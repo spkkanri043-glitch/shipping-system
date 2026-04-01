@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>出荷照合・消込システム</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Meiryo','Hiragino Sans',sans-serif;background:#f5f5f2;color:#1a1a18;min-height:100vh}
+.top-bar{background:#1a1a18;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.top-bar h1{font-size:16px;font-weight:600;white-space:nowrap}
+.top-btns{display:flex;gap:6px;flex-wrap:wrap}
+.top-btn{font-size:11px;background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.top-btn:hover{background:rgba(255,255,255,0.25)}
+.top-btn.danger{background:rgba(220,50,50,0.4)}
+.top-btn.admin{background:rgba(59,123,220,0.5)}
+.container{padding:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.stat{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:12px 14px}
+.stat-label{font-size:11px;color:#888;margin-bottom:4px}
+.stat-value{font-size:26px;font-weight:700}
+.stat-value.done{color:#1e8a55}
+.stat-value.remain{color:#b56e00}
+.progress-bar{height:6px;background:#e5e5e0;border-radius:99px;overflow:hidden;margin-bottom:14px}
+.progress-fill{height:100%;background:#1e8a55;border-radius:99px;transition:width .4s}
+.card{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:700;color:#aaa;margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase}
+.scan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.scan-label{font-size:12px;color:#555;margin-bottom:6px;font-weight:600}
+.scan-status{font-size:12px;margin-top:6px;color:#aaa;min-height:18px}
+.scan-status.active{color:#1e8a55;font-weight:700}
+input[type=text],input[type=password]{width:100%;font-size:14px;padding:10px 12px;border:1px solid #ccc;border-radius:8px;outline:none;font-family:inherit}
+input[type=text]{font-family:'Courier New',monospace}
+input[type=text]:focus,input[type=password]:focus{border-color:#3a7bdc}
+.btn{display:block;width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;margin-top:6px;text-align:center}
+.btn-dark{background:#1a1a18;color:#fff}
+.btn-dark:active{background:#333}
+.feedback{margin-top:10px;font-size:13px;padding:10px 12px;border-radius:8px;display:none;font-weight:500;line-height:1.5}
+.feedback.ok{display:block;background:#ecf9f2;color:#1e8a55;border:1px solid #a8d9be}
+.feedback.err{display:block;background:#fdecea;color:#c0392b;border:1px solid #f5b7b1}
+.feedback.warn{display:block;background:#fff8ec;color:#b56e00;border:1px solid #f5d98b}
+.tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid #e5e5e0}
+.tab{font-size:13px;padding:8px 14px;border:none;background:none;cursor:pointer;color:#aaa;border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:600}
+.tab.active{color:#1a1a18;border-bottom-color:#1a1a18}
+.filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.filter-btn{font-size:11px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;color:#555}
+.filter-btn.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.search-box{flex:1;min-width:100px;font-size:12px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;outline:none;font-family:inherit}
+/* 一括調整バー */
+.bulk-bar{display:none;background:#3a7bdc;color:#fff;border-radius:8px;padding:10px 14px;margin-bottom:10px;align-items:center;gap:10px;flex-wrap:wrap}
+.bulk-bar.show{display:flex}
+.bulk-bar span{font-size:13px;font-weight:600;flex:1}
+.bulk-btn{font-size:12px;padding:5px 12px;border:1px solid rgba(255,255,255,0.4);border-radius:6px;background:rgba(255,255,255,0.15);color:#fff;cursor:pointer;white-space:nowrap}
+.bulk-btn:hover{background:rgba(255,255,255,0.25)}
+/* リストアイテム */
+.list-item{background:#fff;border:1px solid #e5e5e0;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+.list-item.done{opacity:.45}
+.list-item.adjusted-mae{border-left:3px solid #3a7bdc}
+.list-item.adjusted-ato{border-left:3px solid #c0392b}
+.list-item.selected{border-color:#3a7bdc;background:#f0f5ff}
+.item-check{margin-top:2px;width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#3a7bdc}
+.item-body{flex:1;min-width:0}
+.item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px}
+.item-hinban{font-weight:700;font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-bc{font-family:monospace;font-size:11px;color:#888;margin-bottom:4px}
+.item-meta{font-size:11px;color:#aaa;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.badge{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;white-space:nowrap}
+.badge-pending{background:#fff3d6;color:#b56e00}
+.badge-done{background:#d6f5e8;color:#1e8a55}
+.badge-adj-mae{background:#dceeff;color:#1a5fb4}
+.badge-adj-ato{background:#fdecea;color:#c0392b}
+.adj-btn{font-size:11px;padding:3px 8px;border:1px solid #ddd;border-radius:5px;background:#fff;cursor:pointer;color:#555;white-space:nowrap}
+.adj-btn:hover{background:#f0f0ed}
+.file-chips-wrap{margin-bottom:10px}
+.section-title{font-size:11px;font-weight:700;color:#aaa;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase}
+.file-chip{display:inline-flex;align-items:center;gap:4px;background:#f0f0ed;border-radius:99px;padding:3px 10px;font-size:11px;margin:2px;color:#555}
+.empty{text-align:center;color:#aaa;padding:32px;font-size:14px}
+/* 管理者バッジ */
+.admin-badge{display:inline-block;background:#3a7bdc;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;margin-left:8px;font-weight:700}
+/* モーダル共通 */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:100;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:420px}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:14px}
+.modal-field{margin-bottom:12px}
+.modal-label{font-size:12px;color:#888;margin-bottom:4px}
+.modal-val{font-size:13px;font-weight:600}
+select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:14px;font-family:inherit;outline:none}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-actions button{flex:1;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer}
+.btn-cancel{background:#f0f0ed;color:#555}
+.btn-ok{background:#1a1a18;color:#fff}
+.btn-clear{background:#fdecea;color:#c0392b}
+.pw-hint{font-size:11px;color:#aaa;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>出荷照合・消込 <span id="admin-badge" style="display:none" class="admin-badge">管理者</span></h1>
+  <div style="flex:1;font-size:10px;color:rgba(255,255,255,0.4);margin-left:8px" id="save-indicator"></div>
+  <div class="top-btns">
+    <label class="top-btn">CSVを開く<input type="file" accept=".csv" multiple style="display:none" onchange="loadCSVFiles(this)"></label>
+    <button class="top-btn" onclick="exportCSV('pending')">未完了CSV</button>
+    <button class="top-btn" onclick="exportCSV('done')">完了CSV</button>
+    <button class="top-btn" onclick="exportCSVByDate()">納品日別CSV</button>
+    <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()">管理者ログイン</button>
+    <button class="top-btn danger" onclick="clearAll()">リセット</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div id="file-chips-wrap" class="file-chips-wrap" style="display:none">
+    <div class="section-title">読み込み済みCSV</div>
+    <div id="chip-list"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">総件数</div><div class="stat-value" id="s-total">0</div></div>
+    <div class="stat"><div class="stat-label">消込済</div><div class="stat-value done" id="s-done">0</div></div>
+    <div class="stat"><div class="stat-label">未消込</div><div class="stat-value remain" id="s-remain">0</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+
+  <div class="card">
+    <div class="card-title">QRスキャン照合</div>
+    <div class="scan-grid">
+      <div>
+        <div class="scan-label">① 現品票 品番</div>
+        <input type="text" id="hinban-input" placeholder="品番をスキャン（Enter）">
+        <div class="scan-status" id="hinban-status">未スキャン</div>
+      </div>
+      <div>
+        <div class="scan-label">② 納品ラベル QR</div>
+        <input type="text" id="scan-input" placeholder="QRをスキャン（Enter）">
+        <button class="btn btn-dark" onclick="doScan()">照合・消込</button>
+      </div>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('list',this)">出荷リスト</button>
+    <button class="tab" onclick="switchTab('log',this)">消込履歴</button>
+  </div>
+
+  <div id="tab-list">
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('all',this)">すべて</button>
+      <button class="filter-btn" onclick="setFilter('pending',this)">未消込</button>
+      <button class="filter-btn" onclick="setFilter('done',this)">消込済</button>
+      <button class="filter-btn" onclick="setFilter('adjusted',this)">納期調整</button>
+      <input type="text" class="search-box" id="search-box" placeholder="品番・BC検索" oninput="renderList()">
+    </div>
+    <!-- 一括調整バー（管理者のみ） -->
+    <div class="bulk-bar" id="bulk-bar">
+      <span id="bulk-count">0件選択中</span>
+      <button class="bulk-btn" onclick="bulkAdjust()">一括 納期調整</button>
+      <button class="bulk-btn" onclick="bulkClearAdjust()">一括 調整解除</button>
+      <button class="bulk-btn" onclick="deselectAll()">選択解除</button>
+    </div>
+    <div id="list-body"><div class="empty">CSVを読み込んでください<br><small style="font-size:11px;margin-top:8px;display:block">複数ファイルを同時に選択できます</small></div></div>
+  </div>
+
+  <div id="tab-log" style="display:none">
+    <div id="log-body"><div class="empty">消込履歴なし</div></div>
+  </div>
+
+</div>
+
+<!-- 管理者ログインモーダル -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal">
+    <div class="modal-title">管理者ログイン</div>
+    <div class="modal-field">
+      <div class="modal-label">パスワード</div>
+      <input type="password" id="pw-input" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="pw-hint" id="pw-error" style="color:#c0392b;display:none">パスワードが違います</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeLoginModal()">キャンセル</button>
+      <button class="btn-ok" onclick="doLogin()">ログイン</button>
+    </div>
+  </div>
+</div>
+
+<!-- 納品日調整モーダル（単体） -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">納品日を調整</div>
+    <div class="modal-field"><div class="modal-label">品番</div><div class="modal-val" id="modal-hinban"></div></div>
+    <div class="modal-field"><div class="modal-label">バーコード番号</div><div class="modal-val" style="font-family:monospace;font-size:12px" id="modal-bc"></div></div>
+    <div class="modal-field"><div class="modal-label">現在の納品日</div><div class="modal-val" id="modal-current-date"></div></div>
+    <div class="modal-field"><div class="modal-label">調整後 納品日</div><input type="date" id="modal-date"></div>
+    <div class="modal-field">
+      <div class="modal-label">調整区分</div>
+      <select id="modal-type"><option value="前倒し">前倒し納入</option><option value="後ろ倒し">後ろ倒し納入</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+      <button class="btn-clear" onclick="clearAdjust()">調整解除</button>
+      <button class="btn-ok" onclick="saveAdjust()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 一括調整モーダル -->
+<div class="modal-overlay" id="bulk-modal">
+  <div class="modal">
+    <div class="modal-title" id="bulk-modal-title">一括 納期調整</div>
+    <div class="modal-field"><div class="modal-label" id="bulk-modal-count"></div></div>
+    <div class="modal-field"><div class="modal-label">調整後 納品日</div><input type="date" id="bulk-date"></div>
+    <div class="modal-field">
+      <div class="modal-label">調整区分</div>
+      <select id="bulk-type"><option value="前倒し">前倒し納入</option><option value="後ろ倒し">後ろ倒し納入</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeBulkModal()">キャンセル</button>
+      <button class="btn-ok" onclick="saveBulkAdjust()">一括保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 設定（パスワードはここで変更）
+// ============================================================
+const ADMIN_PASSWORD = 'kanamoto2024'; // ★ここを変更してください
+const SAVE_KEY = 'shipping_data_v1';
+const SAVE_KEY_FILES = 'shipping_files_v1';
+const SAVE_KEY_LOG = 'shipping_log_v1';
+
+let records = [];
+let filterMode = 'all';
+let currentHinban = '';
+let modalBC = '';
+let loadedFiles = [];
+let logEntries = [];
+let isAdmin = false;
+let selectedBCs = new Set();
+let autoSaveTimer = null;
+
+document.getElementById('hinban-input').addEventListener('keydown', e => { if(e.key==='Enter') setHinban(); });
+document.getElementById('scan-input').addEventListener('keydown', e => { if(e.key==='Enter') doScan(); });
+
+// ============================================================
+// 自動保存・復元
+// ============================================================
+function autoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(records));
+      localStorage.setItem(SAVE_KEY_FILES, JSON.stringify(loadedFiles));
+      localStorage.setItem(SAVE_KEY_LOG, JSON.stringify(logEntries));
+      const el = document.getElementById('save-indicator');
+      if (el) { el.textContent = '💾 自動保存済 ' + nowStr().slice(11,16); el.style.opacity='1'; setTimeout(()=>el.style.opacity='.4',2000); }
+    } catch(e) { console.warn('自動保存失敗:', e); }
+  }, 800);
+}
+
+function restoreData() {
+  try {
+    const saved = localStorage.getItem(SAVE_KEY);
+    const savedFiles = localStorage.getItem(SAVE_KEY_FILES);
+    const savedLog = localStorage.getItem(SAVE_KEY_LOG);
+    if (saved) {
+      records = JSON.parse(saved);
+      loadedFiles = savedFiles ? JSON.parse(savedFiles) : [];
+      logEntries = savedLog ? JSON.parse(savedLog) : [];
+      if (records.length > 0) {
+        updateStats(); renderList(); updateChips();
+        showFB('ok', `🔄 前回のデータを復元しました（${records.length}件）`);
+      }
+    }
+  } catch(e) { console.warn('復元失敗:', e); }
+}
+
+// ============================================================
+// 管理者ログイン
+// ============================================================
+function showAdminLogin() {
+  if (isAdmin) { doLogout(); return; }
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-error').style.display = 'none';
+  document.getElementById('login-modal').classList.add('show');
+  setTimeout(() => document.getElementById('pw-input').focus(), 100);
+}
+
+function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === ADMIN_PASSWORD) {
+    isAdmin = true;
+    document.getElementById('login-modal').classList.remove('show');
+    document.getElementById('admin-badge').style.display = 'inline-block';
+    document.getElementById('admin-btn').textContent = 'ログアウト';
+    document.getElementById('admin-btn').style.background = 'rgba(220,50,50,0.4)';
+    showFB('ok', '管理者でログインしました。納期調整・一括操作が可能です。');
+    renderList();
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function doLogout() {
+  if (!confirm('管理者からログアウトしますか？')) return;
+  isAdmin = false;
+  selectedBCs.clear();
+  document.getElementById('admin-badge').style.display = 'none';
+  document.getElementById('admin-btn').textContent = '管理者ログイン';
+  document.getElementById('admin-btn').style.background = 'rgba(59,123,220,0.5)';
+  document.getElementById('bulk-bar').classList.remove('show');
+  renderList();
+  showFB('warn', 'ログアウトしました');
+}
+
+function closeLoginModal() {
+  document.getElementById('login-modal').classList.remove('show');
+}
+
+// ============================================================
+// CSV読み込み（複数・重複除外）
+// ============================================================
+function loadCSVFiles(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  let pending = files.length;
+
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      let text = e.target.result;
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
+
+      const newRecs = lines.slice(1).map(line => {
+        const cols = splitCSV(line);
+        const obj = {};
+        headers.forEach((h, i) => {
+          let v = (cols[i]||'').trim().replace(/^"|"$/g,'').replace(/^=?"?([^"]*)"?$/, '$1').replace(/^=/,'');
+          obj[h] = v;
+        });
+        if (obj['品番']) obj['品番'] = obj['品番'].replace(/-/g,'');
+        if (!obj['消込済']) obj['消込済'] = '未';
+        if (!obj['消込日時']) obj['消込日時'] = '';
+        if (!obj['納品調整']) obj['納品調整'] = '';
+        return obj;
+      }).filter(r => r['品番'] && r['バーコード番号']);
+
+      const existingBCs = new Set(records.map(r => r['バーコード番号']));
+      let added = 0, skipped = 0;
+      newRecs.forEach(r => {
+        const bc = r['バーコード番号'];
+        if (existingBCs.has(bc)) { skipped++; }
+        else { records.push(r); existingBCs.add(bc); added++; }
+      });
+
+      if (!loadedFiles.includes(file.name)) loadedFiles.push(file.name);
+      showFB('ok', `${file.name}：追加 ${added}件 / 重複スキップ ${skipped}件`);
+
+      pending--;
+      if (pending === 0) { updateStats(); renderList(); updateChips(); autoSave(); }
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+  input.value = '';
+}
+
+function splitCSV(line) {
+  const cols = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c==='"') inQ=!inQ;
+    else if (c===',' && !inQ) { cols.push(cur); cur=''; }
+    else cur+=c;
+  }
+  cols.push(cur);
+  return cols;
+}
+
+function updateChips() {
+  const wrap = document.getElementById('file-chips-wrap');
+  wrap.style.display = loadedFiles.length ? 'block' : 'none';
+  document.getElementById('chip-list').innerHTML = loadedFiles.map(f => `<span class="file-chip">${f}</span>`).join('');
+}
+
+function clearAll() {
+  if (!confirm('全データをリセットしますか？\n（自動保存データも削除されます）')) return;
+  records=[]; loadedFiles=[]; logEntries=[]; selectedBCs.clear();
+  try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(SAVE_KEY_FILES); localStorage.removeItem(SAVE_KEY_LOG); } catch(e){}
+  updateStats(); renderList(); updateChips();
+  document.getElementById('bulk-bar').classList.remove('show');
+  document.getElementById('save-indicator').textContent = '';
+  showFB('warn','リセットしました');
+}
+
+// ============================================================
+// 品番セット・QR照合（1対1照合モード）
+// ============================================================
+function setHinban() {
+  const inp = document.getElementById('hinban-input');
+  const val = inp.value.trim();
+  if (!val) return;
+  currentHinban = (val.length >= 20 ? val.slice(0,11).trim() : val).replace(/[-\s]/g,'');
+  const st = document.getElementById('hinban-status');
+  st.className = 'scan-status active';
+  st.textContent = '品番セット: ' + currentHinban;
+  inp.value = '';
+  document.getElementById('scan-input').focus();
+  showFB('ok','品番「'+currentHinban+'」をセット。②の納品ラベルQRをスキャンしてください');
+}
+
+function resetHinban() {
+  currentHinban = '';
+  const st = document.getElementById('hinban-status');
+  st.className = 'scan-status';
+  st.textContent = '未スキャン';
+  document.getElementById('hinban-input').focus();
+}
+
+function parseQR(raw) {
+  raw = raw.trim();
+  if (raw.length >= 64) {
+    return { hinban: raw.slice(0,11).trim().replace(/[-\s]/g,''), barcode: raw.slice(44,64).trim().replace(/^KE/,''), full: true };
+  }
+  const m = raw.match(/(\d{18})/);
+  return { hinban:'', barcode: m ? m[1] : raw, full: false };
+}
+
+function doScan() {
+  const inp = document.getElementById('scan-input');
+  const raw = inp.value.trim();
+  if (!raw) return;
+  if (!records.length) { showFB('err','まずCSVを読み込んでください'); inp.value=''; return; }
+  if (!currentHinban) { showFB('warn','①で現品票の品番をスキャンしてください'); inp.value=''; document.getElementById('hinban-input').focus(); return; }
+
+  const parsed = parseQR(raw);
+  if (parsed.full && parsed.hinban && parsed.hinban !== currentHinban) {
+    showFB('err','品番不一致！現品票:「'+currentHinban+'」 QR:「'+parsed.hinban+'」');
+    inp.value=''; resetHinban(); return;
+  }
+
+  const bc = parsed.barcode;
+  const idx = records.findIndex(r => r['バーコード番号']===bc);
+  if (idx===-1) {
+    showFB('err','不一致：バーコード「'+bc+'」はリストにありません');
+    inp.value=''; resetHinban(); return;
+  } else if (records[idx]['消込済']==='済' && records[idx]['納品調整']!=='後ろ倒し') {
+    showFB('warn','警告：既に消込済です（'+records[idx]['品番']+' / '+bc+'）');
+    inp.value=''; resetHinban(); return;
+  } else {
+    const csvHinban = (records[idx]['品番']||'').replace(/[-\s]/g,'');
+    if (currentHinban && csvHinban !== currentHinban) {
+      showFB('err','品番不一致！現品票:「'+currentHinban+'」 CSV:「'+records[idx]['品番']+'」');
+      inp.value=''; resetHinban(); return;
+    }
+    const ts = nowStr();
+    records[idx]['消込済']='済'; records[idx]['消込日時']=ts;
+    // 後ろ倒しが解消された場合は調整区分をクリア
+    if (records[idx]['納品調整']==='後ろ倒し') records[idx]['納品調整']='';
+    logEntries.push({ts, 品番:records[idx]['品番'], バーコード番号:bc, 発注番号:records[idx]['発注番号']||'', 納品先:records[idx]['納品先']||'', 連番:records[idx]['連番']||'', 総数:records[idx]['総数']||''});
+    showFB('ok','✓ 消込完了：品番 '+records[idx]['品番']+' / '+bc);
+    updateStats(); renderList(); autoSave();
+  }
+  inp.value='';
+  // 1対1照合：消込完了後は①にリセット
+  resetHinban();
+}
+
+// ============================================================
+// 統計
+// ============================================================
+function updateStats() {
+  const total=records.length;
+  const done=records.filter(r=>isDone(r)).length;
+  const pending=records.filter(r=>isPending(r)).length;
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-remain').textContent=pending;
+  document.getElementById('prog').style.width=(total>0?Math.round(done/total*100):0)+'%';
+}
+
+// ============================================================
+// 選択・一括操作
+// ============================================================
+function toggleSelect(bc, chk) {
+  if (chk.checked) selectedBCs.add(bc); else selectedBCs.delete(bc);
+  updateBulkBar();
+  const item = chk.closest('.list-item');
+  if (item) item.classList.toggle('selected', chk.checked);
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  if (isAdmin && selectedBCs.size > 0) {
+    bar.classList.add('show');
+    document.getElementById('bulk-count').textContent = selectedBCs.size + '件選択中';
+  } else {
+    bar.classList.remove('show');
+  }
+}
+
+function deselectAll() {
+  selectedBCs.clear();
+  document.querySelectorAll('.item-check').forEach(c => c.checked=false);
+  document.querySelectorAll('.list-item.selected').forEach(i => i.classList.remove('selected'));
+  updateBulkBar();
+}
+
+function bulkAdjust() {
+  if (!selectedBCs.size) return;
+  document.getElementById('bulk-modal-title').textContent = '一括 納期調整';
+  document.getElementById('bulk-modal-count').textContent = selectedBCs.size + '件を一括調整します';
+  document.getElementById('bulk-date').value = '';
+  document.getElementById('bulk-modal').classList.add('show');
+}
+
+function bulkClearAdjust() {
+  if (!selectedBCs.size) return;
+  if (!confirm(selectedBCs.size + '件の調整を解除しますか？')) return;
+  selectedBCs.forEach(bc => {
+    const idx = records.findIndex(r=>r['バーコード番号']===bc);
+    if (idx!==-1) records[idx]['納品調整']='';
+  });
+  deselectAll(); updateStats(); renderList();
+  showFB('ok', '調整を解除しました');
+}
+
+function closeBulkModal() { document.getElementById('bulk-modal').classList.remove('show'); }
+
+function saveBulkAdjust() {
+  const dateVal = document.getElementById('bulk-date').value;
+  const typeVal = document.getElementById('bulk-type').value;
+  if (!dateVal) { alert('日付を選択してください'); return; }
+  const newDate = dateVal.replace(/-/g,'/');
+  selectedBCs.forEach(bc => {
+    const idx = records.findIndex(r=>r['バーコード番号']===bc);
+    if (idx!==-1) { records[idx]['納品日']=newDate; records[idx]['納品調整']=typeVal; }
+  });
+  const cnt = selectedBCs.size;
+  deselectAll(); closeBulkModal(); updateStats(); renderList(); autoSave();
+  showFB('ok', cnt + '件を一括調整しました：' + typeVal + ' → ' + newDate);
+}
+
+// ============================================================
+// リスト描画
+// ============================================================
+function setFilter(mode,btn) {
+  filterMode=mode;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); renderList();
+}
+
+function renderList() {
+  const body=document.getElementById('list-body');
+  const search=(document.getElementById('search-box').value||'').toLowerCase();
+  let list = filterMode==='pending'  ? records.filter(r=>isPending(r))
+           : filterMode==='done'     ? records.filter(r=>isDone(r))
+           : filterMode==='adjusted' ? records.filter(r=>r['納品調整'])
+           : records;
+  if (search) list=list.filter(r=>(r['品番']||'').toLowerCase().includes(search)||(r['バーコード番号']||'').includes(search)||(r['発注番号']||'').toLowerCase().includes(search));
+  if (!list.length) { body.innerHTML='<div class="empty">該当なし</div>'; return; }
+
+  body.innerHTML=list.map(r=>{
+    const done=isDone(r), adj=r['納品調整'], bc=r['バーコード番号']||'';
+    const isSel = selectedBCs.has(bc);
+    const adjClass = adj==='前倒し' ? 'adjusted-mae' : adj==='後ろ倒し' ? 'adjusted-ato' : '';
+    const badgeClass = adj==='前倒し' ? 'badge-adj-mae' : 'badge-adj-ato';
+    return `<div class="list-item ${done?'done':''} ${adjClass} ${isSel?'selected':''}" id="item-${bc}">
+      ${isAdmin && !isDone(r) ? `<input type="checkbox" class="item-check" ${isSel?'checked':''} onchange="toggleSelect('${bc}',this)">` : '<div style="width:16px;flex-shrink:0"></div>'}
+      <div class="item-body">
+        <div class="item-top">
+          <span class="item-hinban">${r['品番']||''}</span>
+          <span style="display:flex;gap:4px;align-items:center;flex-shrink:0">
+            ${adj?`<span class="badge ${badgeClass}">${adj}</span>`:''}
+            <span class="badge ${done?'badge-done':'badge-pending'}">${done?'済':'未'}</span>
+            ${isAdmin && !isDone(r)?`<button class="adj-btn" onclick="openModal('${bc}')">調整</button>`:''}
+          </span>
+        </div>
+        <div class="item-bc">${bc}</div>
+        <div class="item-meta">
+          <span>数量:${r['数量']||''}</span>
+          <span>連番:${r['連番']||''}/${r['総数']||''}</span>
+          <span>納品日:${r['納品日']||''}</span>
+          <span>発注:${r['発注番号']||''}</span>
+          ${done?`<span style="color:#1e8a55">消込:${r['消込日時']||''}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function switchTab(tab,btn) {
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-list').style.display=tab==='list'?'block':'none';
+  document.getElementById('tab-log').style.display=tab==='log'?'block':'none';
+  if (tab==='log') renderLog();
+}
+
+function renderLog() {
+  const body=document.getElementById('log-body');
+  if (!logEntries.length) { body.innerHTML='<div class="empty">消込履歴なし</div>'; return; }
+  body.innerHTML=[...logEntries].reverse().map(r=>`
+    <div class="list-item"><div style="width:16px;flex-shrink:0"></div>
+      <div class="item-body">
+        <div class="item-top"><span class="item-hinban">${r['品番']||''}</span><span style="font-size:11px;color:#aaa">${r['ts']||''}</span></div>
+        <div class="item-bc">${r['バーコード番号']||''}</div>
+        <div class="item-meta"><span>${r['納品先']||''}</span><span>連番:${r['連番']||''}/${r['総数']||''}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// 単体調整モーダル
+// ============================================================
+function openModal(bc) {
+  if (!isAdmin) { showFB('warn','管理者ログインが必要です'); return; }
+  const r=records.find(r=>r['バーコード番号']===bc);
+  if (!r) return;
+  modalBC=bc;
+  document.getElementById('modal-hinban').textContent=r['品番']||'';
+  document.getElementById('modal-bc').textContent=bc;
+  document.getElementById('modal-current-date').textContent=r['納品日']||'未設定';
+  document.getElementById('modal-date').value=(r['納品日']||'').replace(/\//g,'-');
+  document.getElementById('modal-type').value=r['納品調整']||'前倒し';
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal() { document.getElementById('modal').classList.remove('show'); modalBC=''; }
+function saveAdjust() {
+  const dateVal=document.getElementById('modal-date').value;
+  const typeVal=document.getElementById('modal-type').value;
+  if (!dateVal) { alert('日付を選択してください'); return; }
+  const idx=records.findIndex(r=>r['バーコード番号']===modalBC);
+  if (idx===-1) { closeModal(); return; }
+  records[idx]['納品日']=dateVal.replace(/-/g,'/');
+  records[idx]['納品調整']=typeVal;
+  updateStats(); renderList(); closeModal(); autoSave();
+  showFB('ok','納品日を調整しました：'+typeVal+' → '+records[idx]['納品日']);
+}
+function clearAdjust() {
+  const idx=records.findIndex(r=>r['バーコード番号']===modalBC);
+  if (idx!==-1) records[idx]['納品調整']='';
+  closeModal(); renderList(); autoSave();
+  showFB('ok','調整を解除しました');
+}
+
+// ============================================================
+// CSV保存・ユーティリティ
+// ============================================================
+function makeCSV(data) {
+  const keys=['品番','数量','バーコード番号','発注番号','納品先','荷姿','行先コード','連番','総数','出荷日','納品日','納品調整','発送元','消込済','消込日時'];
+  let csv='\uFEFF'+keys.join(',')+'\n';
+  data.forEach(r=>{
+    csv+=keys.map(k=>{
+      let v=r[k]||'';
+      // 後ろ倒しは消込済を「未」に戻してCSV出力
+      if (k==='消込済' && r['納品調整']==='後ろ倒し') v='未';
+      if (k==='消込日時' && r['納品調整']==='後ろ倒し') v='';
+      if(k==='バーコード番号') return '="'+v+'"';
+      return v.includes(',')?'"'+v+'"':v;
+    }).join(',')+'\n';
+  });
+  return csv;
+}
+
+function downloadCSV(csv, filename) {
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=filename;
+  a.click();
+}
+
+function todayStr() {
+  const d=new Date();
+  return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
+}
+
+// 後ろ倒し済は未完了扱いにする判定関数
+function isPending(r) {
+  return r['消込済'] !== '済' || r['納品調整'] === '後ろ倒し';
+}
+function isDone(r) {
+  return r['消込済'] === '済' && r['納品調整'] !== '後ろ倒し';
+}
+
+function exportCSV(mode) {
+  if (!records.length) { showFB('err','データがありません'); return; }
+  const today = todayStr();
+  if (mode==='pending') {
+    // 未完了 ＋ 後ろ倒し済 を含む
+    const data = records.filter(r => isPending(r));
+    if (!data.length) { showFB('warn','未完了データがありません'); return; }
+    downloadCSV(makeCSV(data), `出荷指示_未完了_${today}.csv`);
+    const atoCnt = data.filter(r=>r['納品調整']==='後ろ倒し'&&r['消込済']==='済').length;
+    showFB('ok', `未完了CSV（${data.length}件）を保存しました${atoCnt>0?' ※後ろ倒し済含む'+atoCnt+'件':''}`);
+  } else if (mode==='done') {
+    // 完了 かつ 後ろ倒しでないもののみ
+    const data = records.filter(r => isDone(r));
+    if (!data.length) { showFB('warn','完了データがありません'); return; }
+    downloadCSV(makeCSV(data), `出荷指示_完了済_${today}.csv`);
+    showFB('ok', `完了CSV（${data.length}件）を保存しました`);
+  }
+}
+
+function exportCSVByDate() {
+  if (!records.length) { showFB('err','データがありません'); return; }
+
+  // 納品日ごとにグループ分け
+  const groups = {};
+  records.forEach(r => {
+    const d = (r['納品日']||'未設定').replace(/\//g,'');
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(r);
+  });
+
+  const dates = Object.keys(groups).sort();
+  if (dates.length === 1) {
+    showFB('warn', '納品日が1種類のみです。納品日別に分ける必要はありません');
+    return;
+  }
+
+  // 納品日ごとにダウンロード
+  // ファイル名例: 出荷指示_納品日20260403_未完了.csv / 出荷指示_納品日20260403_完了済.csv
+  let msg = [];
+  dates.forEach(d => {
+    const all = groups[d];
+    const pending = all.filter(r => isPending(r));
+    const done    = all.filter(r => isDone(r));
+    const label = d==='未設定' ? '納品日未設定' : `納品日${d}`;
+
+    if (pending.length) {
+      downloadCSV(makeCSV(pending), `出荷指示_${label}_未完了.csv`);
+    }
+    if (done.length) {
+      downloadCSV(makeCSV(done), `出荷指示_${label}_完了済.csv`);
+    }
+    msg.push(`${d==='未設定'?'未設定':d.slice(0,4)+'/'+d.slice(4,6)+'/'+d.slice(6)}：未完了${pending.length}件・完了${done.length}件`);
+  });
+
+  showFB('ok', `納品日別CSVを保存しました\n${msg.join(' / ')}`);
+}
+
+function nowStr() {
+  const d=new Date();
+  return d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+
+function showFB(type,msg) {
+  const fb=document.getElementById('feedback');
+  fb.className='feedback '+type;
+  fb.textContent=msg;
+}
+
+// 起動時にデータ復元
+restoreData();
+</script>
+</body>
+</html>
