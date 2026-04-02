@@ -254,7 +254,7 @@ let logEntries = [];
 let isAdmin = false;
 let selectedBCs = new Set();
 let autoRefreshTimer = null;
-let autoRefreshInterval = 30; // 秒
+let autoRefreshInterval = 300; // 秒
 let autoRefreshEnabled = false;
 
 // ============================================================
@@ -271,10 +271,10 @@ function toggleAutoRefresh() {
   autoRefreshEnabled = !autoRefreshEnabled;
   const btn = document.getElementById('auto-refresh-btn');
   if (autoRefreshEnabled) {
-    btn.textContent = `⏱ 自動更新 ${autoRefreshInterval}秒`;
+    btn.textContent = `⏱ 自動更新 5分`;
     btn.style.background = 'rgba(30,138,85,0.6)';
     startAutoRefresh();
-    showFB('ok', `自動更新をONにしました（${autoRefreshInterval}秒ごと）`);
+    showFB('ok', `自動更新をONにしました（5分ごと）`);
   } else {
     btn.textContent = '⏱ 自動更新 OFF';
     btn.style.background = '';
@@ -293,14 +293,16 @@ function startAutoRefresh() {
     if (btn) btn.textContent = `⏱ 自動更新 ${countdown}秒`;
   }, autoRefreshInterval * 1000);
 
-  // カウントダウン表示
+  // カウントダウン表示（分単位）
   let countdown = autoRefreshInterval;
   const countTimer = setInterval(() => {
     if (!autoRefreshEnabled) { clearInterval(countTimer); return; }
     countdown--;
     if (countdown <= 0) countdown = autoRefreshInterval;
     const btn = document.getElementById('auto-refresh-btn');
-    if (btn) btn.textContent = `⏱ 自動更新 ${countdown}秒`;
+    const mins = Math.ceil(countdown / 60);
+    const secs = countdown % 60;
+    if (btn) btn.textContent = `⏱ 自動更新 ${mins}分${secs > 0 ? secs + '秒' : ''}`;
   }, 1000);
 }
 
