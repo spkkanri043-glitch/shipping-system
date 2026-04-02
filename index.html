@@ -113,6 +113,8 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
     <button class="top-btn" onclick="exportCSV('pending')">未完了CSV</button>
     <button class="top-btn" onclick="exportCSV('done')">完了CSV</button>
     <button class="top-btn" onclick="exportCSVByDate()">納品日別CSV</button>
+    <button class="top-btn" id="refresh-btn" onclick="manualRefresh()" title="データを最新に更新">🔄 更新</button>
+    <button class="top-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()" title="自動更新オン/オフ">⏱ 自動更新 OFF</button>
     <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()">管理者ログイン</button>
     <button class="top-btn danger" onclick="clearAll()">リセット</button>
   </div>
@@ -251,7 +253,60 @@ let loadedFiles = [];
 let logEntries = [];
 let isAdmin = false;
 let selectedBCs = new Set();
-let autoSaveTimer = null;
+let autoRefreshTimer = null;
+let autoRefreshInterval = 30; // 秒
+let autoRefreshEnabled = false;
+
+// ============================================================
+// 手動・自動更新
+// ============================================================
+function manualRefresh() {
+  restoreData();
+  const btn = document.getElementById('refresh-btn');
+  btn.textContent = '✅ 更新済';
+  setTimeout(() => { btn.textContent = '🔄 更新'; }, 1500);
+}
+
+function toggleAutoRefresh() {
+  autoRefreshEnabled = !autoRefreshEnabled;
+  const btn = document.getElementById('auto-refresh-btn');
+  if (autoRefreshEnabled) {
+    btn.textContent = `⏱ 自動更新 ${autoRefreshInterval}秒`;
+    btn.style.background = 'rgba(30,138,85,0.6)';
+    startAutoRefresh();
+    showFB('ok', `自動更新をONにしました（${autoRefreshInterval}秒ごと）`);
+  } else {
+    btn.textContent = '⏱ 自動更新 OFF';
+    btn.style.background = '';
+    stopAutoRefresh();
+    showFB('warn', '自動更新をOFFにしました');
+  }
+}
+
+function startAutoRefresh() {
+  stopAutoRefresh();
+  autoRefreshTimer = setInterval(() => {
+    restoreData();
+    // カウントダウン表示
+    let countdown = autoRefreshInterval;
+    const btn = document.getElementById('auto-refresh-btn');
+    if (btn) btn.textContent = `⏱ 自動更新 ${countdown}秒`;
+  }, autoRefreshInterval * 1000);
+
+  // カウントダウン表示
+  let countdown = autoRefreshInterval;
+  const countTimer = setInterval(() => {
+    if (!autoRefreshEnabled) { clearInterval(countTimer); return; }
+    countdown--;
+    if (countdown <= 0) countdown = autoRefreshInterval;
+    const btn = document.getElementById('auto-refresh-btn');
+    if (btn) btn.textContent = `⏱ 自動更新 ${countdown}秒`;
+  }, 1000);
+}
+
+function stopAutoRefresh() {
+  if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
+}
 
 document.getElementById('hinban-input').addEventListener('keydown', e => { if(e.key==='Enter') setHinban(); });
 document.getElementById('scan-input').addEventListener('keydown', e => { if(e.key==='Enter') doScan(); });
@@ -278,12 +333,20 @@ function restoreData() {
     const savedFiles = localStorage.getItem(SAVE_KEY_FILES);
     const savedLog = localStorage.getItem(SAVE_KEY_LOG);
     if (saved) {
-      records = JSON.parse(saved);
+      const newRecords = JSON.parse(saved);
+      // 差分チェック（件数や消込状況が変わっていれば通知）
+      const prevDone = records.filter(r=>isDone(r)).length;
+      records = newRecords;
       loadedFiles = savedFiles ? JSON.parse(savedFiles) : [];
       logEntries = savedLog ? JSON.parse(savedLog) : [];
-      if (records.length > 0) {
-        updateStats(); renderList(); updateChips();
-        showFB('ok', `🔄 前回のデータを復元しました（${records.length}件）`);
+      const newDone = records.filter(r=>isDone(r)).length;
+      updateStats(); renderList(); updateChips();
+      // 更新日時表示
+      const el = document.getElementById('save-indicator');
+      if (el) { el.textContent = '🔄 ' + nowStr().slice(11,16) + ' 更新'; el.style.opacity='1'; setTimeout(()=>el.style.opacity='.4',3000); }
+      // 差分があれば通知
+      if (prevDone > 0 && newDone !== prevDone) {
+        showFB('ok', `データが更新されました（消込済: ${prevDone}→${newDone}件）`);
       }
     }
   } catch(e) { console.warn('復元失敗:', e); }
