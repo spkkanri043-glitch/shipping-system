@@ -62,6 +62,9 @@ input[type=text]:focus,input[type=password]:focus{border-color:#3a7bdc}
 .list-item.done{opacity:.45}
 .list-item.adjusted-mae{border-left:3px solid #3a7bdc}
 .list-item.adjusted-ato{border-left:3px solid #c0392b}
+.list-item.cancelled{border-left:3px solid #aaa;background:#f5f5f5;opacity:.5}
+.list-item.cancelled .item-hinban{text-decoration:line-through;color:#aaa}
+.list-item.cancelled .item-bc{text-decoration:line-through}
 .list-item.selected{border-color:#3a7bdc;background:#f0f5ff}
 .item-check{margin-top:2px;width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#3a7bdc}
 .item-body{flex:1;min-width:0}
@@ -74,6 +77,7 @@ input[type=text]:focus,input[type=password]:focus{border-color:#3a7bdc}
 .badge-done{background:#d6f5e8;color:#1e8a55}
 .badge-adj-mae{background:#dceeff;color:#1a5fb4}
 .badge-adj-ato{background:#fdecea;color:#c0392b}
+.badge-cancel{background:#e5e5e0;color:#888}
 .adj-btn{font-size:11px;padding:3px 8px;border:1px solid #ddd;border-radius:5px;background:#fff;cursor:pointer;color:#555;white-space:nowrap}
 .adj-btn:hover{background:#f0f0ed}
 .file-chips-wrap{margin-bottom:10px}
@@ -156,6 +160,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
       <button class="filter-btn" onclick="setFilter('pending',this)">未消込</button>
       <button class="filter-btn" onclick="setFilter('done',this)">消込済</button>
       <button class="filter-btn" onclick="setFilter('adjusted',this)">納期調整</button>
+      <button class="filter-btn" onclick="setFilter('cancelled',this)">キャンセル</button>
       <input type="text" class="search-box" id="search-box" placeholder="品番・BC検索" oninput="renderList()">
     </div>
     <!-- 一括調整バー（管理者のみ） -->
@@ -163,6 +168,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
       <span id="bulk-count">0件選択中</span>
       <button class="bulk-btn" onclick="bulkAdjust()">一括 納期調整</button>
       <button class="bulk-btn" onclick="bulkClearAdjust()">一括 調整解除</button>
+      <button class="bulk-btn" style="background:rgba(150,150,150,0.3)" onclick="bulkCancel()">一括 キャンセル</button>
       <button class="bulk-btn" onclick="deselectAll()">選択解除</button>
     </div>
     <div id="list-body"><div class="empty">CSVを読み込んでください<br><small style="font-size:11px;margin-top:8px;display:block">複数ファイルを同時に選択できます</small></div></div>
@@ -203,8 +209,9 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
       <select id="modal-type"><option value="前倒し">前倒し納入</option><option value="後ろ倒し">後ろ倒し納入</option></select>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+      <button class="btn-cancel" onclick="closeModal()">閉じる</button>
       <button class="btn-clear" onclick="clearAdjust()">調整解除</button>
+      <button style="flex:1;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#888;color:#fff" onclick="cancelRecord()">キャンセル</button>
       <button class="btn-ok" onclick="saveAdjust()">保存</button>
     </div>
   </div>
@@ -231,7 +238,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 // ============================================================
 // 設定（パスワードはここで変更）
 // ============================================================
-const ADMIN_PASSWORD = '435511spk'; // ★ここを変更してください
+const ADMIN_PASSWORD = 'kanamoto2024'; // ★ここを変更してください
 const SAVE_KEY = 'shipping_data_v1';
 const SAVE_KEY_FILES = 'shipping_files_v1';
 const SAVE_KEY_LOG = 'shipping_log_v1';
@@ -480,10 +487,12 @@ function doScan() {
 // 統計
 // ============================================================
 function updateStats() {
-  const total=records.length;
-  const done=records.filter(r=>isDone(r)).length;
-  const pending=records.filter(r=>isPending(r)).length;
-  document.getElementById('s-total').textContent=total;
+  const active=records.filter(r=>!isCancelled(r));
+  const total=active.length;
+  const done=active.filter(r=>isDone(r)).length;
+  const pending=active.filter(r=>isPending(r)).length;
+  const cancelCnt=records.filter(r=>isCancelled(r)).length;
+  document.getElementById('s-total').textContent=total+(cancelCnt>0?` (取消${cancelCnt})` :'');
   document.getElementById('s-done').textContent=done;
   document.getElementById('s-remain').textContent=pending;
   document.getElementById('prog').style.width=(total>0?Math.round(done/total*100):0)+'%';
@@ -563,27 +572,29 @@ function setFilter(mode,btn) {
 function renderList() {
   const body=document.getElementById('list-body');
   const search=(document.getElementById('search-box').value||'').toLowerCase();
-  let list = filterMode==='pending'  ? records.filter(r=>isPending(r))
-           : filterMode==='done'     ? records.filter(r=>isDone(r))
-           : filterMode==='adjusted' ? records.filter(r=>r['納品調整'])
+  let list = filterMode==='pending'   ? records.filter(r=>isPending(r))
+           : filterMode==='done'      ? records.filter(r=>isDone(r))
+           : filterMode==='adjusted'  ? records.filter(r=>r['納品調整'] && !isCancelled(r))
+           : filterMode==='cancelled' ? records.filter(r=>isCancelled(r))
            : records;
   if (search) list=list.filter(r=>(r['品番']||'').toLowerCase().includes(search)||(r['バーコード番号']||'').includes(search)||(r['発注番号']||'').toLowerCase().includes(search));
   if (!list.length) { body.innerHTML='<div class="empty">該当なし</div>'; return; }
 
   body.innerHTML=list.map(r=>{
-    const done=isDone(r), adj=r['納品調整'], bc=r['バーコード番号']||'';
+    const done=isDone(r), cancelled=isCancelled(r), adj=r['納品調整'], bc=r['バーコード番号']||'';
     const isSel = selectedBCs.has(bc);
-    const adjClass = adj==='前倒し' ? 'adjusted-mae' : adj==='後ろ倒し' ? 'adjusted-ato' : '';
-    const badgeClass = adj==='前倒し' ? 'badge-adj-mae' : 'badge-adj-ato';
+    const adjClass = cancelled ? 'cancelled' : adj==='前倒し' ? 'adjusted-mae' : adj==='後ろ倒し' ? 'adjusted-ato' : '';
+    const badgeClass = adj==='前倒し' ? 'badge-adj-mae' : adj==='後ろ倒し' ? 'badge-adj-ato' : 'badge-cancel';
     return `<div class="list-item ${done?'done':''} ${adjClass} ${isSel?'selected':''}" id="item-${bc}">
-      ${isAdmin && !isDone(r) ? `<input type="checkbox" class="item-check" ${isSel?'checked':''} onchange="toggleSelect('${bc}',this)">` : '<div style="width:16px;flex-shrink:0"></div>'}
+      ${isAdmin && !done && !cancelled ? `<input type="checkbox" class="item-check" ${isSel?'checked':''} onchange="toggleSelect('${bc}',this)">` : '<div style="width:16px;flex-shrink:0"></div>'}
       <div class="item-body">
         <div class="item-top">
           <span class="item-hinban">${r['品番']||''}</span>
           <span style="display:flex;gap:4px;align-items:center;flex-shrink:0">
             ${adj?`<span class="badge ${badgeClass}">${adj}</span>`:''}
-            <span class="badge ${done?'badge-done':'badge-pending'}">${done?'済':'未'}</span>
-            ${isAdmin && !isDone(r)?`<button class="adj-btn" onclick="openModal('${bc}')">調整</button>`:''}
+            <span class="badge ${done?'badge-done':cancelled?'badge-cancel':'badge-pending'}">${done?'済':cancelled?'取消':'未'}</span>
+            ${isAdmin && !done && !cancelled?`<button class="adj-btn" onclick="openModal('${bc}')">調整</button>`:''}
+            ${isAdmin && cancelled?`<button class="adj-btn" onclick="restoreRecord('${bc}')">復元</button>`:''}
           </span>
         </div>
         <div class="item-bc">${bc}</div>
@@ -654,6 +665,37 @@ function clearAdjust() {
   showFB('ok','調整を解除しました');
 }
 
+function cancelRecord() {
+  if (!confirm('このデータをキャンセルしますか？\nキャンセル後も「復元」ボタンで元に戻せます。')) return;
+  const idx=records.findIndex(r=>r['バーコード番号']===modalBC);
+  if (idx!==-1) {
+    records[idx]['納品調整']='キャンセル';
+    records[idx]['消込済']='未';
+    records[idx]['消込日時']='';
+  }
+  closeModal(); updateStats(); renderList(); autoSave();
+  showFB('warn','キャンセルしました（「復元」ボタンで元に戻せます）');
+}
+
+function restoreRecord(bc) {
+  const idx=records.findIndex(r=>r['バーコード番号']===bc);
+  if (idx!==-1) records[idx]['納品調整']='';
+  updateStats(); renderList(); autoSave();
+  showFB('ok','復元しました');
+}
+
+function bulkCancel() {
+  if (!selectedBCs.size) return;
+  if (!confirm(selectedBCs.size+'件をキャンセルしますか？')) return;
+  selectedBCs.forEach(bc=>{
+    const idx=records.findIndex(r=>r['バーコード番号']===bc);
+    if (idx!==-1) { records[idx]['納品調整']='キャンセル'; records[idx]['消込済']='未'; records[idx]['消込日時']=''; }
+  });
+  const cnt=selectedBCs.size;
+  deselectAll(); updateStats(); renderList(); autoSave();
+  showFB('warn', cnt+'件をキャンセルしました');
+}
+
 // ============================================================
 // CSV保存・ユーティリティ
 // ============================================================
@@ -685,11 +727,15 @@ function todayStr() {
   return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
 }
 
+// キャンセル判定
+function isCancelled(r) { return r['納品調整'] === 'キャンセル'; }
 // 後ろ倒し済は未完了扱いにする判定関数
 function isPending(r) {
+  if (isCancelled(r)) return false;
   return r['消込済'] !== '済' || r['納品調整'] === '後ろ倒し';
 }
 function isDone(r) {
+  if (isCancelled(r)) return false;
   return r['消込済'] === '済' && r['納品調整'] !== '後ろ倒し';
 }
 
