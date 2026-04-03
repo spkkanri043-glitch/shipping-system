@@ -12,6 +12,23 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Meiryo','Hiragino Sans',sans-serif;background:#f5f5f2;color:#1a1a18;min-height:100vh}
+/* ログイン画面 */
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(160deg,#1a1a18 0%,#2d3748 100%)}
+.login-logo{margin-bottom:24px;opacity:.9}
+.login-company{font-size:15px;color:rgba(255,255,255,0.7);text-align:center;margin-bottom:6px;letter-spacing:.05em}
+.login-greeting{font-size:20px;font-weight:700;color:#fff;text-align:center;margin-bottom:32px;line-height:1.5}
+.login-card{background:#fff;border-radius:16px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.login-title{font-size:16px;font-weight:700;color:#1a1a18;margin-bottom:20px;text-align:center}
+.login-field{margin-bottom:16px}
+.login-label{font-size:12px;color:#888;margin-bottom:6px;font-weight:600}
+.login-input{width:100%;font-size:15px;padding:12px 14px;border:1.5px solid #e5e5e0;border-radius:10px;outline:none;font-family:inherit;transition:border-color .2s}
+.login-input:focus{border-color:#1a1a18}
+.login-btn{width:100%;padding:14px;background:#1a1a18;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;letter-spacing:.05em}
+.login-btn:active{background:#333}
+.login-error{font-size:12px;color:#c0392b;margin-top:8px;text-align:center;display:none;font-weight:600}
+.login-footer{font-size:11px;color:rgba(255,255,255,0.3);text-align:center;margin-top:24px}
+/* メイン画面 */
+#main-screen{display:none}
 .top-bar{background:#1a1a18;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .top-bar h1{font-size:16px;font-weight:600;white-space:nowrap}
 .top-btns{display:flex;gap:6px;flex-wrap:wrap}
@@ -105,9 +122,57 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 </head>
 <body>
 
+<!-- ログイン画面 -->
+<div id="login-screen">
+  <div class="login-logo">
+    <svg width="64" height="64" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+      <rect width="180" height="180" rx="38" fill="rgba(255,255,255,0.1)"/>
+      <rect x="18" y="95" width="90" height="63" fill="#d4a843"/>
+      <polygon points="108,95 138,68 138,130 108,158" fill="#8b6508"/>
+      <polygon points="18,95 108,95 138,68 48,68" fill="#e8b84b"/>
+      <rect x="63" y="95" width="7" height="63" fill="rgba(180,130,20,0.7)"/>
+      <rect x="18" y="124" width="90" height="7" fill="rgba(180,130,20,0.7)"/>
+      <rect x="23" y="102" width="77" height="46" rx="2" fill="rgba(255,255,255,0.93)"/>
+      <rect x="23" y="102" width="77" height="14" rx="2" fill="#e53e3e"/>
+      <rect x="90" y="18" width="72" height="100" rx="10" fill="#4a5568"/>
+      <rect x="96" y="22" width="60" height="24" rx="5" fill="#0a1628"/>
+      <rect x="98" y="35" width="56" height="3" fill="rgba(255,51,51,0.9)"/>
+      <rect x="94" y="50" width="64" height="55" rx="3" fill="#0a0e1a"/>
+      <rect x="96" y="52" width="60" height="51" rx="3" fill="#1a4a6b"/>
+      <rect x="98" y="55" width="56" height="10" fill="rgba(0,100,50,0.8)"/>
+      <rect x="98" y="70" width="50" height="5" fill="rgba(30,80,130,0.7)"/>
+      <rect x="98" y="79" width="47" height="5" fill="rgba(30,80,130,0.7)"/>
+      <rect x="98" y="88" width="54" height="5" fill="rgba(0,150,70,0.8)"/>
+      <circle cx="150" cy="38" r="20" fill="#38a169"/>
+      <polyline points="140,38 146,45 161,28" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="login-company">関ケ原プラ工業株式会社</div>
+  <div class="login-greeting">従業員の皆様、<br>お疲れ様です。</div>
+  <div class="login-card">
+    <div class="login-title">出荷照合システム ログイン</div>
+    <div class="login-field">
+      <div class="login-label">従業員ID</div>
+      <input type="text" class="login-input" id="login-id" placeholder="IDを入力" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <div class="login-label">パスワード</div>
+      <input type="password" class="login-input" id="login-pw" placeholder="パスワードを入力" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">ログイン</button>
+    <div class="login-error" id="login-error">IDまたはパスワードが違います</div>
+  </div>
+  <div class="login-footer">© 関ケ原プラ工業株式会社</div>
+</div>
+
+<!-- メイン画面 -->
+<div id="main-screen">
 <div class="top-bar">
-  <h1>出荷照合・消込 <span id="admin-badge" style="display:none" class="admin-badge">管理者</span></h1>
-  <div style="flex:1;font-size:10px;color:rgba(255,255,255,0.4);margin-left:8px" id="save-indicator"></div>
+  <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+    <h1>出荷照合・消込 <span id="admin-badge" style="display:none" class="admin-badge">管理者</span></h1>
+    <div id="user-name-display" style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);letter-spacing:.03em"></div>
+  </div>
+  <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-left:8px;white-space:nowrap" id="save-indicator"></div>
   <div class="top-btns">
     <label class="top-btn">CSVを開く<input type="file" accept=".csv" multiple style="display:none" onchange="loadCSVFiles(this)"></label>
     <button class="top-btn" onclick="exportCSV('pending')">未完了CSV</button>
@@ -116,6 +181,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
     <button class="top-btn" id="refresh-btn" onclick="manualRefresh()" title="データを最新に更新">🔄 更新</button>
     <button class="top-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()" title="自動更新オン/オフ">⏱ 自動更新 OFF</button>
     <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()">管理者ログイン</button>
+    <button class="top-btn danger" onclick="doLogout()">ログアウト</button>
     <button class="top-btn danger" onclick="clearAll()">リセット</button>
   </div>
 </div>
@@ -188,12 +254,12 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
     <div class="modal-title">管理者ログイン</div>
     <div class="modal-field">
       <div class="modal-label">パスワード</div>
-      <input type="password" id="pw-input" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" id="pw-input" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doAdminLogin()">
       <div class="pw-hint" id="pw-error" style="color:#c0392b;display:none">パスワードが違います</div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeLoginModal()">キャンセル</button>
-      <button class="btn-ok" onclick="doLogin()">ログイン</button>
+      <button class="btn-ok" onclick="doAdminLogin()">ログイン</button>
     </div>
   </div>
 </div>
@@ -235,6 +301,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
     </div>
   </div>
 </div>
+</div><!-- /main-screen -->
 
 <script>
 // ============================================================
@@ -358,20 +425,20 @@ function restoreData() {
 // 管理者ログイン
 // ============================================================
 function showAdminLogin() {
-  if (isAdmin) { doLogout(); return; }
+  if (isAdmin) { doAdminLogout(); return; }
   document.getElementById('pw-input').value = '';
   document.getElementById('pw-error').style.display = 'none';
   document.getElementById('login-modal').classList.add('show');
   setTimeout(() => document.getElementById('pw-input').focus(), 100);
 }
 
-function doLogin() {
+function doAdminLogin() {
   const pw = document.getElementById('pw-input').value;
   if (pw === ADMIN_PASSWORD) {
     isAdmin = true;
     document.getElementById('login-modal').classList.remove('show');
     document.getElementById('admin-badge').style.display = 'inline-block';
-    document.getElementById('admin-btn').textContent = 'ログアウト';
+    document.getElementById('admin-btn').textContent = '管理者ログアウト';
     document.getElementById('admin-btn').style.background = 'rgba(220,50,50,0.4)';
     showFB('ok', '管理者でログインしました。納期調整・一括操作が可能です。');
     renderList();
@@ -382,7 +449,7 @@ function doLogin() {
   }
 }
 
-function doLogout() {
+function doAdminLogout() {
   if (!confirm('管理者からログアウトしますか？')) return;
   isAdmin = false;
   selectedBCs.clear();
@@ -875,6 +942,85 @@ function showFB(type,msg) {
 
 // 起動時にデータ復元
 restoreData();
+
+// ============================================================
+// ログイン機能
+// ============================================================
+const USERS = [
+  // { id: '従業員ID', pw: 'パスワード', name: '表示名', admin: false }
+  // ★以下に従業員を追加してください
+   { id: 'admin',  pw: '435511spk',  name: '管理者',     admin: true  },
+  { id: 'kouki', pw: 'admin',     name: '安田光輝',   admin: false },
+  { id: 'ryota', pw: 'admin1',     name: '吉村亮汰',   admin: false },
+  { id: 'tomoki', pw: 'admin2',     name: '安田智貴',   admin: false },
+];
+
+const SESSION_KEY = 'shipping_session_v1';
+
+function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const errEl = document.getElementById('login-error');
+  const user = USERS.find(u => u.id === id && u.pw === pw);
+  if (!user) {
+    errEl.style.display = 'block';
+    document.getElementById('login-pw').value = '';
+    return;
+  }
+  errEl.style.display = 'none';
+  // セッション保存
+  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id: user.id, name: user.name, admin: user.admin })); } catch(e){}
+  showMainScreen(user);
+}
+
+function showMainScreen(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'block';
+  // 管理者権限セット
+  if (user.admin) {
+    isAdmin = true;
+    document.getElementById('admin-badge').style.display = 'inline-block';
+    document.getElementById('admin-btn').textContent = 'ログアウト';
+    document.getElementById('admin-btn').style.background = 'rgba(220,50,50,0.4)';
+  }
+  // ユーザー名を大きく表示
+  const nameEl = document.getElementById('user-name-display');
+  if (nameEl) nameEl.textContent = '👤 ' + user.name + ' さん';
+  restoreData();
+}
+
+function doLogout() {
+  if (!confirm('ログアウトしますか？')) return;
+  try { sessionStorage.removeItem(SESSION_KEY); } catch(e){}
+  isAdmin = false;
+  selectedBCs.clear();
+  stopAutoRefresh();
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-id').value = '';
+  document.getElementById('login-pw').value = '';
+  document.getElementById('admin-badge').style.display = 'none';
+  document.getElementById('admin-btn').textContent = '管理者ログイン';
+  document.getElementById('admin-btn').style.background = 'rgba(59,123,220,0.5)';
+}
+
+// Enterキーでログイン
+document.getElementById('login-id').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pw').focus(); });
+document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// 起動時：セッション確認
+(function() {
+  try {
+    const sess = sessionStorage.getItem(SESSION_KEY);
+    if (sess) {
+      const user = JSON.parse(sess);
+      showMainScreen(user);
+      return;
+    }
+  } catch(e){}
+  // セッションなし→ログイン画面表示
+  document.getElementById('login-screen').style.display = 'flex';
+})();
 </script>
 </body>
 </html>
