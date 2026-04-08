@@ -1047,8 +1047,35 @@ function doLogout() {
 document.getElementById('login-id').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pw').focus(); });
 document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
-// 起動時：セッション確認
+// 起動時：SSO → セッション → ログイン画面の順に確認
 (function() {
+  // ① SSOトークンチェック（ポータルから来た場合）
+  function parseSSOToken(token) {
+    try {
+      const decoded = atob(token.split('').reverse().join(''));
+      const data = JSON.parse(decoded);
+      if (Date.now() - data.ts > 5 * 60 * 1000) return null; // 5分以上は無効
+      return data;
+    } catch(e) { return null; }
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('sso');
+  if (token) {
+    const data = parseSSOToken(token);
+    if (data) {
+      // URLからトークンを除去
+      window.history.replaceState({}, '', window.location.pathname);
+      let ssoName = data.name || '';
+      try { ssoName = decodeURIComponent(escape(ssoName)); } catch(e) {}
+      const user = { id: data.id, name: ssoName, admin: data.role === 'admin' };
+      try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch(e) {}
+      showMainScreen(user);
+      return;
+    }
+  }
+
+  // ② セッション確認（ページリロード時）
   try {
     const sess = sessionStorage.getItem(SESSION_KEY);
     if (sess) {
@@ -1056,8 +1083,9 @@ document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key=
       showMainScreen(user);
       return;
     }
-  } catch(e){}
-  // セッションなし→ログイン画面表示
+  } catch(e) {}
+
+  // ③ セッションなし → ログイン画面表示
   document.getElementById('login-screen').style.display = 'flex';
 })();
 </script>
