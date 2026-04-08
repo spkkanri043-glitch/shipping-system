@@ -1463,7 +1463,10 @@ seedShifts();
   if (!token) return;
   const data = parseSSOToken(token);
   if (!data) return;
-  cUser = { id: data.id, name: data.name };
+  // 名前をデコード
+  let name = data.name || '';
+  try { name = decodeURIComponent(escape(name)); } catch(e) {}
+  cUser = { id: data.id, name: name };
   isA = (data.role === 'admin');
   window.history.replaceState({}, '', window.location.pathname);
   launch();
