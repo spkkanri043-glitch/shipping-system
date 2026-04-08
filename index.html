@@ -480,9 +480,8 @@ function doAdminLogout() {
   isAdmin = false;
   selectedBCs.clear();
   document.getElementById('admin-badge').style.display = 'none';
-  // 管理者ログアウト後はボタンを非表示に
   const adminBtn = document.getElementById('admin-btn');
-  adminBtn.style.display = 'none';
+  adminBtn.style.display = 'inline-block';
   adminBtn.textContent = '管理者ログイン';
   adminBtn.style.background = 'rgba(59,123,220,0.5)';
   document.getElementById('bulk-bar').classList.remove('show');
@@ -969,12 +968,13 @@ function showFB(type,msg) {
   fb.textContent=msg;
 }
 
-// 起動時にデータ復元
-restoreData();
+// ============================================================
+// URL読込機能（EA660ハンディ用 / GASプロキシ経由）
+// ============================================================
 
-// ============================================================
-// URL読込機能（EA660ハンディ用）
-// ============================================================
+// ★ GASデプロイ後にここのURLを書き換えてください
+https://script.google.com/macros/s/AKfycbwnPDr_vUZW636Lh47bUfoJMZ0bG-Dn5IcHFJ6r6pK3VEmqNqStSSOUAUWpdfOXFuCA/exec
+
 function showUrlInput() {
   document.getElementById('url-input').value = '';
   document.getElementById('url-feedback').style.display = 'none';
@@ -986,20 +986,15 @@ function closeUrlModal() {
   document.getElementById('url-modal').classList.remove('show');
 }
 
-function convertGDriveUrl(url) {
-  // GoogleドライブのURLを直接ダウンロードURLに変換
-  // 形式1: https://drive.google.com/file/d/FILE_ID/view
-  // 形式2: https://drive.google.com/open?id=FILE_ID
-  // 形式3: https://docs.google.com/spreadsheets/d/FILE_ID/...
-  let fileId = null;
+function extractFileId(url) {
+  // GoogleドライブURLからファイルIDを抽出
   const m1 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (m1) fileId = m1[1];
-  else if (m2) fileId = m2[1];
-  if (fileId) {
-    return `https://drive.google.com/uc?export=download&id=${fileId}`;
-  }
-  return url; // 変換できない場合はそのまま
+  if (m1) return m1[1];
+  if (m2) return m2[1];
+  // IDのみ入力された場合
+  if (/^[a-zA-Z0-9_-]{25,}$/.test(url.trim())) return url.trim();
+  return null;
 }
 
 async function loadFromUrl() {
@@ -1007,16 +1002,38 @@ async function loadFromUrl() {
   const fb = document.getElementById('url-feedback');
   if (!rawUrl) { showUrlFb('URLを入力してください', 'warn'); return; }
 
-  const url = convertGDriveUrl(rawUrl);
+  // GASプロキシURLが未設定の場合
+  if (GAS_PROXY_URL.includes('YOUR_SCRIPT_ID')) {
+    showUrlFb('❌ GASプロキシURLが未設定です。\nindex.htmlのGAS_PROXY_URLを設定してください。', 'err');
+    return;
+  }
+
+  const fileId = extractFileId(rawUrl);
+  if (!fileId) {
+    showUrlFb('❌ GoogleドライブのURLを正しく入力してください。', 'err');
+    return;
+  }
+
   showUrlFb('読み込み中...', 'info');
 
   try {
-    const res = await fetch(url);
+    // GASプロキシ経由でCSVを取得
+    const proxyUrl = GAS_PROXY_URL + '?id=' + fileId;
+    const res = await fetch(proxyUrl);
     if (!res.ok) throw new Error('取得失敗: ' + res.status);
     let text = await res.text();
+
+    // エラーレスポンス確認
+    if (text.trim().startsWith('{') && text.includes('"error"')) {
+      const err = JSON.parse(text);
+      throw new Error(err.error || '取得失敗');
+    }
+
     if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
 
     const lines = text.trim().split('\n');
+    if (lines.length < 2) throw new Error('CSVデータが空です');
+
     const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
     const newRecs = lines.slice(1).map(line => {
       const cols = splitCSV(line);
@@ -1041,11 +1058,11 @@ async function loadFromUrl() {
 
     if (!loadedFiles.includes('URL読込')) loadedFiles.push('URL読込');
     updateStats(); renderList(); updateChips(); autoSave();
-    showUrlFb(`✓ 追加 ${added}件 / 重複スキップ ${skipped}件`, 'ok');
+    showUrlFb('✓ 追加 ' + added + '件 / 重複スキップ ' + skipped + '件', 'ok');
     setTimeout(() => closeUrlModal(), 2000);
 
   } catch(err) {
-    showUrlFb('❌ 読み込みエラー: ' + err.message + '\n※GoogleドライブのURL共有設定を「リンクを知っている全員」にしてください', 'err');
+    showUrlFb('❌ ' + err.message, 'err');
   }
 }
 
