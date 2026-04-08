@@ -29,13 +29,19 @@ body{font-family:'Meiryo','Hiragino Sans',sans-serif;background:#f5f5f2;color:#1
 .login-footer{font-size:11px;color:rgba(255,255,255,0.3);text-align:center;margin-top:24px}
 /* メイン画面 */
 #main-screen{display:none}
-.top-bar{background:#1a1a18;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.top-bar h1{font-size:16px;font-weight:600;white-space:nowrap}
-.top-btns{display:flex;gap:6px;flex-wrap:wrap}
-.top-btn{font-size:11px;background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap}
-.top-btn:hover{background:rgba(255,255,255,0.25)}
+.top-bar{background:#1a1a18;color:#fff;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.top-bar-row1{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.top-bar h1{font-size:15px;font-weight:600;white-space:nowrap;margin:0}
+.top-bar-user{font-size:12px;color:rgba(255,255,255,0.75);font-weight:600}
+.top-btns{display:flex;gap:5px;flex-wrap:wrap}
+.top-btn{font-size:11px;background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.top-btn:active{background:rgba(255,255,255,0.3)}
 .top-btn.danger{background:rgba(220,50,50,0.4)}
 .top-btn.admin{background:rgba(59,123,220,0.5)}
+@media(min-width:768px){
+  .top-bar{flex-direction:row;align-items:center;flex-wrap:wrap}
+  .top-bar-row1{flex:1}
+}
 .container{padding:14px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .stat{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:12px 14px}
@@ -168,18 +174,20 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 <!-- メイン画面 -->
 <div id="main-screen">
 <div class="top-bar">
-  <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
-    <h1>出荷照合・消込 <span id="admin-badge" style="display:none" class="admin-badge">管理者</span></h1>
-    <div id="user-name-display" style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);letter-spacing:.03em"></div>
+  <div class="top-bar-row1">
+    <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+      <h1>出荷照合・消込 <span id="admin-badge" style="display:none" class="admin-badge">管理者</span></h1>
+      <div id="user-name-display" class="top-bar-user"></div>
+    </div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.4);white-space:nowrap" id="save-indicator"></div>
   </div>
-  <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-left:8px;white-space:nowrap" id="save-indicator"></div>
   <div class="top-btns">
-    <label class="top-btn">CSVを開く<input type="file" accept=".csv" multiple style="display:none" onchange="loadCSVFiles(this)"></label>
+    <label class="top-btn">CSVを開く<input type="file" accept=".csv,.CSV" multiple style="display:none" onchange="loadCSVFiles(this)"></label>
     <button class="top-btn" onclick="exportCSV('pending')">未完了CSV</button>
     <button class="top-btn" onclick="exportCSV('done')">完了CSV</button>
     <button class="top-btn" onclick="exportCSVByDate()">納品日別CSV</button>
-    <button class="top-btn" id="refresh-btn" onclick="manualRefresh()" title="データを最新に更新">🔄 更新</button>
-    <button class="top-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()" title="自動更新オン/オフ">⏱ 自動更新 OFF</button>
+    <button class="top-btn" id="refresh-btn" onclick="manualRefresh()">🔄 更新</button>
+    <button class="top-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()">⏱ 自動更新 OFF</button>
     <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()">管理者ログイン</button>
     <button class="top-btn danger" onclick="doLogout()">ログアウト</button>
     <button class="top-btn danger" onclick="clearAll()">リセット</button>
@@ -475,12 +483,14 @@ function loadCSVFiles(input) {
 
   files.forEach(file => {
     const reader = new FileReader();
-    reader.onload = function(e) {
-      let text = e.target.result;
+    function tryParse(text, encoding) {
       if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
       const lines = text.trim().split('\n');
+      if (!lines.length || !lines[0]) return false;
       const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
-
+      // ヘッダーが読めない（文字化け）なら失敗とみなす
+      const hasValidHeader = headers.some(h => h.length > 0 && !/[\uFFFD]/.test(h));
+      if (!hasValidHeader) return false;
       const newRecs = lines.slice(1).map(line => {
         const cols = splitCSV(line);
         const obj = {};
@@ -494,20 +504,45 @@ function loadCSVFiles(input) {
         if (!obj['納品調整']) obj['納品調整'] = '';
         return obj;
       }).filter(r => r['品番'] && r['バーコード番号']);
+      return { headers, newRecs, encoding };
+    }
 
+    function applyCSV(file, result) {
       const existingBCs = new Set(records.map(r => r['バーコード番号']));
       let added = 0, skipped = 0;
-      newRecs.forEach(r => {
+      result.newRecs.forEach(r => {
         const bc = r['バーコード番号'];
         if (existingBCs.has(bc)) { skipped++; }
         else { records.push(r); existingBCs.add(bc); added++; }
       });
-
       if (!loadedFiles.includes(file.name)) loadedFiles.push(file.name);
-      showFB('ok', `${file.name}：追加 ${added}件 / 重複スキップ ${skipped}件`);
-
+      showFB('ok', `${file.name}（${result.encoding}）：追加 ${added}件 / 重複スキップ ${skipped}件`);
       pending--;
       if (pending === 0) { updateStats(); renderList(); updateChips(); autoSave(); }
+    }
+
+    reader.onload = function(e) {
+      const utfText = e.target.result;
+      const utfResult = tryParse(utfText, 'UTF-8');
+      if (utfResult && utfResult.newRecs.length > 0) {
+        applyCSV(file, utfResult);
+        return;
+      }
+      // UTF-8で読めなかった or データなし → Shift-JISで再試行
+      const reader2 = new FileReader();
+      reader2.onload = function(e2) {
+        const sjisText = e2.target.result;
+        const sjisResult = tryParse(sjisText, 'Shift_JIS');
+        if (sjisResult && sjisResult.newRecs.length > 0) {
+          applyCSV(file, sjisResult);
+        } else {
+          // どちらでも読めなかった場合はUTF-8結果を使用
+          const fallback = tryParse(utfText, 'UTF-8');
+          if (fallback) applyCSV(file, fallback);
+          else { pending--; showFB('err', `${file.name}：読み込み失敗`); }
+        }
+      };
+      reader2.readAsText(file, 'Shift_JIS');
     };
     reader.readAsText(file, 'utf-8');
   });
@@ -983,9 +1018,13 @@ function showMainScreen(user) {
     document.getElementById('admin-btn').textContent = 'ログアウト';
     document.getElementById('admin-btn').style.background = 'rgba(220,50,50,0.4)';
   }
-  // ユーザー名を大きく表示
+  // ユーザー名を表示（デコード対応）
   const nameEl = document.getElementById('user-name-display');
-  if (nameEl) nameEl.textContent = '👤 ' + user.name + ' さん';
+  if (nameEl) {
+    let displayName = user.name || '';
+    try { displayName = decodeURIComponent(escape(displayName)); } catch(e) {}
+    nameEl.textContent = '👤 ' + displayName + ' さん';
+  }
   restoreData();
 }
 
@@ -1008,32 +1047,8 @@ function doLogout() {
 document.getElementById('login-id').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pw').focus(); });
 document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
-// ===== SSO：ポータルからの自動ログイン =====
+// 起動時：セッション確認
 (function() {
-  function parseSSOToken(token) {
-    try {
-      const decoded = atob(token.split('').reverse().join(''));
-      const data = JSON.parse(decoded);
-      if (Date.now() - data.ts > 5 * 60 * 1000) return null;
-      return data;
-    } catch(e) { return null; }
-  }
-
-  // SSOトークンチェック
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('sso');
-  if (token) {
-    const data = parseSSOToken(token);
-    if (data) {
-      window.history.replaceState({}, '', window.location.pathname);
-      const user = { id: data.id, name: data.name, admin: data.role === 'admin' };
-      try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch(e){}
-      showMainScreen(user);
-      return;
-    }
-  }
-
-  // セッション確認
   try {
     const sess = sessionStorage.getItem(SESSION_KEY);
     if (sess) {
