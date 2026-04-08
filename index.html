@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>出荷照合システム(カナモリ向け)</title>
+<title>出荷照合システム</title>
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACc0lEQVR4nL1XPWgTYRh+LvQgaWPvgnFoTEMIVFChCUUbq4M/6CCZpIjQIaCDg0t1csrk5OiSsUMX6aSDXaSC0khsFaHgD1Yol6RtCAR6tcWGtKkO6V3v++6+++ld71ne732/983z3Pv9XI4DBXm79Y+OeQkxHOS0fsBPciOOAGvCLxGcF+SxVMZ0fmhyRB1/mJxSx2I4yHFuySfuP8b84jfmfOphAqG4oPo7q5uEiIBRkVfQkpfzRZTzRYTiAq6+eKDm9HhB9Ce6UzeKZ4ABrT82/UiX44mA/mZowCieOrDlfFG1tAjXeyAWS5nODz29hlBcUMnpPeCJgL83+k1z0hcPT8Hv5++xvr6i+p4sgRWWPn9Vx73UnKtT0PPzh5vy7m9YJbRK47oYv7YPAOgc+AlMzNoh22s3cjJe2RegJVdIAWD3tPPG7bUbOaM4U4BC7pbYCjoBrdI4+LV98A5IqyNvoza4FgCgt4QsU0Bn5o4p8ZfFhVkAuDCaNWznUUAIqPe1Dx2ZXdSUW4Qf+5TOMlJ1kLFC+LoliBR3mcURnOs++Rw7xylcX0SZ0csQ+zqQN5oQI1FTu7W1jZNnh4n6Y30d0xhMJHUxXQfGJMmwuFKpbBrFPwIYvnRbGEwknwGAGOkeCJYFUNDWEx2Qlpds3WhaXLl1VwAAeaNZAIDaqTphlbhiafi6BJYCkmfSrs/3iWWesNcbvwhLQ7cHWGt9XCD+kKy+yeH8vTnHArSb0Aq1qlSYf/da9XUd+D5zU6BjCpRNql8qHrWqZLjJrBCgv9WOgpdP7N+M2qcXw0FOJffz00whBzSnwItOOCUnBPglgub4Dxaa44PD4JhWAAAAAElFTkSuQmCC">
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1008,8 +1008,32 @@ function doLogout() {
 document.getElementById('login-id').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pw').focus(); });
 document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
-// 起動時：セッション確認
+// ===== SSO：ポータルからの自動ログイン =====
 (function() {
+  function parseSSOToken(token) {
+    try {
+      const decoded = atob(token.split('').reverse().join(''));
+      const data = JSON.parse(decoded);
+      if (Date.now() - data.ts > 5 * 60 * 1000) return null;
+      return data;
+    } catch(e) { return null; }
+  }
+
+  // SSOトークンチェック
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('sso');
+  if (token) {
+    const data = parseSSOToken(token);
+    if (data) {
+      window.history.replaceState({}, '', window.location.pathname);
+      const user = { id: data.id, name: data.name, admin: data.role === 'admin' };
+      try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch(e){}
+      showMainScreen(user);
+      return;
+    }
+  }
+
+  // セッション確認
   try {
     const sess = sessionStorage.getItem(SESSION_KEY);
     if (sess) {
