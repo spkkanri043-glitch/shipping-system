@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>出荷照合システム</title>
+<title>出荷照合システム(カナモリ)</title>
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACc0lEQVR4nL1XPWgTYRh+LvQgaWPvgnFoTEMIVFChCUUbq4M/6CCZpIjQIaCDg0t1csrk5OiSsUMX6aSDXaSC0khsFaHgD1Yol6RtCAR6tcWGtKkO6V3v++6+++ld71ne732/983z3Pv9XI4DBXm79Y+OeQkxHOS0fsBPciOOAGvCLxGcF+SxVMZ0fmhyRB1/mJxSx2I4yHFuySfuP8b84jfmfOphAqG4oPo7q5uEiIBRkVfQkpfzRZTzRYTiAq6+eKDm9HhB9Ce6UzeKZ4ABrT82/UiX44mA/mZowCieOrDlfFG1tAjXeyAWS5nODz29hlBcUMnpPeCJgL83+k1z0hcPT8Hv5++xvr6i+p4sgRWWPn9Vx73UnKtT0PPzh5vy7m9YJbRK47oYv7YPAOgc+AlMzNoh22s3cjJe2RegJVdIAWD3tPPG7bUbOaM4U4BC7pbYCjoBrdI4+LV98A5IqyNvoza4FgCgt4QsU0Bn5o4p8ZfFhVkAuDCaNWznUUAIqPe1Dx2ZXdSUW4Qf+5TOMlJ1kLFC+LoliBR3mcURnOs++Rw7xylcX0SZ0csQ+zqQN5oQI1FTu7W1jZNnh4n6Y30d0xhMJHUxXQfGJMmwuFKpbBrFPwIYvnRbGEwknwGAGOkeCJYFUNDWEx2Qlpds3WhaXLl1VwAAeaNZAIDaqTphlbhiafi6BJYCkmfSrs/3iWWesNcbvwhLQ7cHWGt9XCD+kKy+yeH8vTnHArSb0Aq1qlSYf/da9XUd+D5zU6BjCpRNql8qHrWqZLjJrBCgv9WOgpdP7N+M2qcXw0FOJffz00whBzSnwItOOCUnBPglgub4Dxaa44PD4JhWAAAAAElFTkSuQmCC">
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -154,7 +154,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
   <div class="login-company">関ケ原プラ工業株式会社</div>
   <div class="login-greeting">従業員の皆様、<br>お疲れ様です。</div>
   <div class="login-card">
-    <div class="login-title">出荷照合システム ログイン</div>
+    <div class="login-title">出荷照合システム(カナモリ) ログイン</div>
     <div class="login-field">
       <div class="login-label">従業員ID</div>
       <input type="text" class="login-input" id="login-id" placeholder="IDを入力" autocomplete="username">
@@ -174,19 +174,20 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 <div class="top-bar">
   <div class="top-bar-row1">
     <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
-      <h1>出荷照合・消込 <span id="admin-badge" style="display:none" class="admin-badge">管理者</span></h1>
+      <h1>出荷照合システム(カナモリ) <span id="admin-badge" style="display:none" class="admin-badge">管理者</span></h1>
       <div id="user-name-display" class="top-bar-user"></div>
     </div>
     <div style="font-size:10px;color:rgba(255,255,255,0.4);white-space:nowrap" id="save-indicator"></div>
   </div>
   <div class="top-btns">
     <label class="top-btn">CSVを開く<input type="file" accept=".csv,.CSV" multiple style="display:none" onchange="loadCSVFiles(this)"></label>
+    <button class="top-btn" onclick="showUrlInput()" title="URLからCSV読込（EA660用）">🔗 URL読込</button>
     <button class="top-btn" onclick="exportCSV('pending')">未完了CSV</button>
     <button class="top-btn" onclick="exportCSV('done')">完了CSV</button>
     <button class="top-btn" onclick="exportCSVByDate()">納品日別CSV</button>
     <button class="top-btn" id="refresh-btn" onclick="manualRefresh()">🔄 更新</button>
     <button class="top-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()">⏱ 自動更新 OFF</button>
-    <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()">管理者ログイン</button>
+    <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()" style="display:none">管理者ログイン</button>
     <button class="top-btn danger" onclick="doLogout()">ログアウト</button>
     <button class="top-btn danger" onclick="clearAll()">リセット</button>
   </div>
@@ -308,6 +309,25 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
   </div>
 </div>
 </div><!-- /main-screen -->
+
+<!-- URL読込モーダル（EA660用） -->
+<div class="modal-overlay" id="url-modal">
+  <div class="modal">
+    <div class="modal-title">URLからCSV読込（EA660用）</div>
+    <div class="modal-field">
+      <div class="modal-label">GoogleドライブのCSV共有URLを貼り付け</div>
+      <input type="text" id="url-input" placeholder="https://drive.google.com/..." style="font-size:12px;font-family:inherit">
+      <div style="font-size:11px;color:#888;margin-top:6px;line-height:1.6">
+        手順：Googleドライブ → ファイルを右クリック → 「リンクをコピー」→ ここに貼り付け
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeUrlModal()">キャンセル</button>
+      <button class="btn-ok" onclick="loadFromUrl()">読み込む</button>
+    </div>
+    <div id="url-feedback" style="margin-top:10px;font-size:12px;display:none"></div>
+  </div>
+</div>
 
 <script>
 // ============================================================
@@ -460,8 +480,11 @@ function doAdminLogout() {
   isAdmin = false;
   selectedBCs.clear();
   document.getElementById('admin-badge').style.display = 'none';
-  document.getElementById('admin-btn').textContent = '管理者ログイン';
-  document.getElementById('admin-btn').style.background = 'rgba(59,123,220,0.5)';
+  // 管理者ログアウト後はボタンを非表示に
+  const adminBtn = document.getElementById('admin-btn');
+  adminBtn.style.display = 'none';
+  adminBtn.textContent = '管理者ログイン';
+  adminBtn.style.background = 'rgba(59,123,220,0.5)';
   document.getElementById('bulk-bar').classList.remove('show');
   renderList();
   showFB('warn', 'ログアウトしました');
@@ -950,6 +973,91 @@ function showFB(type,msg) {
 restoreData();
 
 // ============================================================
+// URL読込機能（EA660ハンディ用）
+// ============================================================
+function showUrlInput() {
+  document.getElementById('url-input').value = '';
+  document.getElementById('url-feedback').style.display = 'none';
+  document.getElementById('url-modal').classList.add('show');
+  setTimeout(() => document.getElementById('url-input').focus(), 100);
+}
+
+function closeUrlModal() {
+  document.getElementById('url-modal').classList.remove('show');
+}
+
+function convertGDriveUrl(url) {
+  // GoogleドライブのURLを直接ダウンロードURLに変換
+  // 形式1: https://drive.google.com/file/d/FILE_ID/view
+  // 形式2: https://drive.google.com/open?id=FILE_ID
+  // 形式3: https://docs.google.com/spreadsheets/d/FILE_ID/...
+  let fileId = null;
+  const m1 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m1) fileId = m1[1];
+  else if (m2) fileId = m2[1];
+  if (fileId) {
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+  }
+  return url; // 変換できない場合はそのまま
+}
+
+async function loadFromUrl() {
+  const rawUrl = document.getElementById('url-input').value.trim();
+  const fb = document.getElementById('url-feedback');
+  if (!rawUrl) { showUrlFb('URLを入力してください', 'warn'); return; }
+
+  const url = convertGDriveUrl(rawUrl);
+  showUrlFb('読み込み中...', 'info');
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('取得失敗: ' + res.status);
+    let text = await res.text();
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
+    const lines = text.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
+    const newRecs = lines.slice(1).map(line => {
+      const cols = splitCSV(line);
+      const obj = {};
+      headers.forEach((h, i) => {
+        let v = (cols[i]||'').trim().replace(/^"|"$/g,'').replace(/^=?"?([^"]*)"?$/, '$1').replace(/^=/,'');
+        obj[h] = v;
+      });
+      if (obj['品番']) obj['品番'] = obj['品番'].replace(/-/g,'');
+      if (!obj['消込済']) obj['消込済'] = '未';
+      if (!obj['消込日時']) obj['消込日時'] = '';
+      if (!obj['納品調整']) obj['納品調整'] = '';
+      return obj;
+    }).filter(r => r['品番'] && r['バーコード番号']);
+
+    const existingBCs = new Set(records.map(r => r['バーコード番号']));
+    let added = 0, skipped = 0;
+    newRecs.forEach(r => {
+      if (existingBCs.has(r['バーコード番号'])) { skipped++; }
+      else { records.push(r); existingBCs.add(r['バーコード番号']); added++; }
+    });
+
+    if (!loadedFiles.includes('URL読込')) loadedFiles.push('URL読込');
+    updateStats(); renderList(); updateChips(); autoSave();
+    showUrlFb(`✓ 追加 ${added}件 / 重複スキップ ${skipped}件`, 'ok');
+    setTimeout(() => closeUrlModal(), 2000);
+
+  } catch(err) {
+    showUrlFb('❌ 読み込みエラー: ' + err.message + '\n※GoogleドライブのURL共有設定を「リンクを知っている全員」にしてください', 'err');
+  }
+}
+
+function showUrlFb(msg, type) {
+  const fb = document.getElementById('url-feedback');
+  fb.style.display = 'block';
+  fb.style.color = type==='ok' ? '#1e8a55' : type==='err' ? '#c0392b' : '#b56e00';
+  fb.style.whiteSpace = 'pre-wrap';
+  fb.textContent = msg;
+}
+
+// ============================================================
 // ログイン機能
 // ============================================================
 const USERS = [
@@ -986,8 +1094,14 @@ function showMainScreen(user) {
   if (user.admin) {
     isAdmin = true;
     document.getElementById('admin-badge').style.display = 'inline-block';
-    document.getElementById('admin-btn').textContent = 'ログアウト';
-    document.getElementById('admin-btn').style.background = 'rgba(220,50,50,0.4)';
+    // 管理者ログインボタンを「管理者ログアウト」に変更して表示
+    const adminBtn = document.getElementById('admin-btn');
+    adminBtn.style.display = 'inline-block';
+    adminBtn.textContent = '管理者ログアウト';
+    adminBtn.style.background = 'rgba(220,50,50,0.4)';
+  } else {
+    // 一般ユーザーは管理者ボタン非表示
+    document.getElementById('admin-btn').style.display = 'none';
   }
   // ユーザー名を大きく表示
   const nameEl = document.getElementById('user-name-display');
