@@ -999,27 +999,58 @@ function rDB(){
 }
 
 // ══ SHIFT TABLE ══
+// 「cY年cM+1月21日〜翌月20日」を1期として扱う
+// shiftDays(): 期内の日付オブジェクト配列を返す
+function shiftPeriod(){
+  // 開始: cY年cM月21日（cMは0始まり）
+  // 終了: 翌月20日
+  const days=[];
+  // 当月21日〜月末
+  const dim1=new Date(cY,cM+1,0).getDate();
+  for(let d=21;d<=dim1;d++) days.push({y:cY,m:cM,d});
+  // 翌月1日〜20日
+  let ny=cY,nm=cM+1;
+  if(nm>11){nm=0;ny++;}
+  for(let d=1;d<=20;d++) days.push({y:ny,m:nm,d});
+  return days;
+}
+function shiftPeriodLabel(){
+  let ny=cY,nm=cM+1;
+  if(nm>11){nm=0;ny++;}
+  return `${cY}年${cM+1}月21日〜${ny}年${nm+1}月20日`;
+}
+// キーボードナビ用: 期間の全dateKeyリスト
+function shiftDayKeys(){return shiftPeriod().map(({y,m,d})=>dkey(y,m,d));}
+
 function visEmps(){
-  // 全員が見える（従業員も閲覧可能）
   let e=EMPLOYEES;
   if(curD!=='all')e=e.filter(x=>x.dept===curD);
   return e;
 }
 function setD(d,el){curD=d;document.querySelectorAll('#dt .dtab').forEach(t=>t.classList.remove('on'));el.classList.add('on');selCells.clear();rSh();}
-function chM(dir){cM+=dir;if(cM>11){cM=0;cY++;}if(cM<0){cM=11;cY--;}foc={eid:null,dk:null};selCells.clear();rSh();}
+function chM(dir){
+  // 月を進める（期の単位で移動）
+  cM+=dir;
+  if(cM>11){cM=0;cY++;}
+  if(cM<0){cM=11;cY--;}
+  foc={eid:null,dk:null};selCells.clear();rSh();
+}
 
 function rSh(){
-  document.getElementById('mlbl').textContent=`${cY}年${cM+1}月`;
-  const dim=new Date(cY,cM+1,0).getDate();
+  document.getElementById('mlbl').textContent=shiftPeriodLabel();
+  const days=shiftPeriod();
   const emps=visEmps();
   const tdk=dkey(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate());
 
+  // ヘッダ生成
   let th=`<thead><tr>
     <th class="fx" style="min-width:72px;text-align:left">氏名</th>
     <th class="fx2" style="min-width:48px;text-align:left">チーム</th>`;
-  for(let d=1;d<=dim;d++){
-    const dayType=getDayType(cY,cM,d);
-    const k=dkey(cY,cM,d);
+  // 月の変わり目に区切り列ヘッダを入れる
+  let prevM=-1;
+  days.forEach(({y,m,d})=>{
+    const dayType=getDayType(y,m,d);
+    const k=dkey(y,m,d);
     const isTd=k===tdk;
     let cls='thd';
     if(dayType==='sun')cls+=' sun';
@@ -1028,44 +1059,48 @@ function rSh(){
     else if(dayType==='company-hol')cls+=' sun';
     if(isTd)cls+=' tdc';
     const label=dayType==='sat-work'?'★':'';
-    th+=`<th class="${cls}">${d}${label}<br><span style="font-size:8px">${'日月火水木金土'[new Date(cY,cM,d).getDay()]}</span></th>`;
-  }
+    // 月が変わった最初のセルにborder-leftで区切り
+    const borderStyle=(m!==prevM&&prevM!==-1)?'border-left:2px solid var(--pr)!important':'';
+    prevM=m;
+    th+=`<th class="${cls}" style="${borderStyle}">${d}${label}<br><span style="font-size:8px">${'日月火水木金土'[new Date(y,m,d).getDay()]}</span></th>`;
+  });
   th+=`<th style="min-width:26px;font-size:9px">有給</th><th style="min-width:26px;font-size:9px">深夜</th><th style="min-width:30px;font-size:9px">残業H</th></tr></thead>`;
 
   let tb='<tbody>';
+  const colSpan=days.length+5;
   if(curD==='all'){
     Object.keys(DEPT_STRUCT).forEach(dept=>{
       const de=emps.filter(e=>e.dept===dept);if(!de.length)return;
-      tb+=`<tr class="dept-hr"><td colspan="${dim+5}">${dept}（${de.length}名）</td></tr>`;
-      de.forEach(e=>tb+=buildRow(e,dim,tdk));
-      tb+=buildSum(de,dim,tdk);
+      tb+=`<tr class="dept-hr"><td colspan="${colSpan}">${dept}（${de.length}名）</td></tr>`;
+      de.forEach(e=>tb+=buildRow(e,days,tdk));
+      tb+=buildSum(de,days,tdk);
     });
   }else{
-    emps.forEach(e=>tb+=buildRow(e,dim,tdk));
-    tb+=buildSum(emps,dim,tdk);
+    emps.forEach(e=>tb+=buildRow(e,days,tdk));
+    tb+=buildSum(emps,days,tdk);
   }
   tb+='</tbody>';
   document.getElementById('stbl').innerHTML=th+tb;
   updBulkBar();
 }
 
-function buildRow(e,dim,tdk){
+function buildRow(e,days,tdk){
   const isMe=!isA&&cUser&&e.id===cUser.id;
   let r=`<tr data-eid="${e.id}"${isMe?' style="background:#fffbea"':''}>
     <td class="fx">${e.name}${isMe?' <span style="font-size:8px;color:var(--a)">▶</span>':''}</td>
     <td class="fx2">${e.team}</td>`;
   let vc=0,nc=0,otH=0;
-  for(let d=1;d<=dim;d++){
-    const k=dkey(cY,cM,d);
-    const dayType=getDayType(cY,cM,d);
+  let prevM=-1;
+  days.forEach(({y,m,d})=>{
+    const k=dkey(y,m,d);
+    const dayType=getDayType(y,m,d);
     const s=(SHIFTS[e.id]||{})[k]||{type:'OFF',ot:0};
     const st=SHIFT_DEF[s.type]||SHIFT_DEF.OFF;
     const isTd=k===tdk;
     const selKey=e.id+'|'+k;
     const isSel=selCells.has(selKey);
     const isFoc=foc.eid===e.id&&foc.dk===k;
-    const otStr=s.ot>0?`+${s.ot}`:'';
-    // P勤、またはパート・アルバイトは時間帯を表示
+    // P勤・パート表示
     const emp=EMPLOYEES.find(x=>x.id===e.id);
     let cellLabel=st.lb;
     if(s.type==='P'||(isPT(emp)&&s.type!=='OFF'&&s.type!=='VAC')){
@@ -1082,15 +1117,18 @@ function buildRow(e,dim,tdk){
     else if(dayType==='sun'||dayType==='company-hol')tdCls='td-sun';
     else if(dayType==='sat')tdCls='td-sat';
     else if(dayType==='sat-work')tdCls='td-satw';
+    // 月の変わり目にボーダー
+    const bdrStyle=(m!==prevM&&prevM!==-1)?'border-left:2px solid var(--pr)':'';
+    prevM=m;
     const dndAttr=isA?`draggable="true" ondragstart="onDragStart(event,'${e.id}','${k}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${e.id}','${k}')"`:'' ;
     const scStyle=(s.type==='P'||(isPT(emp)&&s.type!=='OFF'&&s.type!=='VAC'))?'style="font-size:8px;min-width:50px;letter-spacing:-0.3px"':'';
-    r+=`<td class="${tdCls}">
+    r+=`<td class="${tdCls}" style="${bdrStyle}">
       <span class="${cls}" data-eid="${e.id}" data-dk="${k}"
         ${dndAttr}
         onclick="onCell(event,'${e.id}','${k}')"
         ${scStyle}
       >${cellLabel}${s.type!=='OFF'&&s.type!=='VAC'&&s.ot>0?`<br><span style="font-size:7px">+${s.ot}H</span>`:''}</span></td>`;
-  }
+  });
   const otRnd=Math.round(otH*10)/10;
   const otCls=otRnd>OT_LIMIT?'style="color:var(--r);font-weight:700"':otRnd>OT_LIMIT*0.9?'style="color:var(--a);font-weight:600"':'';
   r+=`<td style="font-weight:700;color:var(--g);font-size:11px">${vc}</td>
@@ -1099,13 +1137,16 @@ function buildRow(e,dim,tdk){
   return r;
 }
 
-function buildSum(emps,dim,tdk){
+function buildSum(emps,days,tdk){
   let r='<tr class="sum-r"><td class="fx" style="font-size:10px;font-weight:700">出勤人数</td><td class="fx2"></td>';
-  for(let d=1;d<=dim;d++){
-    const k=dkey(cY,cM,d);
+  let prevM=-1;
+  days.forEach(({y,m,d})=>{
+    const k=dkey(y,m,d);
     const cnt=emps.filter(e=>{const t=((SHIFTS[e.id]||{})[k]||{}).type||'OFF';return t!=='OFF'&&t!=='VAC';}).length;
-    r+=`<td style="font-size:10px">${cnt||''}</td>`;
-  }
+    const bdrStyle=(m!==prevM&&prevM!==-1)?'border-left:2px solid var(--pr)':'';
+    prevM=m;
+    r+=`<td style="font-size:10px;${bdrStyle}">${cnt||''}</td>`;
+  });
   r+=`<td></td><td></td><td></td></tr>`;
   return r;
 }
@@ -1271,8 +1312,7 @@ function setupKB(){
     if(!document.getElementById('pg-sh').classList.contains('on'))return;
     if(!isA)return; // 従業員はキーボード編集不可
     const emps=visEmps();if(!emps.length)return;
-    const dim=new Date(cY,cM+1,0).getDate();
-    const days=[];for(let d=1;d<=dim;d++)days.push(dkey(cY,cM,d));
+    const days=shiftDayKeys();
     let{eid,dk}=foc;
     if(!eid){foc={eid:emps[0].id,dk:days[0]};rFoc();return;}
     const ei=emps.findIndex(e=>e.id===eid),di=days.indexOf(dk);
@@ -2099,48 +2139,72 @@ function rOT(){
 }
 
 // ══ CALENDAR MASTER ══
+// calY/calMはシフト期と同じ意味（calM月21日〜calM+1月20日）
 function chCalM(dir){calM+=dir;if(calM>11){calM=0;calY++;}if(calM<0){calM=11;calY--;}rCal();}
+function calPeriodLabel(){
+  let ny=calY,nm=calM+1;if(nm>11){nm=0;ny++;}
+  return`${calY}年${calM+1}月21日〜${ny}年${nm+1}月20日`;
+}
+function calPeriodDays(){
+  // 当月21日〜月末
+  const days=[];
+  const dim1=new Date(calY,calM+1,0).getDate();
+  for(let d=21;d<=dim1;d++) days.push({y:calY,m:calM,d});
+  // 翌月1日〜20日
+  let ny=calY,nm=calM+1;if(nm>11){nm=0;ny++;}
+  for(let d=1;d<=20;d++) days.push({y:ny,m:nm,d});
+  return days;
+}
+
 function toggleCalDay(y,m,d){
   if(!isA)return;
   const k=dkey(y,m,d);
   const dow=new Date(y,m,d).getDay();
   const cur=CAL_SPECIAL[k];
   if(dow===6){
-    // 土曜: 通常休→出勤日→通常休 トグル
     if(cur==='sat-work')delete CAL_SPECIAL[k];
     else CAL_SPECIAL[k]='sat-work';
   }else if(dow!==0){
-    // 平日: 通常→会社休日→通常 トグル
     if(cur==='company-hol')delete CAL_SPECIAL[k];
     else CAL_SPECIAL[k]='company-hol';
   }
   rCal();rSh();rDB();
 }
 function resetCalMonth(){
-  if(!confirm(`${calY}年${calM+1}月の特殊日設定をリセットしますか？`))return;
-  const prefix=`${calY}-${String(calM).padStart(2,'0')}-`;
-  Object.keys(CAL_SPECIAL).forEach(k=>{if(k.startsWith(prefix))delete CAL_SPECIAL[k];});
+  if(!confirm(`${calPeriodLabel()}の特殊日設定をリセットしますか？`))return;
+  calPeriodDays().forEach(({y,m,d})=>{
+    const k=dkey(y,m,d);delete CAL_SPECIAL[k];
+  });
   rCal();rSh();rDB();
 }
 function rCal(){
-  document.getElementById('cal-mlbl').textContent=`${calY}年${calM+1}月`;
-  document.getElementById('cal-yr-lbl').textContent=`${calY}年`;
-  // Header
+  document.getElementById('cal-mlbl').textContent=calPeriodLabel();
+  document.getElementById('cal-yr-lbl').textContent=`${calY}年${calM+1}月〜${calY+(calM===11?1:0)}年${((calM+1)%12)+1}月`;
+
+  const days=calPeriodDays();
+
+  // 曜日ヘッダ（固定7列）
   const dows=['日','月','火','水','木','金','土'];
-  document.getElementById('cal-header-grid').innerHTML=dows.map((d,i)=>`<div class="cal-dow${i===6?' s':i===0?' su':''}">${d}</div>`).join('');
-  // Body
-  const firstDow=new Date(calY,calM,1).getDay();
-  const dim=new Date(calY,calM+1,0).getDate();
+  document.getElementById('cal-header-grid').innerHTML=
+    dows.map((d,i)=>`<div class="cal-dow${i===6?' s':i===0?' su':''}">${d}</div>`).join('');
+
+  // カレンダーグリッド：日付を7列で流し込む
+  // 最初の日の曜日でパディング
+  const firstDay=days[0];
+  const firstDow=new Date(firstDay.y,firstDay.m,firstDay.d).getDay();
   let html='';
-  for(let i=0;i<firstDow;i++){
-    const d2=new Date(calY,calM,-firstDow+i+1);
-    html+=`<div class="cal-day other-m">${d2.getDate()}</div>`;
-  }
-  for(let d=1;d<=dim;d++){
-    const k=dkey(calY,calM,d);
-    const dow=new Date(calY,calM,d).getDay();
+  // 空セル（最初の週の頭を揃える）
+  for(let i=0;i<firstDow;i++) html+=`<div class="cal-day other-m"></div>`;
+
+  // 月の変わり目を視覚的に区別
+  let prevM=-1;
+  days.forEach(({y,m,d})=>{
+    const k=dkey(y,m,d);
+    const dow=new Date(y,m,d).getDay();
     const sp=CAL_SPECIAL[k];
     const isToday=k===dkey(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate());
+    const isNewM=(m!==prevM&&prevM!==-1);
+    prevM=m;
     let cls='cal-day';
     if(isToday)cls+=' today';
     if(dow===0)cls+=' is-sun';
@@ -2150,20 +2214,24 @@ function rCal(){
     if(sp==='sat-work')badge=`<span class="day-badge db-work">出勤</span>`;
     if(sp==='company-hol')badge=`<span class="day-badge db-hol">休</span>`;
     const tooltip=dow===6?'クリック: 土曜出勤日の切替':dow!==0?'クリック: 会社休日の切替':'';
-    html+=`<div class="${cls}" onclick="toggleCalDay(${calY},${calM},${d})" title="${tooltip}">
+    // 月が変わるセルに視覚マーク
+    const newMStyle=isNewM?'border-top:2px solid var(--pr);':'';
+    html+=`<div class="${cls}" onclick="toggleCalDay(${y},${m},${d})" title="${tooltip}" style="${newMStyle}">
+      ${isNewM?`<span style="position:absolute;top:1px;right:1px;font-size:7px;color:var(--pr);font-weight:700">${m+1}月</span>`:''}
       ${d}${badge}
     </div>`;
-  }
+  });
   document.getElementById('cal-body-grid').innerHTML=html;
 
-  // List
-  const allSpecial=Object.entries(CAL_SPECIAL)
-    .filter(([k])=>k.startsWith(String(calY)))
+  // 特殊日一覧（期間内のみ表示）
+  const periodKeys=new Set(days.map(({y,m,d})=>dkey(y,m,d)));
+  const specials=Object.entries(CAL_SPECIAL)
+    .filter(([k])=>periodKeys.has(k))
     .sort(([a],[b])=>a.localeCompare(b));
-  if(allSpecial.length===0){
+  if(!specials.length){
     document.getElementById('cal-list').innerHTML='<div style="color:var(--tx2);font-size:12px">設定なし</div>';
   }else{
-    document.getElementById('cal-list').innerHTML=allSpecial.map(([k,v])=>{
+    document.getElementById('cal-list').innerHTML=specials.map(([k,v])=>{
       const dt=new Date(k.replace(/-/g,'/'));
       const label=v==='sat-work'?'土曜出勤日':'会社独自休日';
       const bc=v==='sat-work'?'bg-g':'bg-r';
