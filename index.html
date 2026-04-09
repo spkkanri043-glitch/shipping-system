@@ -181,13 +181,12 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
   </div>
   <div class="top-btns">
     <label class="top-btn">CSVを開く<input type="file" accept=".csv,.CSV" multiple style="display:none" onchange="loadCSVFiles(this)"></label>
-    <button class="top-btn" onclick="showUrlInput()" title="URLからCSV読込（EA660用）">🔗 URL読込</button>
     <button class="top-btn" onclick="exportCSV('pending')">未完了CSV</button>
     <button class="top-btn" onclick="exportCSV('done')">完了CSV</button>
     <button class="top-btn" onclick="exportCSVByDate()">納品日別CSV</button>
     <button class="top-btn" id="refresh-btn" onclick="manualRefresh()">🔄 更新</button>
     <button class="top-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()">⏱ 自動更新 OFF</button>
-    <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()" style="display:none">管理者ログイン</button>
+    <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()">管理者ログイン</button>
     <button class="top-btn danger" onclick="doLogout()">ログアウト</button>
     <button class="top-btn danger" onclick="clearAll()">リセット</button>
   </div>
@@ -309,25 +308,6 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
   </div>
 </div>
 </div><!-- /main-screen -->
-
-<!-- URL読込モーダル（EA660用） -->
-<div class="modal-overlay" id="url-modal">
-  <div class="modal">
-    <div class="modal-title">URLからCSV読込（EA660用）</div>
-    <div class="modal-field">
-      <div class="modal-label">GoogleドライブのCSV共有URLを貼り付け</div>
-      <input type="text" id="url-input" placeholder="https://drive.google.com/..." style="font-size:12px;font-family:inherit">
-      <div style="font-size:11px;color:#888;margin-top:6px;line-height:1.6">
-        手順：Googleドライブ → ファイルを右クリック → 「リンクをコピー」→ ここに貼り付け
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeUrlModal()">キャンセル</button>
-      <button class="btn-ok" onclick="loadFromUrl()">読み込む</button>
-    </div>
-    <div id="url-feedback" style="margin-top:10px;font-size:12px;display:none"></div>
-  </div>
-</div>
 
 <script>
 // ============================================================
@@ -480,10 +460,8 @@ function doAdminLogout() {
   isAdmin = false;
   selectedBCs.clear();
   document.getElementById('admin-badge').style.display = 'none';
-  const adminBtn = document.getElementById('admin-btn');
-  adminBtn.style.display = 'inline-block';
-  adminBtn.textContent = '管理者ログイン';
-  adminBtn.style.background = 'rgba(59,123,220,0.5)';
+  document.getElementById('admin-btn').textContent = '管理者ログイン';
+  document.getElementById('admin-btn').style.background = 'rgba(59,123,220,0.5)';
   document.getElementById('bulk-bar').classList.remove('show');
   renderList();
   showFB('warn', 'ログアウトしました');
@@ -968,111 +946,8 @@ function showFB(type,msg) {
   fb.textContent=msg;
 }
 
-// ============================================================
-// URL読込機能（EA660ハンディ用 / GASプロキシ経由）
-// ============================================================
-
-// ★ GASデプロイ後にここのURLを書き換えてください
-https://script.google.com/macros/s/AKfycbwnPDr_vUZW636Lh47bUfoJMZ0bG-Dn5IcHFJ6r6pK3VEmqNqStSSOUAUWpdfOXFuCA/exec
-
-function showUrlInput() {
-  document.getElementById('url-input').value = '';
-  document.getElementById('url-feedback').style.display = 'none';
-  document.getElementById('url-modal').classList.add('show');
-  setTimeout(() => document.getElementById('url-input').focus(), 100);
-}
-
-function closeUrlModal() {
-  document.getElementById('url-modal').classList.remove('show');
-}
-
-function extractFileId(url) {
-  // GoogleドライブURLからファイルIDを抽出
-  const m1 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (m1) return m1[1];
-  if (m2) return m2[1];
-  // IDのみ入力された場合
-  if (/^[a-zA-Z0-9_-]{25,}$/.test(url.trim())) return url.trim();
-  return null;
-}
-
-async function loadFromUrl() {
-  const rawUrl = document.getElementById('url-input').value.trim();
-  const fb = document.getElementById('url-feedback');
-  if (!rawUrl) { showUrlFb('URLを入力してください', 'warn'); return; }
-
-  // GASプロキシURLが未設定の場合
-  if (GAS_PROXY_URL.includes('YOUR_SCRIPT_ID')) {
-    showUrlFb('❌ GASプロキシURLが未設定です。\nindex.htmlのGAS_PROXY_URLを設定してください。', 'err');
-    return;
-  }
-
-  const fileId = extractFileId(rawUrl);
-  if (!fileId) {
-    showUrlFb('❌ GoogleドライブのURLを正しく入力してください。', 'err');
-    return;
-  }
-
-  showUrlFb('読み込み中...', 'info');
-
-  try {
-    // GASプロキシ経由でCSVを取得
-    const proxyUrl = GAS_PROXY_URL + '?id=' + fileId;
-    const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error('取得失敗: ' + res.status);
-    let text = await res.text();
-
-    // エラーレスポンス確認
-    if (text.trim().startsWith('{') && text.includes('"error"')) {
-      const err = JSON.parse(text);
-      throw new Error(err.error || '取得失敗');
-    }
-
-    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-
-    const lines = text.trim().split('\n');
-    if (lines.length < 2) throw new Error('CSVデータが空です');
-
-    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
-    const newRecs = lines.slice(1).map(line => {
-      const cols = splitCSV(line);
-      const obj = {};
-      headers.forEach((h, i) => {
-        let v = (cols[i]||'').trim().replace(/^"|"$/g,'').replace(/^=?"?([^"]*)"?$/, '$1').replace(/^=/,'');
-        obj[h] = v;
-      });
-      if (obj['品番']) obj['品番'] = obj['品番'].replace(/-/g,'');
-      if (!obj['消込済']) obj['消込済'] = '未';
-      if (!obj['消込日時']) obj['消込日時'] = '';
-      if (!obj['納品調整']) obj['納品調整'] = '';
-      return obj;
-    }).filter(r => r['品番'] && r['バーコード番号']);
-
-    const existingBCs = new Set(records.map(r => r['バーコード番号']));
-    let added = 0, skipped = 0;
-    newRecs.forEach(r => {
-      if (existingBCs.has(r['バーコード番号'])) { skipped++; }
-      else { records.push(r); existingBCs.add(r['バーコード番号']); added++; }
-    });
-
-    if (!loadedFiles.includes('URL読込')) loadedFiles.push('URL読込');
-    updateStats(); renderList(); updateChips(); autoSave();
-    showUrlFb('✓ 追加 ' + added + '件 / 重複スキップ ' + skipped + '件', 'ok');
-    setTimeout(() => closeUrlModal(), 2000);
-
-  } catch(err) {
-    showUrlFb('❌ ' + err.message, 'err');
-  }
-}
-
-function showUrlFb(msg, type) {
-  const fb = document.getElementById('url-feedback');
-  fb.style.display = 'block';
-  fb.style.color = type==='ok' ? '#1e8a55' : type==='err' ? '#c0392b' : '#b56e00';
-  fb.style.whiteSpace = 'pre-wrap';
-  fb.textContent = msg;
-}
+// 起動時にデータ復元
+restoreData();
 
 // ============================================================
 // ログイン機能
@@ -1111,14 +986,8 @@ function showMainScreen(user) {
   if (user.admin) {
     isAdmin = true;
     document.getElementById('admin-badge').style.display = 'inline-block';
-    // 管理者ログインボタンを「管理者ログアウト」に変更して表示
-    const adminBtn = document.getElementById('admin-btn');
-    adminBtn.style.display = 'inline-block';
-    adminBtn.textContent = '管理者ログアウト';
-    adminBtn.style.background = 'rgba(220,50,50,0.4)';
-  } else {
-    // 一般ユーザーは管理者ボタン非表示
-    document.getElementById('admin-btn').style.display = 'none';
+    document.getElementById('admin-btn').textContent = 'ログアウト';
+    document.getElementById('admin-btn').style.background = 'rgba(220,50,50,0.4)';
   }
   // ユーザー名を大きく表示
   const nameEl = document.getElementById('user-name-display');
