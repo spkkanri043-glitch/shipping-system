@@ -39,7 +39,8 @@ body{font-family:'Meiryo','Hiragino Sans',sans-serif;background:#f5f5f2;color:#1
 .top-btn{font-size:11px;background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap}
 .top-btn:hover{background:rgba(255,255,255,0.25)}
 .top-btn.danger{background:rgba(220,50,50,0.4)}
-.top-btn.admin{background:rgba(59,123,220,0.5)}
+.top-btn.admin{background:rgba(59,123,220,0.6);border:1px solid rgba(100,160,255,0.5)}
+.top-btn.admin-logout{background:rgba(180,30,30,0.7);border:1px solid rgba(255,100,100,0.5)}
 .container{padding:14px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .stat{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:12px 14px}
@@ -180,13 +181,13 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
     <div style="font-size:10px;color:rgba(255,255,255,0.4);white-space:nowrap" id="save-indicator"></div>
   </div>
   <div class="top-btns">
-    <label class="top-btn">CSVを開く<input type="file" accept=".csv,.CSV" multiple style="display:none" onchange="loadCSVFiles(this)"></label>
+    <button class="top-btn" onclick="showCsvModal()">📂 CSVを開く</button>
     <button class="top-btn" onclick="exportCSV('pending')">未完了CSV</button>
     <button class="top-btn" onclick="exportCSV('done')">完了CSV</button>
     <button class="top-btn" onclick="exportCSVByDate()">納品日別CSV</button>
     <button class="top-btn" id="refresh-btn" onclick="manualRefresh()">🔄 更新</button>
     <button class="top-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()">⏱ 自動更新 OFF</button>
-    <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()">管理者ログイン</button>
+    <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()">🔑 管理者ログイン</button>
     <button class="top-btn danger" onclick="doLogout()">ログアウト</button>
     <button class="top-btn danger" onclick="clearAll()">リセット</button>
   </div>
@@ -308,6 +309,37 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
   </div>
 </div>
 </div><!-- /main-screen -->
+
+<!-- CSVを開くモーダル（ファイル選択 / URL両対応） -->
+<div class="modal-overlay" id="url-modal">
+  <div class="modal">
+    <div class="modal-title">📂 CSVを開く</div>
+
+    <!-- ファイル選択（iPhone・PC） -->
+    <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
+      <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">📁 ファイルから選ぶ</div>
+      <div style="font-size:11px;color:#888;margin-bottom:10px">iPhone・PC・タブレット向け</div>
+      <label style="display:block;width:100%;padding:12px;background:#1a1a18;color:#fff;border-radius:8px;text-align:center;font-size:14px;font-weight:700;cursor:pointer">
+        ファイルを選択
+        <input type="file" accept=".csv,.CSV" multiple style="display:none" onchange="loadCSVFromFile(this)">
+      </label>
+    </div>
+
+    <!-- URL入力（BT-A2000M・Android） -->
+    <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px">
+      <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">🔗 URLから読み込む</div>
+      <div style="font-size:11px;color:#888;margin-bottom:8px">BT-A2000M・Androidハンディ向け<br>Googleスプレッドシートの公開URLを使用</div>
+      <input type="text" id="url-input" placeholder="https://docs.google.com/spreadsheets/d/..." style="font-size:12px;font-family:inherit;margin-bottom:8px">
+      <button style="display:block;width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer" onclick="loadFromUrl()">このURLから読み込む</button>
+    </div>
+
+    <div id="url-feedback" style="margin-top:10px;font-size:12px;display:none;white-space:pre-wrap;line-height:1.6;padding:8px 10px;border-radius:6px"></div>
+
+    <div class="modal-actions" style="margin-top:12px">
+      <button class="btn-cancel" style="width:100%" onclick="closeUrlModal()">閉じる</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ============================================================
@@ -460,8 +492,9 @@ function doAdminLogout() {
   isAdmin = false;
   selectedBCs.clear();
   document.getElementById('admin-badge').style.display = 'none';
-  document.getElementById('admin-btn').textContent = '管理者ログイン';
-  document.getElementById('admin-btn').style.background = 'rgba(59,123,220,0.5)';
+  const adminBtn = document.getElementById('admin-btn');
+  adminBtn.textContent = '🔑 管理者ログイン';
+  adminBtn.className = 'top-btn admin';
   document.getElementById('bulk-bar').classList.remove('show');
   renderList();
   showFB('warn', 'ログアウトしました');
@@ -982,14 +1015,16 @@ function doLogin() {
 function showMainScreen(user) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-screen').style.display = 'block';
-  // 管理者権限セット
+  const adminBtn = document.getElementById('admin-btn');
   if (user.admin) {
     isAdmin = true;
     document.getElementById('admin-badge').style.display = 'inline-block';
-    document.getElementById('admin-btn').textContent = 'ログアウト';
-    document.getElementById('admin-btn').style.background = 'rgba(220,50,50,0.4)';
+    adminBtn.textContent = '🔓 管理者ログアウト';
+    adminBtn.className = 'top-btn admin-logout';
+  } else {
+    adminBtn.textContent = '🔑 管理者ログイン';
+    adminBtn.className = 'top-btn admin';
   }
-  // ユーザー名を大きく表示
   const nameEl = document.getElementById('user-name-display');
   if (nameEl) nameEl.textContent = '👤 ' + user.name + ' さん';
   restoreData();
@@ -1027,6 +1062,96 @@ document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key=
   // セッションなし→ログイン画面表示
   document.getElementById('login-screen').style.display = 'flex';
 })();
+
+// ============================================================
+// URL読込機能（BT-A2000M / Googleスプレッドシート公開URL対応）
+// ============================================================
+function showCsvModal() {
+  document.getElementById('url-input').value = '';
+  const fb = document.getElementById('url-feedback');
+  fb.style.display = 'none'; fb.textContent = '';
+  document.getElementById('url-modal').classList.add('show');
+}
+function showUrlInput() { showCsvModal(); }  // 後方互換
+
+function loadCSVFromFile(input) {
+  loadCSVFiles(input);
+  // ファイル選択後はモーダルを閉じる
+  setTimeout(() => closeUrlModal(), 500);
+}
+function closeUrlModal() {
+  document.getElementById('url-modal').classList.remove('show');
+}
+
+async function loadFromUrl() {
+  const rawUrl = document.getElementById('url-input').value.trim();
+  if (!rawUrl) { showUrlFb('URLを入力してください', 'warn'); return; }
+
+  // GoogleスプレッドシートのURLをCSVダウンロードURLに変換
+  let fetchUrl = rawUrl;
+
+  // 公開URL形式: /pub?...output=csv はそのまま使用
+  // 通常の共有URL: /d/FILE_ID/... → 公開CSVに変換
+  if (rawUrl.includes('docs.google.com/spreadsheets') && !rawUrl.includes('/pub')) {
+    const m = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) {
+      fetchUrl = `https://docs.google.com/spreadsheets/d/${m[1]}/pub?output=csv`;
+    }
+  }
+  // GoogleドライブのCSVファイルURL
+  if (rawUrl.includes('drive.google.com')) {
+    const m = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    const m2 = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    const id = m ? m[1] : m2 ? m2[1] : null;
+    if (id) fetchUrl = `https://drive.google.com/uc?export=download&id=${id}`;
+  }
+
+  showUrlFb('読み込み中...', 'info');
+  try {
+    const res = await fetch(fetchUrl, { redirect: 'follow' });
+    if (!res.ok) throw new Error('取得失敗 (HTTP ' + res.status + ')');
+    let text = await res.text();
+    if (text.trim().startsWith('<!')) throw new Error('HTMLが返されました。スプレッドシートの「ウェブに公開」設定が必要です。');
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) throw new Error('CSVデータが空です');
+    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
+    const newRecs = lines.slice(1).map(line => {
+      const cols = splitCSV(line); const obj = {};
+      headers.forEach((h,i) => {
+        let v=(cols[i]||'').trim().replace(/^"|"$/g,'').replace(/^=?"?([^"]*)"?$/,'$1').replace(/^=/,'');
+        obj[h]=v;
+      });
+      if(obj['品番']) obj['品番']=obj['品番'].replace(/-/g,'');
+      if(!obj['消込済']) obj['消込済']='未';
+      if(!obj['消込日時']) obj['消込日時']='';
+      if(!obj['納品調整']) obj['納品調整']='';
+      return obj;
+    }).filter(r=>r['品番']&&r['バーコード番号']);
+    const existingBCs=new Set(records.map(r=>r['バーコード番号']));
+    let added=0,skipped=0;
+    newRecs.forEach(r=>{
+      if(existingBCs.has(r['バーコード番号'])){skipped++;}
+      else{records.push(r);existingBCs.add(r['バーコード番号']);added++;}
+    });
+    if(!loadedFiles.includes('URL読込')) loadedFiles.push('URL読込');
+    updateStats(); renderList(); updateChips(); autoSave();
+    showUrlFb('✓ 追加 '+added+'件 / 重複スキップ '+skipped+'件', 'ok');
+    setTimeout(()=>closeUrlModal(), 2000);
+  } catch(err) {
+    showUrlFb('❌ '+err.message+'\n\n【解決方法】\nスプレッドシート→「ファイル」→「ウェブに公開」\n→形式を「カンマ区切り(.csv)」→「公開」\n発行されたURLをここに貼り付けてください。', 'err');
+  }
+}
+
+function showUrlFb(msg, type) {
+  const fb = document.getElementById('url-feedback');
+  fb.style.display = 'block';
+  fb.style.padding = '8px 10px';
+  fb.style.borderRadius = '6px';
+  fb.style.background = type==='ok'?'#ecf9f2':type==='err'?'#fdecea':'#fff8ec';
+  fb.style.color = type==='ok'?'#1e8a55':type==='err'?'#c0392b':'#b56e00';
+  fb.textContent = msg;
+}
 </script>
 </body>
 </html>
