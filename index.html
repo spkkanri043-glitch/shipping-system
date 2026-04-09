@@ -330,7 +330,9 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
       <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">🔗 URLから読み込む</div>
       <div style="font-size:11px;color:#888;margin-bottom:8px">BT-A2000M・Androidハンディ向け<br>Googleスプレッドシートの公開URLを使用</div>
       <input type="text" id="url-input" placeholder="https://docs.google.com/spreadsheets/d/..." style="font-size:12px;font-family:inherit;margin-bottom:8px">
-      <button style="display:block;width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer" onclick="loadFromUrl()">このURLから読み込む</button>
+      <div style="display:flex;gap:6px;margin-bottom:0">
+        <button style="flex:1;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer" onclick="loadFromUrl()">このURLから読み込む</button>
+      </div>
     </div>
 
     <div id="url-feedback" style="margin-top:10px;font-size:12px;display:none;white-space:pre-wrap;line-height:1.6;padding:8px 10px;border-radius:6px"></div>
@@ -1066,11 +1068,35 @@ document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key=
 // ============================================================
 // URL読込機能（BT-A2000M / Googleスプレッドシート公開URL対応）
 // ============================================================
+// GASのURL（定数）
+const GAS_URL = ''; // ★ GASのデプロイURL（省略可：GASのgetCsvUrlを使う場合）
+
 function showCsvModal() {
-  document.getElementById('url-input').value = '';
   const fb = document.getElementById('url-feedback');
   fb.style.display = 'none'; fb.textContent = '';
   document.getElementById('url-modal').classList.add('show');
+  // URLが未入力の場合にGASから自動取得を試みる
+  const urlInput = document.getElementById('url-input');
+  if (!urlInput.value) {
+    fetchCsvUrlFromGas();
+  }
+}
+
+// GASからCSV URLを取得してurl-inputに自動セット
+function fetchCsvUrlFromGas() {
+  try {
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res && res.url && res.url.includes('http')) {
+            document.getElementById('url-input').value = res.url;
+            showUrlFb('✅ ポータルに登録されたURLを自動入力しました', 'ok');
+          }
+        })
+        .withFailureHandler(() => {})
+        .getCsvUrl();
+    }
+  } catch(e) {}
 }
 function showUrlInput() { showCsvModal(); }  // 後方互換
 
