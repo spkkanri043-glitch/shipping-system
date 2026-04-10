@@ -428,11 +428,10 @@ function stopAutoRefresh() {
   if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
 }
 
-document.// ============================================================
-// スキャン入力リスナー（BT-A2000M対応）
-// DOMContentLoaded後に実行して確実にDOM要素を取得する
-// ============================================================
 document.addEventListener('DOMContentLoaded', function() {
+
+  // ============================================================
+  // スキャン入力リスナー（BT-A2000M対応）
 
   // ログイン画面 Enterキー対応
   const loginIdEl = document.getElementById('login-id');
