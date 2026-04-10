@@ -755,22 +755,25 @@ function doScan() {
     }
     const ts = nowStr();
     records[idx]['消込済']='済'; records[idx]['消込日時']=ts;
-    // 後ろ倒しが解消された場合は調整区分をクリア
     if (records[idx]['納品調整']==='後ろ倒し') records[idx]['納品調整']='';
     logEntries.push({ts, 品番:records[idx]['品番'], バーコード番号:bc, 発注番号:records[idx]['発注番号']||'', 納品先:records[idx]['納品先']||'', 連番:records[idx]['連番']||'', 総数:records[idx]['総数']||''});
     showFB('ok','✓ 消込完了：品番 '+records[idx]['品番']+' / '+bc);
     inp.value='';
-    updateStats(); renderList(); autoSave();
-    resetHinban();
+    // ★先に②を隠して①にフォーカスを確定（BT-A2000MのkeyupがrenderList後に②を奪わないよう）
+    const area = document.getElementById('scan-area');
+    if (area) area.style.display = 'none';
+    currentHinban = '';
+    document.getElementById('hinban-status').className = 'scan-status';
+    document.getElementById('hinban-status').textContent = '未スキャン';
+    const hinbanEl = document.getElementById('hinban-input');
+    if (hinbanEl) { hinbanEl.value = ''; hinbanEl.focus(); }
+    // 統計・リスト更新・保存はフォーカス確定後に実行
+    setTimeout(() => { updateStats(); renderList(); autoSave(); }, 50);
     return;
   }
   inp.value='';
   resetHinban();
 }
-
-// ============================================================
-// 統計
-// ============================================================
 function updateStats() {
   const active=records.filter(r=>!isCancelled(r));
   const total=active.length;
