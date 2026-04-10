@@ -705,18 +705,14 @@ function resetHinban() {
   const st = document.getElementById('hinban-status');
   st.className = 'scan-status';
   st.textContent = '未スキャン';
-  // ①に確実にフォーカスを戻す（Android BT-A2000M対応）
-  // 複数回試みることでAndroidの遅延に対応
-  const tryFocus = (attempts) => {
+  // ②の入力欄をクリア
+  const scanEl = document.getElementById('scan-input');
+  if (scanEl) scanEl.value = '';
+  // ①にフォーカスを戻す（BT-A2000M対応：遅延して確実に移動）
+  setTimeout(() => {
     const el = document.getElementById('hinban-input');
-    el.value = '';
-    el.focus();
-    el.click(); // Androidでフォーカスが当たらない場合にclickも試みる
-    if (attempts > 0 && document.activeElement !== el) {
-      setTimeout(() => tryFocus(attempts - 1), 100);
-    }
-  };
-  setTimeout(() => tryFocus(3), 100);
+    if (el) { el.value = ''; el.focus(); }
+  }, 150);
 }
 
 function parseQR(raw) {
