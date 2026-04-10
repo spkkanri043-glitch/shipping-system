@@ -430,58 +430,51 @@ function stopAutoRefresh() {
 
 document.// ============================================================
 // スキャン入力リスナー（BT-A2000M対応）
-// BT-A2000Mはスキャン後に自動でEnterを送信する
+// DOMContentLoaded後に実行して確実にDOM要素を取得する
 // ============================================================
+document.addEventListener('DOMContentLoaded', function() {
 
-// ① 現品票バーコード入力
-(function() {
-  const el = document.getElementById('hinban-input');
+  // ① 現品票バーコード入力
+  const hinbanEl = document.getElementById('hinban-input');
+  if (hinbanEl) {
+    hinbanEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); setHinban(); }
+    });
+    hinbanEl.addEventListener('keyup', e => {
+      if (e.key === 'Enter') { e.preventDefault(); setHinban(); }
+    });
+    let hinbanTimer = null;
+    hinbanEl.addEventListener('input', () => {
+      clearTimeout(hinbanTimer);
+      if (hinbanEl.value.trim().length >= 6) {
+        hinbanTimer = setTimeout(() => {
+          if (hinbanEl.value.trim() && document.activeElement === hinbanEl) setHinban();
+        }, 300);
+      }
+    });
+  }
 
-  // Enterキーで実行（keydown・keyup両方対応）
-  el.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); setHinban(); }
-  });
+  // ② 納品ラベルQRコード入力
+  const scanEl = document.getElementById('scan-input');
+  if (scanEl) {
+    scanEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); doScan(); }
+    });
+    scanEl.addEventListener('keyup', e => {
+      if (e.key === 'Enter') { e.preventDefault(); doScan(); }
+    });
+    let scanTimer = null;
+    scanEl.addEventListener('input', () => {
+      clearTimeout(scanTimer);
+      if (scanEl.value.trim().length >= 6) {
+        scanTimer = setTimeout(() => {
+          if (scanEl.value.trim() && document.activeElement === scanEl) doScan();
+        }, 300);
+      }
+    });
+  }
 
-  // スキャナーによってはkeydownではなくkeyupでEnterが来る場合
-  el.addEventListener('keyup', e => {
-    if (e.key === 'Enter') { e.preventDefault(); setHinban(); }
-  });
-
-  // 値が入って一定時間後に自動実行（スキャナーがEnterを送らない場合の保険）
-  let hinbanTimer = null;
-  el.addEventListener('input', () => {
-    clearTimeout(hinbanTimer);
-    if (el.value.trim().length >= 6) {
-      hinbanTimer = setTimeout(() => {
-        if (el.value.trim() && document.activeElement === el) setHinban();
-      }, 300);
-    }
-  });
-})();
-
-// ② 納品ラベルQRコード入力
-(function() {
-  const el = document.getElementById('scan-input');
-
-  el.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); doScan(); }
-  });
-
-  el.addEventListener('keyup', e => {
-    if (e.key === 'Enter') { e.preventDefault(); doScan(); }
-  });
-
-  // 値が入って一定時間後に自動実行（保険）
-  let scanTimer = null;
-  el.addEventListener('input', () => {
-    clearTimeout(scanTimer);
-    if (el.value.trim().length >= 6) {
-      scanTimer = setTimeout(() => {
-        if (el.value.trim() && document.activeElement === el) doScan();
-      }, 300);
-    }
-  });
-})();
+});
 
 // ============================================================
 // 自動保存・復元
@@ -1232,9 +1225,10 @@ document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key=
 // ============================================================
 // URL読込機能（BT-A2000M / Googleスプレッドシート公開URL対応）
 // ============================================================
-// GASのURL（定数）
-const GAS_URL = '';
-const GAS_DEPLOY_URL = 'YOUR_DEPLOY_URL'; // ★GASのデプロイURLを設定 // ★ GASのデプロイURL（省略可：GASのgetCsvUrlを使う場合）
+// GASのデプロイURL（★設定後はGitHubにアップロードしてください）
+// 例: 'https://script.google.com/macros/s/XXXXXX/exec'
+const GAS_DEPLOY_URL = 'YOUR_DEPLOY_URL';
+const GAS_URL = GAS_DEPLOY_URL; // 互換用エイリアス
 
 function showCsvModal() {
   const fb = document.getElementById('url-feedback');
