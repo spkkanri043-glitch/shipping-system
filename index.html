@@ -226,9 +226,9 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
         <input type="text" id="hinban-input" placeholder="品番をスキャン（Enter）">
         <div class="scan-status" id="hinban-status">未スキャン</div>
       </div>
-      <div>
+      <div id="scan-area" style="display:none">
         <div class="scan-label">② 納品ラベル QR</div>
-        <input type="text" id="scan-input" placeholder="QRをスキャン（Enter）" disabled style="opacity:0.4">
+        <input type="text" id="scan-input" placeholder="QRをスキャン（Enter）">
         <button class="btn btn-dark" onclick="doScan()">照合・消込</button>
       </div>
     </div>
@@ -691,10 +691,10 @@ function setHinban() {
   st.className = 'scan-status active';
   st.textContent = '品番セット: ' + currentHinban;
   inp.value = '';
-  // ②を有効化してフォーカス移動
+  // ②エリアを表示してフォーカス移動
+  const area = document.getElementById('scan-area');
   const scan = document.getElementById('scan-input');
-  scan.disabled = false;
-  scan.style.opacity = '1';
+  area.style.display = 'block';
   scan.value = '';
   setTimeout(() => scan.focus(), 80);
   showFB('ok','品番「'+currentHinban+'」をセット。②の納品ラベルQRをスキャンしてください');
@@ -705,18 +705,16 @@ function resetHinban() {
   const st = document.getElementById('hinban-status');
   st.className = 'scan-status';
   st.textContent = '未スキャン';
-  // ②を無効化（BT-A2000Mが勝手にフォーカスしないよう物理的にブロック）
+  // ②エリアを完全に非表示（BT-A2000Mがフォーカスできないよう画面から消す）
+  const area = document.getElementById('scan-area');
   const scanEl = document.getElementById('scan-input');
-  if (scanEl) {
-    scanEl.value = '';
-    scanEl.disabled = true;
-    scanEl.style.opacity = '0.4';
-  }
+  if (area) area.style.display = 'none';
+  if (scanEl) scanEl.value = '';
   // ①にフォーカスを戻す
   setTimeout(() => {
     const el = document.getElementById('hinban-input');
     if (el) { el.value = ''; el.focus(); }
-  }, 200);
+  }, 100);
 }
 
 function parseQR(raw) {
