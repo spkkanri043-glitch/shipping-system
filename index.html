@@ -228,7 +228,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
       </div>
       <div>
         <div class="scan-label">② 納品ラベル QR</div>
-        <input type="text" id="scan-input" placeholder="QRをスキャン（Enter）">
+        <input type="text" id="scan-input" placeholder="QRをスキャン（Enter）" disabled style="opacity:0.4">
         <button class="btn btn-dark" onclick="doScan()">照合・消込</button>
       </div>
     </div>
@@ -691,12 +691,12 @@ function setHinban() {
   st.className = 'scan-status active';
   st.textContent = '品番セット: ' + currentHinban;
   inp.value = '';
-  // ②に確実にフォーカスを移動（Android対応で遅延）
-  setTimeout(() => {
-    const scan = document.getElementById('scan-input');
-    scan.value = '';
-    scan.focus();
-  }, 80);
+  // ②を有効化してフォーカス移動
+  const scan = document.getElementById('scan-input');
+  scan.disabled = false;
+  scan.style.opacity = '1';
+  scan.value = '';
+  setTimeout(() => scan.focus(), 80);
   showFB('ok','品番「'+currentHinban+'」をセット。②の納品ラベルQRをスキャンしてください');
 }
 
@@ -705,14 +705,18 @@ function resetHinban() {
   const st = document.getElementById('hinban-status');
   st.className = 'scan-status';
   st.textContent = '未スキャン';
-  // ②の入力欄をクリア
+  // ②を無効化（BT-A2000Mが勝手にフォーカスしないよう物理的にブロック）
   const scanEl = document.getElementById('scan-input');
-  if (scanEl) scanEl.value = '';
-  // ①にフォーカスを戻す（BT-A2000M対応：遅延して確実に移動）
+  if (scanEl) {
+    scanEl.value = '';
+    scanEl.disabled = true;
+    scanEl.style.opacity = '0.4';
+  }
+  // ①にフォーカスを戻す
   setTimeout(() => {
     const el = document.getElementById('hinban-input');
     if (el) { el.value = ''; el.focus(); }
-  }, 150);
+  }, 200);
 }
 
 function parseQR(raw) {
@@ -757,10 +761,12 @@ function doScan() {
     if (records[idx]['納品調整']==='後ろ倒し') records[idx]['納品調整']='';
     logEntries.push({ts, 品番:records[idx]['品番'], バーコード番号:bc, 発注番号:records[idx]['発注番号']||'', 納品先:records[idx]['納品先']||'', 連番:records[idx]['連番']||'', 総数:records[idx]['総数']||''});
     showFB('ok','✓ 消込完了：品番 '+records[idx]['品番']+' / '+bc);
+    inp.value='';
     updateStats(); renderList(); autoSave();
+    resetHinban();
+    return;
   }
   inp.value='';
-  // 1対1照合：消込完了後は①にリセット
   resetHinban();
 }
 
