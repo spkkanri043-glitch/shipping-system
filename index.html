@@ -434,6 +434,12 @@ document.// ============================================================
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
 
+  // ログイン画面 Enterキー対応
+  const loginIdEl = document.getElementById('login-id');
+  const loginPwEl = document.getElementById('login-pw');
+  if (loginIdEl) loginIdEl.addEventListener('keydown', e => { if(e.key==='Enter') { if(loginPwEl) loginPwEl.focus(); } });
+  if (loginPwEl) loginPwEl.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
   // ① 現品票バーコード入力
   const hinbanEl = document.getElementById('hinban-input');
   if (hinbanEl) {
@@ -1204,9 +1210,7 @@ function doLogout() {
   document.getElementById('admin-btn').style.background = 'rgba(59,123,220,0.5)';
 }
 
-// Enterキーでログイン
-document.getElementById('login-id').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pw').focus(); });
-document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+// Enterキーでログインはは下のDOMContentLoadedで登録
 
 // 起動時：セッション確認
 (function() {
