@@ -321,12 +321,20 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 </div>
 </div><!-- /main-screen -->
 
-<!-- CSVを開くモーダル（ファイル選択 / URL両対応） -->
+<!-- CSVを開くモーダル -->
 <div class="modal-overlay" id="url-modal">
   <div class="modal">
     <div class="modal-title">📂 CSVを開く</div>
 
-    <!-- ファイル選択（iPhone・PC） -->
+    <!-- ① ドライブから選ぶ（BT-A2000M・全端末） -->
+    <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
+      <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">☁️ ドライブから選ぶ</div>
+      <div style="font-size:11px;color:#888;margin-bottom:10px">Googleドライブのフォルダからファイルを選択</div>
+      <button style="width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px" onclick="loadDriveFileList()">📋 ファイル一覧を取得</button>
+      <div id="drive-file-list" style="display:none;max-height:200px;overflow-y:auto;border:1px solid #e5e5e0;border-radius:8px"></div>
+    </div>
+
+    <!-- ② ファイルから選ぶ（iPhone・PC） -->
     <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
       <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">📁 ファイルから選ぶ</div>
       <div style="font-size:11px;color:#888;margin-bottom:10px">iPhone・PC・タブレット向け</div>
@@ -334,16 +342,6 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
         ファイルを選択
         <input type="file" accept=".csv,.CSV" multiple style="display:none" onchange="loadCSVFromFile(this)">
       </label>
-    </div>
-
-    <!-- URL入力（BT-A2000M・Android） -->
-    <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px">
-      <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">🔗 URLから読み込む</div>
-      <div style="font-size:11px;color:#888;margin-bottom:8px">BT-A2000M・Androidハンディ向け<br>Googleスプレッドシートの公開URLを使用</div>
-      <input type="text" id="url-input" placeholder="https://docs.google.com/spreadsheets/d/..." style="font-size:12px;font-family:inherit;margin-bottom:8px">
-      <div style="display:flex;gap:6px;margin-bottom:0">
-        <button style="flex:1;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer" onclick="loadFromUrl()">このURLから読み込む</button>
-      </div>
     </div>
 
     <div id="url-feedback" style="margin-top:10px;font-size:12px;display:none;white-space:pre-wrap;line-height:1.6;padding:8px 10px;border-radius:6px"></div>
@@ -1208,106 +1206,93 @@ function doLogout() {
 // ============================================================
 // GASのデプロイURL（★設定後はGitHubにアップロードしてください）
 // 例: 'https://script.google.com/macros/s/XXXXXX/exec'
-const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbwTPJIZNtdAmeEylVSSjV1w6QbtUrvc1u_s5Ueo8fy9TJNqpwEEo_KxQvo0QNL8f7YDoA/exec';
+const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbzjhDfb3_VKRUwPNtLNmwRJTgIG2tkCaROCyJwdMD5UnWEflOWV0U3UvfMn2vlhIc6s/exec';
 const GAS_URL = GAS_DEPLOY_URL; // 互換用エイリアス
 
 function showCsvModal() {
   const fb = document.getElementById('url-feedback');
-  fb.style.display = 'none'; fb.textContent = '';
+  if (fb) { fb.style.display = 'none'; fb.textContent = ''; }
+  const fileList = document.getElementById('drive-file-list');
+  if (fileList) fileList.style.display = 'none';
   document.getElementById('url-modal').classList.add('show');
-  // URLが未入力の場合にGASから自動取得を試みる
-  const urlInput = document.getElementById('url-input');
-  if (!urlInput.value) {
-    fetchCsvUrlFromGas();
-  }
 }
 
-// GASからCSV URLを取得してurl-inputに自動セット
-function fetchCsvUrlFromGas() {
+function showUrlInput() { showCsvModal(); }
+
+// ドライブ ファイル一覧取得
+async function loadDriveFileList() {
+  if (!GAS_DEPLOY_URL || GAS_DEPLOY_URL === 'YOUR_DEPLOY_URL') {
+    showUrlFb('GAS_DEPLOY_URLが未設定です', 'err'); return;
+  }
+  showUrlFb('ファイル一覧を取得中...', 'info');
   try {
-    if (typeof google !== 'undefined' && google.script && google.script.run) {
-      google.script.run
-        .withSuccessHandler(res => {
-          if (res && res.url && res.url.includes('http')) {
-            document.getElementById('url-input').value = res.url;
-            showUrlFb('✅ ポータルに登録されたURLを自動入力しました', 'ok');
-          }
-        })
-        .withFailureHandler(() => {})
-        .getCsvUrl();
+    const res  = await fetch(GAS_DEPLOY_URL + '?action=getFileList');
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || '取得失敗');
+    if (!data.files || data.files.length === 0) {
+      showUrlFb('フォルダにCSVファイルがありません', 'warn'); return;
     }
-  } catch(e) {}
-}
-function showUrlInput() { showCsvModal(); }  // 後方互換
-
-function loadCSVFromFile(input) {
-  loadCSVFiles(input);
-  // ファイル選択後はモーダルを閉じる
-  setTimeout(() => closeUrlModal(), 500);
-}
-function closeUrlModal() {
-  document.getElementById('url-modal').classList.remove('show');
-}
-
-async function loadFromUrl() {
-  const rawUrl = document.getElementById('url-input').value.trim();
-  if (!rawUrl) { showUrlFb('URLを入力してください', 'warn'); return; }
-
-  // GoogleスプレッドシートのURLをCSVダウンロードURLに変換
-  let fetchUrl = rawUrl;
-
-  // 公開URL形式: /pub?...output=csv はそのまま使用
-  // 通常の共有URL: /d/FILE_ID/... → 公開CSVに変換
-  if (rawUrl.includes('docs.google.com/spreadsheets') && !rawUrl.includes('/pub')) {
-    const m = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (m) {
-      fetchUrl = `https://docs.google.com/spreadsheets/d/${m[1]}/pub?output=csv`;
-    }
+    const listEl = document.getElementById('drive-file-list');
+    listEl.style.display = 'block';
+    listEl.innerHTML = data.files.map(function(f) {
+      const safeId   = f.id;
+      const safeName = f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      return '<div onclick="loadDriveFile(\'' + safeId + '\',\'' + safeName + '\')" '
+        + 'style="padding:10px 12px;border-bottom:1px solid #f0f0ea;cursor:pointer;font-size:13px;'
+        + 'display:flex;justify-content:space-between;align-items:center;gap:8px">'
+        + '<span style="font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.name + '</span>'
+        + '<span style="font-size:11px;color:#aaa;white-space:nowrap;flex-shrink:0">' + f.updated + '</span>'
+        + '</div>';
+    }).join('');
+    showUrlFb(data.files.length + '件のファイルが見つかりました', 'ok');
+  } catch(err) {
+    showUrlFb('エラー: ' + err.message, 'err');
   }
-  // GoogleドライブのCSVファイルURL
-  if (rawUrl.includes('drive.google.com')) {
-    const m = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    const m2 = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    const id = m ? m[1] : m2 ? m2[1] : null;
-    if (id) fetchUrl = `https://drive.google.com/uc?export=download&id=${id}`;
-  }
+}
 
-  showUrlFb('読み込み中...', 'info');
+// ドライブ ファイル読込
+async function loadDriveFile(fileId, fileName) {
+  showUrlFb(fileName + ' を読み込み中...', 'info');
+  document.getElementById('drive-file-list').style.display = 'none';
   try {
-    const res = await fetch(fetchUrl, { redirect: 'follow' });
-    if (!res.ok) throw new Error('取得失敗 (HTTP ' + res.status + ')');
+    const res  = await fetch(GAS_DEPLOY_URL + '?action=getCSV&fileId=' + fileId);
     let text = await res.text();
-    if (text.trim().startsWith('<!')) throw new Error('HTMLが返されました。スプレッドシートの「ウェブに公開」設定が必要です。');
+    if (text.trim().startsWith('{')) {
+      const d = JSON.parse(text);
+      if (!d.ok) throw new Error(d.message);
+    }
     if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
     const lines = text.trim().split('\n');
     if (lines.length < 2) throw new Error('CSVデータが空です');
-    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
-    const newRecs = lines.slice(1).map(line => {
-      const cols = splitCSV(line); const obj = {};
-      headers.forEach((h,i) => {
-        let v=(cols[i]||'').trim().replace(/^"|"$/g,'').replace(/^=?"?([^"]*)"?$/,'$1').replace(/^=/,'');
-        obj[h]=v;
+    const headers = lines[0].split(',').map(function(h) { return h.replace(/^"|"$/g,'').trim(); });
+    const newRecs = lines.slice(1).map(function(line) {
+      const cols = splitCSV(line);
+      const obj = {};
+      headers.forEach(function(h,i) {
+        let v = (cols[i]||'').trim().replace(/^"|"$/g,'').replace(/^=?"?([^"]*)"?$/,'$1').replace(/^=/,'');
+        obj[h] = v;
       });
-      if(obj['品番']) obj['品番']=obj['品番'].replace(/-/g,'');
-      if(!obj['消込済']) obj['消込済']='未';
-      if(!obj['消込日時']) obj['消込日時']='';
-      if(!obj['納品調整']) obj['納品調整']='';
+      if (obj['\u54c1\u756a']) obj['\u54c1\u756a'] = obj['\u54c1\u756a'].replace(/-/g,'');
+      if (!obj['\u6d88\u8fbc\u6e08']) obj['\u6d88\u8fbc\u6e08'] = '\u672a';
+      if (!obj['\u6d88\u8fbc\u65e5\u6642']) obj['\u6d88\u8fbc\u65e5\u6642'] = '';
+      if (!obj['\u7d0d\u54c1\u8abf\u6574']) obj['\u7d0d\u54c1\u8abf\u6574'] = '';
       return obj;
-    }).filter(r=>r['品番']&&r['バーコード番号']);
-    const existingBCs=new Set(records.map(r=>r['バーコード番号']));
-    let added=0,skipped=0;
-    newRecs.forEach(r=>{
-      if(existingBCs.has(r['バーコード番号'])){skipped++;}
-      else{records.push(r);existingBCs.add(r['バーコード番号']);added++;}
+    }).filter(function(r) { return r['\u54c1\u756a'] && r['\u30d0\u30fc\u30b3\u30fc\u30c9\u756a\u53f7']; });
+    const existingBCs = new Set(records.map(function(r) { return r['\u30d0\u30fc\u30b3\u30fc\u30c9\u756a\u53f7']; }));
+    let added = 0, skipped = 0;
+    newRecs.forEach(function(r) {
+      if (existingBCs.has(r['\u30d0\u30fc\u30b3\u30fc\u30c9\u756a\u53f7'])) { skipped++; }
+      else { records.push(r); existingBCs.add(r['\u30d0\u30fc\u30b3\u30fc\u30c9\u756a\u53f7']); added++; }
     });
-    if(!loadedFiles.includes('URL読込')) loadedFiles.push('URL読込');
+    if (!loadedFiles.includes(fileName)) loadedFiles.push(fileName);
     updateStats(); renderList(); updateChips(); autoSave();
-    showUrlFb('✓ 追加 '+added+'件 / 重複スキップ '+skipped+'件', 'ok');
-    setTimeout(()=>closeUrlModal(), 2000);
+    showUrlFb('\u2705 ' + fileName + '\n\u8ffd\u52a0 ' + added + '\u4ef6 / \u91cd\u8907\u30b9\u30ad\u30c3\u30d7 ' + skipped + '\u4ef6', 'ok');
+    setTimeout(function() { closeUrlModal(); }, 2000);
   } catch(err) {
-    showUrlFb('❌ '+err.message+'\n\n【解決方法】\nスプレッドシート→「ファイル」→「ウェブに公開」\n→形式を「カンマ区切り(.csv)」→「公開」\n発行されたURLをここに貼り付けてください。', 'err');
+    showUrlFb('\u274c ' + err.message, 'err');
   }
 }
+
 
 function showUrlFb(msg, type) {
   const fb = document.getElementById('url-feedback');
