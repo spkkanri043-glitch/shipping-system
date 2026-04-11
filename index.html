@@ -1219,6 +1219,14 @@ function showCsvModal() {
 
 function showUrlInput() { showCsvModal(); }
 
+function closeUrlModal() {
+  document.getElementById('url-modal').classList.remove('show');
+  const fb = document.getElementById('url-feedback');
+  if (fb) { fb.style.display = 'none'; fb.textContent = ''; }
+  const fileList = document.getElementById('drive-file-list');
+  if (fileList) fileList.style.display = 'none';
+}
+
 // ドライブ ファイル一覧取得
 async function loadDriveFileList() {
   if (!GAS_DEPLOY_URL || GAS_DEPLOY_URL === 'YOUR_DEPLOY_URL') {
