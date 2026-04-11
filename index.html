@@ -378,11 +378,40 @@ let autoRefreshEnabled = false;
 // ============================================================
 // 手動・自動更新
 // ============================================================
-function manualRefresh() {
-  restoreData();
+async function manualRefresh() {
   const btn = document.getElementById('refresh-btn');
+  btn.textContent = '🔄 更新中...';
+  // まずlocalStorageから復元
+  restoreData();
+  // GASが設定されていればスプレッドシートからも最新データを取得
+  if (GAS_DEPLOY_URL && GAS_DEPLOY_URL !== 'YOUR_DEPLOY_URL') {
+    try {
+      const res  = await fetch(GAS_DEPLOY_URL + '?action=loadShippingData');
+      const data = await res.json();
+      if (data.ok && data.records && data.records.length > 0) {
+        // 消込状態だけ上書きマージ（元のレコード構造は維持）
+        const cloudMap = {};
+        data.records.forEach(function(r) { cloudMap[r['バーコード番号']] = r; });
+        records = records.map(function(r) {
+          const bc = r['バーコード番号'];
+          if (cloudMap[bc]) {
+            // クラウドの消込状態・納品調整を優先
+            r['消込済']   = cloudMap[bc]['消込済']   || r['消込済'];
+            r['消込日時'] = cloudMap[bc]['消込日時'] || r['消込日時'];
+            r['納品調整'] = cloudMap[bc]['納品調整'] || r['納品調整'];
+          }
+          return r;
+        });
+        updateStats(); renderList(); autoSave();
+        showFB('ok', '☁️ クラウドと同期しました');
+      }
+    } catch(err) {
+      // GAS取得失敗はサイレントにスルー（localStorageのデータを使う）
+      console.warn('クラウド同期失敗:', err.message);
+    }
+  }
   btn.textContent = '✅ 更新済';
-  setTimeout(() => { btn.textContent = '🔄 更新'; }, 1500);
+  setTimeout(function() { btn.textContent = '🔄 更新'; }, 1500);
 }
 
 function toggleAutoRefresh() {
@@ -1025,22 +1054,62 @@ function isDone(r) {
   return r['消込済'] === '済' && r['納品調整'] !== '後ろ倒し';
 }
 
-function exportCSV(mode) {
+async function exportCSV(mode) {
   if (!records.length) { showFB('err','データがありません'); return; }
   const today = todayStr();
+
   if (mode==='pending') {
-    // 未完了 ＋ 後ろ倒し済 を含む
     const data = records.filter(r => isPending(r));
     if (!data.length) { showFB('warn','未完了データがありません'); return; }
-    downloadCSV(makeCSV(data), `出荷指示_未完了_${today}.csv`);
-    const atoCnt = data.filter(r=>r['納品調整']==='後ろ倒し'&&r['消込済']==='済').length;
-    showFB('ok', `未完了CSV（${data.length}件）を保存しました${atoCnt>0?' ※後ろ倒し済含む'+atoCnt+'件':''}`);
+    const filename = '出荷指示_未完了_' + today + '.csv';
+    const csv = makeCSV(data);
+    // ドライブに保存（GAS設定済みの場合）
+    if (GAS_DEPLOY_URL && GAS_DEPLOY_URL !== 'YOUR_DEPLOY_URL') {
+      showFB('ok', 'Googleドライブに保存中...');
+      try {
+        const res  = await fetch(GAS_DEPLOY_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'savePendingCSV', csv: csv, filename: filename })
+        });
+        const data2 = await res.json();
+        if (data2.ok) {
+          const atoCnt = data.filter(r=>r['納品調整']==='後ろ倒し'&&r['消込済']==='済').length;
+          showFB('ok', '☁️ Googleドライブに保存しました\n' + filename + '（' + data.length + '件）' + (atoCnt>0?' ※後ろ倒し済含む'+atoCnt+'件':''));
+        } else throw new Error(data2.message);
+      } catch(err) {
+        showFB('warn', 'ドライブ保存失敗、ローカルにダウンロードします\n' + err.message);
+        downloadCSV(csv, filename);
+      }
+    } else {
+      downloadCSV(csv, filename);
+      showFB('ok', '未完了CSV（' + data.length + '件）をダウンロードしました');
+    }
+
   } else if (mode==='done') {
-    // 完了 かつ 後ろ倒しでないもののみ
     const data = records.filter(r => isDone(r));
     if (!data.length) { showFB('warn','完了データがありません'); return; }
-    downloadCSV(makeCSV(data), `出荷指示_完了済_${today}.csv`);
-    showFB('ok', `完了CSV（${data.length}件）を保存しました`);
+    const filename = '出荷指示_完了済_' + today + '.csv';
+    const csv = makeCSV(data);
+    // ドライブの完了フォルダに保存
+    if (GAS_DEPLOY_URL && GAS_DEPLOY_URL !== 'YOUR_DEPLOY_URL') {
+      showFB('ok', 'Googleドライブ（完了フォルダ）に保存中...');
+      try {
+        const res  = await fetch(GAS_DEPLOY_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'saveDoneCSV', csv: csv, filename: filename })
+        });
+        const data2 = await res.json();
+        if (data2.ok) {
+          showFB('ok', '☁️ Googleドライブ（完了フォルダ）に保存しました\n' + filename + '（' + data.length + '件）');
+        } else throw new Error(data2.message);
+      } catch(err) {
+        showFB('warn', 'ドライブ保存失敗、ローカルにダウンロードします\n' + err.message);
+        downloadCSV(csv, filename);
+      }
+    } else {
+      downloadCSV(csv, filename);
+      showFB('ok', '完了CSV（' + data.length + '件）をダウンロードしました');
+    }
   }
 }
 
@@ -1206,7 +1275,7 @@ function doLogout() {
 // ============================================================
 // GASのデプロイURL（★設定後はGitHubにアップロードしてください）
 // 例: 'https://script.google.com/macros/s/XXXXXX/exec'
-const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbzjhDfb3_VKRUwPNtLNmwRJTgIG2tkCaROCyJwdMD5UnWEflOWV0U3UvfMn2vlhIc6s/exec';
+const GAS_DEPLOY_URL = 'YOUR_DEPLOY_URL';
 const GAS_URL = GAS_DEPLOY_URL; // 互換用エイリアス
 
 function showCsvModal() {
@@ -1242,17 +1311,23 @@ async function loadDriveFileList() {
     }
     const listEl = document.getElementById('drive-file-list');
     listEl.style.display = 'block';
-    listEl.innerHTML = data.files.map(function(f) {
-      const safeId   = f.id;
-      const safeName = f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return '<div onclick="loadDriveFile(\'' + safeId + '\',\'' + safeName + '\')" '
-        + 'style="padding:10px 12px;border-bottom:1px solid #f0f0ea;cursor:pointer;font-size:13px;'
-        + 'display:flex;justify-content:space-between;align-items:center;gap:8px">'
-        + '<span style="font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.name + '</span>'
-        + '<span style="font-size:11px;color:#aaa;white-space:nowrap;flex-shrink:0">' + f.updated + '</span>'
-        + '</div>';
-    }).join('');
-    showUrlFb(data.files.length + '件のファイルが見つかりました', 'ok');
+    // チェックボックス＋一括読込ボタン
+    listEl.innerHTML = '<div style="padding:8px 12px;border-bottom:2px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center">'
+      + '<span style="font-size:11px;color:#888">' + data.files.length + '件（複数選択可）</span>'
+      + '<button onclick="loadSelectedFiles()" style="padding:4px 12px;background:#1e8a55;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">選択して読込</button>'
+      + '</div>'
+      + data.files.map(function(f) {
+          const safeId   = f.id;
+          const safeName = f.name.replace(/'/g,"\'");
+          return '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;font-size:13px;'
+            + 'display:flex;align-items:center;gap:10px;cursor:pointer">'
+            + '<input type="checkbox" value="' + safeId + '" data-name="' + safeName + '" '
+            + 'style="width:16px;height:16px;flex-shrink:0;accent-color:#3a7bdc">'
+            + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">' + f.name + '</span>'
+            + '<span style="font-size:11px;color:#aaa;white-space:nowrap;flex-shrink:0">' + f.updated + '</span>'
+            + '</label>';
+        }).join('');
+    showUrlFb(data.files.length + '件見つかりました。選択して「選択して読込」を押してください', 'ok');
   } catch(err) {
     showUrlFb('エラー: ' + err.message, 'err');
   }
@@ -1299,6 +1374,59 @@ async function loadDriveFile(fileId, fileName) {
   } catch(err) {
     showUrlFb('\u274c ' + err.message, 'err');
   }
+}
+
+
+// 複数ファイル選択して読込
+async function loadSelectedFiles() {
+  const checkboxes = document.querySelectorAll('#drive-file-list input[type=checkbox]:checked');
+  if (checkboxes.length === 0) {
+    showUrlFb('ファイルを1つ以上選択してください', 'warn');
+    return;
+  }
+  document.getElementById('drive-file-list').style.display = 'none';
+  let totalAdded = 0, totalSkipped = 0;
+  for (let i = 0; i < checkboxes.length; i++) {
+    const cb       = checkboxes[i];
+    const fileId   = cb.value;
+    const fileName = cb.dataset.name;
+    showUrlFb('(' + (i+1) + '/' + checkboxes.length + ') ' + fileName + ' 読込中...', 'info');
+    try {
+      const res  = await fetch(GAS_DEPLOY_URL + '?action=getCSV&fileId=' + fileId);
+      let text = await res.text();
+      if (text.trim().startsWith('{')) {
+        const d = JSON.parse(text);
+        if (!d.ok) throw new Error(d.message);
+      }
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      const lines = text.trim().split('\n');
+      if (lines.length < 2) continue;
+      const headers = lines[0].split(',').map(function(h) { return h.replace(/^"|"$/g,'').trim(); });
+      const newRecs = lines.slice(1).map(function(line) {
+        const cols = splitCSV(line); const obj = {};
+        headers.forEach(function(h,i) {
+          let v=(cols[i]||'').trim().replace(/^"|"$/g,'').replace(/^=?"?([^"]*)"?$/,'$1').replace(/^=/,'');
+          obj[h]=v;
+        });
+        if(obj['品番']) obj['品番']=obj['品番'].replace(/-/g,'');
+        if(!obj['消込済']) obj['消込済']='未';
+        if(!obj['消込日時']) obj['消込日時']='';
+        if(!obj['納品調整']) obj['納品調整']='';
+        return obj;
+      }).filter(function(r) { return r['品番'] && r['バーコード番号']; });
+      const existingBCs = new Set(records.map(function(r) { return r['バーコード番号']; }));
+      newRecs.forEach(function(r) {
+        if(existingBCs.has(r['バーコード番号'])) { totalSkipped++; }
+        else { records.push(r); existingBCs.add(r['バーコード番号']); totalAdded++; }
+      });
+      if(!loadedFiles.includes(fileName)) loadedFiles.push(fileName);
+    } catch(err) {
+      showUrlFb('❌ ' + fileName + ': ' + err.message, 'err');
+    }
+  }
+  updateStats(); renderList(); updateChips(); autoSave();
+  showUrlFb('✅ 読込完了！追加 ' + totalAdded + '件 / 重複スキップ ' + totalSkipped + '件', 'ok');
+  setTimeout(function() { closeUrlModal(); }, 2000);
 }
 
 
