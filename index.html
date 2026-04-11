@@ -697,13 +697,14 @@ function updateChips() {
 }
 
 function clearAll() {
-  if (!confirm('全データをリセットしますか？\n（自動保存データも削除されます）')) return;
-  records=[]; loadedFiles=[]; logEntries=[]; selectedBCs.clear();
-  try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(SAVE_KEY_FILES); localStorage.removeItem(SAVE_KEY_LOG); } catch(e){}
-  updateStats(); renderList(); updateChips();
-  document.getElementById('bulk-bar').classList.remove('show');
-  document.getElementById('save-indicator').textContent = '';
-  showFB('warn','リセットしました');
+  if (!confirm('ページをリセットしますか？\n（読み込んだCSVデータはすべて消去されます）')) return;
+  // localStorageのデータを削除してページリロード（自動復元なし）
+  try {
+    localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(SAVE_KEY_FILES);
+    localStorage.removeItem(SAVE_KEY_LOG);
+  } catch(e) {}
+  location.reload();
 }
 
 // ============================================================
