@@ -369,6 +369,8 @@ let loadedFiles = [];
 let logEntries = [];
 let isAdmin = false;
 let selectedBCs = new Set();
+let autoSaveTimer = null;
+let cloudSaveTimer = null;
 let autoRefreshTimer = null;
 let autoRefreshInterval = 300; // 秒
 let autoRefreshEnabled = false;
@@ -475,8 +477,6 @@ function autoSave() {
 // ============================================================
 // Googleスプレッドシートへのクラウド保存
 // ============================================================
-let cloudSaveTimer = null;
-let pendingCloudSave = false;
 
 async function saveToCloud() {
   if (!GAS_DEPLOY_URL || GAS_DEPLOY_URL.includes('YOUR_DEPLOY_URL')) return;
