@@ -1361,8 +1361,9 @@ async function loadDriveFileList() {
     listEl.style.display = 'block';
 
     // フォルダ別にグループ化して表示
+    // GASが古い場合はfolderフィールドがないのでsourceとして扱う
     const pendingFiles = data.files.filter(function(f) { return f.folder === 'pending'; });
-    const sourceFiles  = data.files.filter(function(f) { return f.folder === 'source'; });
+    const sourceFiles  = data.files.filter(function(f) { return f.folder !== 'pending'; });
 
     var html2 = '<div style="padding:8px 12px;border-bottom:2px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;background:#f9f9f7">'
       + '<span style="font-size:11px;color:#888">' + data.files.length + '件（複数選択可）</span>'
