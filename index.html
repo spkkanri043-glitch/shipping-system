@@ -1323,7 +1323,7 @@ function doLogout() {
 // ============================================================
 // GASのデプロイURL（★設定後はGitHubにアップロードしてください）
 // 例: 'https://script.google.com/macros/s/XXXXXX/exec'
-const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbw-NX_GJz3XLPMobcpb7GhetGelYbZ_p75Es2bS6qjkNd7qlJjPTNhChANtimHS6_6K4g/exec';
+const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbzjhDfb3_VKRUwPNtLNmwRJTgIG2tkCaROCyJwdMD5UnWEflOWV0U3UvfMn2vlhIc6s/exec';
 const GAS_URL = GAS_DEPLOY_URL; // 互換用エイリアス
 
 function showCsvModal() {
@@ -1359,23 +1359,50 @@ async function loadDriveFileList() {
     }
     const listEl = document.getElementById('drive-file-list');
     listEl.style.display = 'block';
-    listEl.innerHTML =
-      '<div style="padding:8px 12px;border-bottom:2px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;background:#f9f9f7">'
+
+    // フォルダ別にグループ化して表示
+    const pendingFiles = data.files.filter(function(f) { return f.folder === 'pending'; });
+    const sourceFiles  = data.files.filter(function(f) { return f.folder === 'source'; });
+
+    var html2 = '<div style="padding:8px 12px;border-bottom:2px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;background:#f9f9f7">'
       + '<span style="font-size:11px;color:#888">' + data.files.length + '件（複数選択可）</span>'
       + '<button onclick="loadSelectedFiles()" style="padding:6px 16px;background:#1e8a55;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">選択して読込</button>'
-      + '</div>'
-      + data.files.map(function(f) {
-          var safeId   = f.id;
-          var safeName = f.name.replace(/'/g, "\'");
-          return '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;display:flex;align-items:center;gap:10px;cursor:pointer">'
-            + '<input type="checkbox" value="' + safeId + '" data-name="' + safeName + '" style="width:18px;height:18px;flex-shrink:0;accent-color:#3a7bdc">'
-            + '<div style="flex:1;min-width:0">'
-            + '<div style="font-size:13px;font-weight:600;word-break:break-all">' + f.name + '</div>'
-            + '<div style="font-size:11px;color:#888;margin-top:3px">' + f.updated + '</div>'
-            + '</div>'
-            + '</label>';
-        }).join('');
-    showUrlFb(data.files.length + '件見つかりました', 'ok');
+      + '</div>';
+
+    // 未完了フォルダのファイル（作業継続中）
+    if (pendingFiles.length > 0) {
+      html2 += '<div style="padding:6px 12px;background:#fff8ec;font-size:11px;font-weight:700;color:#b56e00;border-bottom:1px solid #f0e8cc">🔄 作業中（未完了フォルダ）</div>';
+      pendingFiles.forEach(function(f) {
+        var safeId   = f.id;
+        var safeName = f.name.replace(/'/g, "\'");
+        html2 += '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;display:flex;align-items:center;gap:10px;cursor:pointer;background:#fffdf5">'
+          + '<input type="checkbox" value="' + safeId + '" data-name="' + safeName + '" style="width:18px;height:18px;flex-shrink:0;accent-color:#e8a000">'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:13px;font-weight:600;word-break:break-all">' + f.name + '</div>'
+          + '<div style="font-size:11px;color:#888;margin-top:3px">' + f.updated + '</div>'
+          + '</div>'
+          + '</label>';
+      });
+    }
+
+    // 読込元フォルダのファイル（新規）
+    if (sourceFiles.length > 0) {
+      html2 += '<div style="padding:6px 12px;background:#f0f5ff;font-size:11px;font-weight:700;color:#3a7bdc;border-bottom:1px solid #dce8ff">🆕 新規（読込元フォルダ）</div>';
+      sourceFiles.forEach(function(f) {
+        var safeId   = f.id;
+        var safeName = f.name.replace(/'/g, "\'");
+        html2 += '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;display:flex;align-items:center;gap:10px;cursor:pointer">'
+          + '<input type="checkbox" value="' + safeId + '" data-name="' + safeName + '" style="width:18px;height:18px;flex-shrink:0;accent-color:#3a7bdc">'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:13px;font-weight:600;word-break:break-all">' + f.name + '</div>'
+          + '<div style="font-size:11px;color:#888;margin-top:3px">' + f.updated + '</div>'
+          + '</div>'
+          + '</label>';
+      });
+    }
+
+    listEl.innerHTML = html2;
+    showUrlFb(data.files.length + '件見つかりました（作業中:' + pendingFiles.length + '件 / 新規:' + sourceFiles.length + '件）', 'ok');
   } catch(err) {
     showUrlFb('エラー: ' + err.message, 'err');
   }
@@ -1486,7 +1513,7 @@ async function loadSelectedFiles() {
           body: JSON.stringify({
             action:         'moveFileToFolder',
             fileId:         movedFileIds[mi],
-            targetFolderId: 'PENDING_FOLDER_ID'
+            targetFolderId: '1vi8AwZexQaXzR1f4xll2B1jo-yC1H5TI'
           })
         });
       } catch(e) { console.warn('移動失敗:', e); }
