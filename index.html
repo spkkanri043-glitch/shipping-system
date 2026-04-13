@@ -321,31 +321,37 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 
 <!-- CSVを開くモーダル -->
 <div class="modal-overlay" id="url-modal">
-  <div class="modal">
-    <div class="modal-title">📂 CSVを開く</div>
+  <div class="modal" style="display:flex;flex-direction:column;max-height:90vh;padding:0;overflow:hidden">
 
-    <!-- ① ドライブから選ぶ（BT-A2000M・全端末） -->
-    <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
-      <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">☁️ ドライブから選ぶ</div>
-      <div style="font-size:11px;color:#888;margin-bottom:10px">Googleドライブのフォルダからファイルを選択</div>
-      <button style="width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px" onclick="loadDriveFileList()">📋 ファイル一覧を取得</button>
-      <div id="drive-file-list" style="display:none;max-height:200px;overflow-y:auto;border:1px solid #e5e5e0;border-radius:8px"></div>
+    <!-- ヘッダー（閉じるボタンを常に表示） -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #e5e5e0;flex-shrink:0">
+      <div class="modal-title" style="margin:0">📂 CSVを開く</div>
+      <button onclick="closeUrlModal()" style="padding:6px 14px;background:#e5e5e0;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">✕ 閉じる</button>
     </div>
 
-    <!-- ② ファイルから選ぶ（iPhone・PC） -->
-    <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
-      <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">📁 ファイルから選ぶ</div>
-      <div style="font-size:11px;color:#888;margin-bottom:10px">iPhone・PC・タブレット向け</div>
-      <label style="display:block;width:100%;padding:12px;background:#1a1a18;color:#fff;border-radius:8px;text-align:center;font-size:14px;font-weight:700;cursor:pointer">
-        ファイルを選択
-        <input type="file" accept=".csv,.CSV" multiple style="display:none" onchange="loadCSVFromFile(this)">
-      </label>
-    </div>
+    <!-- スクロール可能なコンテンツ -->
+    <div style="overflow-y:auto;flex:1;padding:14px">
 
-    <div id="url-feedback" style="margin-top:10px;font-size:12px;display:none;white-space:pre-wrap;line-height:1.6;padding:8px 10px;border-radius:6px"></div>
+      <!-- ① ドライブから選ぶ -->
+      <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
+        <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">☁️ ドライブから選ぶ</div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">Googleドライブのフォルダからファイルを選択</div>
+        <button style="width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px" onclick="loadDriveFileList()">📋 ファイル一覧を取得</button>
+        <div id="drive-file-list" style="display:none;border:1px solid #e5e5e0;border-radius:8px"></div>
+      </div>
 
-    <div class="modal-actions" style="margin-top:12px">
-      <button class="btn-cancel" style="width:100%" onclick="closeUrlModal()">閉じる</button>
+      <!-- ② ファイルから選ぶ -->
+      <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
+        <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">📁 ファイルから選ぶ</div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">iPhone・PC・タブレット向け</div>
+        <label style="display:block;width:100%;padding:12px;background:#1a1a18;color:#fff;border-radius:8px;text-align:center;font-size:14px;font-weight:700;cursor:pointer">
+          ファイルを選択
+          <input type="file" accept=".csv,.CSV" multiple style="display:none" onchange="loadCSVFromFile(this)">
+        </label>
+      </div>
+
+      <div id="url-feedback" style="margin-top:4px;font-size:12px;display:none;white-space:pre-wrap;line-height:1.6;padding:8px 10px;border-radius:6px"></div>
+
     </div>
   </div>
 </div>
@@ -1353,29 +1359,29 @@ async function loadDriveFileList() {
     }
     const listEl = document.getElementById('drive-file-list');
     listEl.style.display = 'block';
-    // チェックボックス＋一括読込ボタン
-    listEl.innerHTML = '<div style="padding:8px 12px;border-bottom:2px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center">'
+    listEl.innerHTML =
+      '<div style="padding:8px 12px;border-bottom:2px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;background:#f9f9f7">'
       + '<span style="font-size:11px;color:#888">' + data.files.length + '件（複数選択可）</span>'
-      + '<button onclick="loadSelectedFiles()" style="padding:4px 12px;background:#1e8a55;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">選択して読込</button>'
+      + '<button onclick="loadSelectedFiles()" style="padding:6px 16px;background:#1e8a55;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">選択して読込</button>'
       + '</div>'
       + data.files.map(function(f) {
-          const safeId   = f.id;
-          const safeName = f.name.replace(/'/g,"\'");
-          return '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;font-size:13px;'
-            + 'display:flex;align-items:center;gap:10px;cursor:pointer">'
-            + '<input type="checkbox" value="' + safeId + '" data-name="' + safeName + '" '
-            + 'style="width:16px;height:16px;flex-shrink:0;accent-color:#3a7bdc">'
-            + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">' + f.name + '</span>'
-            + '<span style="font-size:11px;color:#aaa;white-space:nowrap;flex-shrink:0">' + f.updated + '</span>'
+          var safeId   = f.id;
+          var safeName = f.name.replace(/'/g, "\'");
+          return '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;display:flex;align-items:center;gap:10px;cursor:pointer">'
+            + '<input type="checkbox" value="' + safeId + '" data-name="' + safeName + '" style="width:18px;height:18px;flex-shrink:0;accent-color:#3a7bdc">'
+            + '<div style="flex:1;min-width:0">'
+            + '<div style="font-size:13px;font-weight:600;word-break:break-all">' + f.name + '</div>'
+            + '<div style="font-size:11px;color:#888;margin-top:3px">' + f.updated + '</div>'
+            + '</div>'
             + '</label>';
         }).join('');
-    showUrlFb(data.files.length + '件見つかりました。選択して「選択して読込」を押してください', 'ok');
+    showUrlFb(data.files.length + '件見つかりました', 'ok');
   } catch(err) {
     showUrlFb('エラー: ' + err.message, 'err');
   }
 }
 
-// ドライブ ファイル読込
+
 async function loadDriveFile(fileId, fileName) {
   showUrlFb(fileName + ' を読み込み中...', 'info');
   document.getElementById('drive-file-list').style.display = 'none';
