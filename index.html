@@ -370,6 +370,7 @@ let filterMode = 'all';
 let currentHinban = '';
 let modalBC = '';
 let loadedFiles = [];
+let sourceFileName = ''; // 読込元ファイル名（書き出し時に使用）
 let logEntries = [];
 let isAdmin = false;
 let selectedBCs = new Set();
@@ -672,6 +673,9 @@ function loadCSVFiles(input) {
       });
 
       if (!loadedFiles.includes(file.name)) loadedFiles.push(file.name);
+      if (!sourceFileName) {
+        sourceFileName = file.name.replace(/\.csv$/i, '');
+      }
       showFB('ok', `${file.name}：追加 ${added}件 / 重複スキップ ${skipped}件`);
 
       pending--;
@@ -708,6 +712,7 @@ function clearAll() {
     localStorage.removeItem(SAVE_KEY_FILES);
     localStorage.removeItem(SAVE_KEY_LOG);
   } catch(e) {}
+  sourceFileName = '';
   location.reload();
 }
 
@@ -1029,12 +1034,15 @@ async function exportCSVByStatus() {
   if (GAS_DEPLOY_URL && GAS_DEPLOY_URL !== 'YOUR_DEPLOY_URL') {
     showFB('ok', '📤 CSV書き出し中...');
     try {
+      // ファイル名：元のファイル名_未完了.csv / _完了済.csv / _キャンセル.csv
+      const baseName = sourceFileName || ('出荷指示_' + today);
       const res  = await fetch(GAS_DEPLOY_URL, {
         method: 'POST',
         body: JSON.stringify({
-          action:  'saveCSVByStatus',
-          records: records,
-          today:   today
+          action:   'saveCSVByStatus',
+          records:  records,
+          today:    today,
+          baseName: baseName
         })
       });
       const data = await res.json();
@@ -1055,9 +1063,10 @@ async function exportCSVByStatus() {
     const pending   = records.filter(function(r) { return isPending(r); });
     const done      = records.filter(function(r) { return isDone(r); });
     const cancelled = records.filter(function(r) { return isCancelled(r); });
-    if (pending.length)   downloadCSV(makeCSV(pending),   '出荷指示_未完了_'    + today + '.csv');
-    if (done.length)      downloadCSV(makeCSV(done),      '出荷指示_完了済_'    + today + '.csv');
-    if (cancelled.length) downloadCSV(makeCSV(cancelled), '出荷指示_キャンセル_' + today + '.csv');
+    const baseName2 = sourceFileName || ('出荷指示_' + today);
+    if (pending.length)   downloadCSV(makeCSV(pending),   baseName2 + '_未完了.csv');
+    if (done.length)      downloadCSV(makeCSV(done),      baseName2 + '_完了済.csv');
+    if (cancelled.length) downloadCSV(makeCSV(cancelled), baseName2 + '_キャンセル.csv');
     showFB('ok', 'CSVをダウンロードしました（未完了:' + pending.length + '件 完了:' + done.length + '件 キャンセル:' + cancelled.length + '件）');
   }
 }
@@ -1323,7 +1332,7 @@ function doLogout() {
 // ============================================================
 // GASのデプロイURL（★設定後はGitHubにアップロードしてください）
 // 例: 'https://script.google.com/macros/s/XXXXXX/exec'
-const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbw-NX_GJz3XLPMobcpb7GhetGelYbZ_p75Es2bS6qjkNd7qlJjPTNhChANtimHS6_6K4g/exec';
+const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbzjhDfb3_VKRUwPNtLNmwRJTgIG2tkCaROCyJwdMD5UnWEflOWV0U3UvfMn2vlhIc6s/exec';
 const GAS_URL = GAS_DEPLOY_URL; // 互換用エイリアス
 
 function showCsvModal() {
@@ -1444,6 +1453,9 @@ async function loadDriveFile(fileId, fileName) {
       else { records.push(r); existingBCs.add(r['\u30d0\u30fc\u30b3\u30fc\u30c9\u756a\u53f7']); added++; }
     });
     if (!loadedFiles.includes(fileName)) loadedFiles.push(fileName);
+    if (!sourceFileName) {
+      sourceFileName = fileName.replace(/\.csv$/i, '');
+    }
     updateStats(); renderList(); updateChips(); autoSave();
     showUrlFb('\u2705 ' + fileName + '\n\u8ffd\u52a0 ' + added + '\u4ef6 / \u91cd\u8907\u30b9\u30ad\u30c3\u30d7 ' + skipped + '\u4ef6', 'ok');
     setTimeout(function() { closeUrlModal(); }, 2000);
@@ -1498,6 +1510,10 @@ async function loadSelectedFiles() {
       });
       if(!loadedFiles.includes(fileName)) loadedFiles.push(fileName);
       movedFileIds.push(fileId); // 移動対象に追加
+      // 元ファイル名を保存（.csvを除いた部分）
+      if (!sourceFileName) {
+        sourceFileName = fileName.replace(/\.csv$/i, '');
+      }
     } catch(err) {
       showUrlFb('❌ ' + fileName + ': ' + err.message, 'err');
     }
