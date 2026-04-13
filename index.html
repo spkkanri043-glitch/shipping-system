@@ -239,6 +239,8 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
   </div>
 
   <div id="tab-list">
+    <!-- 品番フィルター -->
+    
     <div class="filter-row">
       <button class="filter-btn active" onclick="setFilter('all',this)">すべて</button>
       <button class="filter-btn" onclick="setFilter('pending',this)">未消込</button>
@@ -366,7 +368,9 @@ const SAVE_KEY_FILES = 'shipping_files_v1';
 const SAVE_KEY_LOG = 'shipping_log_v1';
 
 let records = [];
-let filterMode = 'all';
+let filterMode = 'all'
+let filterHinban = ''; // 品番フィルター（空=全品番）
+let expandedGroups = {}; // 品番グループの開閉状態;
 let currentHinban = '';
 let modalBC = '';
 let loadedFiles = [];
@@ -589,7 +593,7 @@ function restoreData() {
       loadedFiles = savedFiles ? JSON.parse(savedFiles) : [];
       logEntries = savedLog ? JSON.parse(savedLog) : [];
       const newDone = records.filter(r=>isDone(r)).length;
-      updateStats(); renderList(); updateChips();
+      updateStats(); renderList(); renderHinbanFilter(); updateChips();
       // 更新日時表示
       const el = document.getElementById('save-indicator');
       if (el) { el.textContent = '🔄 ' + nowStr().slice(11,16) + ' 更新'; el.style.opacity='1'; setTimeout(()=>el.style.opacity='.4',3000); }
@@ -691,7 +695,7 @@ function loadCSVFiles(input) {
       showFB('ok', `${file.name}：追加 ${added}件 / 重複スキップ ${skipped}件`);
 
       pending--;
-      if (pending === 0) { updateStats(); renderList(); updateChips(); autoSave(); }
+      if (pending === 0) { updateStats(); renderList(); renderHinbanFilter(); updateChips(); autoSave(); }
     };
     reader.readAsText(file, 'utf-8');
   });
@@ -906,46 +910,134 @@ function setFilter(mode,btn) {
   btn.classList.add('active'); renderList();
 }
 
+// ============================================================
+// 品番フィルターUI
+// ============================================================
+function renderHinbanFilter() {
+  // 不使用
+  const wrap = document.getElementById('hinban-filter-wrap');
+  if (wrap) wrap.style.display = 'none';
+}
+
+
+function toggleGroup(hn) {
+  expandedGroups[hn] = !expandedGroups[hn];
+  renderList();
+}
+
+function setHinbanFilter(btn) {
+  filterHinban = btn.dataset ? btn.dataset.hn : '';
+  // 特定品番を選択した場合はその品番を自動で開く
+  if (filterHinban) {
+    expandedGroups[filterHinban] = true;
+  }
+  renderHinbanFilter();
+  renderList();
+}
+
 function renderList() {
-  const body=document.getElementById('list-body');
-  const search=(document.getElementById('search-box').value||'').toLowerCase();
+  const body   = document.getElementById('list-body');
+  const search = (document.getElementById('search-box').value || '').toLowerCase();
+
   let list = filterMode==='pending'   ? records.filter(r=>isPending(r))
            : filterMode==='done'      ? records.filter(r=>isDone(r))
            : filterMode==='adjusted'  ? records.filter(r=>r['納品調整'] && !isCancelled(r))
            : filterMode==='cancelled' ? records.filter(r=>isCancelled(r))
            : records;
-  if (search) list=list.filter(r=>(r['品番']||'').toLowerCase().includes(search)||(r['バーコード番号']||'').includes(search)||(r['発注番号']||'').toLowerCase().includes(search));
+
+  if (filterHinban) list = list.filter(r => (r['品番']||'').replace(/-/g,'') === filterHinban);
+  if (search) list = list.filter(r =>
+    (r['品番']||'').toLowerCase().includes(search) ||
+    (r['バーコード番号']||'').includes(search) ||
+    (r['発注番号']||'').toLowerCase().includes(search)
+  );
+
   if (!list.length) { body.innerHTML='<div class="empty">該当なし</div>'; return; }
 
-  body.innerHTML=list.map(r=>{
-    const done=isDone(r), cancelled=isCancelled(r), adj=r['納品調整'], bc=r['バーコード番号']||'';
-    const isSel = selectedBCs.has(bc);
-    const adjClass = cancelled ? 'cancelled' : adj==='前倒し' ? 'adjusted-mae' : adj==='後ろ倒し' ? 'adjusted-ato' : '';
-    const badgeClass = adj==='前倒し' ? 'badge-adj-mae' : adj==='後ろ倒し' ? 'badge-adj-ato' : 'badge-cancel';
-    return `<div class="list-item ${done?'done':''} ${adjClass} ${isSel?'selected':''}" id="item-${bc}">
-      ${isAdmin && !done && !cancelled ? `<input type="checkbox" class="item-check" ${isSel?'checked':''} onchange="toggleSelect('${bc}',this)">` : '<div style="width:16px;flex-shrink:0"></div>'}
-      <div class="item-body">
-        <div class="item-top">
-          <span class="item-hinban">${r['品番']||''}</span>
-          <span style="display:flex;gap:4px;align-items:center;flex-shrink:0">
-            ${adj?`<span class="badge ${badgeClass}">${adj}</span>`:''}
-            <span class="badge ${done?'badge-done':cancelled?'badge-cancel':'badge-pending'}">${done?'済':cancelled?'取消':'未'}</span>
-            ${isAdmin && !done && !cancelled?`<button class="adj-btn" onclick="openModal('${bc}')">調整</button>`:''}
-            ${isAdmin && cancelled?`<button class="adj-btn" onclick="restoreRecord('${bc}')">復元</button>`:''}
-          </span>
-        </div>
-        <div class="item-bc">${bc}</div>
-        <div class="item-meta">
-          <span>数量:${r['数量']||''}</span>
-          <span>連番:${r['連番']||''}/${r['総数']||''}</span>
-          <span>納品日:${r['納品日']||''}</span>
-          <span>発注:${r['発注番号']||''}</span>
-          ${done?`<span style="color:#1e8a55">消込:${r['消込日時']||''}</span>`:''}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  // 品番でグループ化
+  const groups = {};
+  const order  = [];
+  list.forEach(function(r) {
+    const hn = (r['品番']||'').replace(/-/g,'') || '(不明)';
+    if (!groups[hn]) { groups[hn] = []; order.push(hn); }
+    groups[hn].push(r);
+  });
+
+  const rows = [];
+  order.forEach(function(hn) {
+    const grp       = groups[hn];
+    const doneCount = grp.filter(r => isDone(r)).length;
+    const total     = grp.length;
+    const allDone   = doneCount === total;
+    const color     = allDone ? '#1e8a55' : '#e8a000';
+    const border    = allDone ? '#1e8a55' : '#e8a000';
+
+    // グループ開閉状態（デフォルトは閉じ）
+    const isOpen = expandedGroups[hn] === true;
+    const arrow  = isOpen ? '▲' : '▼';
+
+    // グループヘッダー（クリックで開閉）
+    rows.push(
+      '<div style="display:flex;justify-content:space-between;align-items:center;'
+      + 'padding:7px 12px;background:#f0f0ea;border-left:4px solid ' + border + ';'
+      + 'border-radius:6px;margin-top:12px;font-size:13px;font-weight:700;cursor:pointer"'
+      + ' data-grp="' + hn + '" onclick="toggleGroup(this.dataset.grp)">'
+      + '<span>' + hn + ' <span style="font-size:11px;color:#999;font-weight:400">' + arrow + '</span></span>'
+      + '<span style="color:' + color + ';font-size:12px">' + doneCount + ' / ' + total + '</span>'
+      + '</div>'
+    );
+
+    // 閉じている場合はレコード非表示
+    if (!isOpen) return;
+
+    // レコード行
+    grp.forEach(function(r) {
+      const done      = isDone(r);
+      const cancelled = isCancelled(r);
+      const adj       = r['納品調整'] || '';
+      const bc        = r['バーコード番号'] || '';
+      const isSel     = selectedBCs.has(bc);
+      const adjClass  = cancelled ? 'cancelled' : adj==='前倒し' ? 'adjusted-mae' : adj==='後ろ倒し' ? 'adjusted-ato' : '';
+      const badgeAdj  = adj==='前倒し' ? 'badge-adj-mae' : adj==='後ろ倒し' ? 'badge-adj-ato' : 'badge-cancel';
+      const bcSafe    = bc.replace(/'/g, "\\'");
+
+      rows.push(
+        '<div class="list-item ' + (done?'done':'') + ' ' + adjClass + ' ' + (isSel?'selected':'')
+        + '" id="item-' + bc + '" style="border-radius:0;border-top:none">'
+        + (isAdmin && !done && !cancelled
+            ? '<input type="checkbox" class="item-check" ' + (isSel?'checked':'')
+              + ' onchange="toggleSelect(\'' + bcSafe + '\',this)">'
+            : '<div style="width:16px;flex-shrink:0"></div>')
+        + '<div class="item-body">'
+          + '<div class="item-top">'
+            + '<span class="item-hinban">' + (r['品番']||'') + '</span>'
+            + '<span style="display:flex;gap:4px;align-items:center;flex-shrink:0">'
+              + (adj ? '<span class="badge ' + badgeAdj + '">' + adj + '</span>' : '')
+              + '<span class="badge ' + (done?'badge-done':cancelled?'badge-cancel':'badge-pending') + '">'
+                + (done?'済':cancelled?'取消':'未') + '</span>'
+              + (isAdmin && !done && !cancelled
+                  ? '<button class="adj-btn" onclick="openModal(\'' + bcSafe + '\')">調整</button>' : '')
+              + (isAdmin && cancelled
+                  ? '<button class="adj-btn" onclick="restoreRecord(\'' + bcSafe + '\')">復元</button>' : '')
+            + '</span>'
+          + '</div>'
+          + '<div class="item-bc">' + bc + '</div>'
+          + '<div class="item-meta">'
+            + '<span>数量:' + (r['数量']||'') + '</span>'
+            + '<span>連番:' + (r['連番']||'') + '/' + (r['総数']||'') + '</span>'
+            + '<span>納品日:' + (r['納品日']||'') + '</span>'
+            + '<span>発注:' + (r['発注番号']||'') + '</span>'
+            + (done ? '<span style="color:#1e8a55">消込:' + (r['消込日時']||'') + '</span>' : '')
+          + '</div>'
+        + '</div>'
+        + '</div>'
+      );
+    });
+  });
+
+  body.innerHTML = rows.join('');
 }
+
 
 function switchTab(tab,btn) {
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
@@ -1474,7 +1566,7 @@ async function loadDriveFile(fileId, fileName) {
     if (!sourceFileName) {
       sourceFileName = getBaseFileName(fileName);
     }
-    updateStats(); renderList(); updateChips(); autoSave();
+    updateStats(); renderList(); renderHinbanFilter(); updateChips(); autoSave();
     showUrlFb('\u2705 ' + fileName + '\n\u8ffd\u52a0 ' + added + '\u4ef6 / \u91cd\u8907\u30b9\u30ad\u30c3\u30d7 ' + skipped + '\u4ef6', 'ok');
     setTimeout(function() { closeUrlModal(); }, 2000);
   } catch(err) {
@@ -1536,7 +1628,7 @@ async function loadSelectedFiles() {
       showUrlFb('❌ ' + fileName + ': ' + err.message, 'err');
     }
   }
-  updateStats(); renderList(); updateChips(); autoSave();
+  updateStats(); renderList(); renderHinbanFilter(); updateChips(); autoSave();
   showUrlFb('✅ 読込完了！追加 ' + totalAdded + '件 / 重複スキップ ' + totalSkipped + '件\nファイルを未完了フォルダに移動中...', 'ok');
 
   // 読み込んだファイルを未完了フォルダへ移動
