@@ -1373,10 +1373,16 @@ async function loadDriveFileList() {
   showUrlFb('ファイル一覧を取得中...', 'info');
   try {
     const res  = await fetch(GAS_DEPLOY_URL + '?action=getFileList');
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch(e) {
+      showUrlFb('GASの応答がJSONではありません\n' + text.slice(0, 100), 'err'); return;
+    }
     if (!data.ok) throw new Error(data.message || '取得失敗');
     if (!data.files || data.files.length === 0) {
-      showUrlFb('フォルダにCSVファイルがありません', 'warn'); return;
+      showUrlFb('フォルダにCSVファイルがありません\n（GASが古い可能性あり）', 'warn'); return;
     }
     const listEl = document.getElementById('drive-file-list');
     listEl.style.display = 'block';
