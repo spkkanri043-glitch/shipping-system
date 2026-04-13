@@ -192,9 +192,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
   </div>
   <div class="top-btns">
     <button class="top-btn" onclick="showCsvModal()">📂 CSVを開く</button>
-    <button class="top-btn" onclick="exportCSV('pending')">未完了CSV</button>
-    <button class="top-btn" onclick="exportCSV('done')">完了CSV</button>
-    <button class="top-btn" onclick="exportCSVByDate()">納品日別CSV</button>
+    <button class="top-btn" onclick="exportCSVByStatus()">📤 CSV書き出し</button>
     <button class="top-btn" id="refresh-btn" onclick="manualRefresh()">🔄 更新</button>
     <button class="top-btn" onclick="loadFromCloud()" title="クラウドからデータを復元">☁️ クラウド復元</button>
     <button class="top-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()">⏱ 自動更新 OFF</button>
@@ -1015,6 +1013,49 @@ function bulkCancel() {
 // ============================================================
 // CSV保存・ユーティリティ
 // ============================================================
+// ============================================================
+// CSV書き出し（状態別自動振り分け）
+// ============================================================
+async function exportCSVByStatus() {
+  if (!records.length) { showFB('err', 'データがありません'); return; }
+  const today = todayStr();
+
+  if (GAS_DEPLOY_URL && GAS_DEPLOY_URL !== 'YOUR_DEPLOY_URL') {
+    showFB('ok', '📤 CSV書き出し中...');
+    try {
+      const res  = await fetch(GAS_DEPLOY_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action:  'saveCSVByStatus',
+          records: records,
+          today:   today
+        })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.message);
+      // 結果表示
+      const msgs = [];
+      data.results.forEach(function(r) {
+        if (r.type === 'pending') msgs.push('未完了フォルダ: ' + r.count + '件');
+        if (r.type === 'done')    msgs.push('完了フォルダ: '   + r.count + '件');
+        if (r.type === 'cancel')  msgs.push('キャンセルフォルダ: ' + r.count + '件');
+      });
+      showFB('ok', '☁️ Googleドライブに保存しました\n' + msgs.join('\n'));
+    } catch(err) {
+      showFB('err', '書き出し失敗: ' + err.message);
+    }
+  } else {
+    // GAS未設定の場合はローカルダウンロード
+    const pending   = records.filter(function(r) { return isPending(r); });
+    const done      = records.filter(function(r) { return isDone(r); });
+    const cancelled = records.filter(function(r) { return isCancelled(r); });
+    if (pending.length)   downloadCSV(makeCSV(pending),   '出荷指示_未完了_'    + today + '.csv');
+    if (done.length)      downloadCSV(makeCSV(done),      '出荷指示_完了済_'    + today + '.csv');
+    if (cancelled.length) downloadCSV(makeCSV(cancelled), '出荷指示_キャンセル_' + today + '.csv');
+    showFB('ok', 'CSVをダウンロードしました（未完了:' + pending.length + '件 完了:' + done.length + '件 キャンセル:' + cancelled.length + '件）');
+  }
+}
+
 function makeCSV(data) {
   const keys=['品番','数量','バーコード番号','発注番号','納品先','荷姿','行先コード','連番','総数','出荷日','納品日','納品調整','発送元','消込済','消込日時'];
   let csv='\uFEFF'+keys.join(',')+'\n';
@@ -1387,6 +1428,7 @@ async function loadSelectedFiles() {
   }
   document.getElementById('drive-file-list').style.display = 'none';
   let totalAdded = 0, totalSkipped = 0;
+  const movedFileIds = [];
   for (let i = 0; i < checkboxes.length; i++) {
     const cb       = checkboxes[i];
     const fileId   = cb.value;
@@ -1421,13 +1463,31 @@ async function loadSelectedFiles() {
         else { records.push(r); existingBCs.add(r['バーコード番号']); totalAdded++; }
       });
       if(!loadedFiles.includes(fileName)) loadedFiles.push(fileName);
+      movedFileIds.push(fileId); // 移動対象に追加
     } catch(err) {
       showUrlFb('❌ ' + fileName + ': ' + err.message, 'err');
     }
   }
   updateStats(); renderList(); updateChips(); autoSave();
-  showUrlFb('✅ 読込完了！追加 ' + totalAdded + '件 / 重複スキップ ' + totalSkipped + '件', 'ok');
-  setTimeout(function() { closeUrlModal(); }, 2000);
+  showUrlFb('✅ 読込完了！追加 ' + totalAdded + '件 / 重複スキップ ' + totalSkipped + '件\nファイルを未完了フォルダに移動中...', 'ok');
+
+  // 読み込んだファイルを未完了フォルダへ移動
+  if (GAS_DEPLOY_URL && GAS_DEPLOY_URL !== 'YOUR_DEPLOY_URL') {
+    for (var mi = 0; mi < movedFileIds.length; mi++) {
+      try {
+        await fetch(GAS_DEPLOY_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action:         'moveFileToFolder',
+            fileId:         movedFileIds[mi],
+            targetFolderId: 'PENDING_FOLDER_ID'
+          })
+        });
+      } catch(e) { console.warn('移動失敗:', e); }
+    }
+    showUrlFb('✅ 読込完了！' + totalAdded + '件追加\n元ファイルを未完了フォルダへ移動しました', 'ok');
+  }
+  setTimeout(function() { closeUrlModal(); }, 2500);
 }
 
 
