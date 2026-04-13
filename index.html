@@ -371,6 +371,18 @@ let currentHinban = '';
 let modalBC = '';
 let loadedFiles = [];
 let sourceFileName = ''; // 読込元ファイル名（書き出し時に使用）
+
+// ファイル名からサフィックス（_未完了/_完了済/_キャンセル）を除去してベース名を取得
+function getBaseFileName(filename) {
+  var name = filename.replace(/\.(csv|CSV)$/i, '');
+  // 末尾の _未完了/_完了済/_キャンセル を繰り返し除去
+  var prev;
+  do {
+    prev = name;
+    name = name.replace(/[_　]*(未完了|完了済|キャンセル)$/, '');
+  } while (name !== prev);
+  return name;
+}
 let logEntries = [];
 let isAdmin = false;
 let selectedBCs = new Set();
@@ -674,7 +686,7 @@ function loadCSVFiles(input) {
 
       if (!loadedFiles.includes(file.name)) loadedFiles.push(file.name);
       if (!sourceFileName) {
-        sourceFileName = file.name.replace(/\.csv$/i, '');
+        sourceFileName = getBaseFileName(file.name);
       }
       showFB('ok', `${file.name}：追加 ${added}件 / 重複スキップ ${skipped}件`);
 
@@ -1332,7 +1344,7 @@ function doLogout() {
 // ============================================================
 // GASのデプロイURL（★設定後はGitHubにアップロードしてください）
 // 例: 'https://script.google.com/macros/s/XXXXXX/exec'
-const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbwU2TTaUI1wICOebEg-3AAJzhGPG3v12oGWFWt7L5oSj4rfPjfRk1OSS9jDqcPba_vw/exec';
+const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbzjhDfb3_VKRUwPNtLNmwRJTgIG2tkCaROCyJwdMD5UnWEflOWV0U3UvfMn2vlhIc6s/exec';
 const GAS_URL = GAS_DEPLOY_URL; // 互換用エイリアス
 
 function showCsvModal() {
@@ -1454,7 +1466,7 @@ async function loadDriveFile(fileId, fileName) {
     });
     if (!loadedFiles.includes(fileName)) loadedFiles.push(fileName);
     if (!sourceFileName) {
-      sourceFileName = fileName.replace(/\.csv$/i, '');
+      sourceFileName = getBaseFileName(fileName);
     }
     updateStats(); renderList(); updateChips(); autoSave();
     showUrlFb('\u2705 ' + fileName + '\n\u8ffd\u52a0 ' + added + '\u4ef6 / \u91cd\u8907\u30b9\u30ad\u30c3\u30d7 ' + skipped + '\u4ef6', 'ok');
@@ -1512,7 +1524,7 @@ async function loadSelectedFiles() {
       movedFileIds.push(fileId); // 移動対象に追加
       // 元ファイル名を保存（.csvを除いた部分）
       if (!sourceFileName) {
-        sourceFileName = fileName.replace(/\.csv$/i, '');
+        sourceFileName = getBaseFileName(fileName);
       }
     } catch(err) {
       showUrlFb('❌ ' + fileName + ': ' + err.message, 'err');
