@@ -972,18 +972,43 @@ function renderList() {
     const color     = allDone ? '#1e8a55' : '#e8a000';
     const border    = allDone ? '#1e8a55' : '#e8a000';
 
+    // 仕向地（行先コード）ごとの件数を集計
+    const mukouMap = {};
+    grp.forEach(function(r) {
+      const mk = (r['行先コード'] || '').trim();
+      if (!mk) return;
+      if (!mukouMap[mk]) mukouMap[mk] = { total: 0, done: 0 };
+      mukouMap[mk].total++;
+      if (isDone(r)) mukouMap[mk].done++;
+    });
+    const mukouKeys = Object.keys(mukouMap).sort();
+    let mukouHtml = '';
+    if (mukouKeys.length > 0) {
+      mukouHtml = '<span style="font-size:11px;font-weight:400;margin-left:8px;color:#555;white-space:nowrap">';
+      mukouKeys.forEach(function(mk) {
+        const info = mukouMap[mk];
+        const mc   = info.done === info.total ? '#1e8a55' : '#e8a000';
+        mukouHtml += mk + ':<span style="color:' + mc + '">' + info.done + '/' + info.total + '</span>　';
+      });
+      mukouHtml += '</span>';
+    }
+
     // グループ開閉状態（デフォルトは閉じ）
     const isOpen = expandedGroups[hn] === true;
     const arrow  = isOpen ? '▲' : '▼';
 
     // グループヘッダー（クリックで開閉）
     rows.push(
-      '<div style="display:flex;justify-content:space-between;align-items:center;'
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:2px;'
       + 'padding:7px 12px;background:#f0f0ea;border-left:4px solid ' + border + ';'
       + 'border-radius:6px;margin-top:12px;font-size:13px;font-weight:700;cursor:pointer"'
       + ' data-grp="' + hn + '" onclick="toggleGroup(this.dataset.grp)">'
-      + '<span>' + hn + ' <span style="font-size:11px;color:#999;font-weight:400">' + arrow + '</span></span>'
-      + '<span style="color:' + color + ';font-size:12px">' + doneCount + ' / ' + total + '</span>'
+      + '<span>'
+        + hn
+        + ' <span style="font-size:11px;color:#999;font-weight:400">' + arrow + '</span>'
+        + mukouHtml
+      + '</span>'
+      + '<span style="color:' + color + ';font-size:12px;flex-shrink:0">' + doneCount + ' / ' + total + '</span>'
       + '</div>'
     );
 
@@ -1481,6 +1506,13 @@ async function loadDriveFileList() {
 
     // フォルダ別にグループ化して表示
     // GASが古い場合はfolderフィールドがないのでsourceとして扱う
+    // 日付古い順（昇順）にソート
+    data.files.sort(function(a, b) {
+      // folderがpendingを優先、その中で日付昇順
+      if (a.folder === 'pending' && b.folder !== 'pending') return -1;
+      if (a.folder !== 'pending' && b.folder === 'pending') return 1;
+      return new Date(a.updated) - new Date(b.updated); // 古い順
+    });
     const pendingFiles = data.files.filter(function(f) { return f.folder === 'pending'; });
     const sourceFiles  = data.files.filter(function(f) { return f.folder !== 'pending'; });
 
