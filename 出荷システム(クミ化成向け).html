@@ -347,6 +347,7 @@ function doLogin() {
 }
 
 function showMainScreen(user) {
+  initDomRefs(); // ログイン後にDOM参照を初期化
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-screen').style.display  = 'block';
   const nameEl = document.getElementById('user-name-display');
@@ -377,8 +378,32 @@ document.addEventListener('DOMContentLoaded', function() {
   if (pwEl) pwEl.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 });
 
-// 起動時：セッション復元 → なければログイン画面
+// 起動時：① SSO → ② セッション → ③ ログイン画面
 (function() {
+  // ① ポータルからのSSO自動ログイン
+  function parseSSOToken(token) {
+    try {
+      const decoded = atob(token.split('').reverse().join(''));
+      const data = JSON.parse(decoded);
+      if (Date.now() - data.ts > 5 * 60 * 1000) return null;
+      return data;
+    } catch(e) { return null; }
+  }
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('sso');
+  if (token) {
+    const data = parseSSOToken(token);
+    if (data) {
+      window.history.replaceState({}, '', window.location.pathname);
+      let name = data.name || '';
+      try { name = decodeURIComponent(escape(name)); } catch(e) {}
+      const user = { id: data.id, name: name, admin: data.role === 'admin' };
+      try { sessionStorage.setItem(SESSION_KEY_KUMI, JSON.stringify(user)); } catch(e) {}
+      showMainScreen(user);
+      return;
+    }
+  }
+  // ② セッション復元
   try {
     const sess = sessionStorage.getItem(SESSION_KEY_KUMI);
     if (sess) {
@@ -387,6 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
   } catch(e) {}
+  // ③ ログイン画面表示
   document.getElementById('login-screen').style.display = 'flex';
 })();
 
@@ -436,36 +462,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 // ============================================================
-// 以下はクミ化成向けオリジナルJS（一切変更なし）
+// 以下はクミ化成向けオリジナルJS
 // ============================================================
 const STORAGE_KEY = "kanban_ok_records";
 const SHIP_STORAGE_KEY = "shipping_csv_data";
 const ERROR_STORAGE_KEY = "kanban_error_records";
 
-const cust = document.getElementById("cust");
-const inside = document.getElementById("inside");
-const result = document.getElementById("result");
-const detail = document.getElementById("detail");
-const custClean = document.getElementById("custClean");
-const custExtract = document.getElementById("custExtract");
-const custQty = document.getElementById("custQty");
-const custQtyRaw = document.getElementById("custQtyRaw");
-const insideClean = document.getElementById("insideClean");
-const insideTarget = document.getElementById("insideTarget");
-const insideWindows14 = document.getElementById("insideWindows14");
-const insideWindows15 = document.getElementById("insideWindows15");
-const insideWindows16 = document.getElementById("insideWindows16");
-const insideWindows17 = document.getElementById("insideWindows17");
+// DOM要素はログイン後に取得（ログイン画面中はnullになるため遅延取得）
+let cust, inside, result, detail, custClean, custExtract, custQty, custQtyRaw;
+let insideClean, insideTarget, insideWindows14, insideWindows15, insideWindows16, insideWindows17;
+let savedTableBody, summaryCount, csvFile, shipTableBody, shipSummary, errorTableBody, errorSummaryCount;
 
-const savedTableBody = document.querySelector("#savedTable tbody");
-const summaryCount = document.getElementById("summaryCount");
-
-const csvFile = document.getElementById("csvFile");
-const shipTableBody = document.querySelector("#shipTable tbody");
-const shipSummary = document.getElementById("shipSummary");
-
-const errorTableBody = document.querySelector("#errorTable tbody");
-const errorSummaryCount = document.getElementById("errorSummaryCount");
+function initDomRefs() {
+  cust = document.getElementById("cust");
+  inside = document.getElementById("inside");
+  result = document.getElementById("result");
+  detail = document.getElementById("detail");
+  custClean = document.getElementById("custClean");
+  custExtract = document.getElementById("custExtract");
+  custQty = document.getElementById("custQty");
+  custQtyRaw = document.getElementById("custQtyRaw");
+  insideClean = document.getElementById("insideClean");
+  insideTarget = document.getElementById("insideTarget");
+  insideWindows14 = document.getElementById("insideWindows14");
+  insideWindows15 = document.getElementById("insideWindows15");
+  insideWindows16 = document.getElementById("insideWindows16");
+  insideWindows17 = document.getElementById("insideWindows17");
+  savedTableBody = document.querySelector("#savedTable tbody");
+  summaryCount = document.getElementById("summaryCount");
+  csvFile = document.getElementById("csvFile");
+  shipTableBody = document.querySelector("#shipTable tbody");
+  shipSummary = document.getElementById("shipSummary");
+  errorTableBody = document.querySelector("#errorTable tbody");
+  errorSummaryCount = document.getElementById("errorSummaryCount");
+}
 
 window.addEventListener("load", function () {
     // ログイン画面がある場合は初期化をdoLogin/showMainScreen側に任せる
