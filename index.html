@@ -161,7 +161,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 
     <div class="login-field">
       <div class="login-label">ユーザーID</div>
-      <input type="text" class="login-input" id="login-id" placeholder="admin" autocomplete="username">
+      <input type="text" class="login-input" id="login-id" placeholder="" autocomplete="username">
     </div>
     <div class="login-field">
       <div class="login-label">パスワード</div>
@@ -170,10 +170,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 
     <button class="login-btn" onclick="doLogin()">ログイン</button>
     <div class="login-error" id="login-error">IDまたはパスワードが違います</div>
-    <div class="login-hint" id="login-hint">
-      管理者: admin / 435511spk<br>
-      従業員: kouki, ryota, tomoki / admin
-    </div>
+    <div class="login-hint" id="login-hint" style="display:none"></div>
   </div>
 
   <div class="login-footer">© 関ケ原プラ工業株式会社</div>
@@ -1378,13 +1375,13 @@ function switchLoginTab(type) {
   if (type === 'admin') {
     tabAdmin.classList.add('active');
     tabStaff.classList.remove('active');
-    idInput.placeholder = 'admin';
-    hint.innerHTML = '管理者: admin / 435511spk';
+    idInput.placeholder = '';
+    hint.innerHTML = '';
   } else {
     tabStaff.classList.add('active');
     tabAdmin.classList.remove('active');
-    idInput.placeholder = 'kouki, ryota, tomoki...';
-    hint.innerHTML = '従業員: kouki / admin<br>ryota / admin1 &nbsp; tomoki / admin2';
+    idInput.placeholder = '';
+    hint.innerHTML = '';
   }
   document.getElementById('login-id').value = '';
   document.getElementById('login-pw').value = '';
