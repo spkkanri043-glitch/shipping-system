@@ -1442,8 +1442,33 @@ function doLogout() {
 
 // Enterキーでログインはは下のDOMContentLoadedで登録
 
-// 起動時：セッション確認
+// 起動時：① SSO → ② セッション → ③ ログイン画面 の順で確認
 (function() {
+  // ① ポータルからのSSO自動ログイン
+  function parseSSOToken(token) {
+    try {
+      const decoded = atob(token.split('').reverse().join(''));
+      const data = JSON.parse(decoded);
+      if (Date.now() - data.ts > 5 * 60 * 1000) return null; // 5分以上は無効
+      return data;
+    } catch(e) { return null; }
+  }
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('sso');
+  if (token) {
+    const data = parseSSOToken(token);
+    if (data) {
+      window.history.replaceState({}, '', window.location.pathname); // URLからトークン除去
+      let name = data.name || '';
+      try { name = decodeURIComponent(escape(name)); } catch(e) {}
+      const user = { id: data.id, name: name, admin: data.role === 'admin' };
+      try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch(e) {}
+      showMainScreen(user);
+      return;
+    }
+  }
+
+  // ② セッション復元（ページリロード対応）
   try {
     const sess = sessionStorage.getItem(SESSION_KEY);
     if (sess) {
@@ -1451,8 +1476,9 @@ function doLogout() {
       showMainScreen(user);
       return;
     }
-  } catch(e){}
-  // セッションなし→ログイン画面表示
+  } catch(e) {}
+
+  // ③ セッションなし → ログイン画面表示
   document.getElementById('login-screen').style.display = 'flex';
 })();
 
