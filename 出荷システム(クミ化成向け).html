@@ -144,7 +144,7 @@ body.flash-ng{animation:flashRed .9s ease}
 <!-- ══════════════════════════════════════════════════════
      ログイン画面（カナモリスタイル）
 ════════════════════════════════════════════════════════ -->
-<div id="login-screen" style="display:none">
+<div id="login-screen" style="display:flex">
   <div class="login-logo">
     <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M16 20a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="#b4913e" stroke-width="1.8" fill="none"/>
@@ -171,7 +171,7 @@ body.flash-ng{animation:flashRed .9s ease}
 <!-- ══════════════════════════════════════════════════════
      メイン画面
 ════════════════════════════════════════════════════════ -->
-<div id="main-screen">
+<div id="main-screen" style="display:none">
 
 <!-- ── トップバー ── -->
 <div class="top-bar">
@@ -416,18 +416,16 @@ document.addEventListener('DOMContentLoaded', function() {
   if (pwEl) pwEl.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 });
 
-// 起動時：セッション復元 → なければログイン画面
-(function() {
+// 起動時：セッション復元
+document.addEventListener('DOMContentLoaded', function() {
   try {
     const sess = sessionStorage.getItem(SESSION_KEY_KUMI);
     if (sess) {
       const user = JSON.parse(sess);
       showMainScreen(user);
-      return;
     }
   } catch(e) {}
-  document.getElementById('login-screen').style.display = 'flex';
-})();
+});
 
 // ============================================================
 // タブ切替
