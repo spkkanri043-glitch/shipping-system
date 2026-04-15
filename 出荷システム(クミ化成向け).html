@@ -418,6 +418,102 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 起動時：セッション復元
 document.addEventListener('DOMContentLoaded', function() {
+  // DOM要素の初期化
+    cust = document.getElementById("cust");
+    if (cust) { cust.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        showExtracts();
+        setTimeout(function () {
+            inside.focus();
+        }, 50);
+    }
+}); }
+    inside = document.getElementById("inside");
+    if (inside) { inside.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        check();
+    }
+}); }
+    result = document.getElementById("result");
+    detail = document.getElementById("detail");
+    custClean = document.getElementById("custClean");
+    custExtract = document.getElementById("custExtract");
+    custQty = document.getElementById("custQty");
+    custQtyRaw = document.getElementById("custQtyRaw");
+    insideClean = document.getElementById("insideClean");
+    insideTarget = document.getElementById("insideTarget");
+    insideWindows14 = document.getElementById("insideWindows14");
+    insideWindows15 = document.getElementById("insideWindows15");
+    insideWindows16 = document.getElementById("insideWindows16");
+    insideWindows17 = document.getElementById("insideWindows17");
+    savedTableBody = document.querySelector("#savedTable tbody");
+    summaryCount = document.getElementById("summaryCount");
+    csvFile = document.getElementById("csvFile");
+    // CSVファイル変更リスナー（DOM初期化直後に登録）
+    if (csvFile) { csvFile.addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+        let text = event.target.result || "";
+
+        if (text.charCodeAt(0) === 0xFEFF) {
+            text = text.slice(1);
+        }
+
+        const rows = parseCSVRows(text);
+
+        if (rows.length === 0) {
+            alert("CSV\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3067\u3057\u305f\u3002");
+            return;
+        }
+
+        // 1行目はヘッダー行のためスキップ（slice(1)）
+        const data = rows.slice(1).map((cols, index) => {
+            const productNo = normalizeProductNo(cols[4] || "");
+            const orderQty = toNumber(cols[6] || "");
+            const packQty = toNumber(cols[7] || "");
+            const noki = (cols[2] || "").trim();
+            const biko = (cols[11] || "").trim();
+
+            return {
+                id: "row_" + (index + 2) + "_" + Date.now(),
+                rowNo: index + 2,
+                productNo: productNo,
+                orderQty: orderQty,
+                packQty: packQty,
+                noki: noki,
+                biko: biko,
+                scannedQty: 0,
+                lastScannedAt: ""
+            };
+        }).filter(x => x.productNo !== "");
+
+        if (data.length === 0) {
+            alert("CSV\u304b\u3089E\u5217\u306e\u54c1\u756a\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002");
+            return;
+        }
+
+        setShippingData(data);
+        renderShippingTable();
+        csvFile.value = "";
+
+        alert("CSV\u53d6\u8fbc\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002");
+    };
+
+    reader.onerror = function() {
+        alert("CSV\u306e\u8aad\u8fbc\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002");
+    };
+
+    reader.readAsText(file, "shift_jis");
+}); }
+    shipTableBody = document.querySelector("#shipTable tbody");
+    shipSummary = document.getElementById("shipSummary");
+    errorTableBody = document.querySelector("#errorTable tbody");
+    errorSummaryCount = document.getElementById("errorSummaryCount");
+
   try {
     const sess = sessionStorage.getItem(SESSION_KEY_KUMI);
     if (sess) {
@@ -764,37 +860,33 @@ const STORAGE_KEY = "kanban_ok_records";
 const SHIP_STORAGE_KEY = "shipping_csv_data";
 const ERROR_STORAGE_KEY = "kanban_error_records";
 
-const cust = document.getElementById("cust");
-const inside = document.getElementById("inside");
-const result = document.getElementById("result");
-const detail = document.getElementById("detail");
-const custClean = document.getElementById("custClean");
-const custExtract = document.getElementById("custExtract");
-const custQty = document.getElementById("custQty");
-const custQtyRaw = document.getElementById("custQtyRaw");
-const insideClean = document.getElementById("insideClean");
-const insideTarget = document.getElementById("insideTarget");
-const insideWindows14 = document.getElementById("insideWindows14");
-const insideWindows15 = document.getElementById("insideWindows15");
-const insideWindows16 = document.getElementById("insideWindows16");
-const insideWindows17 = document.getElementById("insideWindows17");
+let cust = null;
+let inside = null;
+let result = null;
+let detail = null;
+let custClean = null;
+let custExtract = null;
+let custQty = null;
+let custQtyRaw = null;
+let insideClean = null;
+let insideTarget = null;
+let insideWindows14 = null;
+let insideWindows15 = null;
+let insideWindows16 = null;
+let insideWindows17 = null;
+let savedTableBody = null;
+let summaryCount = null;
+let csvFile = null;
+let shipTableBody = null;
+let shipSummary = null;
+let errorTableBody = null;
+let errorSummaryCount = null;
 
-const savedTableBody = document.querySelector("#savedTable tbody");
-const summaryCount = document.getElementById("summaryCount");
-
-const csvFile = document.getElementById("csvFile");
-const shipTableBody = document.querySelector("#shipTable tbody");
-const shipSummary = document.getElementById("shipSummary");
-
-const errorTableBody = document.querySelector("#errorTable tbody");
-const errorSummaryCount = document.getElementById("errorSummaryCount");
-
-window.addEventListener("load", function () {
-    // ログイン画面がある場合は初期化をdoLogin/showMainScreen側に任せる
-});
+// 初期化はshowMainScreen内で実行
 
 document.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
+    // メイン画面表示中のみEnterのデフォルト動作を抑止
+    if (e.key === "Enter" && document.getElementById("main-screen").style.display !== "none") {
         e.preventDefault();
     }
 });
@@ -1142,65 +1234,6 @@ function parseCSVRows(text) {
     return rows;
 }
 
-csvFile.addEventListener("change", function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function(event) {
-        let text = event.target.result || "";
-
-        if (text.charCodeAt(0) === 0xFEFF) {
-            text = text.slice(1);
-        }
-
-        const rows = parseCSVRows(text);
-
-        if (rows.length === 0) {
-            alert("CSV\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3067\u3057\u305f\u3002");
-            return;
-        }
-
-        // 1行目はヘッダー行のためスキップ（slice(1)）
-        const data = rows.slice(1).map((cols, index) => {
-            const productNo = normalizeProductNo(cols[4] || "");
-            const orderQty = toNumber(cols[6] || "");
-            const packQty = toNumber(cols[7] || "");
-            const noki = (cols[2] || "").trim();
-            const biko = (cols[11] || "").trim();
-
-            return {
-                id: "row_" + (index + 2) + "_" + Date.now(),
-                rowNo: index + 2,
-                productNo: productNo,
-                orderQty: orderQty,
-                packQty: packQty,
-                noki: noki,
-                biko: biko,
-                scannedQty: 0,
-                lastScannedAt: ""
-            };
-        }).filter(x => x.productNo !== "");
-
-        if (data.length === 0) {
-            alert("CSV\u304b\u3089E\u5217\u306e\u54c1\u756a\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002");
-            return;
-        }
-
-        setShippingData(data);
-        renderShippingTable();
-        csvFile.value = "";
-
-        alert("CSV\u53d6\u8fbc\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002");
-    };
-
-    reader.onerror = function() {
-        alert("CSV\u306e\u8aad\u8fbc\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002");
-    };
-
-    reader.readAsText(file, "shift_jis");
-});
 
 function renderShippingTable() {
     const data = getShippingData();
@@ -1650,20 +1683,7 @@ function clearAll() {
     }, 100);
 }
 
-cust.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-        showExtracts();
-        setTimeout(function () {
-            inside.focus();
-        }, 50);
-    }
-});
 
-inside.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-        check();
-    }
-});
 
 function playOK() {
     try {
