@@ -182,12 +182,11 @@ body.flash-ng{animation:flashRed .9s ease}
     </div>
   </div>
   <div class="top-btns">
-    <button class="top-btn" onclick="exportCSV()">OK履歴CSV出力</button>
-    <button class="top-btn" onclick="exportShippingResultCSV()">出荷指示消込CSV出力</button>
-    <button class="top-btn" onclick="exportErrorCSV()">エラー履歴CSV出力</button>
-    <button class="top-btn danger" onclick="clearSavedData()">OK履歴全削除</button>
-    <button class="top-btn danger" onclick="clearShippingData()">出荷指示データ全削除</button>
-    <button class="top-btn danger" onclick="clearErrorData()">エラー履歴全削除</button>
+    <button class="top-btn" onclick="showCsvModal()">📂 CSVを開く</button>
+    <button class="top-btn" onclick="exportCSVByStatus()">📤 CSV書き出し</button>
+    <button class="top-btn" onclick="exportCSV()">📋 OK履歴CSV</button>
+    <button class="top-btn" onclick="exportErrorCSV()">⚠️ エラーCSV</button>
+    <button class="top-btn danger" onclick="showClearModal()">🗑 削除</button>
     <button class="top-btn danger" onclick="doLogout()">ログアウト</button>
   </div>
 </div>
@@ -320,6 +319,47 @@ body.flash-ng{animation:flashRed .9s ease}
   </div>
 
 </div><!-- /container -->
+
+<!-- ══ CSVを開くモーダル ══ -->
+<div class="modal-overlay" id="url-modal">
+  <div class="modal" style="display:flex;flex-direction:column;max-height:90vh;padding:0;overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #e5e5e0;flex-shrink:0">
+      <div class="modal-title" style="margin:0">📂 CSVを開く</div>
+      <button onclick="closeUrlModal()" style="padding:6px 14px;background:#e5e5e0;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✕ 閉じる</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:14px">
+      <div style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">☁️ ドライブから選ぶ</div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">Googleドライブのフォルダからファイルを選択</div>
+        <button style="width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:inherit" onclick="loadDriveFileList()">📋 ファイル一覧を取得</button>
+        <div id="drive-file-list" style="display:none;border:1px solid #e5e5e0;border-radius:8px"></div>
+      </div>
+      <div style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">📁 ファイルから選ぶ</div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">PC・タブレット向け（Shift-JIS / UTF-8 両対応）</div>
+        <label style="display:block;width:100%;padding:12px;background:#1a1a18;color:#fff;border-radius:8px;text-align:center;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">
+          ファイルを選択
+          <input type="file" accept=".csv,.CSV" style="display:none" onchange="loadCSVFromFile(this)">
+        </label>
+      </div>
+      <div id="url-feedback" style="display:none;font-size:12px;white-space:pre-wrap;line-height:1.6;padding:8px 10px;border-radius:6px;margin-top:4px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 削除モーダル ══ -->
+<div class="modal-overlay" id="clear-modal">
+  <div class="modal">
+    <div class="modal-title">🗑 データ削除</div>
+    <div style="font-size:12px;color:#888;margin-bottom:14px">削除したいデータを選んでください</div>
+    <div class="modal-actions" style="flex-direction:column;gap:8px">
+      <button style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#fdecea;color:#c0392b;font-family:inherit" onclick="clearSavedData();closeClearModal()">OK履歴を全削除</button>
+      <button style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#fdecea;color:#c0392b;font-family:inherit" onclick="clearShippingData();closeClearModal()">出荷指示データを全削除</button>
+      <button style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#fdecea;color:#c0392b;font-family:inherit" onclick="clearErrorData();closeClearModal()">エラー履歴を全削除</button>
+      <button class="btn-cancel" style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit" onclick="closeClearModal()">キャンセル</button>
+    </div>
+  </div>
+</div>
 </div><!-- /main-screen -->
 
 <script>
@@ -1393,6 +1433,234 @@ function playNG() {
     setTimeout(() => {
         document.body.classList.remove("flash-ng");
     }, 900);
+}
+
+// ============================================================
+// GAS設定
+// ============================================================
+const GAS_DEPLOY_URL_KUMI = 'https://script.google.com/macros/s/AKfycbzlj7JIEJwj65ACuflQVctEvYrmdcKBoJLdmghcQLyH1CYCK4gAzF7wue_OBdSNQGH0Bw/exec';
+
+// ============================================================
+// 削除モーダル
+// ============================================================
+function showClearModal() {
+  document.getElementById('clear-modal').classList.add('show');
+}
+function closeClearModal() {
+  document.getElementById('clear-modal').classList.remove('show');
+}
+
+// ============================================================
+// CSVを開くモーダル
+// ============================================================
+function showCsvModal() {
+  const fb = document.getElementById('url-feedback');
+  if (fb) { fb.style.display = 'none'; fb.textContent = ''; }
+  const fl = document.getElementById('drive-file-list');
+  if (fl) fl.style.display = 'none';
+  document.getElementById('url-modal').classList.add('show');
+}
+function closeUrlModal() {
+  document.getElementById('url-modal').classList.remove('show');
+}
+function showUrlFb(msg, type) {
+  const fb = document.getElementById('url-feedback');
+  fb.style.display = 'block';
+  fb.style.background = type==='ok'?'#ecf9f2':type==='err'?'#fdecea':'#fff8ec';
+  fb.style.color = type==='ok'?'#1e8a55':type==='err'?'#c0392b':'#b56e00';
+  fb.textContent = msg;
+}
+
+// ============================================================
+// ローカルファイル読込（Shift-JIS / UTF-8 両対応）
+// ============================================================
+let loadedFiles_kumi = [];
+
+function loadCSVFromFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  showUrlFb(file.name + ' を読み込み中...', 'info');
+  const trySjis = new FileReader();
+  trySjis.onload = function(e) {
+    let text = e.target.result || '';
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    const r = processCSVText_kumi(text, file.name);
+    if (r.added > 0) {
+      showUrlFb('✅ ' + file.name + '\n追加 ' + r.added + '件', 'ok');
+      setTimeout(closeUrlModal, 1500);
+    } else {
+      const tryUtf = new FileReader();
+      tryUtf.onload = function(e2) {
+        let t2 = e2.target.result || '';
+        if (t2.charCodeAt(0) === 0xFEFF) t2 = t2.slice(1);
+        const r2 = processCSVText_kumi(t2, file.name);
+        if (r2.added > 0 || r2.skipped > 0) {
+          showUrlFb('✅ ' + file.name + '\n追加 ' + r2.added + '件', 'ok');
+          setTimeout(closeUrlModal, 1500);
+        } else {
+          showUrlFb('❌ 品番データを取得できませんでした', 'err');
+        }
+      };
+      tryUtf.readAsText(file, 'utf-8');
+    }
+  };
+  trySjis.readAsText(file, 'shift_jis');
+  input.value = '';
+}
+
+function processCSVText_kumi(text, fileName) {
+  const rows = parseCSVRows(text);
+  if (rows.length <= 1) return { added: 0, skipped: 0 };
+  const existing = getShippingData();
+  const existingKeys = new Set(existing.map(x => x.rowNo + '_' + x.productNo));
+  let added = 0, skipped = 0;
+  rows.slice(1).map((cols, index) => ({
+    id: 'row_' + (index+2) + '_' + Date.now(),
+    rowNo: index + 2,
+    productNo: normalizeProductNo(cols[4] || ''),
+    orderQty: toNumber(cols[6] || ''),
+    packQty: toNumber(cols[7] || ''),
+    noki: (cols[2] || '').trim(),
+    biko: (cols[11] || '').trim(),
+    scannedQty: 0, lastScannedAt: ''
+  })).filter(x => x.productNo !== '').forEach(r => {
+    const k = r.rowNo + '_' + r.productNo;
+    if (existingKeys.has(k)) { skipped++; }
+    else { existing.push(r); existingKeys.add(k); added++; }
+  });
+  if (added > 0) {
+    setShippingData(existing);
+    renderShippingTable();
+    updateStatCards();
+    if (!loadedFiles_kumi.includes(fileName)) loadedFiles_kumi.push(fileName);
+  }
+  return { added, skipped };
+}
+
+// ============================================================
+// ドライブ ファイル一覧取得
+// ============================================================
+async function loadDriveFileList() {
+  if (!GAS_DEPLOY_URL_KUMI || GAS_DEPLOY_URL_KUMI === 'YOUR_DEPLOY_URL') {
+    showUrlFb('GAS_DEPLOY_URLが未設定です', 'err'); return;
+  }
+  showUrlFb('ファイル一覧を取得中...', 'info');
+  try {
+    const res  = await fetch(GAS_DEPLOY_URL_KUMI + '?action=getFileList');
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); }
+    catch(e) { showUrlFb('GASの応答エラー: ' + text.slice(0,80), 'err'); return; }
+    if (!data.ok) throw new Error(data.message || '取得失敗');
+    if (!data.files || data.files.length === 0) {
+      showUrlFb('フォルダにCSVファイルがありません', 'warn'); return;
+    }
+    const listEl = document.getElementById('drive-file-list');
+    listEl.style.display = 'block';
+    data.files.sort(function(a,b) {
+      if (a.folder==='pending' && b.folder!=='pending') return -1;
+      if (a.folder!=='pending' && b.folder==='pending') return 1;
+      return new Date(b.updated) - new Date(a.updated);
+    });
+    const pending = data.files.filter(f => f.folder === 'pending');
+    const source  = data.files.filter(f => f.folder !== 'pending');
+    let h = '<div style="padding:8px 12px;border-bottom:2px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;background:#f9f9f7">'
+      + '<span style="font-size:11px;color:#888">' + data.files.length + '件（複数選択可）</span>'
+      + '<button onclick="loadSelectedFiles_kumi()" style="padding:6px 16px;background:#1e8a55;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">選択して読込</button>'
+      + '</div>';
+    if (pending.length > 0) {
+      h += '<div style="padding:6px 12px;background:#fff8ec;font-size:11px;font-weight:700;color:#b56e00;border-bottom:1px solid #f0e8cc">🔄 作業中（未完了フォルダ）</div>';
+      pending.forEach(f => {
+        h += '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;display:flex;align-items:center;gap:10px;cursor:pointer;background:#fffdf5">'
+          + '<input type="checkbox" value="' + f.id + '" data-name="' + f.name.replace(/'/g,"\'") + '" style="width:18px;height:18px;flex-shrink:0;accent-color:#e8a000">'
+          + '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">' + f.name + '</div>'
+          + '<div style="font-size:11px;color:#888">' + f.updated + '</div></div></label>';
+      });
+    }
+    if (source.length > 0) {
+      h += '<div style="padding:6px 12px;background:#f0f5ff;font-size:11px;font-weight:700;color:#3a7bdc;border-bottom:1px solid #dce8ff">🆕 新規（読込元フォルダ）</div>';
+      source.forEach(f => {
+        h += '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;display:flex;align-items:center;gap:10px;cursor:pointer">'
+          + '<input type="checkbox" value="' + f.id + '" data-name="' + f.name.replace(/'/g,"\'") + '" style="width:18px;height:18px;flex-shrink:0;accent-color:#3a7bdc">'
+          + '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">' + f.name + '</div>'
+          + '<div style="font-size:11px;color:#888">' + f.updated + '</div></div></label>';
+      });
+    }
+    listEl.innerHTML = h;
+    showUrlFb(data.files.length + '件見つかりました', 'ok');
+  } catch(err) {
+    showUrlFb('エラー: ' + err.message, 'err');
+  }
+}
+
+async function loadSelectedFiles_kumi() {
+  const checkboxes = document.querySelectorAll('#drive-file-list input[type=checkbox]:checked');
+  if (!checkboxes.length) { showUrlFb('ファイルを1つ以上選択してください', 'warn'); return; }
+  document.getElementById('drive-file-list').style.display = 'none';
+  let totalAdded = 0, totalSkipped = 0;
+  const movedIds = [];
+  for (let i = 0; i < checkboxes.length; i++) {
+    const cb = checkboxes[i];
+    showUrlFb('(' + (i+1) + '/' + checkboxes.length + ') ' + cb.dataset.name + ' 読込中...', 'info');
+    try {
+      const res = await fetch(GAS_DEPLOY_URL_KUMI + '?action=getCSV&fileId=' + cb.value);
+      let text = await res.text();
+      if (text.trim().startsWith('{')) { const d=JSON.parse(text); if (!d.ok) throw new Error(d.message); }
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      const r = processCSVText_kumi(text, cb.dataset.name);
+      totalAdded += r.added; totalSkipped += r.skipped;
+      movedIds.push(cb.value);
+    } catch(e) { showUrlFb('❌ ' + cb.dataset.name + ': ' + e.message, 'err'); }
+  }
+  showUrlFb('✅ 読込完了！追加 ' + totalAdded + '件\nファイルを未完了フォルダへ移動中...', 'ok');
+  for (const id of movedIds) {
+    try {
+      await fetch(GAS_DEPLOY_URL_KUMI, { method:'POST', body: JSON.stringify({
+        action:'moveFileToFolder', fileId:id,
+        targetFolderId:'1BvIVakIQyPZBBwHpkbniLMIVyRmFadYL'
+      })});
+    } catch(e) {}
+  }
+  showUrlFb('✅ 完了！' + totalAdded + '件追加\n元ファイルを未完了フォルダへ移動しました', 'ok');
+  setTimeout(closeUrlModal, 2000);
+}
+
+// ============================================================
+// CSV書き出し（ドライブ保存）
+// ============================================================
+async function exportCSVByStatus() {
+  const data = getShippingData();
+  if (!data.length) { alert('出荷指示データがありません'); return; }
+  const today = getNowString().slice(0,10).replace(/-/g,'');
+  const baseName = '出荷指示_' + today;
+  if (!GAS_DEPLOY_URL_KUMI || GAS_DEPLOY_URL_KUMI === 'YOUR_DEPLOY_URL') {
+    const pending = data.filter(x => (x.orderQty - x.scannedQty) > 0);
+    const done    = data.filter(x => (x.orderQty - x.scannedQty) === 0);
+    if (pending.length) downloadCsvText(makeShipCSV_kumi(pending), baseName + '_未完了.csv');
+    if (done.length)    downloadCsvText(makeShipCSV_kumi(done),    baseName + '_完了済.csv');
+    alert('CSVをダウンロードしました');
+    return;
+  }
+  try {
+    const res = await fetch(GAS_DEPLOY_URL_KUMI, { method:'POST', body: JSON.stringify({
+      action:'saveCSVByStatus', records:data, today:today, baseName:baseName
+    })});
+    const d = await res.json();
+    if (!d.ok) throw new Error(d.message);
+    const msgs = d.results.map(r => (r.type==='pending'?'未完了':'完了') + ':' + r.count + '件');
+    alert('☁️ Googleドライブに保存しました\n' + msgs.join(' / '));
+  } catch(e) { alert('書き出し失敗: ' + e.message); }
+}
+
+function makeShipCSV_kumi(data) {
+  const headers = ['CSV行','品番','納期','指示数','正規入数','消込数','最新消込日時','備考'];
+  const rows = data.map(r => [
+    r.rowNo||'', r.productNo, r.noki||'', r.orderQty, r.packQty||'',
+    r.scannedQty, r.lastScannedAt||'', r.biko||''
+  ]);
+  return '\uFEFF' + [headers, ...rows]
+    .map(row => row.map(v => '"' + String(v||'').replace(/"/g,'""') + '"').join(','))
+    .join('\r\n');
 }
 </script>
 
