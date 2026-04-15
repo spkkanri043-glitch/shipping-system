@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>出荷システム（クミ化成向け）</title>
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACc0lEQVR4nL1XPWgTYRh+LvQgaWPvgnFoTEMIVFChCUUbq4M/6CCZpIjQIaCDg0t1csrk5OiSsUMX6aSDXaSC0khsFaHgD1Yol6RtCAR6tcWGtKkO6V3v++6+++ld71ne732/983z3Pv9XI4DBXm79Y+OeQkxHOS0fsBPciOOAGvCLxGcF+SxVMZ0fmhyRB1/mJxSx2I4yHFuySfuP8b84jfmfOphAqG4oPo7q5uEiIBRkVfQkpfzRZTzRYTiAq6+eKDm9HhB9Ce6UzeKZ4ABrT82/UiX44mA/mZowCieOrDlfFG1tAjXeyAWS5nODz29hlBcUMnpPeCJgL83+k1z0hcPT8Hv5++xvr6i+p4sgRWWPn9Vx73UnKtT0PPzh5vy7m9YJbRK47oYv7YPAOgc+AlMzNoh22s3cjJe2RegJVdIAWD3tPPG7bUbOaM4U4BC7pbYCjoBrdI4+LV98A5IqyNvoza4FgCgt4QsU0Bn5o4p8ZfFhVkAuDCaNWznUUAIqPe1Dx2ZXdSUW4Qf+5TOMlJ1kLFC+LoliBR3mcURnOs++Rw7xylcX0SZ0csQ+zqQN5oQI1FTu7W1jZNnh4n6Y30d0xhMJHUxXQfGJMmwuFKpbBrFPwIYvnRbGEwknwGAGOkeCJYFUNDWEx2Qlpds3WhaXLl1VwAAeaNZAIDaqTphlbhiafi6BJYCkmfSrs/3iWWesNcbvwhLQ7cHWGt9XCD+kKy+yeH8vTnHArSb0Aq1qlSYf/da9XUd+D5zU6BjCpRNql8qHrWqZLjJrBCgv9WOgpdP7N+M2qcXw0FOJffz00whBzSnwItOOCUnBPglgub4Dxaa44PD4JhWAAAAAElFTkSuQmCC">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="出荷照合">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Meiryo','Hiragino Sans',sans-serif;background:#f5f5f2;color:#1a1a18;min-height:100vh}
+
+/* ── ログイン画面（カナモリスタイル） ── */
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(160deg,#0d1b2e 0%,#1a2f4e 50%,#0d2340 100%)}
+.login-logo{width:64px;height:64px;border-radius:50%;border:2px solid rgba(180,145,70,0.6);display:flex;align-items:center;justify-content:center;margin-bottom:20px;background:rgba(180,145,70,0.1)}
+.login-logo svg{width:32px;height:32px}
+.login-company{font-size:18px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px;letter-spacing:.05em}
+.login-greeting{font-size:13px;color:rgba(255,255,255,0.55);text-align:center;margin-bottom:28px;letter-spacing:.03em}
+.login-card{background:rgba(255,255,255,0.97);border-radius:16px;padding:24px 24px 28px;width:100%;max-width:360px;box-shadow:0 24px 64px rgba(0,0,0,0.4)}
+.login-field{margin-bottom:14px}
+.login-label{font-size:11px;color:#888;margin-bottom:5px;font-weight:600;letter-spacing:.04em}
+.login-input{width:100%;font-size:15px;padding:11px 13px;border:1.5px solid #e5e5e0;border-radius:8px;outline:none;font-family:inherit;transition:border-color .2s;background:#fafafa}
+.login-input:focus{border-color:#1a2f4e;background:#fff}
+.login-btn{width:100%;padding:13px;background:#1a2f4e;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;letter-spacing:.05em;transition:background .2s;font-family:inherit}
+.login-btn:active{background:#0d1b2e}
+.login-error{font-size:12px;color:#c0392b;margin-top:8px;text-align:center;display:none;font-weight:600}
+.login-footer{font-size:11px;color:rgba(255,255,255,0.25);text-align:center;margin-top:20px}
+
+/* ── メイン画面 ── */
+#main-screen{display:none}
+.top-bar{background:#1a1a18;color:#fff;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.top-bar-row1{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.top-bar h1{font-size:15px;font-weight:600;white-space:nowrap;margin:0}
+.top-bar-user{font-size:12px;color:rgba(255,255,255,0.75);font-weight:600}
+@media(min-width:768px){.top-bar{flex-direction:row;align-items:center;flex-wrap:wrap}.top-bar-row1{flex:1}}
+.top-btns{display:flex;gap:6px;flex-wrap:wrap}
+.top-btn{font-size:11px;background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;font-family:inherit}
+.top-btn:hover{background:rgba(255,255,255,0.25)}
+.top-btn.danger{background:rgba(220,50,50,0.4)}
+
+/* ── コンテナ ── */
+.container{padding:14px;max-width:960px;margin:0 auto}
+
+/* ── 統計カード ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.stat{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:12px 14px}
+.stat-label{font-size:11px;color:#888;margin-bottom:4px}
+.stat-value{font-size:26px;font-weight:700;color:#1a1a18}
+.stat-value.done{color:#1e8a55}
+.stat-value.remain{color:#b56e00}
+.stat-value.errs{color:#c0392b}
+
+/* ── プログレスバー ── */
+.progress-bar{height:6px;background:#e5e5e0;border-radius:99px;overflow:hidden;margin-bottom:14px}
+.progress-fill{height:100%;background:#1e8a55;border-radius:99px;transition:width .4s}
+
+/* ── カード ── */
+.card{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:700;color:#aaa;margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase}
+
+/* ── CSV取込エリア ── */
+.csv-area{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.csv-count{font-size:13px;color:#555;font-weight:600}
+.file-label-btn{display:inline-flex;align-items:center;background:#1a1a18;color:#fff;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;font-family:inherit}
+
+/* ── スキャン入力グリッド ── */
+.scan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.scan-label{font-size:12px;color:#555;margin-bottom:6px;font-weight:600}
+input[type="text"]{width:100%;font-size:18px;padding:10px 12px;border:1px solid #ccc;border-radius:8px;outline:none;font-family:'Courier New',monospace;background:#fff}
+input[type="text"]:focus{border-color:#3a7bdc;box-shadow:0 0 0 3px rgba(58,123,220,0.12)}
+input[type="file"]{width:100%;font-family:inherit;font-size:13px;padding:10px 12px;border:1px solid #ccc;border-radius:8px;outline:none;background:#fff}
+.info-row{margin-top:8px;font-size:11px;color:#aaa;line-height:1.8;word-break:break-all}
+.info-row span{color:#555;font-family:'Courier New',monospace}
+
+/* ── 判定結果カード ── */
+.result-card{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:16px 20px;margin-bottom:12px;display:flex;align-items:center;gap:20px}
+#result{font-size:64px;font-weight:900;line-height:1;min-width:100px;text-align:center;color:#ccc;transition:color .15s}
+#result.ok{color:#1e8a55}
+#result.ng{color:#c0392b}
+#result.warn{color:#b56e00}
+.result-right{flex:1;min-width:0}
+.result-label{font-size:11px;font-weight:700;color:#aaa;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+#detail{font-size:12px;color:#555;line-height:1.6;word-break:break-all;white-space:pre-wrap;min-height:36px}
+
+/* ── ボタン ── */
+.btn{display:block;width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;margin-top:6px;text-align:center;font-family:inherit}
+.btn-dark{background:#1a1a18;color:#fff}
+.btn-dark:active{background:#333}
+
+/* ── 操作手順 ── */
+.note{padding:10px 14px;background:#f5f5f2;border-left:3px solid #3a7bdc;border-radius:0 6px 6px 0;font-size:11.5px;color:#555;line-height:1.8;white-space:pre-wrap;margin-bottom:14px}
+
+/* ── タブ ── */
+.tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid #e5e5e0}
+.tab{font-size:13px;padding:8px 14px;border:none;background:none;cursor:pointer;color:#aaa;border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:600;font-family:inherit}
+.tab.active{color:#1a1a18;border-bottom-color:#1a1a18}
+
+/* ── フィルター ── */
+.filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.filter-btn{font-size:11px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;color:#555;font-family:inherit}
+.filter-btn.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.search-box{flex:1;min-width:100px;font-size:12px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;outline:none;font-family:inherit}
+
+/* ── テーブル（出荷リスト・OK・エラー） ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+th{background:#f5f5f2;color:#888;font-size:11px;font-weight:700;padding:8px 10px;border:1px solid #e5e5e0;text-align:left;white-space:nowrap;letter-spacing:.04em}
+td{padding:8px 10px;border:1px solid #e5e5e0;color:#1a1a18;vertical-align:top;word-break:break-all}
+.count-box{font-size:13px;font-weight:600;color:#555;margin-bottom:6px}
+.row-done td{background:#f0fbf4}
+.row-progress td{background:#fffbf0}
+.row-error td{background:#fdf2f2}
+.status-ok{color:#1e8a55;font-weight:700}
+.status-warn{color:#b56e00;font-weight:700}
+.status-ng{color:#c0392b;font-weight:700}
+
+/* ── モーダル共通（カナモリスタイル） ── */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:100;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:420px}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:14px}
+.modal-field{margin-bottom:12px}
+.modal-label{font-size:12px;color:#888;margin-bottom:4px}
+.modal-val{font-size:13px;font-weight:600}
+select,input[type=date],input[type=password]{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:14px;font-family:inherit;outline:none}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-actions button{flex:1;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-cancel{background:#f0f0ed;color:#555}
+.btn-ok{background:#1a1a18;color:#fff}
+.btn-clear{background:#fdecea;color:#c0392b}
+.pw-hint{font-size:11px;color:#aaa;margin-top:6px}
+
+/* ── フラッシュ ── */
+@keyframes flashRed{0%{background:#f5f5f2}40%{background:#fdecea}100%{background:#f5f5f2}}
+@keyframes flashGreen{0%{background:#f5f5f2}40%{background:#ecf9f2}100%{background:#f5f5f2}}
+body.flash-ok{animation:flashGreen .5s ease}
+body.flash-ng{animation:flashRed .9s ease}
+</style>
+</head>
+<body tabindex="0">
+
+<!-- ══════════════════════════════════════════════════════
+     ログイン画面（カナモリスタイル）
+════════════════════════════════════════════════════════ -->
+<div id="login-screen" style="display:none">
+  <div class="login-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 20a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="#b4913e" stroke-width="1.8" fill="none"/>
+      <path d="M26.7 13.1l-1.8-.5a9.1 9.1 0 0 0-.8-1.9l1-1.6a.8.8 0 0 0-.1-1l-1.1-1.1a.8.8 0 0 0-1-.1l-1.6 1a9.1 9.1 0 0 0-1.9-.8l-.5-1.8A.8.8 0 0 0 18 5h-1.6a.8.8 0 0 0-.8.6l-.5 1.8a9.1 9.1 0 0 0-1.9.8l-1.6-1a.8.8 0 0 0-1 .1L9.5 8.4a.8.8 0 0 0-.1 1l1 1.6a9.1 9.1 0 0 0-.8 1.9l-1.8.5A.8.8 0 0 0 7 14v1.6c0 .4.3.7.6.8l1.8.5c.2.7.5 1.3.8 1.9l-1 1.6a.8.8 0 0 0 .1 1l1.1 1.1a.8.8 0 0 0 1 .1l1.6-1c.6.3 1.2.6 1.9.8l.5 1.8c.1.4.4.6.8.6H16a.8.8 0 0 0 .8-.6l.5-1.8a9.1 9.1 0 0 0 1.9-.8l1.6 1a.8.8 0 0 0 1-.1l1.1-1.1a.8.8 0 0 0 .1-1l-1-1.6c.3-.6.6-1.2.8-1.9l1.8-.5a.8.8 0 0 0 .6-.8V14a.8.8 0 0 0-.5-.9z" stroke="#b4913e" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+  <div class="login-company">関ケ原プラ工業(株)</div>
+  <div class="login-greeting">クミ化成向け 出荷システム</div>
+  <div class="login-card">
+    <div class="login-field">
+      <div class="login-label">ユーザーID</div>
+      <input type="text" class="login-input" id="login-id" autocomplete="username" placeholder="">
+    </div>
+    <div class="login-field">
+      <div class="login-label">パスワード</div>
+      <input type="password" class="login-input" id="login-pw" placeholder="パスワード" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">ログイン</button>
+    <div class="login-error" id="login-error">IDまたはパスワードが違います</div>
+  </div>
+  <div class="login-footer">© 関ケ原プラ工業株式会社</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     メイン画面
+════════════════════════════════════════════════════════ -->
+<div id="main-screen">
+
+<!-- ── トップバー ── -->
+<div class="top-bar">
+  <div class="top-bar-row1">
+    <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+      <h1>出荷システム（クミ化成向け）</h1>
+      <div id="user-name-display" class="top-bar-user"></div>
+    </div>
+  </div>
+  <div class="top-btns">
+    <button class="top-btn" onclick="exportCSV()">OK履歴CSV出力</button>
+    <button class="top-btn" onclick="exportShippingResultCSV()">出荷指示消込CSV出力</button>
+    <button class="top-btn" onclick="exportErrorCSV()">エラー履歴CSV出力</button>
+    <button class="top-btn danger" onclick="clearSavedData()">OK履歴全削除</button>
+    <button class="top-btn danger" onclick="clearShippingData()">出荷指示データ全削除</button>
+    <button class="top-btn danger" onclick="clearErrorData()">エラー履歴全削除</button>
+    <button class="top-btn danger" onclick="doLogout()">ログアウト</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── 統計カード ── -->
+  <div class="stats">
+    <div class="stat"><div class="stat-label">出荷指示</div><div class="stat-value" id="stat-total">0</div></div>
+    <div class="stat"><div class="stat-label">消込済</div><div class="stat-value done" id="stat-done">0</div></div>
+    <div class="stat"><div class="stat-label">未消込</div><div class="stat-value remain" id="stat-remain">0</div></div>
+    <div class="stat"><div class="stat-label">エラー</div><div class="stat-value errs" id="stat-err">0</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="stat-prog" style="width:0%"></div></div>
+
+  <!-- ── 出荷指示CSV取込 ── -->
+  <div class="card">
+    <div class="card-title">出荷指示CSV取込</div>
+    <div class="csv-area">
+      <label class="file-label-btn">
+        📂 CSVファイルを選択
+        <input id="csvFile" type="file" accept=".csv,text/csv" style="display:none">
+      </label>
+      <span class="csv-count" id="shipSummary">出荷指示データ：0件</span>
+    </div>
+    <div style="margin-top:6px;font-size:11px;color:#aaa">E列=品番 / G列=指示数 / H列=正規入数 / L列=備考（1行目ヘッダーは自動スキップ）</div>
+  </div>
+
+  <!-- ── カンバン照合入力 ── -->
+  <div class="card">
+    <div class="card-title">カンバン照合・消込</div>
+    <div class="scan-grid">
+      <div>
+        <div class="scan-label">① 客先カンバン</div>
+        <input id="cust" type="text" autocomplete="off" placeholder="スキャン または 入力（Enter）">
+        <div class="info-row">
+          元データ：<span id="custClean"></span><br>
+          抽出候補（17文字優先）：<span id="custExtract"></span><br>
+          客先数量（91～93列）：<span id="custQty"></span>&nbsp;<span id="custQtyRaw" style="color:#aaa"></span>
+        </div>
+      </div>
+      <div>
+        <div class="scan-label">② 社内カンバン</div>
+        <input id="inside" type="text" autocomplete="off" placeholder="スキャン または 入力（Enter）">
+        <div class="info-row">
+          整形後（空白・記号削除）：<span id="insideClean"></span><br>
+          比較対象（先頭14～20文字）：<span id="insideTarget"></span><br>
+          14文字候補：<span id="insideWindows14"></span><br>
+          15文字候補：<span id="insideWindows15"></span><br>
+          16文字候補：<span id="insideWindows16"></span><br>
+          17文字候補：<span id="insideWindows17"></span>
+        </div>
+        <button class="btn btn-dark" onclick="check()">照合・消込</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 判定結果 ── -->
+  <div class="result-card">
+    <div id="result">—</div>
+    <div class="result-right">
+      <div class="result-label">判定結果</div>
+      <div id="detail"></div>
+    </div>
+  </div>
+
+  <!-- ── 操作手順 ── -->
+  <div class="note">操作手順：
+① 出荷指示CSVを読み込む
+② 客先カンバンを読む
+③ 客先は 38～54列（17文字）を先に照合し、一致しなければ 38～52列（15文字）を照合する
+④ 客先数量は 91～93列 を読む（001→1、023→23、100→100）
+⑤ 社内カンバンを読む
+⑥ 品番が一致したら、客先数量ぶんCSVを自動消込する
+⑦ 消込優先順は「残数一致」→「正規入数一致」
+⑧ 一致しない場合は消し込まず、エラー確認一覧へ記録する</div>
+
+  <!-- ── タブ ── -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('ship',this)">出荷リスト</button>
+    <button class="tab" onclick="switchTab('ok',this)">OK保存一覧</button>
+    <button class="tab" onclick="switchTab('err',this)">エラー確認一覧</button>
+  </div>
+
+  <!-- 出荷リスト -->
+  <div id="tab-ship">
+    <div class="count-box" id="shipDetailCount"></div>
+    <div class="table-wrap">
+      <table id="shipTable">
+        <thead>
+          <tr>
+            <th>CSV行</th><th>品番</th><th>納期</th><th>指示数</th><th>正規入数</th>
+            <th>消込数</th><th>残数</th><th>状態</th><th>備考</th><th>最新消込日時</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- OK保存一覧 -->
+  <div id="tab-ok" style="display:none">
+    <div class="count-box" id="summaryCount"></div>
+    <div class="table-wrap">
+      <table id="savedTable">
+        <thead>
+          <tr>
+            <th>品番</th><th>件数</th><th>最新日時</th><th>一致した客先値</th>
+            <th>一致した社内値</th><th>一致長</th><th>客先数量</th><th>客先元データ</th><th>社内元データ</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- エラー確認一覧 -->
+  <div id="tab-err" style="display:none">
+    <div class="count-box" id="errorSummaryCount"></div>
+    <div class="table-wrap">
+      <table id="errorTable">
+        <thead>
+          <tr>
+            <th>日時</th><th>品番</th><th>客先数量</th><th>エラー内容</th><th>客先元データ</th><th>社内元データ</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /container -->
+</div><!-- /main-screen -->
+
+<script>
+// ============================================================
+// ログイン設定
+// ============================================================
+const USERS_KUMI = [
+  { id: 'admin',  pw: '435511spk', name: '管理者' },
+  { id: 'staff',  pw: 'kumi2024',  name: 'スタッフ' },
+];
+const SESSION_KEY_KUMI = 'kumi_session_v1';
+
+function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const user = USERS_KUMI.find(u => u.id === id && u.pw === pw);
+  if (!user) {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-pw').value = '';
+    return;
+  }
+  document.getElementById('login-error').style.display = 'none';
+  try { sessionStorage.setItem(SESSION_KEY_KUMI, JSON.stringify({ id: user.id, name: user.name })); } catch(e){}
+  showMainScreen(user);
+}
+
+function showMainScreen(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display  = 'block';
+  const nameEl = document.getElementById('user-name-display');
+  if (nameEl) nameEl.textContent = '\u{1F464} ' + user.name + ' さん';
+  // メイン画面初期化
+  setTimeout(function() {
+    cust.focus();
+    renderSavedTable();
+    renderShippingTable();
+    renderErrorTable();
+  }, 300);
+}
+
+function doLogout() {
+  if (!confirm('ログアウトしますか？')) return;
+  try { sessionStorage.removeItem(SESSION_KEY_KUMI); } catch(e){}
+  document.getElementById('main-screen').style.display  = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-id').value = '';
+  document.getElementById('login-pw').value = '';
+}
+
+// Enterキー対応
+document.addEventListener('DOMContentLoaded', function() {
+  const idEl = document.getElementById('login-id');
+  const pwEl = document.getElementById('login-pw');
+  if (idEl) idEl.addEventListener('keydown', e => { if(e.key==='Enter' && pwEl) pwEl.focus(); });
+  if (pwEl) pwEl.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+});
+
+// 起動時：セッション復元 → なければログイン画面
+(function() {
+  try {
+    const sess = sessionStorage.getItem(SESSION_KEY_KUMI);
+    if (sess) {
+      const user = JSON.parse(sess);
+      showMainScreen(user);
+      return;
+    }
+  } catch(e) {}
+  document.getElementById('login-screen').style.display = 'flex';
+})();
+
+// ============================================================
+// タブ切替
+// ============================================================
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-ship').style.display = tab === 'ship' ? 'block' : 'none';
+  document.getElementById('tab-ok').style.display   = tab === 'ok'   ? 'block' : 'none';
+  document.getElementById('tab-err').style.display  = tab === 'err'  ? 'block' : 'none';
+}
+
+// 統計カード更新
+function updateStatCards() {
+  try {
+    const data   = getShippingData();
+    const total  = data.length;
+    const done   = data.filter(x => (x.orderQty - x.scannedQty) === 0).length;
+    const remain = total - done;
+    const errCnt = getErrorRecords().length;
+    document.getElementById('stat-total').textContent  = total;
+    document.getElementById('stat-done').textContent   = done;
+    document.getElementById('stat-remain').textContent = remain;
+    document.getElementById('stat-err').textContent    = errCnt;
+    document.getElementById('stat-prog').style.width   =
+      (total > 0 ? Math.round(done / total * 100) : 0) + '%';
+  } catch(e) {}
+}
+</script>
+
+<script>
+// ============================================================
+// 以下はクミ化成向けオリジナルJS（一切変更なし）
+// ============================================================
+const STORAGE_KEY = "kanban_ok_records";
+const SHIP_STORAGE_KEY = "shipping_csv_data";
+const ERROR_STORAGE_KEY = "kanban_error_records";
+
+const cust = document.getElementById("cust");
+const inside = document.getElementById("inside");
+const result = document.getElementById("result");
+const detail = document.getElementById("detail");
+const custClean = document.getElementById("custClean");
+const custExtract = document.getElementById("custExtract");
+const custQty = document.getElementById("custQty");
+const custQtyRaw = document.getElementById("custQtyRaw");
+const insideClean = document.getElementById("insideClean");
+const insideTarget = document.getElementById("insideTarget");
+const insideWindows14 = document.getElementById("insideWindows14");
+const insideWindows15 = document.getElementById("insideWindows15");
+const insideWindows16 = document.getElementById("insideWindows16");
+const insideWindows17 = document.getElementById("insideWindows17");
+
+const savedTableBody = document.querySelector("#savedTable tbody");
+const summaryCount = document.getElementById("summaryCount");
+
+const csvFile = document.getElementById("csvFile");
+const shipTableBody = document.querySelector("#shipTable tbody");
+const shipSummary = document.getElementById("shipSummary");
+
+const errorTableBody = document.querySelector("#errorTable tbody");
+const errorSummaryCount = document.getElementById("errorSummaryCount");
+
+window.addEventListener("load", function () {
+    // ログイン画面がある場合は初期化をdoLogin/showMainScreen側に任せる
+});
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+    }
+});
+
+setInterval(function () {
+    if (document.getElementById('main-screen').style.display !== 'none') {
+        if (document.activeElement !== cust && document.activeElement !== inside && document.activeElement !== csvFile) {
+            cust.focus();
+        }
+    }
+}, 300);
+
+function normalize(str) {
+    return String(str || "")
+        .replace(/\r/g, "")
+        .replace(/\n/g, "");
+}
+
+function removeSpaces(str) {
+    return String(str || "").replace(/[\s\u00A0\u3000]+/g, "");
+}
+
+function normalizeProductNo(str) {
+    return removeSpaces(str).replace(/[－ー‐‒–—―-]/g, "");
+}
+
+function escapeHtml(str) {
+    return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function getNowString() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    const ss = String(d.getSeconds()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+}
+
+function toNumber(value) {
+    const s = String(value || "").replace(/,/g, "").trim();
+    if (s === "") return 0;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : 0;
+}
+
+function cleanCustomerKanban(raw) {
+    return normalize(raw);
+}
+
+function getCustomerCandidates(raw) {
+    const s = cleanCustomerKanban(raw);
+    const list = [];
+
+    if (s.length >= 54) {
+        const rawPart17 = s.slice(37, 54);
+        const part17 = normalizeProductNo(rawPart17);
+        list.push({
+            label: "38\uff5e54\u5217",
+            value: part17,
+            rawValue: rawPart17,
+            length: part17.length
+        });
+    }
+
+    if (s.length >= 52) {
+        const rawPart15 = s.slice(37, 52);
+        const part15 = normalizeProductNo(rawPart15);
+        list.push({
+            label: "38\uff5e52\u5217",
+            value: part15,
+            rawValue: rawPart15,
+            length: part15.length
+        });
+    }
+
+    return list.filter(x => x.value.length > 0);
+}
+
+function getCustomerQuantity(raw) {
+    const s = cleanCustomerKanban(raw);
+
+    if (s.length < 93) {
+        return null;
+    }
+
+    const qtyText = s.slice(90, 93);
+    const qtyTrim = qtyText.trim();
+
+    if (!/^\d{3}$/.test(qtyTrim)) {
+        return null;
+    }
+
+    return Number(qtyTrim);
+}
+
+function cleanInsideKanban(raw) {
+    return normalizeProductNo(String(raw || ""));
+}
+
+function getInsideTarget(raw) {
+    const cleaned = cleanInsideKanban(raw);
+    if (cleaned.length < 14) return "";
+    return cleaned.slice(0, Math.min(20, cleaned.length));
+}
+
+function getInsideWindowsByLength(raw, len) {
+    const target = getInsideTarget(raw);
+    const list = [];
+
+    if (target.length < len) {
+        return list;
+    }
+
+    for (let i = 0; i <= target.length - len; i++) {
+        list.push(target.slice(i, i + len));
+    }
+
+    return [...new Set(list)];
+}
+
+function showExtracts() {
+    const customerRaw = cleanCustomerKanban(cust.value);
+    const customerCandidates = getCustomerCandidates(cust.value);
+    const customerQtyVal = getCustomerQuantity(cust.value);
+    const qtyRaw = customerRaw.length >= 93 ? customerRaw.slice(90, 93) : "";
+
+    const insideRawClean = cleanInsideKanban(inside.value);
+    const target = getInsideTarget(inside.value);
+    const windows14 = getInsideWindowsByLength(inside.value, 14);
+    const windows15 = getInsideWindowsByLength(inside.value, 15);
+    const windows16 = getInsideWindowsByLength(inside.value, 16);
+    const windows17 = getInsideWindowsByLength(inside.value, 17);
+
+    custClean.textContent = customerRaw ? "[" + customerRaw + "]" : "\u6284\u51fa\u4e0d\u53ef";
+    custExtract.textContent = customerCandidates.length
+        ? customerCandidates.map(x => `${x.label}: ${x.rawValue} \u2192 ${x.value} (${x.value.length}\u6587\u5b57)`).join(" / ")
+        : "\u6284\u51fa\u4e0d\u53ef";
+    custQty.textContent = customerQtyVal !== null ? customerQtyVal : "\u6284\u51fa\u4e0d\u53ef";
+    custQtyRaw.textContent = qtyRaw ? "[" + qtyRaw + "]" : "\u6284\u51fa\u4e0d\u53ef";
+    insideClean.textContent = insideRawClean ? "[" + insideRawClean + "]" : "\u6284\u51fa\u4e0d\u53ef";
+    insideTarget.textContent = target || "\u6284\u51fa\u4e0d\u53ef";
+    insideWindows14.textContent = windows14.length ? windows14.join(" / ") : "\u6284\u51fa\u4e0d\u53ef";
+    insideWindows15.textContent = windows15.length ? windows15.join(" / ") : "\u6284\u51fa\u4e0d\u53ef";
+    insideWindows16.textContent = windows16.length ? windows16.join(" / ") : "\u6284\u51fa\u4e0d\u53ef";
+    insideWindows17.textContent = windows17.length ? windows17.join(" / ") : "\u6284\u51fa\u4e0d\u53ef";
+}
+
+function getSavedRecords() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    } catch (e) {
+        return [];
+    }
+}
+
+function setSavedRecords(records) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+}
+
+function saveOKRecord(productNo, customerValue, insideMatchedValue, matchLength, customerQtyValue, customerRaw, insideRaw) {
+    const records = getSavedRecords();
+
+    records.push({
+        productNo: productNo,
+        customerValue: customerValue,
+        insideMatchedValue: insideMatchedValue,
+        matchLength: matchLength,
+        customerQtyValue: customerQtyValue,
+        customerRaw: customerRaw,
+        insideRaw: insideRaw,
+        savedAt: getNowString()
+    });
+
+    setSavedRecords(records);
+    renderSavedTable();
+}
+
+function renderSavedTable() {
+    const records = getSavedRecords();
+    savedTableBody.innerHTML = "";
+
+    if (records.length === 0) {
+        summaryCount.textContent = "\u4fdd\u5b58\u4ef6\u6570\uff1a0\u4ef6 / \u54c1\u756a\u6570\uff1a0\u4ef6";
+        return;
+    }
+
+    const grouped = {};
+
+    records.forEach(r => {
+        if (!grouped[r.productNo]) {
+            grouped[r.productNo] = [];
+        }
+        grouped[r.productNo].push(r);
+    });
+
+    const productNos = Object.keys(grouped).sort();
+
+    productNos.forEach(productNo => {
+        const arr = grouped[productNo];
+        const latest = arr[arr.length - 1];
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${escapeHtml(productNo)}</td>
+            <td>${arr.length}</td>
+            <td>${escapeHtml(latest.savedAt)}</td>
+            <td>${escapeHtml(latest.customerValue)}</td>
+            <td>${escapeHtml(latest.insideMatchedValue)}</td>
+            <td>${escapeHtml(latest.matchLength)}</td>
+            <td>${escapeHtml(latest.customerQtyValue)}</td>
+            <td>${escapeHtml(latest.customerRaw)}</td>
+            <td>${escapeHtml(latest.insideRaw)}</td>
+        `;
+        savedTableBody.appendChild(tr);
+    });
+
+    summaryCount.textContent = `\u4fdd\u5b58\u4ef6\u6570\uff1a${records.length}\u4ef6 / \u54c1\u756a\u6570\uff1a${productNos.length}\u4ef6`;
+}
+
+function getErrorRecords() {
+    try {
+        return JSON.parse(localStorage.getItem(ERROR_STORAGE_KEY) || "[]");
+    } catch (e) {
+        return [];
+    }
+}
+
+function setErrorRecords(records) {
+    localStorage.setItem(ERROR_STORAGE_KEY, JSON.stringify(records));
+}
+
+function saveErrorRecord(productNo, customerQtyValue, message, customerRaw, insideRaw) {
+    const records = getErrorRecords();
+
+    records.push({
+        savedAt: getNowString(),
+        productNo: productNo || "",
+        customerQtyValue: customerQtyValue || "",
+        message: message || "",
+        customerRaw: customerRaw || "",
+        insideRaw: insideRaw || ""
+    });
+
+    setErrorRecords(records);
+    renderErrorTable();
+}
+
+function renderErrorTable() {
+    const records = getErrorRecords();
+    errorTableBody.innerHTML = "";
+
+    if (records.length === 0) {
+        errorSummaryCount.textContent = "\u30a8\u30e9\u30fc\u4ef6\u6570\uff1a0\u4ef6";
+        updateStatCards();
+        return;
+    }
+
+    records.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.className = "row-error";
+        tr.innerHTML = `
+            <td>${escapeHtml(r.savedAt)}</td>
+            <td>${escapeHtml(r.productNo)}</td>
+            <td>${escapeHtml(r.customerQtyValue)}</td>
+            <td>${escapeHtml(r.message)}</td>
+            <td>${escapeHtml(r.customerRaw)}</td>
+            <td>${escapeHtml(r.insideRaw)}</td>
+        `;
+        errorTableBody.appendChild(tr);
+    });
+
+    errorSummaryCount.textContent = `\u30a8\u30e9\u30fc\u4ef6\u6570\uff1a${records.length}\u4ef6`;
+    updateStatCards();
+}
+
+function clearErrorData() {
+    if (!confirm("\u30a8\u30e9\u30fc\u5c65\u6b74\u3092\u5168\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f")) {
+        return;
+    }
+    localStorage.removeItem(ERROR_STORAGE_KEY);
+    renderErrorTable();
+}
+
+function getShippingData() {
+    try {
+        return JSON.parse(localStorage.getItem(SHIP_STORAGE_KEY) || "[]");
+    } catch (e) {
+        return [];
+    }
+}
+
+function setShippingData(data) {
+    localStorage.setItem(SHIP_STORAGE_KEY, JSON.stringify(data));
+}
+
+function parseCSVRows(text) {
+    const rows = [];
+    let row = [];
+    let value = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (ch === '"') {
+            if (inQuotes && next === '"') {
+                value += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (ch === ',' && !inQuotes) {
+            row.push(value);
+            value = "";
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+            if (ch === '\r' && next === '\n') {
+                i++;
+            }
+            row.push(value);
+            value = "";
+
+            if (row.some(v => String(v).trim() !== "")) {
+                rows.push(row);
+            }
+            row = [];
+        } else {
+            value += ch;
+        }
+    }
+
+    row.push(value);
+    if (row.some(v => String(v).trim() !== "")) {
+        rows.push(row);
+    }
+
+    return rows;
+}
+
+csvFile.addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+        let text = event.target.result || "";
+
+        if (text.charCodeAt(0) === 0xFEFF) {
+            text = text.slice(1);
+        }
+
+        const rows = parseCSVRows(text);
+
+        if (rows.length === 0) {
+            alert("CSV\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3067\u3057\u305f\u3002");
+            return;
+        }
+
+        // 1行目はヘッダー行のためスキップ（slice(1)）
+        const data = rows.slice(1).map((cols, index) => {
+            const productNo = normalizeProductNo(cols[4] || "");
+            const orderQty = toNumber(cols[6] || "");
+            const packQty = toNumber(cols[7] || "");
+            const noki = (cols[2] || "").trim();
+            const biko = (cols[11] || "").trim();
+
+            return {
+                id: "row_" + (index + 2) + "_" + Date.now(),
+                rowNo: index + 2,
+                productNo: productNo,
+                orderQty: orderQty,
+                packQty: packQty,
+                noki: noki,
+                biko: biko,
+                scannedQty: 0,
+                lastScannedAt: ""
+            };
+        }).filter(x => x.productNo !== "");
+
+        if (data.length === 0) {
+            alert("CSV\u304b\u3089E\u5217\u306e\u54c1\u756a\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002");
+            return;
+        }
+
+        setShippingData(data);
+        renderShippingTable();
+        csvFile.value = "";
+
+        alert("CSV\u53d6\u8fbc\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002");
+    };
+
+    reader.onerror = function() {
+        alert("CSV\u306e\u8aad\u8fbc\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002");
+    };
+
+    reader.readAsText(file, "shift_jis");
+});
+
+function renderShippingTable() {
+    const data = getShippingData();
+    shipTableBody.innerHTML = "";
+
+    if (data.length === 0) {
+        shipSummary.textContent = "\u51fa\u8377\u6307\u793a\u30c7\u30fc\u30bf\uff1a0\u4ef6";
+        document.getElementById("shipDetailCount").textContent = "";
+        updateStatCards();
+        return;
+    }
+
+    let totalOrder = 0;
+    let totalScanned = 0;
+    let doneCount = 0;
+
+    data.forEach(item => {
+        const remain = item.orderQty - item.scannedQty;
+        totalOrder += item.orderQty;
+        totalScanned += item.scannedQty;
+
+        let status = "\u672a\u6d88\u8fbc";
+        let statusClass = "";
+        let rowClass = "";
+
+        if (remain === 0) {
+            status = "\u5b8c\u4e86";
+            statusClass = "status-ok";
+            rowClass = "row-done";
+            doneCount++;
+        } else if (item.scannedQty > 0) {
+            status = "\u6d88\u8fbc\u4e2d";
+            statusClass = "status-warn";
+            rowClass = "row-progress";
+        }
+
+        const tr = document.createElement("tr");
+        tr.className = rowClass;
+        const bikoVal = item.biko || "";
+        const bikoIsAbnormal = bikoVal !== "" && bikoVal !== "S4AF01";
+        const bikoStyle = bikoIsAbnormal ? 'style="color:#c0392b;font-weight:700"' : '';
+        tr.innerHTML = `
+            <td>${escapeHtml(item.rowNo || "")}</td>
+            <td>${escapeHtml(item.productNo)}</td>
+            <td>${escapeHtml(item.noki || "")}</td>
+            <td>${item.orderQty}</td>
+            <td>${item.packQty || ""}</td>
+            <td>${item.scannedQty}</td>
+            <td>${remain}</td>
+            <td class="${statusClass}">${status}</td>
+            <td ${bikoStyle}>${escapeHtml(bikoVal)}</td>
+            <td>${escapeHtml(item.lastScannedAt || "")}</td>
+        `;
+        shipTableBody.appendChild(tr);
+    });
+
+    shipSummary.textContent =
+        `\u51fa\u8377\u6307\u793a\u30c7\u30fc\u30bf\uff1a${data.length}\u4ef6 / \u5b8c\u4e86\uff1a${doneCount}\u4ef6 / \u6307\u793a\u5408\u8a08\uff1a${totalOrder} / \u6d88\u8fbc\u5408\u8a08\uff1a${totalScanned}`;
+    document.getElementById("shipDetailCount").textContent =
+        `\u51fa\u8377\u6307\u793a\u30c7\u30fc\u30bf\uff1a${data.length}\u4ef6 / \u5b8c\u4e86\uff1a${doneCount}\u4ef6`;
+
+    updateStatCards();
+}
+
+function consumeShippingData(productNo, qty) {
+    const data = getShippingData();
+
+    if (!productNo) {
+        return { ok: false, status: "NG", message: "\u54c1\u756a\u304c\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002" };
+    }
+
+    if (!Number.isFinite(qty) || qty <= 0) {
+        return { ok: false, status: "NG", message: "\u5ba2\u5148\u6570\u91cf\u304c\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002" };
+    }
+
+    const normalizedProductNo = normalizeProductNo(productNo);
+
+    const targetIndexes = data
+        .map((x, idx) => ({ item: x, idx }))
+        .filter(x => normalizeProductNo(x.item.productNo) === normalizedProductNo);
+
+    if (targetIndexes.length === 0) {
+        return {
+            ok: false,
+            status: "NG",
+            message: `\u51fa\u8377\u6307\u793aCSV\u306b\u54c1\u756a [${productNo}] \u304c\u3042\u308a\u307e\u305b\u3093\u3002`
+        };
+    }
+
+    const available = targetIndexes.filter(x => (x.item.orderQty - x.item.scannedQty) > 0);
+
+    if (available.length === 0) {
+        return {
+            ok: false,
+            status: "NG",
+            message: `\u54c1\u756a [${productNo}] \u306e\u5bfe\u8c61\u884c\u306f\u3059\u3079\u3066\u5b8c\u4e86\u3057\u3066\u3044\u307e\u3059\u3002`
+        };
+    }
+
+    const exactRemainMatches = available.filter(x => (x.item.orderQty - x.item.scannedQty) === qty);
+    const exactPackMatches = available.filter(x => x.item.packQty === qty);
+
+    let candidates = [];
+    let reason = "";
+
+    if (exactRemainMatches.length > 0) {
+        candidates = exactRemainMatches;
+        reason = "\u6b8b\u6570\u4e00\u81f4\u3067\u9078\u629e";
+    } else if (exactPackMatches.length > 0) {
+        candidates = exactPackMatches;
+        reason = "\u6b63\u898f\u5165\u6570\u4e00\u81f4\u3067\u9078\u629e";
+    } else {
+        return {
+            ok: false,
+            status: "NG",
+            message: `\u54c1\u756a [${productNo}] \u306f\u898b\u3064\u304b\u308a\u307e\u3057\u305f\u304c\u3001\u5ba2\u5148\u6570\u91cf ${qty} \u3068\u4e00\u81f4\u3059\u308b\u6b8b\u6570\u30fb\u6b63\u898f\u5165\u6570\u304c\u3042\u308a\u307e\u305b\u3093\u3002`
+        };
+    }
+
+    const target = candidates[Math.floor(Math.random() * candidates.length)];
+
+    data[target.idx].scannedQty += qty;
+    data[target.idx].lastScannedAt = getNowString();
+    setShippingData(data);
+    renderShippingTable();
+
+    const remain = data[target.idx].orderQty - data[target.idx].scannedQty;
+
+    return {
+        ok: true,
+        status: "OK",
+        message: `CSV\u884c ${data[target.idx].rowNo} \u306e\u54c1\u756a [${productNo}] \u3092 ${qty} \u6d88\u8fbc\u3057\u307e\u3057\u305f\u3002${reason}\u3002\u6b8b\u6570=${remain}`
+    };
+}
+
+function check() {
+    const customerCandidates = getCustomerCandidates(cust.value);
+    const customerRaw = cleanCustomerKanban(cust.value);
+    const customerQty = getCustomerQuantity(cust.value);
+
+    const insideCleaned = cleanInsideKanban(inside.value);
+    const target = getInsideTarget(inside.value);
+
+    const windowsMap = {
+        14: getInsideWindowsByLength(inside.value, 14),
+        15: getInsideWindowsByLength(inside.value, 15),
+        16: getInsideWindowsByLength(inside.value, 16),
+        17: getInsideWindowsByLength(inside.value, 17)
+    };
+
+    showExtracts();
+
+    if (!customerRaw) {
+        const errorMessage = "\u5ba2\u5148\u30ab\u30f3\u30d0\u30f3\u304b\u3089\u6709\u52b9\u6587\u5b57\u3092\u6284\u51fa\u3067\u304d\u307e\u305b\u3093\u3002";
+        result.innerText = "NG";
+        result.className = "ng";
+        detail.innerText = errorMessage;
+        saveErrorRecord("", "", errorMessage, cleanCustomerKanban(cust.value), cleanInsideKanban(inside.value));
+        playNG();
+        return;
+    }
+
+    if (customerCandidates.length === 0) {
+        const errorMessage = "\u5ba2\u5148\u30ab\u30f3\u30d0\u30f3\u304c\u77ed\u3044\u305f\u3081\u300138\uff5e54\u5217\u307e\u305f\u306f38\uff5e52\u5217\u3092\u6284\u51fa\u3067\u304d\u307e\u305b\u3093\u3002";
+        result.innerText = "NG";
+        result.className = "ng";
+        detail.innerText = errorMessage;
+        saveErrorRecord("", "", errorMessage, cleanCustomerKanban(cust.value), cleanInsideKanban(inside.value));
+        playNG();
+        return;
+    }
+
+    if (customerQty === null) {
+        const errorMessage = "\u5ba2\u5148\u30ab\u30f3\u30d0\u30f3\u306e\u6570\u91cf\uff0891\uff5e93\u5217\uff09\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002\u5ba2\u5148\u6570\u91cf\u751f\u30c7\u30fc\u30bf\u3092\u78ba\u8a8d\u3057\u3066\u304f\u3060\u3055\u3044\u3002";
+        result.innerText = "NG";
+        result.className = "ng";
+        detail.innerText = errorMessage;
+        saveErrorRecord("", "", errorMessage, cleanCustomerKanban(cust.value), cleanInsideKanban(inside.value));
+        playNG();
+        return;
+    }
+
+    if (!insideCleaned) {
+        const errorMessage = "\u793e\u5185\u30ab\u30f3\u30d0\u30f3\u304b\u3089\u6709\u52b9\u6587\u5b57\u3092\u6284\u51fa\u3067\u304d\u307e\u305b\u3093\u3002";
+        result.innerText = "NG";
+        result.className = "ng";
+        detail.innerText = errorMessage;
+        saveErrorRecord("", customerQty, errorMessage, cleanCustomerKanban(cust.value), cleanInsideKanban(inside.value));
+        playNG();
+        return;
+    }
+
+    if (!target) {
+        const errorMessage = "\u793e\u5185\u30ab\u30f3\u30d0\u30f3\u306f\u6574\u5f62\u5f8c14\u6587\u5b57\u672a\u6e80\u306e\u305f\u3081\u3001\u6bd4\u8f03\u5bfe\u8c61\u3092\u4f5c\u308c\u307e\u305b\u3093\u3002";
+        result.innerText = "NG";
+        result.className = "ng";
+        detail.innerText = errorMessage;
+        saveErrorRecord("", customerQty, errorMessage, cleanCustomerKanban(cust.value), cleanInsideKanban(inside.value));
+        playNG();
+        return;
+    }
+
+    const sortedCandidates = [...customerCandidates].sort((a, b) => b.length - a.length);
+
+    let matchedInfo = null;
+
+    for (const customerCandidate of sortedCandidates) {
+        const windows = windowsMap[customerCandidate.length] || [];
+        const matched = windows.find(x => x === customerCandidate.value);
+
+        if (matched) {
+            matchedInfo = {
+                customerLabel: customerCandidate.label,
+                customerValue: customerCandidate.value,
+                insideValue: matched,
+                matchLength: customerCandidate.length
+            };
+            break;
+        }
+    }
+
+    if (!matchedInfo) {
+        const errorMessage =
+            "\u4e0d\u4e00\u81f4\uff1a\u5ba2\u5148\u5019\u88dc [" +
+            customerCandidates.map(x => x.label + ":" + x.value).join(" / ") +
+            "] / \u793e\u518514\u5019\u88dc [" + ((windowsMap[14] || []).join(" , ") || "\u306a\u3057") +
+            "] / \u793e\u518515\u5019\u88dc [" + ((windowsMap[15] || []).join(" , ") || "\u306a\u3057") +
+            "] / \u793e\u518516\u5019\u88dc [" + ((windowsMap[16] || []).join(" , ") || "\u306a\u3057") +
+            "] / \u793e\u518517\u5019\u88dc [" + ((windowsMap[17] || []).join(" , ") || "\u306a\u3057") + "]";
+
+        result.innerText = "NG";
+        result.className = "ng";
+        detail.innerText = errorMessage;
+
+        saveErrorRecord(
+            "",
+            customerQty,
+            errorMessage,
+            cleanCustomerKanban(cust.value),
+            cleanInsideKanban(inside.value)
+        );
+
+        playNG();
+        return;
+    }
+
+    const shippingData = getShippingData();
+    if (shippingData.length === 0) {
+        const errorMessage = "\u5148\u306b\u51fa\u8377\u6307\u793aCSV\u3092\u53d6\u308a\u8fbc\u3093\u3067\u304f\u3060\u3055\u3044\u3002";
+        result.innerText = "NG";
+        result.className = "ng";
+        detail.innerText = errorMessage;
+        saveErrorRecord(
+            matchedInfo.customerValue,
+            customerQty,
+            errorMessage,
+            cleanCustomerKanban(cust.value),
+            cleanInsideKanban(inside.value)
+        );
+        playNG();
+        return;
+    }
+
+    const productNo = matchedInfo.customerValue;
+    const consumeResult = consumeShippingData(productNo, customerQty);
+
+    if (!consumeResult.ok) {
+        const errorMessage =
+            "\u54c1\u756a\u4e00\u81f4\uff1a" + matchedInfo.customerLabel +
+            " [" + matchedInfo.customerValue + "] / \u793e\u5185\u5019\u88dc [" + matchedInfo.insideValue + "]" +
+            " / \u5ba2\u5148\u6570\u91cf=" + customerQty +
+            " / " + consumeResult.message;
+
+        result.innerText = "NG";
+        result.className = "ng";
+        detail.innerText = errorMessage;
+
+        saveErrorRecord(
+            matchedInfo.customerValue,
+            customerQty,
+            errorMessage,
+            cleanCustomerKanban(cust.value),
+            cleanInsideKanban(inside.value)
+        );
+
+        playNG();
+        return;
+    }
+
+    result.innerText = "OK";
+    result.className = "ok";
+    detail.innerText =
+        "\u54c1\u756a\u4e00\u81f4\uff1a" + matchedInfo.customerLabel +
+        " [" + matchedInfo.customerValue + "] / \u793e\u5185\u5019\u88dc [" + matchedInfo.insideValue + "]" +
+        " / \u5ba2\u5148\u6570\u91cf=" + customerQty +
+        " / " + consumeResult.message;
+
+    // 備考チェック：S4AF01以外は仕向け先違いアラート
+    const matchedItem = getShippingData().find(
+        x => normalizeProductNo(x.productNo) === normalizeProductNo(productNo)
+    );
+    const bikoForAlert = matchedItem ? (matchedItem.biko || "") : "";
+    if (bikoForAlert !== "" && bikoForAlert !== "S4AF01") {
+        setTimeout(() => {
+            alert("⚠️ 仕向け先違いのため、別パレットで準備してください。\n備考：" + bikoForAlert);
+        }, 100);
+    }
+
+    saveOKRecord(
+        productNo,
+        matchedInfo.customerValue,
+        matchedInfo.insideValue,
+        matchedInfo.matchLength,
+        customerQty,
+        cleanCustomerKanban(cust.value),
+        cleanInsideKanban(inside.value)
+    );
+
+    playOK();
+    setTimeout(clearAll, 500);
+}
+
+function exportCSV() {
+    const records = getSavedRecords();
+
+    if (records.length === 0) {
+        alert("\u4fdd\u5b58\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093\u3002");
+        return;
+    }
+
+    const header = [
+        "\u54c1\u756a","\u4fdd\u5b58\u65e5\u6642","\u4e00\u81f4\u3057\u305f\u5ba2\u5148\u5024",
+        "\u4e00\u81f4\u3057\u305f\u793e\u5185\u5024","\u4e00\u81f4\u9577","\u5ba2\u5148\u6570\u91cf",
+        "\u5ba2\u5148\u5143\u30c7\u30fc\u30bf","\u793e\u5185\u5143\u30c7\u30fc\u30bf"
+    ];
+
+    const rows = records.map(r => [
+        r.productNo, r.savedAt, r.customerValue, r.insideMatchedValue,
+        r.matchLength, r.customerQtyValue, r.customerRaw, r.insideRaw
+    ]);
+
+    const csv = [header, ...rows]
+        .map(row => row.map(v => `"${String(v || "").replace(/"/g, '""')}"`).join(","))
+        .join("\r\n");
+
+    downloadCsvText(csv, "kanban_ok_records.csv");
+}
+
+function exportShippingResultCSV() {
+    const data = getShippingData();
+
+    if (data.length === 0) {
+        alert("\u51fa\u8377\u6307\u793a\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093\u3002");
+        return;
+    }
+
+    const header = ["CSV\u884c","\u54c1\u756a","\u6307\u793a\u6570","\u6b63\u898f\u5165\u6570","\u6d88\u8fbc\u6570","\u6b8b\u6570","\u72b6\u614b","\u6700\u65b0\u6d88\u8fbc\u65e5\u6642"];
+    const rows = data.map(item => {
+        const remain = item.orderQty - item.scannedQty;
+        let status = "\u672a\u6d88\u8fbc";
+        if (remain === 0) status = "\u5b8c\u4e86";
+        else if (item.scannedQty > 0) status = "\u6d88\u8fbc\u4e2d";
+
+        return [
+            item.rowNo || "", item.productNo, item.orderQty, item.packQty || "",
+            item.scannedQty, remain, status, item.lastScannedAt || ""
+        ];
+    });
+
+    const csv = [header, ...rows]
+        .map(row => row.map(v => `"${String(v || "").replace(/"/g, '""')}"`).join(","))
+        .join("\r\n");
+
+    downloadCsvText(csv, "shipping_result.csv");
+}
+
+function exportErrorCSV() {
+    const records = getErrorRecords();
+
+    if (records.length === 0) {
+        alert("\u30a8\u30e9\u30fc\u5c65\u6b74\u304c\u3042\u308a\u307e\u305b\u3093\u3002");
+        return;
+    }
+
+    const header = ["\u65e5\u6642","\u54c1\u756a","\u5ba2\u5148\u6570\u91cf","\u30a8\u30e9\u30fc\u5185\u5bb9","\u5ba2\u5148\u5143\u30c7\u30fc\u30bf","\u793e\u5185\u5143\u30c7\u30fc\u30bf"];
+
+    const rows = records.map(r => [
+        r.savedAt, r.productNo, r.customerQtyValue, r.message, r.customerRaw, r.insideRaw
+    ]);
+
+    const csv = [header, ...rows]
+        .map(row => row.map(v => `"${String(v || "").replace(/"/g, '""')}"`).join(","))
+        .join("\r\n");
+
+    downloadCsvText(csv, "kanban_error_records.csv");
+}
+
+function downloadCsvText(csv, filename) {
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function clearSavedData() {
+    if (!confirm("OK\u5c65\u6b74\u3092\u5168\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f")) {
+        return;
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    renderSavedTable();
+}
+
+function clearShippingData() {
+    if (!confirm("\u51fa\u8377\u6307\u793a\u30c7\u30fc\u30bf\u3092\u5168\u524a\u9664\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f")) {
+        return;
+    }
+    localStorage.removeItem(SHIP_STORAGE_KEY);
+    renderShippingTable();
+}
+
+function clearAll() {
+    cust.value = "";
+    inside.value = "";
+    result.innerText = "\u2014";
+    result.className = "";
+    detail.innerText = "";
+    custClean.textContent = "";
+    custExtract.textContent = "";
+    custQty.textContent = "";
+    custQtyRaw.textContent = "";
+    insideClean.textContent = "";
+    insideTarget.textContent = "";
+    insideWindows14.textContent = "";
+    insideWindows15.textContent = "";
+    insideWindows16.textContent = "";
+    insideWindows17.textContent = "";
+
+    setTimeout(function () {
+        cust.focus();
+    }, 100);
+}
+
+cust.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        showExtracts();
+        setTimeout(function () {
+            inside.focus();
+        }, 50);
+    }
+});
+
+inside.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        check();
+    }
+});
+
+function playOK() {
+    try {
+        new Audio("https://www.soundjay.com/buttons/sounds/button-3.mp3").play();
+    } catch (e) {}
+
+    document.body.classList.add("flash-ok");
+    setTimeout(() => {
+        document.body.classList.remove("flash-ok");
+    }, 500);
+}
+
+function playNG() {
+    try {
+        new Audio("https://www.soundjay.com/buttons/sounds/button-10.mp3").play();
+    } catch (e) {}
+
+    document.body.classList.add("flash-ng");
+    setTimeout(() => {
+        document.body.classList.remove("flash-ng");
+    }, 900);
+}
+</script>
+
+</body>
+</html>
