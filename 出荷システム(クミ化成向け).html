@@ -206,10 +206,7 @@ body.flash-ng{animation:flashRed .9s ease}
   <div class="card">
     <div class="card-title">出荷指示CSV取込</div>
     <div class="csv-area">
-      <label class="file-label-btn">
-        📂 CSVファイルを選択
-        <input id="csvFile" type="file" accept=".csv,text/csv" style="display:none">
-      </label>
+      <button class="file-label-btn" onclick="showCsvModal()" style="border:none;cursor:pointer">📂 CSVを開く</button>
       <span class="csv-count" id="shipSummary">出荷指示データ：0件</span>
     </div>
     <div style="margin-top:6px;font-size:11px;color:#aaa">E列=品番 / G列=指示数 / H列=正規入数 / L列=備考（1行目ヘッダーは自動スキップ）</div>
@@ -220,16 +217,7 @@ body.flash-ng{animation:flashRed .9s ease}
     <div class="card-title">カンバン照合・消込</div>
     <div class="scan-grid">
       <div>
-        <div class="scan-label">① 客先カンバン</div>
-        <input id="cust" type="text" autocomplete="off" placeholder="スキャン または 入力（Enter）">
-        <div class="info-row">
-          元データ：<span id="custClean"></span><br>
-          抽出候補（17文字優先）：<span id="custExtract"></span><br>
-          客先数量（91～93列）：<span id="custQty"></span>&nbsp;<span id="custQtyRaw" style="color:#aaa"></span>
-        </div>
-      </div>
-      <div>
-        <div class="scan-label">② 社内カンバン</div>
+        <div class="scan-label">① 社内カンバン</div>
         <input id="inside" type="text" autocomplete="off" placeholder="スキャン または 入力（Enter）">
         <div class="info-row">
           整形後（空白・記号削除）：<span id="insideClean"></span><br>
@@ -238,6 +226,15 @@ body.flash-ng{animation:flashRed .9s ease}
           15文字候補：<span id="insideWindows15"></span><br>
           16文字候補：<span id="insideWindows16"></span><br>
           17文字候補：<span id="insideWindows17"></span>
+        </div>
+      </div>
+      <div>
+        <div class="scan-label">② 客先カンバン</div>
+        <input id="cust" type="text" autocomplete="off" placeholder="スキャン または 入力（Enter）">
+        <div class="info-row">
+          元データ：<span id="custClean"></span><br>
+          抽出候補（17文字優先）：<span id="custExtract"></span><br>
+          客先数量（91～93列）：<span id="custQty"></span>&nbsp;<span id="custQtyRaw" style="color:#aaa"></span>
         </div>
         <button class="btn btn-dark" onclick="check()">照合・消込</button>
       </div>
@@ -255,11 +252,11 @@ body.flash-ng{animation:flashRed .9s ease}
 
   <!-- ── 操作手順 ── -->
   <div class="note">操作手順：
-① 出荷指示CSVを読み込む
-② 客先カンバンを読む
-③ 客先は 38～54列（17文字）を先に照合し、一致しなければ 38～52列（15文字）を照合する
-④ 客先数量は 91～93列 を読む（001→1、023→23、100→100）
-⑤ 社内カンバンを読む
+① 出荷指示CSVを読み込む（📂 CSVを開く）
+② 社内カンバンをスキャン（Enter）
+③ 客先カンバンをスキャン（Enter）→ 自動照合・消込
+④ 客先は 38～54列（17文字）を先に照合し、一致しなければ 38～52列（15文字）を照合する
+⑤ 客先数量は 91～93列 を読む（001→1、023→23、100→100）
 ⑥ 品番が一致したら、客先数量ぶんCSVを自動消込する
 ⑦ 消込優先順は「残数一致」→「正規入数一致」
 ⑧ 一致しない場合は消し込まず、エラー確認一覧へ記録する</div>
@@ -334,14 +331,7 @@ body.flash-ng{animation:flashRed .9s ease}
         <button style="width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:inherit" onclick="loadDriveFileList()">📋 ファイル一覧を取得</button>
         <div id="drive-file-list" style="display:none;border:1px solid #e5e5e0;border-radius:8px"></div>
       </div>
-      <div style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
-        <div style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">📁 ファイルから選ぶ</div>
-        <div style="font-size:11px;color:#888;margin-bottom:10px">PC・タブレット向け（Shift-JIS / UTF-8 両対応）</div>
-        <label style="display:block;width:100%;padding:12px;background:#1a1a18;color:#fff;border-radius:8px;text-align:center;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">
-          ファイルを選択
-          <input type="file" accept=".csv,.CSV" style="display:none" onchange="loadCSVFromFile(this)">
-        </label>
-      </div>
+
       <div id="url-feedback" style="display:none;font-size:12px;white-space:pre-wrap;line-height:1.6;padding:8px 10px;border-radius:6px;margin-top:4px"></div>
     </div>
   </div>
@@ -394,7 +384,7 @@ function showMainScreen(user) {
   if (nameEl) nameEl.textContent = '\u{1F464} ' + user.name + ' さん';
   // メイン画面初期化
   setTimeout(function() {
-    cust.focus();
+    inside.focus();
     renderSavedTable();
     renderShippingTable();
     renderErrorTable();
@@ -550,7 +540,7 @@ document.addEventListener("keydown", function(e) {
 setInterval(function () {
     if (cust && document.getElementById('main-screen').style.display !== 'none') {
         if (document.activeElement !== cust && document.activeElement !== inside && document.activeElement !== csvFile) {
-            cust.focus();
+            inside.focus();
         }
     }
 }, 300);
@@ -890,65 +880,7 @@ function parseCSVRows(text) {
     return rows;
 }
 
-csvFile.addEventListener("change", function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function(event) {
-        let text = event.target.result || "";
-
-        if (text.charCodeAt(0) === 0xFEFF) {
-            text = text.slice(1);
-        }
-
-        const rows = parseCSVRows(text);
-
-        if (rows.length === 0) {
-            alert("CSV\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3067\u3057\u305f\u3002");
-            return;
-        }
-
-        // 1行目はヘッダー行のためスキップ（slice(1)）
-        const data = rows.slice(1).map((cols, index) => {
-            const productNo = normalizeProductNo(cols[4] || "");
-            const orderQty = toNumber(cols[6] || "");
-            const packQty = toNumber(cols[7] || "");
-            const noki = (cols[2] || "").trim();
-            const biko = (cols[11] || "").trim();
-
-            return {
-                id: "row_" + (index + 2) + "_" + Date.now(),
-                rowNo: index + 2,
-                productNo: productNo,
-                orderQty: orderQty,
-                packQty: packQty,
-                noki: noki,
-                biko: biko,
-                scannedQty: 0,
-                lastScannedAt: ""
-            };
-        }).filter(x => x.productNo !== "");
-
-        if (data.length === 0) {
-            alert("CSV\u304b\u3089E\u5217\u306e\u54c1\u756a\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002");
-            return;
-        }
-
-        setShippingData(data);
-        renderShippingTable();
-        csvFile.value = "";
-
-        alert("CSV\u53d6\u8fbc\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002");
-    };
-
-    reader.onerror = function() {
-        alert("CSV\u306e\u8aad\u8fbc\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002");
-    };
-
-    reader.readAsText(file, "shift_jis");
-});
+// CSV読込はshowCsvModal→loadCSVFromFileで処理
 
 function renderShippingTable() {
     const data = getShippingData();
@@ -1394,21 +1326,23 @@ function clearAll() {
     insideWindows17.textContent = "";
 
     setTimeout(function () {
-        cust.focus();
+        inside.focus();
     }, 100);
 }
 
-cust.addEventListener("keydown", function(e) {
+// ① 社内カンバン(inside)でEnter → 客先(cust)にフォーカス
+inside.addEventListener("keydown", function(e) {
     if (e.key === "Enter") {
-        showExtracts();
         setTimeout(function () {
-            inside.focus();
+            cust.focus();
         }, 50);
     }
 });
 
-inside.addEventListener("keydown", function(e) {
+// ② 客先カンバン(cust)でEnter → 照合実行
+cust.addEventListener("keydown", function(e) {
     if (e.key === "Enter") {
+        showExtracts();
         check();
     }
 });
@@ -1459,6 +1393,8 @@ function showCsvModal() {
   const fl = document.getElementById('drive-file-list');
   if (fl) fl.style.display = 'none';
   document.getElementById('url-modal').classList.add('show');
+  // 開いたら自動でファイル一覧を取得
+  setTimeout(loadDriveFileList, 200);
 }
 function closeUrlModal() {
   document.getElementById('url-modal').classList.remove('show');
@@ -1480,25 +1416,35 @@ function loadCSVFromFile(input) {
   const file = input.files[0];
   if (!file) return;
   showUrlFb(file.name + ' を読み込み中...', 'info');
+
+  // まずShift-JISで試す
   const trySjis = new FileReader();
   trySjis.onload = function(e) {
     let text = e.target.result || '';
     if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
     const r = processCSVText_kumi(text, file.name);
-    if (r.added > 0) {
-      showUrlFb('✅ ' + file.name + '\n追加 ' + r.added + '件', 'ok');
-      setTimeout(closeUrlModal, 1500);
+    if (r.added > 0 || r.skipped > 0) {
+      // 読めた（追加 or 重複スキップ）→ 正常終了
+      const msg = r.added > 0
+        ? '✅ ' + file.name + '\n追加 ' + r.added + '件' + (r.skipped > 0 ? ' / 重複スキップ ' + r.skipped + '件' : '')
+        : '⚠️ ' + file.name + '\n全件重複スキップ（既に読込済み）';
+      showUrlFb(msg, r.added > 0 ? 'ok' : 'warn');
+      setTimeout(closeUrlModal, 1800);
     } else {
+      // Shift-JISで品番が1件も取れなかった → UTF-8で再試行
       const tryUtf = new FileReader();
       tryUtf.onload = function(e2) {
         let t2 = e2.target.result || '';
         if (t2.charCodeAt(0) === 0xFEFF) t2 = t2.slice(1);
         const r2 = processCSVText_kumi(t2, file.name);
         if (r2.added > 0 || r2.skipped > 0) {
-          showUrlFb('✅ ' + file.name + '\n追加 ' + r2.added + '件', 'ok');
-          setTimeout(closeUrlModal, 1500);
+          const msg2 = r2.added > 0
+            ? '✅ ' + file.name + '\n追加 ' + r2.added + '件' + (r2.skipped > 0 ? ' / 重複スキップ ' + r2.skipped + '件' : '')
+            : '⚠️ ' + file.name + '\n全件重複スキップ（既に読込済み）';
+          showUrlFb(msg2, r2.added > 0 ? 'ok' : 'warn');
+          setTimeout(closeUrlModal, 1800);
         } else {
-          showUrlFb('❌ 品番データを取得できませんでした', 'err');
+          showUrlFb('❌ 品番データを取得できませんでした\nE列に品番（5桁数字）があるか確認してください', 'err');
         }
       };
       tryUtf.readAsText(file, 'utf-8');
@@ -1512,7 +1458,7 @@ function processCSVText_kumi(text, fileName) {
   const rows = parseCSVRows(text);
   if (rows.length <= 1) return { added: 0, skipped: 0 };
   const existing = getShippingData();
-  const existingKeys = new Set(existing.map(x => x.rowNo + '_' + x.productNo));
+  const existingKeys = new Set(existing.map(x => x.productNo));
   let added = 0, skipped = 0;
   rows.slice(1).map((cols, index) => ({
     id: 'row_' + (index+2) + '_' + Date.now(),
@@ -1524,7 +1470,7 @@ function processCSVText_kumi(text, fileName) {
     biko: (cols[11] || '').trim(),
     scannedQty: 0, lastScannedAt: ''
   })).filter(x => x.productNo !== '').forEach(r => {
-    const k = r.rowNo + '_' + r.productNo;
+    const k = r.productNo;
     if (existingKeys.has(k)) { skipped++; }
     else { existing.push(r); existingKeys.add(k); added++; }
   });
@@ -1599,30 +1545,61 @@ async function loadSelectedFiles_kumi() {
   document.getElementById('drive-file-list').style.display = 'none';
   let totalAdded = 0, totalSkipped = 0;
   const movedIds = [];
+
   for (let i = 0; i < checkboxes.length; i++) {
     const cb = checkboxes[i];
     showUrlFb('(' + (i+1) + '/' + checkboxes.length + ') ' + cb.dataset.name + ' 読込中...', 'info');
     try {
       const res = await fetch(GAS_DEPLOY_URL_KUMI + '?action=getCSV&fileId=' + cb.value);
       let text = await res.text();
-      if (text.trim().startsWith('{')) { const d=JSON.parse(text); if (!d.ok) throw new Error(d.message); }
+
+      // GASエラーチェック
+      if (text.trim().startsWith('{')) {
+        const d = JSON.parse(text);
+        if (!d.ok) throw new Error(d.message);
+      }
+
+      // BOM除去
       if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
+      // CSV処理（GAS側でShift-JIS→文字列変換済みのためそのまま処理）
       const r = processCSVText_kumi(text, cb.dataset.name);
-      totalAdded += r.added; totalSkipped += r.skipped;
+      totalAdded   += r.added;
+      totalSkipped += r.skipped;
+
+      // 追加・スキップどちらでも成功扱いで移動対象に追加
       movedIds.push(cb.value);
-    } catch(e) { showUrlFb('❌ ' + cb.dataset.name + ': ' + e.message, 'err'); }
+
+    } catch(e) {
+      showUrlFb('❌ ' + cb.dataset.name + ': ' + e.message, 'err');
+    }
   }
-  showUrlFb('✅ 読込完了！追加 ' + totalAdded + '件\nファイルを未完了フォルダへ移動中...', 'ok');
+
+  // 結果表示
+  const resultMsg = totalAdded > 0
+    ? '✅ 読込完了！追加 ' + totalAdded + '件' + (totalSkipped > 0 ? ' / 重複スキップ ' + totalSkipped + '件' : '')
+    : (totalSkipped > 0 ? '⚠️ 全件重複スキップ（既に読込済み）' : '❌ データを取得できませんでした');
+  showUrlFb(resultMsg + '\nファイルを未完了フォルダへ移動中...', totalAdded > 0 ? 'ok' : totalSkipped > 0 ? 'warn' : 'err');
+
+  // ファイルを未完了フォルダへ移動
   for (const id of movedIds) {
     try {
-      await fetch(GAS_DEPLOY_URL_KUMI, { method:'POST', body: JSON.stringify({
-        action:'moveFileToFolder', fileId:id,
-        targetFolderId:'1BvIVakIQyPZBBwHpkbniLMIVyRmFadYL'
-      })});
-    } catch(e) {}
+      await fetch(GAS_DEPLOY_URL_KUMI, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'moveFileToFolder',
+          fileId: id,
+          targetFolderId: '1BvIVakIQyPZBBwHpkbniLMIVyRmFadYL'
+        })
+      });
+    } catch(e) { console.warn('移動失敗:', e); }
   }
-  showUrlFb('✅ 完了！' + totalAdded + '件追加\n元ファイルを未完了フォルダへ移動しました', 'ok');
-  setTimeout(closeUrlModal, 2000);
+
+  const finalMsg = totalAdded > 0
+    ? '✅ 完了！' + totalAdded + '件追加\n元ファイルを未完了フォルダへ移動しました'
+    : (totalSkipped > 0 ? '⚠️ 全件重複スキップ（既に読込済み）' : '❌ データを取得できませんでした');
+  showUrlFb(finalMsg, totalAdded > 0 ? 'ok' : totalSkipped > 0 ? 'warn' : 'err');
+  setTimeout(closeUrlModal, 2500);
 }
 
 // ============================================================
