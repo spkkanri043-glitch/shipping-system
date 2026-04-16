@@ -492,6 +492,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 // ============================================================
+// GAS設定（URLはここで一元管理）
+// ============================================================
+const GAS_DEPLOY_URL_KUMI = 'https://script.google.com/macros/s/AKfycbzlj7JIEJwj65ACuflQVctEvYrmdcKBoJLdmghcQLyH1CYCK4gAzF7wue_OBdSNQGH0Bw/exec';
+
+// ============================================================
 // 以下はクミ化成向けオリジナルJS
 // ============================================================
 const STORAGE_KEY = "kanban_ok_records";
@@ -525,6 +530,23 @@ function initDomRefs() {
   shipSummary = document.getElementById("shipSummary");
   errorTableBody = document.querySelector("#errorTable tbody");
   errorSummaryCount = document.getElementById("errorSummaryCount");
+
+  // DOM初期化後にイベントリスナー登録
+  if (inside) {
+    inside.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        setTimeout(function() { if (cust) cust.focus(); }, 50);
+      }
+    });
+  }
+  if (cust) {
+    cust.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        showExtracts();
+        check();
+      }
+    });
+  }
 }
 
 window.addEventListener("load", function () {
@@ -1330,22 +1352,7 @@ function clearAll() {
     }, 100);
 }
 
-// ① 社内カンバン(inside)でEnter → 客先(cust)にフォーカス
-inside.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-        setTimeout(function () {
-            cust.focus();
-        }, 50);
-    }
-});
 
-// ② 客先カンバン(cust)でEnter → 照合実行
-cust.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-        showExtracts();
-        check();
-    }
-});
 
 function playOK() {
     try {
@@ -1372,7 +1379,6 @@ function playNG() {
 // ============================================================
 // GAS設定
 // ============================================================
-const GAS_DEPLOY_URL_KUMI = 'https://script.google.com/macros/s/AKfycbzlj7JIEJwj65ACuflQVctEvYrmdcKBoJLdmghcQLyH1CYCK4gAzF7wue_OBdSNQGH0Bw/exec';
 
 // ============================================================
 // 削除モーダル
