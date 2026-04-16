@@ -1464,7 +1464,8 @@ function processCSVText_kumi(text, fileName) {
   const rows = parseCSVRows(text);
   if (rows.length <= 1) return { added: 0, skipped: 0 };
   const existing = getShippingData();
-  const existingKeys = new Set(existing.map(x => x.productNo));
+  // 注文番号をキーに重複判定（同一注文番号=同一明細）
+  const existingKeys = new Set(existing.map(x => x.chubangou || x.productNo));
   let added = 0, skipped = 0;
   rows.slice(1).map((cols, index) => ({
     id: 'row_' + (index+2) + '_' + Date.now(),
@@ -1474,9 +1475,10 @@ function processCSVText_kumi(text, fileName) {
     packQty: toNumber(cols[7] || ''),
     noki: (cols[2] || '').trim(),
     biko: (cols[11] || '').trim(),
+    chubangou: (cols[10] || '').trim(),
     scannedQty: 0, lastScannedAt: ''
   })).filter(x => x.productNo !== '').forEach(r => {
-    const k = r.productNo;
+    const k = r.chubangou || r.productNo;
     if (existingKeys.has(k)) { skipped++; }
     else { existing.push(r); existingKeys.add(k); added++; }
   });
@@ -1589,13 +1591,19 @@ async function loadSelectedFiles_kumi() {
 
   // ファイルを未完了フォルダへ移動
   for (const id of movedIds) {
+    // ファイル名を取得して_未完了サフィックスを付けて移動
+    const cb = Array.from(document.querySelectorAll('#drive-file-list input[type=checkbox]')).find(c => c.value === id);
+    const origName = cb ? cb.dataset.name : '';
+    const baseName = origName.replace(/\.csv$/i, '').replace(/_未完了$/, '');
+    const newName  = baseName + '_未完了.csv';
     try {
       await fetch(GAS_DEPLOY_URL_KUMI, {
         method: 'POST',
         body: JSON.stringify({
-          action: 'moveFileToFolder',
-          fileId: id,
-          targetFolderId: '1BvIVakIQyPZBBwHpkbniLMIVyRmFadYL'
+          action:         'moveFileToFolder',
+          fileId:         id,
+          targetFolderId: '1BvIVakIQyPZBBwHpkbniLMIVyRmFadYL',
+          newName:        newName
         })
       });
     } catch(e) { console.warn('移動失敗:', e); }
