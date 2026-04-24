@@ -2338,13 +2338,20 @@ seedShifts();
   const data=parseSSOToken(token);
   if(!data)return;
 
-  // empsパラメータから従業員データを同期（ポータルから渡される）
-  const empsParam=params.get('emps');
-  if(empsParam){
-    try{
-      const emps=JSON.parse(decodeURIComponent(empsParam));
+  // 従業員データを取得して同期（URLパラメータ or sessionStorage）
+  let empsJson = null;
+  const empsParam = params.get('emps');
+  const empsKey = params.get('emps_key');
+  if (empsParam) {
+    empsJson = decodeURIComponent(empsParam);
+  } else if (empsKey) {
+    try { empsJson = sessionStorage.getItem(empsKey); } catch(e) {}
+  }
+  if (empsJson) {
+    try {
+      const emps = JSON.parse(empsJson);
       syncEmployeesFromPortal(emps);
-    }catch(e){console.warn('従業員データ同期エラー:',e);}
+    } catch(e) { console.warn('従業員データ同期エラー:', e); }
   }
 
   // 名前をデコード
