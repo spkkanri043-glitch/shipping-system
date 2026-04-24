@@ -872,6 +872,10 @@ function calcAL(y){
   for(const[th,d]of t)if(y<th)return d-1;
   return 20;
 }
+// ポータルから有給残日数が指定されていればそちらを優先
+function getAL(emp){
+  return emp.al !== undefined ? emp.al : calcAL(emp.years||0);
+}
 
 // ══ SHIFTS ══
 const SHIFTS={};
@@ -2305,52 +2309,33 @@ seedShifts();
   // ポータルの従業員データをシフト管理のEMPLOYEES形式に変換
   function syncEmployeesFromPortal(portalEmps){
     if(!portalEmps||!portalEmps.length)return;
-    // アクティブな従業員のみ
     const active=portalEmps.filter(e=>e.status==='active'||e.status==='在職'||!e.status);
     if(!active.length)return;
 
-    // 既存のシフトデータを保持したまま従業員リストを更新
     const newEmps=active.map(e=>{
-      // 既存従業員があればそのデータを引き継ぐ
-      const existing=EMPLOYEES.find(x=>x.id===e.id||x.id===e.loginId);
+      const existing=EMPLOYEES.find(x=>x.id===(e.loginId||e.id));
+      const empId=e.loginId||e.id;
       return {
-        id:        e.loginId || e.id,
-        name:      e.name,
-        dept:      mapDept(e.dept),
-        team:      mapTeam(e.dept),
-        years:     existing ? existing.years : 1,
-        ecat:      existing ? existing.ecat : '無期雇用',
-        etype:     existing ? existing.etype : '正社員',
-        ptStart:   existing ? existing.ptStart : '09:00',
-        ptEnd:     existing ? existing.ptEnd : '15:00',
-        pw:        existing ? existing.pw : '1234',
-        role:      e.role
+        id:      empId,
+        name:    e.name,
+        // ポータルに項目があればそのまま使用、なければ既存データかデフォルト値
+        dept:    e.dept    || (existing?existing.dept:'製造部'),
+        team:    e.team    || (existing?existing.team:'３交代'),
+        years:   e.years   !== undefined ? Number(e.years)   : (existing?existing.years:1),
+        ecat:    e.ecat    || (existing?existing.ecat:'無期雇用'),
+        etype:   e.etype   || (existing?existing.etype:'正社員'),
+        ptStart: e.ptStart || (existing?existing.ptStart:'09:00'),
+        ptEnd:   e.ptEnd   || (existing?existing.ptEnd:'18:00'),
+        // 有給：ポータルのnenkyuuを使用
+        al:      e.nenkyuu !== undefined ? Number(e.nenkyuu) : (existing?(existing.al||10):10),
+        pw:      existing ? existing.pw : '1234',
+        role:    e.role
       };
     });
 
-    // SHIFTSに新従業員のエントリを追加
-    newEmps.forEach(e=>{
-      if(!SHIFTS[e.id])SHIFTS[e.id]={};
-    });
-
+    newEmps.forEach(e=>{ if(!SHIFTS[e.id])SHIFTS[e.id]={}; });
     EMPLOYEES.length=0;
     newEmps.forEach(e=>EMPLOYEES.push(e));
-  }
-
-  // 部署名マッピング（ポータル→シフト管理）
-  function mapDept(dept){
-    if(!dept)return '製造部';
-    if(dept.includes('製造'))return '製造部';
-    if(dept.includes('品質'))return '品質保証部';
-    if(dept.includes('物流')||dept.includes('生産'))return '生産管理部';
-    if(dept.includes('総務')||dept.includes('管理'))return '生産管理部';
-    return dept;
-  }
-  function mapTeam(dept){
-    if(!dept)return '３交代';
-    if(dept.includes('製造'))return '３交代';
-    if(dept.includes('品質'))return '検査・組立';
-    return '事務・管理';
   }
 
   const params=new URLSearchParams(window.location.search);
