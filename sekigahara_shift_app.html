@@ -2309,33 +2309,38 @@ seedShifts();
   // ポータルの従業員データをシフト管理のEMPLOYEES形式に変換
   function syncEmployeesFromPortal(portalEmps){
     if(!portalEmps||!portalEmps.length)return;
-    const active=portalEmps.filter(e=>e.status==='active'||e.status==='在職'||!e.status);
+    // 在職のみ
+    const active=portalEmps.filter(e=>
+      e.status==='active'||e.status==='在職'||(!e.status)
+    );
     if(!active.length)return;
 
     const newEmps=active.map(e=>{
-      const existing=EMPLOYEES.find(x=>x.id===(e.loginId||e.id));
       const empId=e.loginId||e.id;
+      // 既存従業員データがあればシフトデータを引き継ぐ
+      const existing=EMPLOYEES.find(x=>x.id===empId||x.id===e.id||x.id===e.loginId);
       return {
         id:      empId,
-        name:    e.name,
-        // ポータルに項目があればそのまま使用、なければ既存データかデフォルト値
+        name:    e.name||'',
         dept:    e.dept    || (existing?existing.dept:'製造部'),
         team:    e.team    || (existing?existing.team:'３交代'),
-        years:   e.years   !== undefined ? Number(e.years)   : (existing?existing.years:1),
+        years:   e.years!==undefined&&e.years!=='' ? Number(e.years)  : (existing?existing.years:1),
         ecat:    e.ecat    || (existing?existing.ecat:'無期雇用'),
         etype:   e.etype   || (existing?existing.etype:'正社員'),
         ptStart: e.ptStart || (existing?existing.ptStart:'09:00'),
         ptEnd:   e.ptEnd   || (existing?existing.ptEnd:'18:00'),
-        // 有給：ポータルのnenkyuuを使用
-        al:      e.nenkyuu !== undefined ? Number(e.nenkyuu) : (existing?(existing.al||10):10),
+        // ポータルのnenkyuu（有給残）を al として使用
+        al:      e.nenkyuu!==undefined&&e.nenkyuu!=='' ? Number(e.nenkyuu) : (existing?existing.al:10),
         pw:      existing ? existing.pw : '1234',
-        role:    e.role
+        role:    e.role||'staff'
       };
     });
 
+    // SHIFTSに新従業員のエントリを追加
     newEmps.forEach(e=>{ if(!SHIFTS[e.id])SHIFTS[e.id]={}; });
     EMPLOYEES.length=0;
     newEmps.forEach(e=>EMPLOYEES.push(e));
+    console.log('[SSO] 従業員同期完了:', newEmps.length, '名');
   }
 
   const params=new URLSearchParams(window.location.search);
