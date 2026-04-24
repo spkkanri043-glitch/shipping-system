@@ -373,7 +373,7 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
     <!-- EMPLOYEE -->
     <div class="pg" id="pg-emp">
       <div class="stl">👥 従業員登録一覧
-        <button class="btn pri sm" style="margin-left:auto" onclick="openAddEmp()">＋ 追加</button>
+        <!-- ポータル従業員マスターで管理するため追加ボタン非表示 -->
       </div>
       <div class="dtabs" id="edt" style="margin-bottom:10px">
         <div class="dtab on" onclick="setED('all',this)">全体</div>
@@ -1369,8 +1369,7 @@ function rEmp(){
       <td>${isPT(e)?`<span style="font-size:11px;font-weight:600;color:#166534;background:#f0fdf4;padding:2px 7px;border-radius:4px;border:1px solid #86efac">${e.ptStart||'09:00'}〜${e.ptEnd||'15:00'}</span>`:'<span style="color:var(--tx3);font-size:11px">—</span>'}</td>
       <td><span class="badge bg-b" style="font-size:10px">${tot}日</span></td>
       <td style="white-space:nowrap">
-        <button class="btn sm" onclick="openEditEmp('${e.id}')">編集</button>
-        <button class="btn danger sm" onclick="delEmp('${e.id}')">削除</button>
+        <span style="font-size:10px;color:var(--tx3)">ポータルで管理</span>
       </td>
     </tr>`;
   }).join('');
@@ -1379,7 +1378,7 @@ function rEmp(){
 function chEmpDept(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e){e.dept=val;e.team=(DEPT_STRUCT[val]?.teams||[val])[0];rEmp();rSh();}}
 function chEmpTeam(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e)e.team=val;}
 function chEmpYears(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e)e.years=parseFloat(val)||0;}
-function delEmp(eid){if(!confirm('削除しますか？'))return;const i=EMPLOYEES.findIndex(x=>x.id===eid);if(i>=0){EMPLOYEES.splice(i,1);rEmp();rSh();rDB();}}
+function delEmp(eid){alert('従業員の削除はポータルの従業員マスターで行ってください。');}
 
 function updateEtypeOpts(){
   const cat=document.getElementById('e-ecat').value;
@@ -1413,6 +1412,7 @@ function updateTeamOpts(){
   document.getElementById('e-team').innerHTML=teams.map(t=>`<option>${t}</option>`).join('');
 }
 function openAddEmp(){
+  alert('従業員の追加・編集はポータルの従業員マスターで行ってください。');return;
   editingEmpId=null;
   document.getElementById('emttl').textContent='従業員追加';
   document.getElementById('e-name').value='';
@@ -1426,6 +1426,7 @@ function openAddEmp(){
   document.getElementById('emod').classList.remove('hid');
 }
 function openEditEmp(eid){
+  alert('従業員の追加・編集はポータルの従業員マスターで行ってください。');return;
   const e=EMPLOYEES.find(x=>x.id===eid);if(!e)return;
   editingEmpId=eid;
   document.getElementById('emttl').textContent='従業員編集';
