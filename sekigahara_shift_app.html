@@ -373,7 +373,7 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
     <!-- EMPLOYEE -->
     <div class="pg" id="pg-emp">
       <div class="stl">👥 従業員登録一覧
-        <!-- ポータル従業員マスターで管理するため追加ボタン非表示 -->
+        <button class="btn pri sm" style="margin-left:auto" onclick="openAddEmp()">＋ 追加</button>
       </div>
       <div class="dtabs" id="edt" style="margin-bottom:10px">
         <div class="dtab on" onclick="setED('all',this)">全体</div>
@@ -850,18 +850,27 @@ function mkEmp(name,dept,team,years,ecat,etype,ptStart,ptEnd){
   return{id,name,dept,team,years,ecat,etype,
     ptStart:ptStart||'09:00',ptEnd:ptEnd||'15:00',pw:'1234'};
 }
-// 従業員データはポータルの従業員マスターから取得
-// （ポータルからSSOで開いた場合に自動反映される）
+// 製造部 3交代 19名
+const mfN=['田中 一郎','鈴木 花子','山田 太郎','伊藤 次郎','松本 健司',
+  '佐々木 勇','渡辺 光','川口 誠','高橋 亮','中村 菜々',
+  '小林 恵子','加藤 孝','木村 龍','清水 由美','橋本 隆',
+  '岡田 茂','福田 優','石川 恵','西村 剛'];
+mfN.forEach((n,i)=>EMPLOYEES.push(mkEmp(n,'製造部','３交代',[8,3,12,5,2,7,6,10,4,9,1,11,3,6,8,5,2,7,4][i],'無期雇用','正社員')));
+// 生産管理部 5名
+['中島 健','野田 恵美','藤田 博','近藤 美帆','岩本 智'].forEach((n,i)=>
+  EMPLOYEES.push(mkEmp(n,'生産管理部','事務・管理',[15,4,7,3,8][i],'無期雇用','正社員')));
+// 品質保証部 5名
+['浜田 誠','上田 美咲','長谷川 亮','原田 由佳','藤原 健'].forEach((n,i)=>
+  EMPLOYEES.push(mkEmp(n,'品質保証部','検査・組立',[6,9,11,2,5][i],'無期雇用','正社員')));
+// 派遣 3名
+['派遣 太郎','派遣 花子','派遣 次郎'].forEach((n,i)=>
+  EMPLOYEES.push(mkEmp(n,'派遣','派遣',[1,0.5,2][i],'派遣','派遣社員')));
 
 function calcAL(y){
   if(y<0.5)return 0;
   const t=[[0.5,10],[1.5,11],[2.5,12],[3.5,14],[4.5,16],[5.5,18]];
   for(const[th,d]of t)if(y<th)return d-1;
   return 20;
-}
-// ポータルから有給残日数が指定されていればそちらを優先
-function getAL(emp){
-  return emp.al !== undefined ? emp.al : calcAL(emp.years||0);
 }
 
 // ══ SHIFTS ══
@@ -887,8 +896,6 @@ function calcMonthOT(eid,y,m){
 }
 
 function seedShifts(){
-  // 従業員がいない場合はスキップ（ポータルから取得）
-  if(EMPLOYEES.length===0)return;
   const pats=['A','B','C','D','E','F','G','H','X','J','OFF','OFF','B','D','A','C','E','G','B'];
   // パートタイム専用パターン（短時間勤務・週3〜4日想定）
   const ptPats=['PT','OFF','PT','OFF','PT','OFF','OFF'];
@@ -1362,7 +1369,8 @@ function rEmp(){
       <td>${isPT(e)?`<span style="font-size:11px;font-weight:600;color:#166534;background:#f0fdf4;padding:2px 7px;border-radius:4px;border:1px solid #86efac">${e.ptStart||'09:00'}〜${e.ptEnd||'15:00'}</span>`:'<span style="color:var(--tx3);font-size:11px">—</span>'}</td>
       <td><span class="badge bg-b" style="font-size:10px">${tot}日</span></td>
       <td style="white-space:nowrap">
-        <span style="font-size:10px;color:var(--tx3)">ポータルで管理</span>
+        <button class="btn sm" onclick="openEditEmp('${e.id}')">編集</button>
+        <button class="btn danger sm" onclick="delEmp('${e.id}')">削除</button>
       </td>
     </tr>`;
   }).join('');
@@ -1371,7 +1379,7 @@ function rEmp(){
 function chEmpDept(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e){e.dept=val;e.team=(DEPT_STRUCT[val]?.teams||[val])[0];rEmp();rSh();}}
 function chEmpTeam(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e)e.team=val;}
 function chEmpYears(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e)e.years=parseFloat(val)||0;}
-function delEmp(eid){alert('従業員の削除はポータルの従業員マスターで行ってください。');}
+function delEmp(eid){if(!confirm('削除しますか？'))return;const i=EMPLOYEES.findIndex(x=>x.id===eid);if(i>=0){EMPLOYEES.splice(i,1);rEmp();rSh();rDB();}}
 
 function updateEtypeOpts(){
   const cat=document.getElementById('e-ecat').value;
@@ -1405,7 +1413,6 @@ function updateTeamOpts(){
   document.getElementById('e-team').innerHTML=teams.map(t=>`<option>${t}</option>`).join('');
 }
 function openAddEmp(){
-  alert('従業員の追加・編集はポータルの従業員マスターで行ってください。');return;
   editingEmpId=null;
   document.getElementById('emttl').textContent='従業員追加';
   document.getElementById('e-name').value='';
@@ -1419,7 +1426,6 @@ function openAddEmp(){
   document.getElementById('emod').classList.remove('hid');
 }
 function openEditEmp(eid){
-  alert('従業員の追加・編集はポータルの従業員マスターで行ってください。');return;
   const e=EMPLOYEES.find(x=>x.id===eid);if(!e)return;
   editingEmpId=eid;
   document.getElementById('emttl').textContent='従業員編集';
@@ -2284,88 +2290,32 @@ function saveDeptSettings(){
 // ══ INIT ══
 seedShifts();
 
-// ══ SSO：ポータルからの自動ログイン + 従業員データ同期 ══
+// ══ SSO：ポータルからの自動ログイン ══
+// URLパラメータ ?sso=<token> があれば自動ログイン
+// トークン形式: Base64(reverse(JSON({id,name,role,ts})))
 (function(){
   function parseSSOToken(token){
     try{
       const decoded=atob(token.split('').reverse().join(''));
       const data=JSON.parse(decoded);
+      // 5分以内のトークンのみ有効
       if(Date.now()-data.ts>5*60*1000)return null;
       return data;
     }catch(e){return null;}
   }
-
-  // ポータルの従業員データをシフト管理のEMPLOYEES形式に変換
-  function syncEmployeesFromPortal(portalEmps){
-    if(!portalEmps||!portalEmps.length)return;
-    // 在職のみ
-    const active=portalEmps.filter(e=>
-      e.status==='active'||e.status==='在職'||(!e.status)
-    );
-    if(!active.length)return;
-
-    const newEmps=active.map(e=>{
-      const empId=e.loginId||e.id;
-      // 既存従業員データがあればシフトデータを引き継ぐ
-      const existing=EMPLOYEES.find(x=>x.id===empId||x.id===e.id||x.id===e.loginId);
-      return {
-        id:      empId,
-        name:    e.name||'',
-        dept:    e.dept    || (existing?existing.dept:'製造部'),
-        team:    e.team    || (existing?existing.team:'３交代'),
-        years:   e.years!==undefined&&e.years!=='' ? Number(e.years)  : (existing?existing.years:1),
-        ecat:    e.ecat    || (existing?existing.ecat:'無期雇用'),
-        etype:   e.etype   || (existing?existing.etype:'正社員'),
-        ptStart: e.ptStart || (existing?existing.ptStart:'09:00'),
-        ptEnd:   e.ptEnd   || (existing?existing.ptEnd:'18:00'),
-        // ポータルのnenkyuu（有給残）を al として使用
-        al:      e.nenkyuu!==undefined&&e.nenkyuu!=='' ? Number(e.nenkyuu) : (existing?existing.al:10),
-        pw:      existing ? existing.pw : '1234',
-        role:    e.role||'staff'
-      };
-    });
-
-    // SHIFTSに新従業員のエントリを追加
-    newEmps.forEach(e=>{ if(!SHIFTS[e.id])SHIFTS[e.id]={}; });
-    EMPLOYEES.length=0;
-    newEmps.forEach(e=>EMPLOYEES.push(e));
-    console.log('[SSO] 従業員同期完了:', newEmps.length, '名');
-    // 同期後に seedShifts を再実行してシフトデータを初期化
-    seedShifts();
-  }
-
   const params=new URLSearchParams(window.location.search);
   const token=params.get('sso');
   if(!token)return;
   const data=parseSSOToken(token);
   if(!data)return;
-
-  // 従業員データを取得して同期（URLパラメータ or sessionStorage）
-  let empsJson = null;
-  const empsParam = params.get('emps');
-  const empsKey = params.get('emps_key');
-  if (empsParam) {
-    empsJson = decodeURIComponent(empsParam);
-  } else if (empsKey) {
-    try { empsJson = sessionStorage.getItem(empsKey); } catch(e) {}
-  }
-  if (empsJson) {
-    try {
-      const emps = JSON.parse(empsJson);
-      syncEmployeesFromPortal(emps);
-    } catch(e) { console.warn('従業員データ同期エラー:', e); }
-  }
-
-  // 名前をデコード
+  // 名前をデコード（URLエンコード対応）
   let name=data.name||'';
   try{name=decodeURIComponent(escape(name));}catch(e){}
   cUser={id:data.id,name};
   isA=(data.role==='admin');
+  // URLからトークンを除去（セキュリティ）
   window.history.replaceState({},'',window.location.pathname);
-  // 画面を開いてからリフレッシュ（DOMが準備されてからrenderを呼ぶ）
   launch();
-  // 少し遅延させてrenderを再実行（SSO後の初回描画を確実に）
-  setTimeout(()=>{ rSh(); rDB(); rEmp(); }, 100);
 })();
 </script>
 </body>
