@@ -2290,30 +2290,88 @@ function saveDeptSettings(){
 // ══ INIT ══
 seedShifts();
 
-// ══ SSO：ポータルからの自動ログイン ══
-// URLパラメータ ?sso=<token> があれば自動ログイン
-// トークン形式: Base64(reverse(JSON({id,name,role,ts})))
+// ══ SSO：ポータルからの自動ログイン + 従業員データ同期 ══
 (function(){
   function parseSSOToken(token){
     try{
       const decoded=atob(token.split('').reverse().join(''));
       const data=JSON.parse(decoded);
-      // 5分以内のトークンのみ有効
       if(Date.now()-data.ts>5*60*1000)return null;
       return data;
     }catch(e){return null;}
   }
+
+  // ポータルの従業員データをシフト管理のEMPLOYEES形式に変換
+  function syncEmployeesFromPortal(portalEmps){
+    if(!portalEmps||!portalEmps.length)return;
+    // アクティブな従業員のみ
+    const active=portalEmps.filter(e=>e.status==='active'||e.status==='在職'||!e.status);
+    if(!active.length)return;
+
+    // 既存のシフトデータを保持したまま従業員リストを更新
+    const newEmps=active.map(e=>{
+      // 既存従業員があればそのデータを引き継ぐ
+      const existing=EMPLOYEES.find(x=>x.id===e.id||x.id===e.loginId);
+      return {
+        id:        e.loginId || e.id,
+        name:      e.name,
+        dept:      mapDept(e.dept),
+        team:      mapTeam(e.dept),
+        years:     existing ? existing.years : 1,
+        ecat:      existing ? existing.ecat : '無期雇用',
+        etype:     existing ? existing.etype : '正社員',
+        ptStart:   existing ? existing.ptStart : '09:00',
+        ptEnd:     existing ? existing.ptEnd : '15:00',
+        pw:        existing ? existing.pw : '1234',
+        role:      e.role
+      };
+    });
+
+    // SHIFTSに新従業員のエントリを追加
+    newEmps.forEach(e=>{
+      if(!SHIFTS[e.id])SHIFTS[e.id]={};
+    });
+
+    EMPLOYEES.length=0;
+    newEmps.forEach(e=>EMPLOYEES.push(e));
+  }
+
+  // 部署名マッピング（ポータル→シフト管理）
+  function mapDept(dept){
+    if(!dept)return '製造部';
+    if(dept.includes('製造'))return '製造部';
+    if(dept.includes('品質'))return '品質保証部';
+    if(dept.includes('物流')||dept.includes('生産'))return '生産管理部';
+    if(dept.includes('総務')||dept.includes('管理'))return '生産管理部';
+    return dept;
+  }
+  function mapTeam(dept){
+    if(!dept)return '３交代';
+    if(dept.includes('製造'))return '３交代';
+    if(dept.includes('品質'))return '検査・組立';
+    return '事務・管理';
+  }
+
   const params=new URLSearchParams(window.location.search);
   const token=params.get('sso');
   if(!token)return;
   const data=parseSSOToken(token);
   if(!data)return;
-  // 名前をデコード（URLエンコード対応）
+
+  // empsパラメータから従業員データを同期（ポータルから渡される）
+  const empsParam=params.get('emps');
+  if(empsParam){
+    try{
+      const emps=JSON.parse(decodeURIComponent(empsParam));
+      syncEmployeesFromPortal(emps);
+    }catch(e){console.warn('従業員データ同期エラー:',e);}
+  }
+
+  // 名前をデコード
   let name=data.name||'';
   try{name=decodeURIComponent(escape(name));}catch(e){}
   cUser={id:data.id,name};
   isA=(data.role==='admin');
-  // URLからトークンを除去（セキュリティ）
   window.history.replaceState({},'',window.location.pathname);
   launch();
 })();
