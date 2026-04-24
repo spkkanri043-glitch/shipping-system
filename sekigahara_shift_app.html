@@ -2330,6 +2330,8 @@ seedShifts();
     EMPLOYEES.length=0;
     newEmps.forEach(e=>EMPLOYEES.push(e));
     console.log('[SSO] 従業員同期完了:', newEmps.length, '名');
+    // 同期後に seedShifts を再実行してシフトデータを初期化
+    seedShifts();
   }
 
   const params=new URLSearchParams(window.location.search);
@@ -2360,7 +2362,10 @@ seedShifts();
   cUser={id:data.id,name};
   isA=(data.role==='admin');
   window.history.replaceState({},'',window.location.pathname);
+  // 画面を開いてからリフレッシュ（DOMが準備されてからrenderを呼ぶ）
   launch();
+  // 少し遅延させてrenderを再実行（SSO後の初回描画を確実に）
+  setTimeout(()=>{ rSh(); rDB(); rEmp(); }, 100);
 })();
 </script>
 </body>
