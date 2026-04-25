@@ -424,6 +424,14 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       <div id="vreq-form-wrap">
         <div class="req-form">
           <div class="req-form-title">✏ 新規有給申請</div>
+          <!-- 管理者のみ：対象者選択 -->
+          <div class="req-row" id="vreq-target-row" style="display:none">
+            <div class="req-lbl">申請対象者</div>
+            <div class="req-ctrl">
+              <select class="req-inp" id="vreq-target" onchange="calcVreqPreview()"></select>
+              <div style="font-size:10px;color:var(--tx2);margin-top:3px">管理者は代理申請が可能です</div>
+            </div>
+          </div>
           <div class="req-row">
             <div class="req-lbl">申請種別</div>
             <div class="req-ctrl">
@@ -494,6 +502,14 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
           <div class="al ai" style="margin-bottom:10px;font-size:11px">
             ℹ 事前申請が原則です。社内上限42H/月・法定上限45H/月を確認してから申請してください。
           </div>
+          <!-- 管理者のみ：対象者選択 -->
+          <div class="req-row" id="otreq-target-row" style="display:none">
+            <div class="req-lbl">申請対象者</div>
+            <div class="req-ctrl">
+              <select class="req-inp" id="otreq-target" onchange="calcOTReqPreview()"></select>
+              <div style="font-size:10px;color:var(--tx2);margin-top:3px">管理者は代理申請が可能です</div>
+            </div>
+          </div>
           <div class="req-row">
             <div class="req-lbl">対象日</div>
             <div class="req-ctrl"><input type="date" class="req-inp" id="otreq-date" onchange="calcOTReqPreview()"></div>
@@ -556,6 +572,14 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
           <div class="req-form-title">✏ 休日出勤申請</div>
           <div class="al aw" style="margin-bottom:10px;font-size:11px">
             ⚠ 休日出勤は事前に上長の許可が必要です。振替休日の取得も忘れずに申請してください。
+          </div>
+          <!-- 管理者のみ：対象者選択 -->
+          <div class="req-row" id="hreq-target-row" style="display:none">
+            <div class="req-lbl">申請対象者</div>
+            <div class="req-ctrl">
+              <select class="req-inp" id="hreq-target"></select>
+              <div style="font-size:10px;color:var(--tx2);margin-top:3px">管理者は代理申請が可能です</div>
+            </div>
           </div>
           <div class="req-row">
             <div class="req-lbl">出勤日</div>
@@ -1458,12 +1482,13 @@ function onVreqTypeChange(){
 function calcVreqPreview(){
   const t=document.getElementById('vreq-type').value;
   const from=document.getElementById('vreq-from').value;
-  const to=(document.getElementById('vreq-to-row').style.display!=='none')
-    ?document.getElementById('vreq-to').value:from;
+  const toRow=document.getElementById('vreq-to-row');
+  const to=(toRow&&toRow.style.display!=='none')?document.getElementById('vreq-to').value:from;
   const el=document.getElementById('vreq-remain-preview');
-  if(!from||!cUser){el.innerHTML='';return;}
-  const emp=EMPLOYEES.find(x=>x.id===cUser.id);
-  if(!emp){el.innerHTML='';return;}
+  if(!from||!cUser){if(el)el.innerHTML='';return;}
+  const targetId=isA?(document.getElementById('vreq-target')?.value||''):cUser.id;
+  const emp=EMPLOYEES.find(x=>x.id===targetId);
+  if(!emp){if(el)el.innerHTML='';return;}
   const tot=calcAL(emp.years),used=cntVac(emp.id),rem=tot-used;
   let days=0;
   if(t==='全休')days=from?countWorkDays(from,to||from):0;
@@ -1489,6 +1514,12 @@ function clearVreqForm(){
 }
 function submitVreq(){
   if(!cUser)return;
+  // 申請対象者の決定（管理者は選択、従業員は自分）
+  const targetId=isA
+    ?(document.getElementById('vreq-target')?.value||'')
+    :cUser.id;
+  const emp=EMPLOYEES.find(x=>x.id===targetId);
+  if(!emp){alert(isA?'申請対象者を選択してください（先に従業員を登録してください）':'従業員情報が見つかりません');return;}
   const type=document.getElementById('vreq-type').value;
   const from=document.getElementById('vreq-from').value;
   if(!from){alert('開始日を入力してください');return;}
@@ -1498,23 +1529,20 @@ function submitVreq(){
   const reason=document.getElementById('vreq-reason').value.trim();
   const tstart=isTime?document.getElementById('vreq-tstart').value:'';
   const tend=isTime?document.getElementById('vreq-tend').value:'';
-  // 日数計算
   let days=0;
   if(type==='全休')days=countWorkDays(from,to);
   else if(isHalf)days=0.5;
   else days=0.25;
   if(days<=0){alert('有効な申請期間を入力してください（休日のみの期間は申請できません）');return;}
-  const emp=EMPLOYEES.find(x=>x.id===cUser.id);
   const rem=calcAL(emp.years)-cntVac(emp.id);
   if(days>rem){if(!confirm(`有給残日数（${rem}日）を超えています。申請しますか？`))return;}
-  // 重複チェック
   const overlap=VAC_REQUESTS.some(r=>{
-    if(r.eid!==cUser.id||r.status==='cancelled'||r.status==='rejected')return false;
+    if(r.eid!==emp.id||r.status==='cancelled'||r.status==='rejected')return false;
     return !(to<r.from||from>r.to);
   });
   if(overlap){alert('同じ期間に既に申請があります。');return;}
   const req={
-    id:genReqId(),eid:cUser.id,name:cUser.name,
+    id:genReqId(),eid:emp.id,name:emp.name,
     dept:emp.dept,type,from,to,days,
     tstart,tend,reason,
     status:'pending',
@@ -1523,7 +1551,7 @@ function submitVreq(){
   VAC_REQUESTS.unshift(req);
   clearVreqForm();
   rVreq();updVreqBadge();rDB();
-  alert(`✅ 有給申請を提出しました（${req.id}）\n管理者の承認をお待ちください。`);
+  alert(`✅ 有給申請を提出しました（${req.id}）\n${isA?emp.name+'の':''}申請が完了しました。`);
 }
 
 // 管理者操作
@@ -1581,24 +1609,32 @@ let curRF='all';
 function setRF(f,el){curRF=f;document.querySelectorAll('.rfbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');rVreqList();}
 
 function rVreq(){
-  // フォーム表示制御
   const formWrap=document.getElementById('vreq-form-wrap');
   const lbl=document.getElementById('vreq-role-label');
+  const targetRow=document.getElementById('vreq-target-row');
+  const targetSel=document.getElementById('vreq-target');
+  // 管理者・従業員ともフォームを表示
+  if(formWrap)formWrap.style.display='';
   if(isA){
-    if(formWrap)formWrap.style.display='none';
-    if(lbl)lbl.textContent='管理者モード：申請の承認・却下ができます';
+    if(lbl)lbl.textContent='申請フォーム（代理申請・自己申請が可能）';
+    if(targetRow)targetRow.style.display='';
+    if(targetSel){
+      targetSel.innerHTML=EMPLOYEES.length>0
+        ?EMPLOYEES.map(e=>`<option value="${e.id}">${e.name}（${e.dept}）</option>`).join('')
+        :'<option value="">※先に従業員を登録してください</option>';
+    }
   }else{
-    if(formWrap)formWrap.style.display='';
     if(lbl)lbl.textContent='有給申請を提出します。承認後にシフトへ反映されます。';
-    // イベント設定
-    const ty=document.getElementById('vreq-type');
-    if(ty&&!ty._vreqBound){ty.addEventListener('change',onVreqTypeChange);ty._vreqBound=true;}
-    const fr=document.getElementById('vreq-from');
-    if(fr&&!fr._vreqBound){fr.addEventListener('change',calcVreqPreview);fr._vreqBound=true;}
-    const tr=document.getElementById('vreq-to');
-    if(tr&&!tr._vreqBound){tr.addEventListener('change',calcVreqPreview);tr._vreqBound=true;}
-    onVreqTypeChange();
+    if(targetRow)targetRow.style.display='none';
   }
+  // イベント設定（一度だけ）
+  const ty=document.getElementById('vreq-type');
+  if(ty&&!ty._vreqBound){ty.addEventListener('change',onVreqTypeChange);ty._vreqBound=true;}
+  const fr=document.getElementById('vreq-from');
+  if(fr&&!fr._vreqBound){fr.addEventListener('change',calcVreqPreview);fr._vreqBound=true;}
+  const tr=document.getElementById('vreq-to');
+  if(tr&&!tr._vreqBound){tr.addEventListener('change',calcVreqPreview);tr._vreqBound=true;}
+  onVreqTypeChange();
   rVreqList();
   updVreqBadge();
 }
@@ -1666,7 +1702,8 @@ function calcOTReqPreview(){
   const dt=new Date(date);
   const dow='日月火水木金土'[dt.getDay()];
   if(prev)prev.textContent=`（${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日・${dow}）`;
-  const emp=EMPLOYEES.find(x=>x.id===cUser.id);
+  const tgtId=isA?(document.getElementById('otreq-target')?.value||''):cUser.id;
+  const emp=EMPLOYEES.find(x=>x.id===tgtId);
   if(!emp||!mPrev)return;
   const curOT=calcMonthOT(emp.id,dt.getFullYear(),dt.getMonth());
   const newOT=Math.round((curOT+hours)*10)/10;
@@ -1683,13 +1720,15 @@ function clearOTReqForm(){
 }
 function submitOTReq(){
   if(!cUser)return;
+  const targetId=isA?(document.getElementById('otreq-target')?.value||''):cUser.id;
+  const emp=EMPLOYEES.find(x=>x.id===targetId);
+  if(!emp){alert(isA?'申請対象者を選択してください':'従業員情報が見つかりません');return;}
   const date=document.getElementById('otreq-date').value;
   if(!date){alert('対象日を入力してください');return;}
   const shift=document.getElementById('otreq-shift').value;
   const hours=parseFloat(document.getElementById('otreq-hours').value)||0;
   const reason=document.getElementById('otreq-reason').value.trim();
   if(!reason){alert('残業理由を入力してください');return;}
-  const emp=EMPLOYEES.find(x=>x.id===cUser.id);
   const dt=new Date(date);
   const curOT=calcMonthOT(emp.id,dt.getFullYear(),dt.getMonth());
   const newOT=Math.round((curOT+hours)*10)/10;
@@ -1697,10 +1736,10 @@ function submitOTReq(){
     if(!confirm(`社内上限(${OT_LIMIT}H)を超えます（申請後${newOT}H）。申請しますか？`))return;
   }
   // 重複チェック
-  const overlap=OT_REQUESTS.some(r=>r.eid===cUser.id&&r.date===date&&r.status!=='cancelled'&&r.status!=='rejected');
+  const overlap=OT_REQUESTS.some(r=>r.eid===emp.id&&r.date===date&&r.status!=='cancelled'&&r.status!=='rejected');
   if(overlap){alert('同じ日に既に残業申請があります');return;}
   const req={
-    id:genOTReqId(),eid:cUser.id,name:cUser.name,dept:emp.dept,
+    id:genOTReqId(),eid:emp.id,name:emp.name,dept:emp.dept,
     date,shift,hours,reason,status:'pending',
     appliedAt:new Date().toISOString(),reviewedAt:null,reviewNote:''
   };
@@ -1751,18 +1790,25 @@ function setOTRF(f,el){curOTRF=f;document.querySelectorAll('#otreq-filter .rfbtn
 function rOTReq(){
   const formWrap=document.getElementById('otreq-form-wrap');
   const lbl=document.getElementById('otreq-role-label');
+  const targetRow=document.getElementById('otreq-target-row');
+  const targetSel=document.getElementById('otreq-target');
+  if(formWrap)formWrap.style.display='';
   if(isA){
-    if(formWrap)formWrap.style.display='none';
-    if(lbl)lbl.textContent='管理者モード：申請の承認・却下ができます';
+    if(lbl)lbl.textContent='申請フォーム（代理申請・自己申請が可能）';
+    if(targetRow)targetRow.style.display='';
+    if(targetSel){
+      targetSel.innerHTML=EMPLOYEES.length>0
+        ?EMPLOYEES.map(e=>`<option value="${e.id}">${e.name}（${e.dept}）</option>`).join('')
+        :'<option value="">※先に従業員を登録してください</option>';
+    }
   }else{
-    if(formWrap)formWrap.style.display='';
     if(lbl)lbl.textContent='残業の事前申請です。承認後にシフトへ反映されます。';
-    // イベント設定（一度だけ）
-    ['otreq-date','otreq-hours'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el&&!el._bound){el.addEventListener('change',calcOTReqPreview);el._bound=true;}
-    });
+    if(targetRow)targetRow.style.display='none';
   }
+  ['otreq-date','otreq-hours'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&!el._bound){el.addEventListener('change',calcOTReqPreview);el._bound=true;}
+  });
   rOTReqList();
 }
 function rOTReqList(){
@@ -1846,6 +1892,9 @@ function clearHReqForm(){
 }
 function submitHReq(){
   if(!cUser)return;
+  const targetId=isA?(document.getElementById('hreq-target')?.value||''):cUser.id;
+  const emp=EMPLOYEES.find(x=>x.id===targetId);
+  if(!emp){alert(isA?'申請対象者を選択してください':'従業員情報が見つかりません');return;}
   const date=document.getElementById('hreq-date').value;
   if(!date){alert('出勤日を入力してください');return;}
   const start=document.getElementById('hreq-start').value;
@@ -1862,11 +1911,10 @@ function submitHReq(){
   let mins=(eh*60+em)-(sh*60+sm);if(mins<0)mins+=24*60;
   const hours=Math.round(mins/60*10)/10;
   // 重複チェック
-  const overlap=H_REQUESTS.some(r=>r.eid===cUser.id&&r.date===date&&r.status!=='cancelled'&&r.status!=='rejected');
+  const overlap=H_REQUESTS.some(r=>r.eid===emp.id&&r.date===date&&r.status!=='cancelled'&&r.status!=='rejected');
   if(overlap){alert('同じ日に既に休日出勤申請があります');return;}
-  const emp=EMPLOYEES.find(x=>x.id===cUser.id);
   const req={
-    id:genHReqId(),eid:cUser.id,name:cUser.name,dept:emp.dept,
+    id:genHReqId(),eid:emp.id,name:emp.name,dept:emp.dept,
     date,start,end,hours,furikae,reason,status:'pending',
     appliedAt:new Date().toISOString(),reviewedAt:null,reviewNote:''
   };
@@ -1926,17 +1974,25 @@ function setHRF(f,el){curHRF=f;document.querySelectorAll('#hreq-filter .rfbtn').
 function rHReq(){
   const formWrap=document.getElementById('hreq-form-wrap');
   const lbl=document.getElementById('hreq-role-label');
+  const targetRow=document.getElementById('hreq-target-row');
+  const targetSel=document.getElementById('hreq-target');
+  if(formWrap)formWrap.style.display='';
   if(isA){
-    if(formWrap)formWrap.style.display='none';
-    if(lbl)lbl.textContent='管理者モード：申請の承認・却下ができます';
+    if(lbl)lbl.textContent='申請フォーム（代理申請・自己申請が可能）';
+    if(targetRow)targetRow.style.display='';
+    if(targetSel){
+      targetSel.innerHTML=EMPLOYEES.length>0
+        ?EMPLOYEES.map(e=>`<option value="${e.id}">${e.name}（${e.dept}）</option>`).join('')
+        :'<option value="">※先に従業員を登録してください</option>';
+    }
   }else{
-    if(formWrap)formWrap.style.display='';
     if(lbl)lbl.textContent='休日出勤の事前申請です。承認後にシフトへ反映されます。';
-    ['hreq-date','hreq-start','hreq-end'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el&&!el._hbound){el.addEventListener('change',id==='hreq-date'?checkHreqDay:calcHreqHours);el._hbound=true;}
-    });
+    if(targetRow)targetRow.style.display='none';
   }
+  ['hreq-date','hreq-start','hreq-end'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&!el._hbound){el.addEventListener('change',id==='hreq-date'?checkHreqDay:calcHreqHours);el._hbound=true;}
+  });
   rHReqList();
 }
 function rHReqList(){
