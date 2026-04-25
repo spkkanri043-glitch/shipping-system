@@ -2245,32 +2245,79 @@ function saveDeptSettings(){
 // ══ INIT ══
 seedShifts();
 
-// ══ SSO：ポータルからの自動ログイン ══
-// URLパラメータ ?sso=<token> があれば自動ログイン
-// トークン形式: Base64(reverse(JSON({id,name,role,ts})))
+// ══ SSO：ポータルからの自動ログイン + 従業員同期 ══
 (function(){
   function parseSSOToken(token){
     try{
       const decoded=atob(token.split('').reverse().join(''));
       const data=JSON.parse(decoded);
-      // 5分以内のトークンのみ有効
       if(Date.now()-data.ts>5*60*1000)return null;
       return data;
     }catch(e){return null;}
   }
+
+  // ポータルの従業員データをシフト管理のEMPLOYEES形式に変換して同期
+  function syncFromPortal(portalEmps){
+    if(!portalEmps||!portalEmps.length)return;
+    // 在職のみ対象
+    const active=portalEmps.filter(e=>e.status==='active'||e.status==='在職'||!e.status);
+    if(!active.length)return;
+
+    const newEmps=active.map(e=>{
+      const empId=e.loginId||e.id; // ログインIDを優先
+      const existing=EMPLOYEES.find(x=>x.id===empId);
+      return {
+        id:      empId,
+        // ポータルと一致する項目をそのままマッピング
+        name:    e.name  || (existing?existing.name:''),
+        dept:    e.dept  || (existing?existing.dept:'製造部'),
+        team:    e.team  || (existing?existing.team:'３交代'),
+        years:   e.years!==undefined&&e.years!=='' ? Number(e.years) : (existing?existing.years:0),
+        ecat:    e.ecat  || (existing?existing.ecat:'無期雇用'),
+        etype:   e.etype || (existing?existing.etype:'正社員'),
+        // 一致しない項目はシフト独自の値を維持
+        ptStart: existing?existing.ptStart:'09:00',
+        ptEnd:   existing?existing.ptEnd:'18:00',
+        pw:      existing?existing.pw:'1234',
+        al:      e.nenkyuu!==undefined&&e.nenkyuu!=='' ? Number(e.nenkyuu) : (existing?existing.al:10),
+      };
+    });
+
+    // 既存SHIFTSを保持したまま従業員リストを更新
+    newEmps.forEach(e=>{ if(!SHIFTS[e.id])SHIFTS[e.id]={}; });
+    EMPLOYEES.length=0;
+    newEmps.forEach(e=>EMPLOYEES.push(e));
+    seedShifts();
+  }
+
   const params=new URLSearchParams(window.location.search);
   const token=params.get('sso');
   if(!token)return;
   const data=parseSSOToken(token);
   if(!data)return;
-  // 名前をデコード（URLエンコード対応）
+
+  // empsパラメータから従業員データを同期
+  const empsParam=params.get('emps');
+  const empsKey=params.get('emps_key');
+  let empsJson=null;
+  if(empsParam) empsJson=decodeURIComponent(empsParam);
+  else if(empsKey){ try{empsJson=sessionStorage.getItem(empsKey);}catch(e){} }
+
+  if(empsJson){
+    try{
+      const emps=JSON.parse(empsJson);
+      syncFromPortal(emps);
+    }catch(e){console.warn('従業員同期エラー:',e);}
+  }
+
   let name=data.name||'';
   try{name=decodeURIComponent(escape(name));}catch(e){}
   cUser={id:data.id,name};
   isA=(data.role==='admin');
-  // URLからトークンを除去（セキュリティ）
   window.history.replaceState({},'',window.location.pathname);
   launch();
+  // 同期後に画面を再描画
+  setTimeout(()=>{ try{rSh();rDB();rEmp();}catch(e){} }, 150);
 })();
 </script>
 </body>
