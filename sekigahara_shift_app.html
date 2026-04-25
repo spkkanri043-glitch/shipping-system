@@ -850,21 +850,7 @@ function mkEmp(name,dept,team,years,ecat,etype,ptStart,ptEnd){
   return{id,name,dept,team,years,ecat,etype,
     ptStart:ptStart||'09:00',ptEnd:ptEnd||'15:00',pw:'1234'};
 }
-// 製造部 3交代 19名
-const mfN=['田中 一郎','鈴木 花子','山田 太郎','伊藤 次郎','松本 健司',
-  '佐々木 勇','渡辺 光','川口 誠','高橋 亮','中村 菜々',
-  '小林 恵子','加藤 孝','木村 龍','清水 由美','橋本 隆',
-  '岡田 茂','福田 優','石川 恵','西村 剛'];
-mfN.forEach((n,i)=>EMPLOYEES.push(mkEmp(n,'製造部','３交代',[8,3,12,5,2,7,6,10,4,9,1,11,3,6,8,5,2,7,4][i],'無期雇用','正社員')));
-// 生産管理部 5名
-['中島 健','野田 恵美','藤田 博','近藤 美帆','岩本 智'].forEach((n,i)=>
-  EMPLOYEES.push(mkEmp(n,'生産管理部','事務・管理',[15,4,7,3,8][i],'無期雇用','正社員')));
-// 品質保証部 5名
-['浜田 誠','上田 美咲','長谷川 亮','原田 由佳','藤原 健'].forEach((n,i)=>
-  EMPLOYEES.push(mkEmp(n,'品質保証部','検査・組立',[6,9,11,2,5][i],'無期雇用','正社員')));
-// 派遣 3名
-['派遣 太郎','派遣 花子','派遣 次郎'].forEach((n,i)=>
-  EMPLOYEES.push(mkEmp(n,'派遣','派遣',[1,0.5,2][i],'派遣','派遣社員')));
+// ※ 従業員は「従業員管理」画面から登録してください
 
 function calcAL(y){
   if(y<0.5)return 0;
@@ -896,41 +882,10 @@ function calcMonthOT(eid,y,m){
 }
 
 function seedShifts(){
-  const pats=['A','B','C','D','E','F','G','H','X','J','OFF','OFF','B','D','A','C','E','G','B'];
-  // パートタイム専用パターン（短時間勤務・週3〜4日想定）
-  const ptPats=['PT','OFF','PT','OFF','PT','OFF','OFF'];
+  // 登録済み従業員のシフト領域を初期化する
   EMPLOYEES.forEach(e=>{
-    SHIFTS[e.id]={};
-    for(let mo=0;mo<4;mo++){
-      const mon=(cM+mo)%12,yr=cY+Math.floor((cM+mo)/12);
-      const dim=new Date(yr,mon+1,0).getDate();
-      for(let d=1;d<=dim;d++){
-        const k=dkey(yr,mon,d);
-        const dayT=getDayType(yr,mon,d);
-        const idx=(d+parseInt(e.id.slice(3)))%pats.length;
-        const isRest=dayT==='sun'||dayT==='sat'||dayT==='company-hol';
-        if(isPT(e)){
-          // パート・アルバイトは週3〜4日勤務パターン
-          const ptIdx=(d+parseInt(e.id.slice(3)))%ptPats.length;
-          const t=isRest?'OFF':(ptPats[ptIdx]==='PT'?'P':'OFF');
-          if(t==='P'&&!isRest){
-            SHIFTS[e.id][k]={type:'P',ot:0,start:e.ptStart||'09:00',end:e.ptEnd||'15:00'};
-          }else{
-            SHIFTS[e.id][k]={type:'OFF',ot:0};
-          }
-        }else{
-          const t=isRest?'OFF':pats[idx];
-          SHIFTS[e.id][k]={type:t,ot:0};
-        }
-      }
-    }
+    if(!SHIFTS[e.id])SHIFTS[e.id]={};
   });
-  // sample OT entries
-  const mm=String(cM).padStart(2,'0');
-  if(SHIFTS['emp001'])SHIFTS['emp001'][`${cY}-${mm}-10`]={type:'VAC',ot:0};
-  if(SHIFTS['emp001'])SHIFTS['emp001'][`${cY}-${mm}-15`]={type:'A',ot:3};
-  if(SHIFTS['emp003'])SHIFTS['emp003'][`${cY}-${mm}-08`]={type:'E',ot:2};
-  if(SHIFTS['emp006'])SHIFTS['emp006'][`${cY}-${mm}-20`]={type:'HOL-W',ot:4};
 }
 
 // ══ AUTH ══
