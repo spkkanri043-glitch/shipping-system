@@ -1417,6 +1417,7 @@ function saveEmp(){
     EMPLOYEES.push(e);SHIFTS[e.id]={};
   }
   closeEmod();rEmp();rSh();rDB();
+  persistData(); // localStorageに保存
 }
 
 // ══ VACATION REQUEST ══
@@ -2242,7 +2243,71 @@ function saveDeptSettings(){
   alert('保存しました');rSt();rEmp();
 }
 
+// ══ localStorage 保存・復元 ══
+const LS_EMP   = 'kpk_shift_employees';
+const LS_SHIFT = 'kpk_shift_data';
+
+// 従業員データとシフトデータをlocalStorageに保存
+function persistData() {
+  try {
+    localStorage.setItem(LS_EMP, JSON.stringify(EMPLOYEES));
+    localStorage.setItem(LS_SHIFT, JSON.stringify(SHIFTS));
+  } catch(e) { console.warn('保存エラー:', e); }
+}
+
+// localStorageから復元
+function restoreData() {
+  try {
+    const empJson = localStorage.getItem(LS_EMP);
+    const shiftJson = localStorage.getItem(LS_SHIFT);
+    if (empJson) {
+      const saved = JSON.parse(empJson);
+      if (saved && saved.length > 0) {
+        EMPLOYEES.length = 0;
+        saved.forEach(e => EMPLOYEES.push(e));
+      }
+    }
+    if (shiftJson) {
+      const saved = JSON.parse(shiftJson);
+      if (saved) Object.assign(SHIFTS, saved);
+    }
+  } catch(e) { console.warn('復元エラー:', e); }
+}
+
+// ポータルから従業員を受け取った時はlocalStorageも更新
+function syncFromPortalAndPersist(portalEmps) {
+  if (!portalEmps || !portalEmps.length) return;
+  const active = portalEmps.filter(e => e.status === 'active' || e.status === '在職' || !e.status);
+  if (!active.length) return;
+
+  const newEmps = active.map(e => {
+    const empId = e.loginId || e.id;
+    const existing = EMPLOYEES.find(x => x.id === empId);
+    return {
+      id:      empId,
+      name:    e.name   || (existing ? existing.name : ''),
+      dept:    e.dept   || (existing ? existing.dept : '製造部'),
+      team:    e.team   || (existing ? existing.team : '３交代'),
+      years:   e.years !== undefined && e.years !== '' ? Number(e.years) : (existing ? existing.years : 0),
+      ecat:    e.ecat   || (existing ? existing.ecat : '無期雇用'),
+      etype:   e.etype  || (existing ? existing.etype : '正社員'),
+      ptStart: existing ? existing.ptStart : '09:00',
+      ptEnd:   existing ? existing.ptEnd   : '18:00',
+      pw:      existing ? existing.pw      : '1234',
+      al:      e.nenkyuu !== undefined && e.nenkyuu !== '' ? Number(e.nenkyuu) : (existing ? existing.al : 10),
+    };
+  });
+
+  // 既存SHIFTSを保持
+  newEmps.forEach(e => { if (!SHIFTS[e.id]) SHIFTS[e.id] = {}; });
+  EMPLOYEES.length = 0;
+  newEmps.forEach(e => EMPLOYEES.push(e));
+  seedShifts();
+  persistData(); // localStorage に保存
+}
+
 // ══ INIT ══
+restoreData(); // まずlocalStorageから復元
 seedShifts();
 
 // ══ SSO：ポータルからの自動ログイン + 従業員同期 ══
@@ -2256,47 +2321,13 @@ seedShifts();
     }catch(e){return null;}
   }
 
-  // ポータルの従業員データをシフト管理のEMPLOYEES形式に変換して同期
-  function syncFromPortal(portalEmps){
-    if(!portalEmps||!portalEmps.length)return;
-    // 在職のみ対象
-    const active=portalEmps.filter(e=>e.status==='active'||e.status==='在職'||!e.status);
-    if(!active.length)return;
-
-    const newEmps=active.map(e=>{
-      const empId=e.loginId||e.id; // ログインIDを優先
-      const existing=EMPLOYEES.find(x=>x.id===empId);
-      return {
-        id:      empId,
-        // ポータルと一致する項目をそのままマッピング
-        name:    e.name  || (existing?existing.name:''),
-        dept:    e.dept  || (existing?existing.dept:'製造部'),
-        team:    e.team  || (existing?existing.team:'３交代'),
-        years:   e.years!==undefined&&e.years!=='' ? Number(e.years) : (existing?existing.years:0),
-        ecat:    e.ecat  || (existing?existing.ecat:'無期雇用'),
-        etype:   e.etype || (existing?existing.etype:'正社員'),
-        // 一致しない項目はシフト独自の値を維持
-        ptStart: existing?existing.ptStart:'09:00',
-        ptEnd:   existing?existing.ptEnd:'18:00',
-        pw:      existing?existing.pw:'1234',
-        al:      e.nenkyuu!==undefined&&e.nenkyuu!=='' ? Number(e.nenkyuu) : (existing?existing.al:10),
-      };
-    });
-
-    // 既存SHIFTSを保持したまま従業員リストを更新
-    newEmps.forEach(e=>{ if(!SHIFTS[e.id])SHIFTS[e.id]={}; });
-    EMPLOYEES.length=0;
-    newEmps.forEach(e=>EMPLOYEES.push(e));
-    seedShifts();
-  }
-
   const params=new URLSearchParams(window.location.search);
   const token=params.get('sso');
   if(!token)return;
   const data=parseSSOToken(token);
   if(!data)return;
 
-  // empsパラメータから従業員データを同期
+  // empsパラメータから従業員データを同期してlocalStorageに保存
   const empsParam=params.get('emps');
   const empsKey=params.get('emps_key');
   let empsJson=null;
@@ -2306,7 +2337,7 @@ seedShifts();
   if(empsJson){
     try{
       const emps=JSON.parse(empsJson);
-      syncFromPortal(emps);
+      syncFromPortalAndPersist(emps); // 保存も同時に行う
     }catch(e){console.warn('従業員同期エラー:',e);}
   }
 
@@ -2316,7 +2347,6 @@ seedShifts();
   isA=(data.role==='admin');
   window.history.replaceState({},'',window.location.pathname);
   launch();
-  // 同期後に画面を再描画
   setTimeout(()=>{ try{rSh();rDB();rEmp();}catch(e){} }, 150);
 })();
 </script>
