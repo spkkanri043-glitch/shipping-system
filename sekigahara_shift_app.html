@@ -113,12 +113,17 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .thd.sun{color:var(--r)}.thd.sat{color:var(--b)}
 .thd.tdc{background:#e5effe!important;color:var(--pr)!important;font-weight:700}
 /* 会社カレンダー: 土曜出勤日 */
-.thd.sat-work{color:#0b7a3d;background:#e3f6ed!important}
+.thd.sat-work{color:#0b7a3d;background:#c8f0d8!important}
 /* 休日カラム背景 */
-.td-sun{background:#fef5f5!important}
-.td-sat{background:#f5f8ff!important}
-.td-satw{background:#f0fdf4!important}
-.td-t{background:#fffbea!important}
+.thd.sun-bg{background:#fdd9d9!important}
+/* 曜日ヘッダ休日背景 */
+.thd.sun-col-hdr{background:#fdd9d9!important}
+.thd.sat-col-hdr{background:#d6e4ff!important}
+/* 休日カラム背景 ── 濃いめに */
+.td-sun{background:#fdd9d9!important}   /* 日曜・会社休日 */
+.td-sat{background:#d6e4ff!important}   /* 土曜（休日） */
+.td-satw{background:#c8f0d8!important}  /* 土曜出勤日 */
+.td-t{background:#fffbea!important}     /* 今日 */
 
 .sc{display:inline-block;padding:2px 3px;border-radius:3px;font-size:10px;font-weight:700;cursor:grab;min-width:28px;text-align:center;transition:transform .1s,box-shadow .1s;user-select:none;line-height:1.5;position:relative}
 .sc:hover{transform:scale(1.08);box-shadow:0 1px 5px rgba(0,0,0,.2)}
@@ -954,7 +959,7 @@ let selCells=new Set();
 let edEid=null,edDK=null,dragSrc=null,editingEmpId=null;
 let calY=TODAY.getFullYear(),calM=TODAY.getMonth();
 
-function dkey(y,m,d){return`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+function dkey(y,m,d){return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
 function cntVac(eid){let c=0;Object.entries(SHIFTS[eid]||{}).forEach(([k,v])=>{if(k.startsWith(String(TODAY.getFullYear()))&&v.type==='VAC')c++;});return c;}
 function calcMonthOT(eid,y,m){
   let ot=0;const dim=new Date(y,m+1,0).getDate();
@@ -1092,10 +1097,10 @@ function rSh(){
     const k=dkey(y,m,d);
     const isTd=k===tdk;
     let cls='thd';
-    if(dayType==='sun')cls+=' sun';
+    if(dayType==='sun'){cls+=' sun';cls+=' sun-col-hdr';}
     else if(dayType==='sat-work')cls+=' sat-work';
-    else if(dayType==='sat')cls+=' sat';
-    else if(dayType==='company-hol')cls+=' sun';
+    else if(dayType==='sat'){cls+=' sat';cls+=' sat-col-hdr';}
+    else if(dayType==='company-hol'){cls+=' sun';cls+=' sun-col-hdr';}
     if(isTd)cls+=' tdc';
     const label=dayType==='sat-work'?'★':'';
     // 月が変わった最初のセルにborder-leftで区切り
