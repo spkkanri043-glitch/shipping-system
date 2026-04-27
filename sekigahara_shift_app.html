@@ -1009,7 +1009,7 @@ function slt(t){ltab=t;document.getElementById('lt-a').classList.toggle('on',t==
 function doLogin(){
   const id=document.getElementById('lid').value.trim(),pw=document.getElementById('lpw').value;
   if(ltab==='a'&&id==='admin'&&pw==='admin'){cUser={id:'admin',name:'管理者'};isA=true;launch();}
-  else{const e=EMPLOYEES.find(x=>x.id===id&&x.pw===pw);if(e){cUser={id:e.id,name:e.name};isA=false;launch();}else{alert('IDまたはパスワードが違います');}}
+  else{const e=EMPLOYEES.find(x=>x.id===id&&x.pw===pw);if(e){cUser={id:e.id,name:e.name,dept:e.dept||''};isA=(e.id==='admin');launch();}else{alert('IDまたはパスワードが違います');}}
 }
 document.getElementById('lpw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 // オフライン状態をGASに通知
@@ -2748,38 +2748,6 @@ function showSyncBadge(status) {
   if (status === 'saved' || status === 'loaded') setTimeout(() => { el.style.display='none'; }, 3000);
 }
 
-// ══ ページ読み込み時の自動同期 + 5分ごと定期更新 ══
-(function(){
-  // DOMContentLoaded後にGAS URLが確定してから実行
-  document.addEventListener('DOMContentLoaded', function() {
-    // SSOトークンなしで直接開いた場合もloadFromSheetを呼ぶ
-    // （SSOあり場合はSSOブロック内で呼ばれるため300ms後に重複チェック）
-    setTimeout(async () => {
-      if (!GAS_URL_SHIFT) return;
-      // SSOで既にloadが走っている場合はスキップ（sync-badgeが表示中）
-      const badge = document.getElementById('sync-badge');
-      if (badge && badge.style.display !== 'none') return;
-      try {
-        await loadFromSheet();
-        rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
-      } catch(e) {}
-    }, 1000);
-
-    // 5分ごとに自動更新
-    setInterval(async () => {
-      if (!GAS_URL_SHIFT) return;
-      try {
-        console.log('[autoSync] 自動更新中...');
-        await loadFromSheet();
-        rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
-        console.log('[autoSync] 完了');
-      } catch(e) {
-        console.warn('[autoSync] エラー:', e);
-      }
-    }, 5 * 60 * 1000); // 5分
-  });
-})();
-
 // ══ SSO：ポータルからの自動ログイン + 従業員同期 ══
 (function(){
   function parseSSOToken(token){
@@ -2818,7 +2786,7 @@ function showSyncBadge(status) {
   let name=data.name||'';
   try{name=decodeURIComponent(escape(name));}catch(e){}
   cUser={id:data.id,name,dept:data.dept||''};
-  isA=(data.role==='admin');
+  isA=(data.id==='admin');
   window.history.replaceState({},'',window.location.pathname);
   // ログインユーザーをEMPLOYEESに仮登録（申請機能のため）
   if(!isA && !EMPLOYEES.find(x=>x.id===data.id)){
