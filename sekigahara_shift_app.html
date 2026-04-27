@@ -1012,7 +1012,31 @@ function doLogin(){
   else{const e=EMPLOYEES.find(x=>x.id===id&&x.pw===pw);if(e){cUser={id:e.id,name:e.name};isA=false;launch();}else{alert('IDまたはパスワードが違います');}}
 }
 document.getElementById('lpw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-function doLogout(){cUser=null;isA=false;document.getElementById('lw').classList.remove('hid');document.getElementById('mainApp').classList.add('hid');document.getElementById('lid').value='';document.getElementById('lpw').value='';}
+// オフライン状態をGASに通知
+function notifyOffline() {
+  if (!cUser || !GAS_URL_SHIFT) return;
+  try {
+    const url = GAS_URL_SHIFT + '?action=setOnlineStatus' +
+      '&appId=shift' +
+      '&userId=' + encodeURIComponent(cUser.id) +
+      '&userName=' + encodeURIComponent(cUser.name) +
+      '&action2=logout';
+    navigator.sendBeacon(url); // ページ離脱時も確実に送信
+  } catch(e) {}
+}
+
+function doLogout(){
+  notifyOffline();
+  cUser=null;isA=false;
+  document.getElementById('lw').classList.remove('hid');
+  document.getElementById('mainApp').classList.add('hid');
+  document.getElementById('lid').value='';
+  document.getElementById('lpw').value='';
+}
+
+// ページを閉じる・離脱する時もオフラインを記録
+window.addEventListener('beforeunload', notifyOffline);
+window.addEventListener('pagehide', notifyOffline);
 
 function launch(){
   document.getElementById('lw').classList.add('hid');
@@ -2567,10 +2591,6 @@ function syncFromPortalAndPersist(portalEmps) {
   persistData(); // localStorage に保存
 }
 
-// ══ INIT ══
-restoreData(); // まずlocalStorageから復元
-seedShifts();
-
 // ══ GASスプレッドシート保存・読み込み ══
 const LS_GAS_URL = 'kpk_shift_gas_url';
 let GAS_URL_SHIFT = '';
@@ -2580,6 +2600,31 @@ function setGasUrl(url) {
   GAS_URL_SHIFT = url;
   try { localStorage.setItem(LS_GAS_URL, url); } catch(e) {}
 }
+
+// ══ オンライン状態通知 ══
+function notifyOffline() {
+  if (!GAS_URL_SHIFT || !cUser) return;
+  try {
+    const url = GAS_URL_SHIFT + '?action=setOnlineStatus' +
+      '&appId=shift' +
+      '&userId=' + encodeURIComponent(cUser.id) +
+      '&userName=' + encodeURIComponent(cUser.name) +
+      '&action2=logout';
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(url);
+    } else {
+      fetch(url, { keepalive: true, redirect: 'follow' }).catch(() => {});
+    }
+  } catch(e) {}
+}
+
+// ページを閉じる・離れる時にオフライン通知
+window.addEventListener('beforeunload', notifyOffline);
+window.addEventListener('pagehide', notifyOffline);
+
+// ══ INIT ══
+restoreData();
+seedShifts();
 
 // スプレッドシートに全データを保存
 let _saveTimer = null;
