@@ -2593,8 +2593,13 @@ function syncFromPortalAndPersist(portalEmps) {
 
 // ══ GASスプレッドシート保存・読み込み ══
 const LS_GAS_URL = 'kpk_shift_gas_url';
-let GAS_URL_SHIFT = '';
-try { GAS_URL_SHIFT = localStorage.getItem(LS_GAS_URL) || ''; } catch(e) {}
+// GASのURL（ポータルと同じURL）
+const GAS_URL_HARDCODED = 'https://script.google.com/macros/s/AKfycbzAB87ZCwdp3mgVTMe8kS-bAgQAEleWotqJGS72GJCx3UkNKoLu-i2r2WBgibzpN9sU/exec';
+let GAS_URL_SHIFT = GAS_URL_HARDCODED; // まずハードコード値をセット
+try {
+  const saved = localStorage.getItem(LS_GAS_URL);
+  if (saved) GAS_URL_SHIFT = saved; // 保存済みがあれば上書き
+} catch(e) {}
 
 function setGasUrl(url) {
   GAS_URL_SHIFT = url;
