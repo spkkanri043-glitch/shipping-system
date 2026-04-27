@@ -2748,6 +2748,38 @@ function showSyncBadge(status) {
   if (status === 'saved' || status === 'loaded') setTimeout(() => { el.style.display='none'; }, 3000);
 }
 
+// ══ ページ読み込み時の自動同期 + 5分ごと定期更新 ══
+(function(){
+  // DOMContentLoaded後にGAS URLが確定してから実行
+  document.addEventListener('DOMContentLoaded', function() {
+    // SSOトークンなしで直接開いた場合もloadFromSheetを呼ぶ
+    // （SSOあり場合はSSOブロック内で呼ばれるため300ms後に重複チェック）
+    setTimeout(async () => {
+      if (!GAS_URL_SHIFT) return;
+      // SSOで既にloadが走っている場合はスキップ（sync-badgeが表示中）
+      const badge = document.getElementById('sync-badge');
+      if (badge && badge.style.display !== 'none') return;
+      try {
+        await loadFromSheet();
+        rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
+      } catch(e) {}
+    }, 1000);
+
+    // 5分ごとに自動更新
+    setInterval(async () => {
+      if (!GAS_URL_SHIFT) return;
+      try {
+        console.log('[autoSync] 自動更新中...');
+        await loadFromSheet();
+        rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
+        console.log('[autoSync] 完了');
+      } catch(e) {
+        console.warn('[autoSync] エラー:', e);
+      }
+    }, 5 * 60 * 1000); // 5分
+  });
+})();
+
 // ══ SSO：ポータルからの自動ログイン + 従業員同期 ══
 (function(){
   function parseSSOToken(token){
