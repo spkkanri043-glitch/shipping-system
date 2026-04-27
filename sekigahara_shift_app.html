@@ -948,6 +948,31 @@ function calcAL(y){
   return 20;
 }
 
+// ログインユーザーの従業員データを取得（見つからない場合はcUserから仮データ作成）
+function getEmpOrCurrent(targetId) {
+  let emp = EMPLOYEES.find(x => x.id === targetId);
+  if (!emp && cUser && cUser.id === targetId) {
+    // ポータルSSOでログインした場合、EMPLOYEESにない場合でも申請できるよう仮データ作成
+    emp = {
+      id:      cUser.id,
+      name:    cUser.name,
+      dept:    cUser.dept || '-',
+      team:    '-',
+      years:   0,
+      ecat:    '-',
+      etype:   '-',
+      ptStart: '09:00',
+      ptEnd:   '18:00',
+      al:      10,
+      pw:      ''
+    };
+    // 仮データをEMPLOYEESに追加して次回から使えるようにする
+    EMPLOYEES.push(emp);
+    if (!SHIFTS[emp.id]) SHIFTS[emp.id] = {};
+  }
+  return emp;
+}
+
 // ══ SHIFTS ══
 const SHIFTS={};
 const TODAY=new Date();
@@ -1506,8 +1531,7 @@ function saveEmp(){
     EMPLOYEES.push(e);SHIFTS[e.id]={};
   }
   closeEmod();rEmp();rSh();rDB();
-  persistData();
-  scheduleSave(); // スプレッドシートに自動保存
+  persistData(); // localStorageに保存
 }
 
 // ══ VACATION REQUEST ══
@@ -1584,7 +1608,7 @@ function submitVreq(){
   const targetId=isA
     ?(document.getElementById('vreq-target')?.value||'')
     :cUser.id;
-  const emp=EMPLOYEES.find(x=>x.id===targetId);
+  const emp = isA ? EMPLOYEES.find(x=>x.id===targetId) : getEmpOrCurrent(targetId);
   if(!emp){alert(isA?'申請対象者を選択してください（先に従業員を登録してください）':'従業員情報が見つかりません');return;}
   const type=document.getElementById('vreq-type').value;
   const from=document.getElementById('vreq-from').value;
@@ -1787,7 +1811,7 @@ function clearOTReqForm(){
 function submitOTReq(){
   if(!cUser)return;
   const targetId=isA?(document.getElementById('otreq-target')?.value||''):cUser.id;
-  const emp=EMPLOYEES.find(x=>x.id===targetId);
+  const emp = isA ? EMPLOYEES.find(x=>x.id===targetId) : getEmpOrCurrent(targetId);
   if(!emp){alert(isA?'申請対象者を選択してください':'従業員情報が見つかりません');return;}
   const date=document.getElementById('otreq-date').value;
   if(!date){alert('対象日を入力してください');return;}
@@ -1959,7 +1983,7 @@ function clearHReqForm(){
 function submitHReq(){
   if(!cUser)return;
   const targetId=isA?(document.getElementById('hreq-target')?.value||''):cUser.id;
-  const emp=EMPLOYEES.find(x=>x.id===targetId);
+  const emp = isA ? EMPLOYEES.find(x=>x.id===targetId) : getEmpOrCurrent(targetId);
   if(!emp){alert(isA?'申請対象者を選択してください':'従業員情報が見つかりません');return;}
   const date=document.getElementById('hreq-date').value;
   if(!date){alert('出勤日を入力してください');return;}
@@ -2430,113 +2454,8 @@ function persistData() {
     localStorage.setItem(LS_EMP,   JSON.stringify(EMPLOYEES));
     localStorage.setItem(LS_SHIFT, JSON.stringify(SHIFTS));
     localStorage.setItem(LS_CAL,   JSON.stringify(CAL_SPECIAL));
-    localStorage.setItem(LS_VER,   '2');
+    localStorage.setItem(LS_VER,   '2'); // v2 = dkey m+1修正済み
   } catch(e) { console.warn('保存エラー:', e); }
-}
-
-// ══ GASスプレッドシート保存・読み込み ══
-// GAS_URLはポータルのSSOトークンと一緒に渡される or localStorageに保存
-const LS_GAS_URL = 'kpk_shift_gas_url';
-let GAS_URL_SHIFT = localStorage.getItem(LS_GAS_URL) || '';
-
-function setGasUrl(url) {
-  GAS_URL_SHIFT = url;
-  try { localStorage.setItem(LS_GAS_URL, url); } catch(e) {}
-}
-
-// GASへのAPIコール
-async function gasApi(action, payload = {}) {
-  if (!GAS_URL_SHIFT) return { ok: false, message: 'GAS URLが設定されていません' };
-  try {
-    const token = btoa(JSON.stringify({ action, ...payload, ts: Date.now() })).split('').reverse().join('');
-    const url = GAS_URL_SHIFT + '?action=' + encodeURIComponent(action) + '&token=' + encodeURIComponent(token);
-    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-    const text = await res.text();
-    return JSON.parse(text);
-  } catch(e) {
-    return { ok: false, message: e.message };
-  }
-}
-
-// スプレッドシートにシフトデータ全体を保存
-let _saveTimer = null;
-function scheduleSave() {
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(saveToSheet, 3000); // 3秒後に自動保存
-}
-
-async function saveToSheet() {
-  if (!GAS_URL_SHIFT) return;
-  try {
-    showSyncStatus('saving');
-    const data = {
-      shifts:      JSON.stringify(SHIFTS),
-      vacReqs:     JSON.stringify(VAC_REQUESTS),
-      otReqs:      JSON.stringify(OT_REQUESTS),
-      hReqs:       JSON.stringify(H_REQUESTS),
-      calSpecial:  JSON.stringify(CAL_SPECIAL),
-    };
-    const payload = encodeURIComponent(JSON.stringify(data));
-    const url = GAS_URL_SHIFT + '?action=saveShiftData&data=' + payload;
-    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-    const result = JSON.parse(await res.text());
-    if (result.ok) {
-      showSyncStatus('saved');
-    } else {
-      showSyncStatus('error', result.message);
-    }
-  } catch(e) {
-    showSyncStatus('error', e.message);
-  }
-}
-
-// スプレッドシートからシフトデータを読み込み
-async function loadFromSheet() {
-  if (!GAS_URL_SHIFT) return false;
-  try {
-    showSyncStatus('loading');
-    const url = GAS_URL_SHIFT + '?action=loadShiftData';
-    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-    const result = JSON.parse(await res.text());
-    if (result.ok && result.data) {
-      const d = result.data;
-      if (d.shifts)    { const s=JSON.parse(d.shifts);     Object.keys(SHIFTS).forEach(k=>delete SHIFTS[k]); Object.assign(SHIFTS, s); }
-      if (d.vacReqs)   { VAC_REQUESTS.length=0;  JSON.parse(d.vacReqs).forEach(r=>VAC_REQUESTS.push(r)); }
-      if (d.otReqs)    { OT_REQUESTS.length=0;   JSON.parse(d.otReqs).forEach(r=>OT_REQUESTS.push(r)); }
-      if (d.hReqs)     { H_REQUESTS.length=0;    JSON.parse(d.hReqs).forEach(r=>H_REQUESTS.push(r)); }
-      if (d.calSpecial){ const c=JSON.parse(d.calSpecial); Object.keys(CAL_SPECIAL).forEach(k=>delete CAL_SPECIAL[k]); Object.assign(CAL_SPECIAL, c); }
-      persistData(); // localStorageにも同期
-      showSyncStatus('loaded');
-      return true;
-    } else {
-      showSyncStatus('error', result.message || 'データなし');
-      return false;
-    }
-  } catch(e) {
-    showSyncStatus('error', e.message);
-    return false;
-  }
-}
-
-// 同期ステータス表示
-function showSyncStatus(status, msg) {
-  const el = document.getElementById('sync-status');
-  if (!el) return;
-  const map = {
-    saving:  { text: '💾 保存中...', color: '#b07000', bg: '#fff7db' },
-    saved:   { text: '✅ 保存済み', color: '#0b7a3d', bg: '#e3f6ed' },
-    loading: { text: '🔄 読み込み中...', color: '#1655b0', bg: '#e5effe' },
-    loaded:  { text: '✅ 読み込み完了', color: '#0b7a3d', bg: '#e3f6ed' },
-    error:   { text: '❌ ' + (msg || 'エラー'), color: '#b53030', bg: '#fce8e8' },
-  };
-  const s = map[status] || map.saved;
-  el.textContent = s.text;
-  el.style.color = s.color;
-  el.style.background = s.bg;
-  el.style.display = 'block';
-  if (status === 'saved' || status === 'loaded') {
-    setTimeout(() => { if(el) el.style.display = 'none'; }, 3000);
-  }
 }
 
 // localStorageから復元（v1データは自動マイグレーション）
@@ -2591,7 +2510,8 @@ function syncFromPortalAndPersist(portalEmps) {
   if (!active.length) return;
 
   const newEmps = active.map(e => {
-    const empId = e.loginId || e.id;
+    // IDはポータルの社員ID（e.id）を使用 ※loginIdは名前等が入っている場合があるため
+    const empId = e.id || e.loginId;
     const existing = EMPLOYEES.find(x => x.id === empId);
     return {
       id:      empId,
@@ -2619,26 +2539,6 @@ function syncFromPortalAndPersist(portalEmps) {
 // ══ INIT ══
 restoreData(); // まずlocalStorageから復元
 seedShifts();
-
-// 手動同期（ボタン押下時）
-async function manualSyncSheet() {
-  if (!GAS_URL_SHIFT) {
-    alert('GAS URLが設定されていません。ポータルから開いてください。');
-    return;
-  }
-  await loadFromSheet();
-  rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
-}
-
-// 手動同期（ボタン押下時）
-async function manualSyncSheet() {
-  if (!GAS_URL_SHIFT) {
-    alert('GAS URLが設定されていません。ポータルから開いてください。');
-    return;
-  }
-  await loadFromSheet();
-  rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
-}
 
 // ══ SSO：ポータルからの自動ログイン + 従業員同期 ══
 (function(){
@@ -2671,29 +2571,19 @@ async function manualSyncSheet() {
     }catch(e){console.warn('従業員同期エラー:',e);}
   }
 
-  // GAS URLをポータルから受け取る
-  const gasUrlParam = params.get('gas_url');
-  if (gasUrlParam) {
-    setGasUrl(decodeURIComponent(gasUrlParam));
-  }
-
   let name=data.name||'';
   try{name=decodeURIComponent(escape(name));}catch(e){}
-  cUser={id:data.id,name};
+  cUser={id:data.id,name,dept:data.dept||''};
   isA=(data.role==='admin');
   window.history.replaceState({},'',window.location.pathname);
+  // 一般ユーザーがEMPLOYEESにいない場合、仮登録（申請機能のため）
+  // ログインユーザーをEMPLOYEESに仮登録（申請機能のため）
+  if(!isA && !EMPLOYEES.find(x=>x.id===data.id)){
+    getEmpOrCurrent(data.id);
+    persistData();
+  }
   launch();
-  // スプレッドシートから最新データを読み込む
-  setTimeout(async () => {
-    try {
-      if (GAS_URL_SHIFT) {
-        await loadFromSheet();
-        rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
-      } else {
-        rSh(); rDB(); rEmp();
-      }
-    } catch(e) {}
-  }, 300);
+  setTimeout(()=>{ try{rSh();rDB();rEmp();}catch(e){} }, 150);
 })();
 </script>
 </body>
