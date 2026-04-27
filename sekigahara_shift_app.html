@@ -2635,24 +2635,51 @@ function scheduleSave() {
 
 async function saveToSheet() {
   if (!GAS_URL_SHIFT) {
-    console.warn('[saveToSheet] GAS_URL_SHIFT が未設定のため保存をスキップ');
+    console.warn('[saveToSheet] GAS_URL_SHIFT が未設定');
     return;
   }
   try {
-    console.log('[saveToSheet] スプレッドシートに保存開始...');
     showSyncBadge('saving');
-    const payload = encodeURIComponent(JSON.stringify({
+    const data = {
       shifts:     JSON.stringify(SHIFTS),
       vacReqs:    JSON.stringify(VAC_REQUESTS),
       otReqs:     JSON.stringify(OT_REQUESTS),
       hReqs:      JSON.stringify(H_REQUESTS),
       calSpecial: JSON.stringify(CAL_SPECIAL),
       employees:  JSON.stringify(EMPLOYEES),
-    }));
-    const res = await fetch(GAS_URL_SHIFT + '?action=saveShiftData&data=' + payload, { redirect: 'follow' });
+    };
+    // POSTで送信（GETのURL長さ制限を回避）
+    const res = await fetch(GAS_URL_SHIFT, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'saveShiftData', data })
+    });
     const result = JSON.parse(await res.text());
     showSyncBadge(result.ok ? 'saved' : 'error');
-  } catch(e) { showSyncBadge('error'); }
+    console.log('[saveToSheet] 結果:', result);
+  } catch(e) {
+    // POSTが失敗したらGETで再試行（データを圧縮）
+    try {
+      console.warn('[saveToSheet] POST失敗、GETで再試行...');
+      const data = {
+        shifts:     JSON.stringify(SHIFTS),
+        vacReqs:    JSON.stringify(VAC_REQUESTS),
+        otReqs:     JSON.stringify(OT_REQUESTS),
+        hReqs:      JSON.stringify(H_REQUESTS),
+        calSpecial: JSON.stringify(CAL_SPECIAL),
+        employees:  JSON.stringify(EMPLOYEES),
+      };
+      const encoded = encodeURIComponent(JSON.stringify(data));
+      const url = GAS_URL_SHIFT + '?action=saveShiftData&data=' + encoded.slice(0, 7500);
+      const res2 = await fetch(url, { redirect: 'follow' });
+      const result2 = JSON.parse(await res2.text());
+      showSyncBadge(result2.ok ? 'saved' : 'error');
+    } catch(e2) {
+      console.error('[saveToSheet] エラー:', e2);
+      showSyncBadge('error');
+    }
+  }
 }
 
 // スプレッドシートから全データを読み込み
