@@ -2492,10 +2492,17 @@ function restoreData() {
       if (saved) Object.assign(CAL_SPECIAL, saved);
     }
 
+    // 申請データの復元
+    const vacJson = localStorage.getItem('kpk_vac_req');
+    const otJson  = localStorage.getItem('kpk_ot_req');
+    const hJson   = localStorage.getItem('kpk_h_req');
+    if (vacJson) { const s=JSON.parse(vacJson); VAC_REQUESTS.length=0; s.forEach(r=>VAC_REQUESTS.push(r)); }
+    if (otJson)  { const s=JSON.parse(otJson);  OT_REQUESTS.length=0;  s.forEach(r=>OT_REQUESTS.push(r)); }
+    if (hJson)   { const s=JSON.parse(hJson);   H_REQUESTS.length=0;   s.forEach(r=>H_REQUESTS.push(r)); }
+
     // マイグレーション完了後はv2として再保存
     if (needsMigration && (shiftJson || calJson)) {
       localStorage.setItem(LS_VER, '2');
-      // マイグレーション済みデータで上書き保存
       if (shiftJson) localStorage.setItem(LS_SHIFT, JSON.stringify(SHIFTS));
       if (calJson)   localStorage.setItem(LS_CAL,   JSON.stringify(CAL_SPECIAL));
       console.log('マイグレーション完了');
