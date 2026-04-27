@@ -1009,7 +1009,7 @@ function slt(t){ltab=t;document.getElementById('lt-a').classList.toggle('on',t==
 function doLogin(){
   const id=document.getElementById('lid').value.trim(),pw=document.getElementById('lpw').value;
   if(ltab==='a'&&id==='admin'&&pw==='admin'){cUser={id:'admin',name:'管理者'};isA=true;launch();}
-  else{const e=EMPLOYEES.find(x=>x.id===id&&x.pw===pw);if(e){cUser={id:e.id,name:e.name,dept:e.dept||''};isA=(e.id.toLowerCase()==='admin');launch();}else{alert('IDまたはパスワードが違います');}}
+  else{const e=EMPLOYEES.find(x=>x.id===id&&x.pw===pw);if(e){cUser={id:e.id,name:e.name};isA=false;launch();}else{alert('IDまたはパスワードが違います');}}
 }
 document.getElementById('lpw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 // オフライン状態をGASに通知
@@ -2810,7 +2810,7 @@ function showSyncBadge(status) {
   let name=data.name||'';
   try{name=decodeURIComponent(escape(name));}catch(e){}
   cUser={id:data.id,name,dept:data.dept||''};
-  isA=(data.id.toLowerCase()==='admin');
+  isA=(data.role==='admin');
   window.history.replaceState({},'',window.location.pathname);
   // ログインユーザーをEMPLOYEESに仮登録（申請機能のため）
   if(!isA && !EMPLOYEES.find(x=>x.id===data.id)){
