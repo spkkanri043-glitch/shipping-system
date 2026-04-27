@@ -336,6 +336,8 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
     <div class="tbl">
       <div class="tbic">⚙</div>
       <div><div class="tbco">関ケ原プラ工業(株) シフト管理</div><div class="tbmd" id="tbmd">管理者モード</div></div>
+      <span id="sync-badge" style="display:none;font-size:10px;padding:2px 8px;border-radius:12px;font-weight:600;margin-left:8px"></span>
+      <button onclick="manualSyncSheet()" style="font-size:10px;padding:3px 8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;cursor:pointer;margin-left:4px" title="最新データに同期">🔄</button>
     </div>
     <div class="tbr"><span class="rbg ra" id="rbg">管理者</span><button class="blo" onclick="doLogout()">ログアウト</button></div>
   </div>
@@ -1639,6 +1641,8 @@ function submitVreq(){
     appliedAt:new Date().toISOString(),reviewedAt:null,reviewNote:''
   };
   VAC_REQUESTS.unshift(req);
+  persistData();
+  scheduleSave();
   clearVreqForm();
   rVreq();updVreqBadge();rDB();
   alert(`✅ 有給申請を提出しました（${req.id}）\n${isA?emp.name+'の':''}申請が完了しました。`);
@@ -1665,6 +1669,7 @@ function approveReq(id){
     }
   }
   rVreq();updVreqBadge();rSh();rPL();rDB();
+  persistData();scheduleSave();
   alert(`✅ ${req.id} を承認しました。シフトに反映されました。`);
 }
 function rejectReq(id){
@@ -1674,6 +1679,7 @@ function rejectReq(id){
   if(!note.trim()){alert('却下理由を入力してください');return;}
   req.status='rejected';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
   rVreq();updVreqBadge();rDB();
+  persistData();scheduleSave();
   alert(`❌ ${req.id} を却下しました。`);
 }
 function cancelReq(id){
@@ -1693,6 +1699,7 @@ function cancelReq(id){
   }else if(req.status!=='pending'){alert('取消できない状態です');return;}
   req.status='cancelled';req.reviewedAt=new Date().toISOString();
   rVreq();updVreqBadge();rDB();
+  persistData();scheduleSave();
 }
 
 let curRF='all';
@@ -1834,6 +1841,8 @@ function submitOTReq(){
     appliedAt:new Date().toISOString(),reviewedAt:null,reviewNote:''
   };
   OT_REQUESTS.unshift(req);
+  persistData();
+  scheduleSave();
   clearOTReqForm();
   rOTReq();updAllBadges();rDB();
   alert(`✅ 残業申請を提出しました（${req.id}）\n管理者の承認をお待ちください。`);
@@ -2009,6 +2018,8 @@ function submitHReq(){
     appliedAt:new Date().toISOString(),reviewedAt:null,reviewNote:''
   };
   H_REQUESTS.unshift(req);
+  persistData();
+  scheduleSave();
   clearHReqForm();
   rHReq();updAllBadges();rDB();
   alert(`✅ 休日出勤申請を提出しました（${req.id}）\n管理者の承認をお待ちください。`);
@@ -2454,7 +2465,10 @@ function persistData() {
     localStorage.setItem(LS_EMP,   JSON.stringify(EMPLOYEES));
     localStorage.setItem(LS_SHIFT, JSON.stringify(SHIFTS));
     localStorage.setItem(LS_CAL,   JSON.stringify(CAL_SPECIAL));
-    localStorage.setItem(LS_VER,   '2'); // v2 = dkey m+1修正済み
+    localStorage.setItem(LS_VER,   '2');
+    localStorage.setItem('kpk_vac_req', JSON.stringify(VAC_REQUESTS));
+    localStorage.setItem('kpk_ot_req',  JSON.stringify(OT_REQUESTS));
+    localStorage.setItem('kpk_h_req',   JSON.stringify(H_REQUESTS));
   } catch(e) { console.warn('保存エラー:', e); }
 }
 
@@ -2491,6 +2505,16 @@ function restoreData() {
       }
       if (saved) Object.assign(CAL_SPECIAL, saved);
     }
+
+    // 申請データの復元
+    try {
+      const vacJson2 = localStorage.getItem('kpk_vac_req');
+      const otJson2  = localStorage.getItem('kpk_ot_req');
+      const hJson2   = localStorage.getItem('kpk_h_req');
+      if (vacJson2) { const s=JSON.parse(vacJson2); VAC_REQUESTS.length=0; s.forEach(r=>VAC_REQUESTS.push(r)); }
+      if (otJson2)  { const s=JSON.parse(otJson2);  OT_REQUESTS.length=0;  s.forEach(r=>OT_REQUESTS.push(r)); }
+      if (hJson2)   { const s=JSON.parse(hJson2);   H_REQUESTS.length=0;   s.forEach(r=>H_REQUESTS.push(r)); }
+    } catch(e2) {}
 
     // 申請データの復元
     const vacJson = localStorage.getItem('kpk_vac_req');
@@ -2547,6 +2571,89 @@ function syncFromPortalAndPersist(portalEmps) {
 restoreData(); // まずlocalStorageから復元
 seedShifts();
 
+// ══ GASスプレッドシート保存・読み込み ══
+const LS_GAS_URL = 'kpk_shift_gas_url';
+let GAS_URL_SHIFT = '';
+try { GAS_URL_SHIFT = localStorage.getItem(LS_GAS_URL) || ''; } catch(e) {}
+
+function setGasUrl(url) {
+  GAS_URL_SHIFT = url;
+  try { localStorage.setItem(LS_GAS_URL, url); } catch(e) {}
+}
+
+// スプレッドシートに全データを保存
+let _saveTimer = null;
+function scheduleSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveToSheet, 2000);
+}
+
+async function saveToSheet() {
+  if (!GAS_URL_SHIFT) return;
+  try {
+    showSyncBadge('saving');
+    const payload = encodeURIComponent(JSON.stringify({
+      shifts:     JSON.stringify(SHIFTS),
+      vacReqs:    JSON.stringify(VAC_REQUESTS),
+      otReqs:     JSON.stringify(OT_REQUESTS),
+      hReqs:      JSON.stringify(H_REQUESTS),
+      calSpecial: JSON.stringify(CAL_SPECIAL),
+      employees:  JSON.stringify(EMPLOYEES),
+    }));
+    const res = await fetch(GAS_URL_SHIFT + '?action=saveShiftData&data=' + payload, { redirect: 'follow' });
+    const result = JSON.parse(await res.text());
+    showSyncBadge(result.ok ? 'saved' : 'error');
+  } catch(e) { showSyncBadge('error'); }
+}
+
+// スプレッドシートから全データを読み込み
+async function loadFromSheet() {
+  if (!GAS_URL_SHIFT) return false;
+  try {
+    showSyncBadge('loading');
+    const res = await fetch(GAS_URL_SHIFT + '?action=loadShiftData', { redirect: 'follow' });
+    const result = JSON.parse(await res.text());
+    if (!result.ok || !result.data) { showSyncBadge('error'); return false; }
+    const d = result.data;
+    if (d.shifts)    { const s=JSON.parse(d.shifts);    Object.keys(SHIFTS).forEach(k=>delete SHIFTS[k]); Object.assign(SHIFTS,s); }
+    if (d.vacReqs)   { VAC_REQUESTS.length=0;  JSON.parse(d.vacReqs).forEach(r=>VAC_REQUESTS.push(r)); }
+    if (d.otReqs)    { OT_REQUESTS.length=0;   JSON.parse(d.otReqs).forEach(r=>OT_REQUESTS.push(r)); }
+    if (d.hReqs)     { H_REQUESTS.length=0;    JSON.parse(d.hReqs).forEach(r=>H_REQUESTS.push(r)); }
+    if (d.calSpecial){ const c=JSON.parse(d.calSpecial); Object.keys(CAL_SPECIAL).forEach(k=>delete CAL_SPECIAL[k]); Object.assign(CAL_SPECIAL,c); }
+    if (d.employees) {
+      const emps=JSON.parse(d.employees);
+      if(emps&&emps.length){ EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(e)); }
+    }
+    persistData();
+    showSyncBadge('loaded');
+    return true;
+  } catch(e) { showSyncBadge('error'); return false; }
+}
+
+// 手動同期
+async function manualSyncSheet() {
+  if (!GAS_URL_SHIFT) { alert('ポータルから開いてください（GAS URLが未設定）'); return; }
+  await loadFromSheet();
+  rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
+}
+
+// 同期バッジ表示
+function showSyncBadge(status) {
+  const el = document.getElementById('sync-badge');
+  if (!el) return;
+  const map = {
+    saving:  ['💾 保存中', '#b07000', '#fff7db'],
+    saved:   ['✅ 保存済', '#0b7a3d', '#e3f6ed'],
+    loading: ['🔄 読込中', '#1655b0', '#e5effe'],
+    loaded:  ['✅ 読込完了','#0b7a3d','#e3f6ed'],
+    error:   ['❌ エラー',  '#b53030', '#fce8e8'],
+  };
+  const [text, color, bg] = map[status] || map.saved;
+  el.textContent = text; el.style.color = color; el.style.background = bg;
+  el.style.display = 'inline-block';
+  if (status === 'saved' || status === 'loaded') setTimeout(() => { el.style.display='none'; }, 3000);
+}
+
 // ══ SSO：ポータルからの自動ログイン + 従業員同期 ══
 (function(){
   function parseSSOToken(token){
@@ -2574,23 +2681,36 @@ seedShifts();
   if(empsJson){
     try{
       const emps=JSON.parse(empsJson);
-      syncFromPortalAndPersist(emps); // 保存も同時に行う
+      syncFromPortalAndPersist(emps);
     }catch(e){console.warn('従業員同期エラー:',e);}
   }
+
+  // GAS URLを受け取って保存
+  const gasUrlParam=params.get('gas_url');
+  if(gasUrlParam){ setGasUrl(decodeURIComponent(gasUrlParam)); }
 
   let name=data.name||'';
   try{name=decodeURIComponent(escape(name));}catch(e){}
   cUser={id:data.id,name,dept:data.dept||''};
   isA=(data.role==='admin');
   window.history.replaceState({},'',window.location.pathname);
-  // 一般ユーザーがEMPLOYEESにいない場合、仮登録（申請機能のため）
   // ログインユーザーをEMPLOYEESに仮登録（申請機能のため）
   if(!isA && !EMPLOYEES.find(x=>x.id===data.id)){
     getEmpOrCurrent(data.id);
     persistData();
   }
   launch();
-  setTimeout(()=>{ try{rSh();rDB();rEmp();}catch(e){} }, 150);
+  // スプレッドシートから最新データを読み込む
+  setTimeout(async()=>{
+    try{
+      if(GAS_URL_SHIFT){
+        await loadFromSheet();
+        rSh();rDB();rEmp();rPL();rVreq();rOTReq();rHReq();rOT();
+      }else{
+        rSh();rDB();rEmp();
+      }
+    }catch(e){}
+  }, 300);
 })();
 </script>
 </body>
