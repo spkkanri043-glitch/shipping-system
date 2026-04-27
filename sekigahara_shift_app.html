@@ -240,6 +240,16 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
   }
 }
 
+/* SYNC LOG */
+.sync-log-wrap{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rads);padding:8px 10px;margin-bottom:10px;max-height:180px;overflow-y:auto}
+.sync-log-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bd);font-size:10px;color:var(--tx2)}
+.sync-log-row:last-child{border-bottom:none}
+.sync-log-who{font-weight:600;color:var(--pr);min-width:60px}
+.sync-log-ts{color:var(--tx3);white-space:nowrap}
+.sync-log-act{flex:1}
+.auto-sync-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#0b7a3d;animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+
 /* SETTINGS */
 .stg{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:12px}
 .stc{padding:9px 11px;border-radius:var(--rads);border:1px solid var(--bd);background:var(--sf)}
@@ -337,7 +347,9 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       <div class="tbic">⚙</div>
       <div><div class="tbco">関ケ原プラ工業(株) シフト管理</div><div class="tbmd" id="tbmd">管理者モード</div></div>
       <span id="sync-badge" style="display:none;font-size:10px;padding:2px 8px;border-radius:12px;font-weight:600;margin-left:8px"></span>
-      <button onclick="manualSyncSheet()" style="font-size:10px;padding:3px 8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;cursor:pointer;margin-left:4px" title="最新データに同期">🔄</button>
+      <span id="sync-info" style="font-size:9px;color:rgba(255,255,255,.6);margin-left:6px;display:none"></span>
+      <button onclick="manualSyncSheet()" style="font-size:10px;padding:3px 8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;cursor:pointer;margin-left:4px" title="最新データに同期（手動）">🔄 同期</button>
+      <span id="auto-sync-badge" style="font-size:9px;color:rgba(255,255,255,.45);margin-left:4px" title="自動同期（1時間ごと）">⏱ 自動</span>
     </div>
     <div class="tbr"><span class="rbg ra" id="rbg">管理者</span><button class="blo" onclick="doLogout()">ログアウト</button></div>
   </div>
@@ -744,6 +756,26 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
     <div class="pg" id="pg-st">
       <div class="stl">⚙ シフト種別一覧</div>
       <div class="stg" id="stg"></div>
+
+      <!-- 同期ログカード -->
+      <div class="card" id="sync-log-card">
+        <div class="stl" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+          <span>🔄 同期・更新ログ</span>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span id="auto-sync-status" style="font-size:10px;color:var(--g);display:flex;align-items:center;gap:4px">
+              <span class="auto-sync-dot"></span>自動同期 ON（1時間ごと）
+            </span>
+            <button class="btn sm pri" onclick="manualSyncSheet()">🔄 今すぐ同期</button>
+            <button class="btn sm" onclick="loadSyncLog()">📋 ログ更新</button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--tx2);margin-bottom:8px">
+          最終同期: <strong id="last-sync-time">—</strong> 　更新者: <strong id="last-sync-user">—</strong>
+        </div>
+        <div class="sync-log-wrap" id="sync-log-list">
+          <div style="font-size:11px;color:var(--tx3);text-align:center;padding:8px">ログを読み込み中...</div>
+        </div>
+      </div>
       <div class="card">
         <div class="stl">🏢 部署・チーム設定</div>
         <div id="dept-setting"></div>
@@ -1048,12 +1080,15 @@ function launch(){
   document.getElementById('sh-hint-txt').textContent=isA?'Shiftクリック:複数選択 / ドラッグ:入替':'閲覧のみ（編集は管理者）';
   sp('db',document.querySelector('.nt.on'));
   rDB();rSh();rEmp();rPL();rVreq();rOTReq();rHReq();rOT();rCal();rSt();setupKB();
+  restoreSyncLog(); // ログ復元
+  startAutoSync(); // 自動同期タイマー開始
 }
 function sp(pg,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
   document.getElementById('pg-'+pg).classList.add('on');
   if(el)el.classList.add('on');
+  if(pg==='st') setTimeout(loadSyncLog, 200); // 設定ページを開いたときにログ自動更新
 }
 
 // ══ DASHBOARD ══
@@ -1283,6 +1318,8 @@ function applyBulk(){
     }
   });
   clearSel();rSh();rDB();rPL();rOT();
+  persistData();
+  scheduleSave(); // GASへ自動保存
 }
 
 // ══ DRAG & DROP ══
@@ -1397,6 +1434,8 @@ function saveSh(){
   if(!SHIFTS[edEid])SHIFTS[edEid]={};
   SHIFTS[edEid][edDK]=shiftData;
   closeMod();rSh();rDB();rPL();rOT();
+  persistData();
+  scheduleSave(); // GASへ自動保存
 }
 
 // ══ KEYBOARD ══
@@ -1558,6 +1597,7 @@ function saveEmp(){
   }
   closeEmod();rEmp();rSh();rDB();
   persistData(); // localStorageに保存
+  scheduleSave(); // GASへ自動保存
 }
 
 // ══ VACATION REQUEST ══
@@ -2651,17 +2691,73 @@ async function saveShiftKey(key, val) {
   }
 }
 
+// ══ 同期ログ管理 ══
+const SYNC_LOG_KEY = 'kpk_sync_log';
+let _syncLog = [];
+
+function getSyncUserName() {
+  if (!cUser) return '不明';
+  return cUser.name || cUser.id || '不明';
+}
+function getDeviceLabel() {
+  const ua = navigator.userAgent;
+  if (/iPad|tablet/i.test(ua)) return 'タブレット';
+  if (/iPhone|Android.*Mobile/i.test(ua)) return 'スマホ';
+  return 'PC';
+}
+function addSyncLogEntry(action, ok) {
+  const entry = { ts: new Date().toISOString(), user: getSyncUserName(), action: action + (ok ? ' ✓' : ' ✗'), device: getDeviceLabel() };
+  _syncLog.unshift(entry);
+  if (_syncLog.length > 50) _syncLog.length = 50;
+  try { localStorage.setItem(SYNC_LOG_KEY, JSON.stringify(_syncLog)); } catch(e) {}
+  updateSyncInfoBar(entry);
+}
+function restoreSyncLog() {
+  try { const s = localStorage.getItem(SYNC_LOG_KEY); if (s) { const p = JSON.parse(s); if (Array.isArray(p)) { _syncLog = p; if (p[0]) updateSyncInfoBar(p[0]); } } } catch(e) {}
+}
+function updateSyncInfoBar(entry) {
+  if (!entry) return;
+  const d = new Date(entry.ts);
+  const fmt = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const el = document.getElementById('sync-info');
+  if (el) { el.textContent = `${fmt} ${entry.user}`; el.style.display = 'inline'; }
+  const lt = document.getElementById('last-sync-time'); const lu = document.getElementById('last-sync-user');
+  if (lt) lt.textContent = fmt; if (lu) lu.textContent = `${entry.user}（${entry.device||''}）`;
+}
+// GASにログ送信（fire-and-forget）
+function pushLogToGas(action, ok) {
+  if (!GAS_URL_SHIFT) return;
+  const url = GAS_URL_SHIFT + '?action=addShiftLog' + '&user=' + encodeURIComponent(getSyncUserName()) + '&act=' + encodeURIComponent(action + (ok?':OK':':NG')) + '&dev=' + encodeURIComponent(getDeviceLabel());
+  try { const xhr = new XMLHttpRequest(); xhr.open('GET', url, true); xhr.send(); } catch(e) {}
+}
+// GASからログを取得して画面に表示
+async function loadSyncLog() {
+  const el = document.getElementById('sync-log-list'); if (!el) return;
+  if (!GAS_URL_SHIFT) { el.innerHTML = '<div style="font-size:11px;color:var(--tx3);text-align:center;padding:8px">GAS URL未設定</div>'; return; }
+  el.innerHTML = '<div style="font-size:11px;color:var(--tx3);text-align:center;padding:8px">読み込み中...</div>';
+  try {
+    const data = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest(); xhr.open('GET', GAS_URL_SHIFT + '?action=getShiftLog', true);
+      xhr.onload = () => { try { resolve(JSON.parse(xhr.responseText)); } catch(e) { reject(e); } };
+      xhr.onerror = () => reject(new Error('XHR error')); xhr.send();
+    });
+    if (!data.ok || !data.logs || !data.logs.length) { el.innerHTML = '<div style="font-size:11px;color:var(--tx3);text-align:center;padding:8px">ログなし</div>'; return; }
+    el.innerHTML = data.logs.slice(0, 50).map(r => {
+      const ts = r.ts ? new Date(r.ts) : null;
+      const fmtTs = ts ? `${ts.getMonth()+1}/${ts.getDate()} ${String(ts.getHours()).padStart(2,'0')}:${String(ts.getMinutes()).padStart(2,'0')}` : (r.ts||'');
+      const okIcon = (r.action||'').includes(':OK') ? '✅' : (r.action||'').includes(':NG') ? '❌' : '📝';
+      return `<div class="sync-log-row"><span class="sync-log-ts">${fmtTs}</span><span class="sync-log-who">${r.user||'?'}</span><span style="font-size:9px;color:var(--tx3)">${r.device||''}</span><span class="sync-log-act">${okIcon} ${(r.action||'').replace(':OK','').replace(':NG','')}</span></div>`;
+    }).join('');
+    if (data.logs[0]) updateSyncInfoBar({ ts: data.logs[0].ts, user: data.logs[0].user, device: data.logs[0].device });
+  } catch(e) { el.innerHTML = `<div style="font-size:11px;color:var(--r);text-align:center;padding:8px">読込エラー: ${e.message}</div>`; }
+}
+
 async function saveToSheet() {
-  if (!GAS_URL_SHIFT) {
-    console.warn('[saveToSheet] GAS_URL_SHIFT未設定');
-    return;
-  }
+  if (!GAS_URL_SHIFT) { console.warn('[saveToSheet] GAS_URL_SHIFT未設定'); return; }
   try {
     showSyncBadge('saving');
-    // SHIFTSは大きいのでミニマム版（変更があった月のみ）に絞る
     const shiftsJson = JSON.stringify(SHIFTS);
     console.log('[saveToSheet] SHIFTSサイズ:', shiftsJson.length, 'bytes');
-
     const results = await Promise.all([
       saveShiftKey('shifts',     shiftsJson),
       saveShiftKey('vacReqs',    JSON.stringify(VAC_REQUESTS)),
@@ -2672,10 +2768,14 @@ async function saveToSheet() {
     ]);
     const allOk = results.every(r => r);
     showSyncBadge(allOk ? 'saved' : 'error');
+    addSyncLogEntry('保存', allOk);
+    pushLogToGas('保存', allOk);
     console.log('[saveToSheet] 完了 ok=' + allOk);
   } catch(e) {
     console.error('[saveToSheet] エラー:', e);
     showSyncBadge('error');
+    addSyncLogEntry('保存', false);
+    pushLogToGas('保存', false);
   }
 }
 
@@ -2720,15 +2820,37 @@ async function loadFromSheet() {
     if (emps && emps.length) { EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(e)); }
     persistData();
     showSyncBadge('loaded');
+    addSyncLogEntry('読込', true);
+    pushLogToGas('読込', true);
     return true;
-  } catch(e) { showSyncBadge('error'); return false; }
+  } catch(e) {
+    showSyncBadge('error');
+    addSyncLogEntry('読込', false);
+    pushLogToGas('読込', false);
+    return false;
+  }
 }
 
-// 手動同期
+// 手動同期（トップバーの🔄ボタン）
 async function manualSyncSheet() {
   if (!GAS_URL_SHIFT) { alert('ポータルから開いてください（GAS URLが未設定）'); return; }
-  await loadFromSheet();
+  const ok = await loadFromSheet();
   rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
+  // 設定ページが表示中ならログも更新
+  if (document.getElementById('pg-st').classList.contains('on')) loadSyncLog();
+}
+
+// ══ 自動同期タイマー（1時間ごと）══
+let _autoSyncTimer = null;
+function startAutoSync() {
+  if (_autoSyncTimer) clearInterval(_autoSyncTimer);
+  _autoSyncTimer = setInterval(async () => {
+    if (!GAS_URL_SHIFT || !cUser) return;
+    console.log('[自動同期] 開始', new Date().toLocaleTimeString());
+    const ok = await loadFromSheet();
+    if (ok) { rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT(); }
+  }, 60 * 60 * 1000); // 1時間ごと
+  console.log('[自動同期] タイマー開始（1時間ごと）');
 }
 
 // 同期バッジ表示
