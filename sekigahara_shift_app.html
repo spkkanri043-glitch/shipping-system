@@ -2606,26 +2606,10 @@ function setGasUrl(url) {
   try { localStorage.setItem(LS_GAS_URL, url); } catch(e) {}
 }
 
-// ══ オンライン状態通知 ══
-function notifyOffline() {
-  if (!GAS_URL_SHIFT || !cUser) return;
-  try {
-    const url = GAS_URL_SHIFT + '?action=setOnlineStatus' +
-      '&appId=shift' +
-      '&userId=' + encodeURIComponent(cUser.id) +
-      '&userName=' + encodeURIComponent(cUser.name) +
-      '&action2=logout';
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(url);
-    } else {
-      fetch(url, { keepalive: true, redirect: 'follow' }).catch(() => {});
-    }
-  } catch(e) {}
-}
+// ══ オンライン状態通知（関数は上部で定義済み）══
 
-// ページを閉じる・離れる時にオフライン通知
-window.addEventListener('beforeunload', notifyOffline);
-window.addEventListener('pagehide', notifyOffline);
+// ページを閉じる・離れる時にオフライン通知（pagehideのみ使用）
+// ※ beforeunloadはリロードでも発火するため除外
 
 // ══ INIT ══
 restoreData();
@@ -2709,15 +2693,31 @@ async function loadFromSheet() {
     });
     if (!result.ok || !result.data) { showSyncBadge('error'); return false; }
     const d = result.data;
-    if (d.shifts)    { const s=JSON.parse(d.shifts);    Object.keys(SHIFTS).forEach(k=>delete SHIFTS[k]); Object.assign(SHIFTS,s); }
-    if (d.vacReqs)   { VAC_REQUESTS.length=0;  JSON.parse(d.vacReqs).forEach(r=>VAC_REQUESTS.push(r)); }
-    if (d.otReqs)    { OT_REQUESTS.length=0;   JSON.parse(d.otReqs).forEach(r=>OT_REQUESTS.push(r)); }
-    if (d.hReqs)     { H_REQUESTS.length=0;    JSON.parse(d.hReqs).forEach(r=>H_REQUESTS.push(r)); }
-    if (d.calSpecial){ const c=JSON.parse(d.calSpecial); Object.keys(CAL_SPECIAL).forEach(k=>delete CAL_SPECIAL[k]); Object.assign(CAL_SPECIAL,c); }
-    if (d.employees) {
-      const emps=JSON.parse(d.employees);
-      if(emps&&emps.length){ EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(e)); }
+    console.log('[loadFromSheet] 取得キー:', Object.keys(d));
+
+    function safeParseObj(json, label) {
+      if (!json || json === '') return null;
+      try { return JSON.parse(json); }
+      catch(e) { console.error('[loadFromSheet] パースエラー', label, e); return null; }
     }
+
+    const shifts = safeParseObj(d.shifts, 'shifts');
+    if (shifts) { Object.keys(SHIFTS).forEach(k=>delete SHIFTS[k]); Object.assign(SHIFTS, shifts); }
+
+    const vacReqs = safeParseObj(d.vacReqs, 'vacReqs');
+    if (vacReqs) { VAC_REQUESTS.length=0; vacReqs.forEach(r=>VAC_REQUESTS.push(r)); }
+
+    const otReqs = safeParseObj(d.otReqs, 'otReqs');
+    if (otReqs) { OT_REQUESTS.length=0; otReqs.forEach(r=>OT_REQUESTS.push(r)); }
+
+    const hReqs = safeParseObj(d.hReqs, 'hReqs');
+    if (hReqs) { H_REQUESTS.length=0; hReqs.forEach(r=>H_REQUESTS.push(r)); }
+
+    const calSpecial = safeParseObj(d.calSpecial, 'calSpecial');
+    if (calSpecial) { Object.keys(CAL_SPECIAL).forEach(k=>delete CAL_SPECIAL[k]); Object.assign(CAL_SPECIAL, calSpecial); }
+
+    const emps = safeParseObj(d.employees, 'employees');
+    if (emps && emps.length) { EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(e)); }
     persistData();
     showSyncBadge('loaded');
     return true;
