@@ -1035,10 +1035,15 @@ function doLogout(){
 }
 
 // ページを閉じる・離脱する時もオフラインを記録
-window.addEventListener('beforeunload', notifyOffline);
-window.addEventListener('pagehide', notifyOffline);
+// イベントリスナーは下部で登録
 
 function launch(){
+  // セッション保持（リロード対応）
+  try {
+    if (cUser) sessionStorage.setItem('kpk_shift_user', JSON.stringify({
+      id: cUser.id, name: cUser.name, dept: cUser.dept||'', isA: isA
+    }));
+  } catch(e) {}
   document.getElementById('lw').classList.add('hid');
   document.getElementById('mainApp').classList.remove('hid');
   document.getElementById('tbmd').textContent=isA?'管理者モード':cUser.name+' さん、ようこそ';
@@ -2619,12 +2624,38 @@ function notifyOffline() {
 }
 
 // ページを閉じる・離れる時にオフライン通知
-window.addEventListener('beforeunload', notifyOffline);
-window.addEventListener('pagehide', notifyOffline);
+// pagehideのみ使用（beforeunloadはリロードでも発火するため除外）
+// visibilitychangeで「非表示になった時」に通知（タブ切り替えでも動くが許容範囲）
+window.addEventListener('pagehide', (e) => {
+  // persisted=trueはブラウザキャッシュ保存時（bfcache）→通知しない
+  if (!e.persisted) notifyOffline();
+});
 
 // ══ INIT ══
 restoreData();
 seedShifts();
+
+// セッション復元（リロード対応）
+(function() {
+  try {
+    const saved = sessionStorage.getItem('kpk_shift_user');
+    if (saved) {
+      const u = JSON.parse(saved);
+      cUser = { id: u.id, name: u.name, dept: u.dept || '' };
+      isA = u.isA || false;
+      // GAS URLが保持されていればスプレッドシートから最新データ読み込み
+      setTimeout(async () => {
+        try {
+          if (GAS_URL_SHIFT) {
+            await loadFromSheet();
+          }
+          launch();
+          rSh(); rDB(); rEmp(); rVreq(); rOTReq(); rHReq(); rOT();
+        } catch(e) { launch(); }
+      }, 100);
+    }
+  } catch(e) {}
+})();
 
 // スプレッドシートに全データを保存
 let _saveTimer = null;
