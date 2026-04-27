@@ -1506,7 +1506,8 @@ function saveEmp(){
     EMPLOYEES.push(e);SHIFTS[e.id]={};
   }
   closeEmod();rEmp();rSh();rDB();
-  persistData(); // localStorageに保存
+  persistData();
+  scheduleSave(); // スプレッドシートに自動保存
 }
 
 // ══ VACATION REQUEST ══
@@ -2429,8 +2430,113 @@ function persistData() {
     localStorage.setItem(LS_EMP,   JSON.stringify(EMPLOYEES));
     localStorage.setItem(LS_SHIFT, JSON.stringify(SHIFTS));
     localStorage.setItem(LS_CAL,   JSON.stringify(CAL_SPECIAL));
-    localStorage.setItem(LS_VER,   '2'); // v2 = dkey m+1修正済み
+    localStorage.setItem(LS_VER,   '2');
   } catch(e) { console.warn('保存エラー:', e); }
+}
+
+// ══ GASスプレッドシート保存・読み込み ══
+// GAS_URLはポータルのSSOトークンと一緒に渡される or localStorageに保存
+const LS_GAS_URL = 'kpk_shift_gas_url';
+let GAS_URL_SHIFT = localStorage.getItem(LS_GAS_URL) || '';
+
+function setGasUrl(url) {
+  GAS_URL_SHIFT = url;
+  try { localStorage.setItem(LS_GAS_URL, url); } catch(e) {}
+}
+
+// GASへのAPIコール
+async function gasApi(action, payload = {}) {
+  if (!GAS_URL_SHIFT) return { ok: false, message: 'GAS URLが設定されていません' };
+  try {
+    const token = btoa(JSON.stringify({ action, ...payload, ts: Date.now() })).split('').reverse().join('');
+    const url = GAS_URL_SHIFT + '?action=' + encodeURIComponent(action) + '&token=' + encodeURIComponent(token);
+    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+    const text = await res.text();
+    return JSON.parse(text);
+  } catch(e) {
+    return { ok: false, message: e.message };
+  }
+}
+
+// スプレッドシートにシフトデータ全体を保存
+let _saveTimer = null;
+function scheduleSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveToSheet, 3000); // 3秒後に自動保存
+}
+
+async function saveToSheet() {
+  if (!GAS_URL_SHIFT) return;
+  try {
+    showSyncStatus('saving');
+    const data = {
+      shifts:      JSON.stringify(SHIFTS),
+      vacReqs:     JSON.stringify(VAC_REQUESTS),
+      otReqs:      JSON.stringify(OT_REQUESTS),
+      hReqs:       JSON.stringify(H_REQUESTS),
+      calSpecial:  JSON.stringify(CAL_SPECIAL),
+    };
+    const payload = encodeURIComponent(JSON.stringify(data));
+    const url = GAS_URL_SHIFT + '?action=saveShiftData&data=' + payload;
+    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+    const result = JSON.parse(await res.text());
+    if (result.ok) {
+      showSyncStatus('saved');
+    } else {
+      showSyncStatus('error', result.message);
+    }
+  } catch(e) {
+    showSyncStatus('error', e.message);
+  }
+}
+
+// スプレッドシートからシフトデータを読み込み
+async function loadFromSheet() {
+  if (!GAS_URL_SHIFT) return false;
+  try {
+    showSyncStatus('loading');
+    const url = GAS_URL_SHIFT + '?action=loadShiftData';
+    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+    const result = JSON.parse(await res.text());
+    if (result.ok && result.data) {
+      const d = result.data;
+      if (d.shifts)    { const s=JSON.parse(d.shifts);     Object.keys(SHIFTS).forEach(k=>delete SHIFTS[k]); Object.assign(SHIFTS, s); }
+      if (d.vacReqs)   { VAC_REQUESTS.length=0;  JSON.parse(d.vacReqs).forEach(r=>VAC_REQUESTS.push(r)); }
+      if (d.otReqs)    { OT_REQUESTS.length=0;   JSON.parse(d.otReqs).forEach(r=>OT_REQUESTS.push(r)); }
+      if (d.hReqs)     { H_REQUESTS.length=0;    JSON.parse(d.hReqs).forEach(r=>H_REQUESTS.push(r)); }
+      if (d.calSpecial){ const c=JSON.parse(d.calSpecial); Object.keys(CAL_SPECIAL).forEach(k=>delete CAL_SPECIAL[k]); Object.assign(CAL_SPECIAL, c); }
+      persistData(); // localStorageにも同期
+      showSyncStatus('loaded');
+      return true;
+    } else {
+      showSyncStatus('error', result.message || 'データなし');
+      return false;
+    }
+  } catch(e) {
+    showSyncStatus('error', e.message);
+    return false;
+  }
+}
+
+// 同期ステータス表示
+function showSyncStatus(status, msg) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  const map = {
+    saving:  { text: '💾 保存中...', color: '#b07000', bg: '#fff7db' },
+    saved:   { text: '✅ 保存済み', color: '#0b7a3d', bg: '#e3f6ed' },
+    loading: { text: '🔄 読み込み中...', color: '#1655b0', bg: '#e5effe' },
+    loaded:  { text: '✅ 読み込み完了', color: '#0b7a3d', bg: '#e3f6ed' },
+    error:   { text: '❌ ' + (msg || 'エラー'), color: '#b53030', bg: '#fce8e8' },
+  };
+  const s = map[status] || map.saved;
+  el.textContent = s.text;
+  el.style.color = s.color;
+  el.style.background = s.bg;
+  el.style.display = 'block';
+  if (status === 'saved' || status === 'loaded') {
+    setTimeout(() => { if(el) el.style.display = 'none'; }, 3000);
+  }
 }
 
 // localStorageから復元（v1データは自動マイグレーション）
@@ -2514,6 +2620,26 @@ function syncFromPortalAndPersist(portalEmps) {
 restoreData(); // まずlocalStorageから復元
 seedShifts();
 
+// 手動同期（ボタン押下時）
+async function manualSyncSheet() {
+  if (!GAS_URL_SHIFT) {
+    alert('GAS URLが設定されていません。ポータルから開いてください。');
+    return;
+  }
+  await loadFromSheet();
+  rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
+}
+
+// 手動同期（ボタン押下時）
+async function manualSyncSheet() {
+  if (!GAS_URL_SHIFT) {
+    alert('GAS URLが設定されていません。ポータルから開いてください。');
+    return;
+  }
+  await loadFromSheet();
+  rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
+}
+
 // ══ SSO：ポータルからの自動ログイン + 従業員同期 ══
 (function(){
   function parseSSOToken(token){
@@ -2545,13 +2671,29 @@ seedShifts();
     }catch(e){console.warn('従業員同期エラー:',e);}
   }
 
+  // GAS URLをポータルから受け取る
+  const gasUrlParam = params.get('gas_url');
+  if (gasUrlParam) {
+    setGasUrl(decodeURIComponent(gasUrlParam));
+  }
+
   let name=data.name||'';
   try{name=decodeURIComponent(escape(name));}catch(e){}
   cUser={id:data.id,name};
   isA=(data.role==='admin');
   window.history.replaceState({},'',window.location.pathname);
   launch();
-  setTimeout(()=>{ try{rSh();rDB();rEmp();}catch(e){} }, 150);
+  // スプレッドシートから最新データを読み込む
+  setTimeout(async () => {
+    try {
+      if (GAS_URL_SHIFT) {
+        await loadFromSheet();
+        rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
+      } else {
+        rSh(); rDB(); rEmp();
+      }
+    } catch(e) {}
+  }, 300);
 })();
 </script>
 </body>
