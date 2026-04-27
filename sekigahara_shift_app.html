@@ -2638,6 +2638,35 @@ function scheduleSave() {
   _saveTimer = setTimeout(saveToSheet, 2000);
 }
 
+async function saveShiftKey(key, val) {
+  // 値をそのまま送信（エンコード後8000文字以下に制限）
+  const encoded = encodeURIComponent(val);
+  const safe = encoded.slice(0, 7500); // GASのURL上限
+  const url = GAS_URL_SHIFT + '?action=saveShiftKey' +
+    '&key=' + encodeURIComponent(key) +
+    '&val=' + safe;
+  try {
+    // GASはリダイレクトがあるためno-corsではレスポンスが読めない
+    // XMLHttpRequestで同期的に送信（CORSを回避）
+    return await new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.onload = () => {
+        try {
+          const r = JSON.parse(xhr.responseText);
+          console.log('[saveKey]', key, ':', r.ok ? 'OK' : r.message);
+          resolve(r.ok);
+        } catch(e) { resolve(false); }
+      };
+      xhr.onerror = () => { console.error('[saveKey] XHR error', key); resolve(false); };
+      xhr.send();
+    });
+  } catch(e) {
+    console.error('[saveKey] エラー', key, e);
+    return false;
+  }
+}
+
 async function saveToSheet() {
   if (!GAS_URL_SHIFT) {
     console.warn('[saveToSheet] GAS_URL_SHIFT未設定');
@@ -2645,51 +2674,21 @@ async function saveToSheet() {
   }
   try {
     showSyncBadge('saving');
-    // キーごとに個別GETリクエストで送信（URL長さ制限を回避）
-    const items = {
-      shifts:     JSON.stringify(SHIFTS),
-      vacReqs:    JSON.stringify(VAC_REQUESTS),
-      otReqs:     JSON.stringify(OT_REQUESTS),
-      hReqs:      JSON.stringify(H_REQUESTS),
-      calSpecial: JSON.stringify(CAL_SPECIAL),
-      employees:  JSON.stringify(EMPLOYEES),
-    };
-    let allOk = true;
-    for (const [key, val] of Object.entries(items)) {
-      try {
-        // 値が大きい場合は分割して送信
-        const maxLen = 6000;
-        const encoded = encodeURIComponent(val);
-        if (encoded.length <= maxLen) {
-          const url = GAS_URL_SHIFT + '?action=saveShiftKey' +
-            '&key=' + encodeURIComponent(key) +
-            '&val=' + encoded;
-          const res = await fetch(url, { redirect: 'follow' });
-          const r = JSON.parse(await res.text());
-          if (!r.ok) allOk = false;
-        } else {
-          // 分割送信
-          const chunks = [];
-          let str = val;
-          while (str.length > 0) {
-            chunks.push(str.slice(0, 3000));
-            str = str.slice(3000);
-          }
-          for (let i = 0; i < chunks.length; i++) {
-            const url = GAS_URL_SHIFT + '?action=saveShiftKey' +
-              '&key=' + encodeURIComponent(key) +
-              '&val=' + encodeURIComponent(chunks[i]) +
-              '&chunk=' + i + '&total=' + chunks.length;
-            const res = await fetch(url, { redirect: 'follow' });
-          }
-        }
-      } catch(e) { allOk = false; }
-    }
-    // 保存完了マーカーを送信
-    await fetch(GAS_URL_SHIFT + '?action=saveShiftKey&key=_savedAt&val=' +
-      encodeURIComponent(new Date().toISOString()), { redirect: 'follow' });
+    // SHIFTSは大きいのでミニマム版（変更があった月のみ）に絞る
+    const shiftsJson = JSON.stringify(SHIFTS);
+    console.log('[saveToSheet] SHIFTSサイズ:', shiftsJson.length, 'bytes');
+
+    const results = await Promise.all([
+      saveShiftKey('shifts',     shiftsJson),
+      saveShiftKey('vacReqs',    JSON.stringify(VAC_REQUESTS)),
+      saveShiftKey('otReqs',     JSON.stringify(OT_REQUESTS)),
+      saveShiftKey('hReqs',      JSON.stringify(H_REQUESTS)),
+      saveShiftKey('calSpecial', JSON.stringify(CAL_SPECIAL)),
+      saveShiftKey('employees',  JSON.stringify(EMPLOYEES)),
+    ]);
+    const allOk = results.every(r => r);
     showSyncBadge(allOk ? 'saved' : 'error');
-    console.log('[saveToSheet] 完了');
+    console.log('[saveToSheet] 完了 ok=' + allOk);
   } catch(e) {
     console.error('[saveToSheet] エラー:', e);
     showSyncBadge('error');
@@ -2701,8 +2700,13 @@ async function loadFromSheet() {
   if (!GAS_URL_SHIFT) return false;
   try {
     showSyncBadge('loading');
-    const res = await fetch(GAS_URL_SHIFT + '?action=loadShiftData', { redirect: 'follow' });
-    const result = JSON.parse(await res.text());
+    const result = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', GAS_URL_SHIFT + '?action=loadShiftData', true);
+      xhr.onload = () => { try { resolve(JSON.parse(xhr.responseText)); } catch(e) { reject(e); } };
+      xhr.onerror = () => reject(new Error('XHR error'));
+      xhr.send();
+    });
     if (!result.ok || !result.data) { showSyncBadge('error'); return false; }
     const d = result.data;
     if (d.shifts)    { const s=JSON.parse(d.shifts);    Object.keys(SHIFTS).forEach(k=>delete SHIFTS[k]); Object.assign(SHIFTS,s); }
