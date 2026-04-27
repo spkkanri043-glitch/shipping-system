@@ -1422,8 +1422,26 @@ function showMainScreen(user) {
   restoreData();
 }
 
+// オフライン通知（タブを閉じた時・ログアウト時）
+function notifyOfflineShipping() {
+  try {
+    const sess = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+    if (!sess || !GAS_DEPLOY_URL || GAS_DEPLOY_URL === 'YOUR_DEPLOY_URL') return;
+    const url = GAS_DEPLOY_URL + '?action=setOnlineStatus' +
+      '&appId=shipping' +
+      '&userId=' + encodeURIComponent(sess.id) +
+      '&userName=' + encodeURIComponent(sess.name) +
+      '&action2=logout';
+    if (navigator.sendBeacon) { navigator.sendBeacon(url); }
+    else { fetch(url, { keepalive: true, redirect: 'follow' }).catch(() => {}); }
+  } catch(e) {}
+}
+window.addEventListener('beforeunload', notifyOfflineShipping);
+window.addEventListener('pagehide', notifyOfflineShipping);
+
 function doLogout() {
   if (!confirm('ログアウトしますか？')) return;
+  notifyOfflineShipping();
   try { sessionStorage.removeItem(SESSION_KEY); } catch(e){}
   isAdmin = false;
   selectedBCs.clear();
