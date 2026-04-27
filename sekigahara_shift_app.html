@@ -2245,6 +2245,7 @@ function toggleCalDay(y,m,d){
     if(cur==='company-hol')delete CAL_SPECIAL[k];
     else CAL_SPECIAL[k]='company-hol';
   }
+  persistData();
   rCal();rSh();rDB();
 }
 function resetCalMonth(){
@@ -2252,6 +2253,7 @@ function resetCalMonth(){
   calPeriodDays().forEach(({y,m,d})=>{
     const k=dkey(y,m,d);delete CAL_SPECIAL[k];
   });
+  persistData();
   rCal();rSh();rDB();
 }
 function rCal(){
@@ -2320,7 +2322,7 @@ function rCal(){
     }).join('');
   }
 }
-function deleteCalDay(k){delete CAL_SPECIAL[k];rCal();rSh();rDB();}
+function deleteCalDay(k){delete CAL_SPECIAL[k];persistData();rCal();rSh();rDB();}
 
 // ══ SETTINGS ══
 function rSt(){
@@ -2367,20 +2369,80 @@ function saveDeptSettings(){
 // ══ localStorage 保存・復元 ══
 const LS_EMP   = 'kpk_shift_employees';
 const LS_SHIFT = 'kpk_shift_data';
+const LS_CAL   = 'kpk_cal_special';
+const LS_VER   = 'kpk_data_ver'; // データバージョン管理
 
-// 従業員データとシフトデータをlocalStorageに保存
+// ══ 旧キー自動マイグレーション（v1→v2: dkeyのm+1修正対応） ══
+// 旧形式: YYYY-0M-DD（mが0始まり, 例: 4月=03）
+// 新形式: YYYY-MM-DD（mが1始まり, 例: 4月=04）
+function migrateShiftKeys(shiftsObj) {
+  if (!shiftsObj) return {};
+  const newShifts = {};
+  Object.entries(shiftsObj).forEach(([eid, days]) => {
+    newShifts[eid] = {};
+    if (days && typeof days === 'object') {
+      Object.entries(days).forEach(([k, v]) => {
+        const parts = k.split('-');
+        if (parts.length === 3) {
+          const mNum = parseInt(parts[1]);
+          // mNum が 0-11 の範囲 → 旧形式（0始まり）→ +1して新形式に
+          // mNum が 1-12 の範囲 → 新形式なのでそのまま
+          if (mNum === 0 || mNum <= 11) {
+            // 旧形式と判断できる場合のみ変換
+            // 旧: parts[1]="03" は 0始まりの4月 → 新: "04"
+            const newM = String(mNum + 1).padStart(2, '0');
+            newShifts[eid][`${parts[0]}-${newM}-${parts[2]}`] = v;
+          } else {
+            newShifts[eid][k] = v;
+          }
+        } else {
+          newShifts[eid][k] = v;
+        }
+      });
+    }
+  });
+  return newShifts;
+}
+function migrateCalKeys(calObj) {
+  if (!calObj) return {};
+  const newCal = {};
+  Object.entries(calObj).forEach(([k, v]) => {
+    const parts = k.split('-');
+    if (parts.length === 3) {
+      const mNum = parseInt(parts[1]);
+      if (mNum === 0 || mNum <= 11) {
+        const newM = String(mNum + 1).padStart(2, '0');
+        newCal[`${parts[0]}-${newM}-${parts[2]}`] = v;
+      } else {
+        newCal[k] = v;
+      }
+    } else {
+      newCal[k] = v;
+    }
+  });
+  return newCal;
+}
+
+// 従業員データ・シフトデータ・カレンダー設定をlocalStorageに保存
 function persistData() {
   try {
-    localStorage.setItem(LS_EMP, JSON.stringify(EMPLOYEES));
+    localStorage.setItem(LS_EMP,   JSON.stringify(EMPLOYEES));
     localStorage.setItem(LS_SHIFT, JSON.stringify(SHIFTS));
+    localStorage.setItem(LS_CAL,   JSON.stringify(CAL_SPECIAL));
+    localStorage.setItem(LS_VER,   '2'); // v2 = dkey m+1修正済み
   } catch(e) { console.warn('保存エラー:', e); }
 }
 
-// localStorageから復元
+// localStorageから復元（v1データは自動マイグレーション）
 function restoreData() {
   try {
-    const empJson = localStorage.getItem(LS_EMP);
+    const ver = localStorage.getItem(LS_VER) || '1';
+    const needsMigration = ver === '1'; // v1データはマイグレーションが必要
+
+    const empJson   = localStorage.getItem(LS_EMP);
     const shiftJson = localStorage.getItem(LS_SHIFT);
+    const calJson   = localStorage.getItem(LS_CAL);
+
     if (empJson) {
       const saved = JSON.parse(empJson);
       if (saved && saved.length > 0) {
@@ -2389,8 +2451,29 @@ function restoreData() {
       }
     }
     if (shiftJson) {
-      const saved = JSON.parse(shiftJson);
+      let saved = JSON.parse(shiftJson);
+      if (needsMigration) {
+        console.log('SHIFTSキーをv1→v2にマイグレーション中...');
+        saved = migrateShiftKeys(saved);
+      }
       if (saved) Object.assign(SHIFTS, saved);
+    }
+    if (calJson) {
+      let saved = JSON.parse(calJson);
+      if (needsMigration) {
+        console.log('CAL_SPECIALキーをv1→v2にマイグレーション中...');
+        saved = migrateCalKeys(saved);
+      }
+      if (saved) Object.assign(CAL_SPECIAL, saved);
+    }
+
+    // マイグレーション完了後はv2として再保存
+    if (needsMigration && (shiftJson || calJson)) {
+      localStorage.setItem(LS_VER, '2');
+      // マイグレーション済みデータで上書き保存
+      if (shiftJson) localStorage.setItem(LS_SHIFT, JSON.stringify(SHIFTS));
+      if (calJson)   localStorage.setItem(LS_CAL,   JSON.stringify(CAL_SPECIAL));
+      console.log('マイグレーション完了');
     }
   } catch(e) { console.warn('復元エラー:', e); }
 }
