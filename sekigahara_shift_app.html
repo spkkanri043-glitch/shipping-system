@@ -2635,12 +2635,13 @@ function scheduleSave() {
 
 async function saveToSheet() {
   if (!GAS_URL_SHIFT) {
-    console.warn('[saveToSheet] GAS_URL_SHIFT が未設定');
+    console.warn('[saveToSheet] GAS_URL_SHIFT未設定');
     return;
   }
   try {
     showSyncBadge('saving');
-    const data = {
+    // キーごとに個別GETリクエストで送信（URL長さ制限を回避）
+    const items = {
       shifts:     JSON.stringify(SHIFTS),
       vacReqs:    JSON.stringify(VAC_REQUESTS),
       otReqs:     JSON.stringify(OT_REQUESTS),
@@ -2648,37 +2649,45 @@ async function saveToSheet() {
       calSpecial: JSON.stringify(CAL_SPECIAL),
       employees:  JSON.stringify(EMPLOYEES),
     };
-    // POSTで送信（GETのURL長さ制限を回避）
-    const res = await fetch(GAS_URL_SHIFT, {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'saveShiftData', data })
-    });
-    const result = JSON.parse(await res.text());
-    showSyncBadge(result.ok ? 'saved' : 'error');
-    console.log('[saveToSheet] 結果:', result);
-  } catch(e) {
-    // POSTが失敗したらGETで再試行（データを圧縮）
-    try {
-      console.warn('[saveToSheet] POST失敗、GETで再試行...');
-      const data = {
-        shifts:     JSON.stringify(SHIFTS),
-        vacReqs:    JSON.stringify(VAC_REQUESTS),
-        otReqs:     JSON.stringify(OT_REQUESTS),
-        hReqs:      JSON.stringify(H_REQUESTS),
-        calSpecial: JSON.stringify(CAL_SPECIAL),
-        employees:  JSON.stringify(EMPLOYEES),
-      };
-      const encoded = encodeURIComponent(JSON.stringify(data));
-      const url = GAS_URL_SHIFT + '?action=saveShiftData&data=' + encoded.slice(0, 7500);
-      const res2 = await fetch(url, { redirect: 'follow' });
-      const result2 = JSON.parse(await res2.text());
-      showSyncBadge(result2.ok ? 'saved' : 'error');
-    } catch(e2) {
-      console.error('[saveToSheet] エラー:', e2);
-      showSyncBadge('error');
+    let allOk = true;
+    for (const [key, val] of Object.entries(items)) {
+      try {
+        // 値が大きい場合は分割して送信
+        const maxLen = 6000;
+        const encoded = encodeURIComponent(val);
+        if (encoded.length <= maxLen) {
+          const url = GAS_URL_SHIFT + '?action=saveShiftKey' +
+            '&key=' + encodeURIComponent(key) +
+            '&val=' + encoded;
+          const res = await fetch(url, { redirect: 'follow' });
+          const r = JSON.parse(await res.text());
+          if (!r.ok) allOk = false;
+        } else {
+          // 分割送信
+          const chunks = [];
+          let str = val;
+          while (str.length > 0) {
+            chunks.push(str.slice(0, 3000));
+            str = str.slice(3000);
+          }
+          for (let i = 0; i < chunks.length; i++) {
+            const url = GAS_URL_SHIFT + '?action=saveShiftKey' +
+              '&key=' + encodeURIComponent(key) +
+              '&val=' + encodeURIComponent(chunks[i]) +
+              '&chunk=' + i + '&total=' + chunks.length;
+            const res = await fetch(url, { redirect: 'follow' });
+          }
+        }
+      } catch(e) { allOk = false; }
     }
+    // 保存完了マーカーを送信
+    await fetch(GAS_URL_SHIFT + '?action=saveShiftKey&key=_savedAt&val=' +
+      encodeURIComponent(new Date().toISOString()), { redirect: 'follow' });
+    showSyncBadge(allOk ? 'saved' : 'error');
+    console.log('[saveToSheet] 完了');
+  } catch(e) {
+    console.error('[saveToSheet] エラー:', e);
+    showSyncBadge('error');
   }
 }
 
