@@ -1110,7 +1110,7 @@ function rDB(){
     const st=SHIFT_DEF[s.type]||SHIFT_DEF.OFF;
     const w=s.type!=='OFF'&&s.type!=='VAC';if(w)wk++;
     const oStr=s.ot>0?` <span style="font-size:9px;background:#fff7db;color:#b07000;padding:1px 4px;border-radius:3px">残業${s.ot}H</span>`:'';
-    const isMe=!isA&&cUser&&e.id===cUser.id;
+    const isMe=cUser&&String(e.id)===String(cUser.id);
     h+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)${isMe?';background:#fffbea;border-radius:4px;padding:5px 6px':''}">
       <div style="width:28px;height:28px;border-radius:50%;background:var(--bbg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--b);flex-shrink:0">${e.name.charAt(0)}</div>
       <div style="flex:1"><div style="font-size:12px;font-weight:600">${e.name}${isMe?' <span style="font-size:9px;background:#e8a020;color:#fff;padding:1px 5px;border-radius:3px">あなた</span>':''}</div><div style="font-size:10px;color:var(--tx2)">${e.dept}</div></div>
@@ -1222,7 +1222,7 @@ function rSh(){
 }
 
 function buildRow(e,days,tdk){
-  const isMe=!isA&&cUser&&e.id===cUser.id;
+  const isMe=cUser&&String(e.id)===String(cUser.id);
   let r=`<tr data-eid="${e.id}"${isMe?' style="background:#fffbea"':''}>
     <td class="fx">${e.name}${isMe?' <span style="font-size:8px;color:var(--a)">▶</span>':''}</td>
     <td class="fx2">${e.team}</td>`;
