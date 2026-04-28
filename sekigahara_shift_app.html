@@ -373,9 +373,9 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
     <div class="pg on" id="pg-db">
       <div class="mgrid" style="grid-template-columns:repeat(4,1fr)">
         <div class="mc"><div class="mv" id="m-w" style="color:var(--pr)">—</div><div class="ml">本日出勤</div></div>
-        <div class="mc"><div class="mv" id="m-al" style="color:var(--r)">—</div><div class="ml">有給アラート</div></div>
-        <div class="mc"><div class="mv" id="m-tot" style="color:var(--g)">—</div><div class="ml">従業員数</div></div>
-        <div class="mc"><div class="mv" id="m-ot" style="color:var(--r)">—</div><div class="ml">残業超過(42H)</div></div>
+        <div class="mc"><div class="mv" id="m-al" style="color:var(--r)">—</div><div class="ml" id="ml-al">有給アラート</div></div>
+        <div class="mc" id="mc-tot"><div class="mv" id="m-tot" style="color:var(--g)">—</div><div class="ml">従業員数</div></div>
+        <div class="mc"><div class="mv" id="m-ot" style="color:var(--r)">—</div><div class="ml" id="ml-ot">残業超過(42H)</div></div>
       </div>
       <div class="mgrid" style="grid-template-columns:repeat(3,1fr);margin-top:-4px">
         <div class="mc" style="cursor:pointer;border-top:2px solid #d1fae5" onclick="sp('vreq',document.querySelector('[onclick*=vreq]'))" title="有給申請一覧へ">
@@ -1141,11 +1141,21 @@ function rDB(){
   });
   document.getElementById('tsh').innerHTML=h||'<div style="font-size:12px;color:var(--tx2)">データなし</div>';
   document.getElementById('m-w').textContent=wk;
+  // 従業員数は管理者のみ表示
+  const mcTot=document.getElementById('mc-tot');
+  if(mcTot)mcTot.style.display=isA?'':'none';
   document.getElementById('m-tot').textContent=EMPLOYEES.length;
+  // カード見出しをロール別に切り替え
+  const mlAl=document.getElementById('ml-al');
+  const mlOt=document.getElementById('ml-ot');
+  if(mlAl)mlAl.textContent=isA?'有給アラート':'有給残日数アラート';
+  if(mlOt)mlOt.textContent=isA?'残業超過(42H)':'残業超過(42H)';
   // 申請バッジ一括更新
   updAllBadges();
   let al='',ac=0,otc=0;
-  EMPLOYEES.forEach(e=>{
+  // アラート：管理者は全員分、従業員は自分のみ
+  const alertTargets=isA?EMPLOYEES:(cUser?EMPLOYEES.filter(e=>String(e.id)===String(cUser.id)):[]);
+  alertTargets.forEach(e=>{
     const tot=getAL(e),u=cntVac(e.id);
     if(tot>=10&&u<5){al+=`<div class="al aw">⚠ <strong>${e.name}</strong>（${e.dept}）：年5日取得 残${5-u}日未達</div>`;ac++;}
     const ot=calcPeriodOT(e.id,td.getFullYear(),td.getMonth());
