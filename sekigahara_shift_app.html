@@ -2180,7 +2180,7 @@ function approveHReq(id){
   const note=prompt('承認コメント（任意）','');
   if(note===null)return;
   req.status='approved';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
-  // シフトに HOL-W を反映
+  req.reviewedBy=cUser?cUser.name:'管理者'; // 承認者名を記録
   const dt=new Date(req.date);
   const k=dkey(dt.getFullYear(),dt.getMonth(),dt.getDate());
   if(!SHIFTS[req.eid])SHIFTS[req.eid]={};
@@ -2193,6 +2193,7 @@ function approveHReq(id){
     SHIFTS[req.eid][fk]={type:'OFF',ot:0,note:'振替休日'};
   }
   rHReq();updAllBadges();rSh();rOT();rDB();
+  persistData();scheduleSave();
   alert(`✅ ${req.id} を承認しました。シフトに「休出」として反映されました。${req.furikae?'\n振替休日('+req.furikae+')もシフトに反映されました。':''}`);
 }
 function rejectHReq(id){
@@ -2201,7 +2202,9 @@ function rejectHReq(id){
   if(note===null)return;
   if(!note.trim()){alert('却下理由を入力してください');return;}
   req.status='rejected';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
+  req.reviewedBy=cUser?cUser.name:'管理者'; // 却下者名を記録
   rHReq();updAllBadges();rDB();
+  persistData();scheduleSave();
   alert(`❌ ${req.id} を却下しました。`);
 }
 function cancelHReq(id){
@@ -2276,6 +2279,7 @@ function rHReqList(){
         <span class="status-badge ${stCls[req.status]}">${stMap[req.status]}</span>
       </div>
       <div class="req-body">申請日: ${appliedDt}${reviewDt?`　査定日: ${reviewDt}`:''}
+        ${req.reviewedBy?`　<span style="font-size:10px;color:var(--tx2)">担当: <strong style="color:var(--pr)">${req.reviewedBy}</strong></span>`:''}
         ${req.furikae?`　振替休日: <strong>${req.furikae}</strong>`:' 　振替休日: 未定'}</div>
       ${req.reason?`<div class="req-reason">業務内容: ${req.reason}</div>`:''}
       ${req.reviewNote?`<div class="req-reason" style="border-left-color:${req.status==='rejected'?'var(--r)':'var(--g)'}">
