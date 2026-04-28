@@ -983,6 +983,11 @@ function calcAL(y){
   for(const[th,d]of t)if(y<th)return d-1;
   return 20;
 }
+// 手動上書き（alOverride）があればそちらを優先、なければ勤続年数から計算
+function getAL(emp){
+  if(!emp)return 0;
+  return (emp.alOverride!=null&&emp.alOverride!=='')?Number(emp.alOverride):calcAL(emp.years);
+}
 
 // ログインユーザーの従業員データを取得（見つからない場合はcUserから仮データ作成）
 function getEmpOrCurrent(targetId) {
@@ -1124,7 +1129,7 @@ function rDB(){
   updAllBadges();
   let al='',ac=0,otc=0;
   EMPLOYEES.forEach(e=>{
-    const tot=calcAL(e.years),u=cntVac(e.id);
+    const tot=getAL(e),u=cntVac(e.id);
     if(tot>=10&&u<5){al+=`<div class="al aw">⚠ <strong>${e.name}</strong>（${e.dept}）：年5日取得 残${5-u}日未達</div>`;ac++;}
     const ot=calcMonthOT(e.id,td.getFullYear(),td.getMonth());
     if(ot>OT_LIMIT){al+=`<div class="al ar">🚨 <strong>${e.name}</strong>：今月計画残業${ot}H（社内上限${OT_LIMIT}H超過）</div>`;otc++;}
@@ -1490,7 +1495,6 @@ function rEmp(){
   };
   const ecatBadge={'無期雇用':'bg-g','有期雇用':'bg-a','派遣':'bg-p'};
   let html=emps.map(e=>{
-    const tot=calcAL(e.years);
     return`<tr>
       <td style="color:var(--tx2);font-size:10px">${e.id}</td>
       <td><strong>${e.name}</strong></td>
@@ -1508,7 +1512,16 @@ function rEmp(){
       <td><span class="badge ${ecatBadge[e.ecat]||'bg-gray'}" style="font-size:9px">${e.ecat}</span></td>
       <td><span class="badge ${etBadge[e.etype]||'bg-gray'}" style="font-size:9px">${e.etype}</span></td>
       <td>${isPT(e)?`<span style="font-size:11px;font-weight:600;color:#166534;background:#f0fdf4;padding:2px 7px;border-radius:4px;border:1px solid #86efac">${e.ptStart||'09:00'}〜${e.ptEnd||'15:00'}</span>`:'<span style="color:var(--tx3);font-size:11px">—</span>'}</td>
-      <td><span class="badge bg-b" style="font-size:10px">${tot}日</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="number" value="${getAL(e)}" min="0" step="0.5"
+            onchange="chEmpAL('${e.id}',this.value)"
+            style="width:46px;font-size:11px;border:1px solid var(--bd2);border-radius:4px;padding:2px 4px;background:var(--sf);color:var(--tx)"
+            title="有給残日数を手入力で変更できます">
+          <span style="font-size:9px;color:var(--tx3)">日</span>
+          ${e.alOverride!=null&&e.alOverride!==''?`<span style="font-size:8px;color:var(--a);font-weight:600" title="手動設定値">✎</span>`:`<span style="font-size:8px;color:var(--tx3)" title="勤続年数から自動計算">自動</span>`}
+        </div>
+      </td>
       <td style="white-space:nowrap">
         <button class="btn sm" onclick="openEditEmp('${e.id}')">編集</button>
         <button class="btn danger sm" onclick="delEmp('${e.id}')">削除</button>
@@ -1520,6 +1533,17 @@ function rEmp(){
 function chEmpDept(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e){e.dept=val;e.team=(DEPT_STRUCT[val]?.teams||[val])[0];rEmp();rSh();}}
 function chEmpTeam(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e)e.team=val;}
 function chEmpYears(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e)e.years=parseFloat(val)||0;}
+// 有給残日数の手動上書き（管理者のみ）
+function chEmpAL(eid,val){
+  if(!isA)return;
+  const e=EMPLOYEES.find(x=>x.id===eid);
+  if(!e)return;
+  const n=parseFloat(val);
+  if(isNaN(n)||n<0){alert('0以上の数値を入力してください');rEmp();return;}
+  e.alOverride=Math.round(n*10)/10;
+  persistData();scheduleSave();
+  rEmp(); // 自動/手動バッジ再描画
+}
 function delEmp(eid){if(!confirm('削除しますか？'))return;const i=EMPLOYEES.findIndex(x=>x.id===eid);if(i>=0){EMPLOYEES.splice(i,1);rEmp();rSh();rDB();}}
 
 function updateEtypeOpts(){
@@ -1652,7 +1676,7 @@ function calcVreqPreview(){
   const targetId=isA?(document.getElementById('vreq-target')?.value||''):cUser.id;
   const emp=EMPLOYEES.find(x=>x.id===targetId);
   if(!emp){if(el)el.innerHTML='';return;}
-  const tot=calcAL(emp.years),used=cntVac(emp.id),rem=tot-used;
+  const tot=getAL(emp),used=cntVac(emp.id),rem=tot-used;
   let days=0;
   if(t==='全休')days=from?countWorkDays(from,to||from):0;
   else if(t==='半休前'||t==='半休後')days=0.5;
@@ -1697,7 +1721,7 @@ function submitVreq(){
   else if(isHalf)days=0.5;
   else days=0.25;
   if(days<=0){alert('有効な申請期間を入力してください（休日のみの期間は申請できません）');return;}
-  const rem=calcAL(emp.years)-cntVac(emp.id);
+  const rem=getAL(emp)-cntVac(emp.id);
   if(days>rem){if(!confirm(`有給残日数（${rem}日）を超えています。申請しますか？`))return;}
   const overlap=VAC_REQUESTS.some(r=>{
     if(r.eid!==emp.id||r.status==='cancelled'||r.status==='rejected')return false;
@@ -1725,7 +1749,7 @@ function approveReq(id){
   const note=prompt('承認コメント（任意）','');
   if(note===null)return;
   req.status='approved';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
-  // シフトに反映（全休の場合）
+  // シフトに反映（全休・半休の場合）
   if(req.type==='全休'||req.type==='半休前'||req.type==='半休後'){
     const from=new Date(req.from),to=new Date(req.to);
     let cur=new Date(from);
@@ -1739,7 +1763,13 @@ function approveReq(id){
       cur.setDate(cur.getDate()+1);
     }
   }
-  rVreq();updVreqBadge();rSh();rPL();rDB();
+  // 有給残日数を自動減算（alOverrideを更新）
+  const emp=EMPLOYEES.find(x=>x.id===req.eid);
+  if(emp&&req.days>0){
+    const cur=getAL(emp);
+    emp.alOverride=Math.max(0,Math.round((cur-req.days)*10)/10);
+  }
+  rVreq();updVreqBadge();rSh();rPL();rDB();rEmp();
   persistData();scheduleSave();
   alert(`✅ ${req.id} を承認しました。シフトに反映されました。`);
 }
@@ -1766,7 +1796,13 @@ function cancelReq(id){
       if(SHIFTS[req.eid]?.[k]?.reqId===req.id)SHIFTS[req.eid][k]={type:'OFF',ot:0};
       cur.setDate(cur.getDate()+1);
     }
-    rSh();rPL();
+    // 有給残日数を加算して戻す
+    const emp=EMPLOYEES.find(x=>x.id===req.eid);
+    if(emp&&req.days>0){
+      const cur=getAL(emp);
+      emp.alOverride=Math.round((cur+req.days)*10)/10;
+    }
+    rSh();rPL();rEmp();
   }else if(req.status!=='pending'){alert('取消できない状態です');return;}
   req.status='cancelled';req.reviewedAt=new Date().toISOString();
   rVreq();updVreqBadge();rDB();
@@ -2225,7 +2261,7 @@ function rPL(){
   if(curPD!=='all')emps=emps.filter(e=>e.dept===curPD);
   let tbl='',ac=0;
   emps.forEach(e=>{
-    const tot=calcAL(e.years),u=cntVac(e.id),rem=tot-u;
+    const tot=getAL(e),u=cntVac(e.id),rem=tot-u;
     const ob=tot>=10,d5=u>=5;if(ob&&!d5)ac++;
     const st=ob?(d5?'<span class="badge bg-g">✓達成</span>':`<span class="badge bg-r">未達(${5-u}日)</span>`):'<span class="badge bg-gray">対象外</span>';
     tbl+=`<tr><td><strong>${e.name}</strong></td><td>${e.dept}</td><td>${e.years}年</td><td>${tot}日</td><td>${u}日</td><td><strong>${rem}日</strong></td><td>${ob?'5日':'—'}</td><td>${st}</td></tr>`;
@@ -2236,7 +2272,7 @@ function rPL(){
     :'<div class="al aok">✓ 全員が年5日の有給取得義務を達成しています</div>';
   let bars='';
   emps.forEach(e=>{
-    const tot=calcAL(e.years),u=cntVac(e.id);
+    const tot=getAL(e),u=cntVac(e.id);
     const pct=tot>0?Math.round((u/tot)*100):0;
     const cls=(tot>=10&&u<5)?'danger':pct>80?'warn':'';
     bars+=`<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">
