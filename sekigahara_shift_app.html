@@ -2207,6 +2207,25 @@ function rejectHReq(id){
   persistData();scheduleSave();
   alert(`❌ ${req.id} を却下しました。`);
 }
+// 振替休日の後日設定
+function editFurikae(id){
+  const req=H_REQUESTS.find(r=>r.id===id);
+  if(!req||req.status!=='approved'){alert('承認済みの申請にのみ設定できます');return;}
+  const val=prompt(`${req.name} の振替休日を入力してください\n例: 2026-05-10`,'');
+  if(val===null)return;
+  if(!val.trim()){alert('日付を入力してください');return;}
+  const dt=new Date(val.trim());
+  if(isNaN(dt)){alert('正しい日付形式で入力してください（例: 2026-05-10）');return;}
+  const fk=dkey(dt.getFullYear(),dt.getMonth(),dt.getDate());
+  req.furikae=val.trim();
+  // シフトに振替休日（OFF）を反映
+  if(!SHIFTS[req.eid])SHIFTS[req.eid]={};
+  SHIFTS[req.eid][fk]={type:'OFF',ot:0,note:'振替休日'};
+  rHReqList();rSh();rDB();
+  persistData();scheduleSave();
+  alert(`✅ 振替休日（${val.trim()}）をシフトに反映しました。`);
+}
+
 function cancelHReq(id){
   const req=H_REQUESTS.find(r=>r.id===id);if(!req)return;
   if(req.status==='approved'){
@@ -2223,6 +2242,7 @@ function cancelHReq(id){
   }else if(req.status!=='pending'){alert('取消できない状態です');return;}
   req.status='cancelled';req.reviewedAt=new Date().toISOString();
   rHReq();updAllBadges();rDB();
+  persistData();scheduleSave();
 }
 let curHRF='all';
 function setHRF(f,el){curHRF=f;document.querySelectorAll('#hreq-filter .rfbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');rHReqList();}
@@ -2267,7 +2287,14 @@ function rHReqList(){
     const adminBtns=isA&&isPending?
       `<button class="btn pri sm" onclick="approveHReq('${req.id}')">✓ 承認</button>
        <button class="btn danger sm" onclick="rejectHReq('${req.id}')">✗ 却下</button>`:'';
-    const cancelBtn=isPending?`<button class="btn sm" onclick="cancelHReq('${req.id}')" style="color:var(--r)">取消</button>`:'';
+    // 取消：申請中は誰でも、承認済は管理者のみ
+    const canCancel=isPending||(req.status==='approved'&&isA);
+    const cancelBtn=canCancel?`<button class="btn sm" onclick="cancelHReq('${req.id}')" style="color:var(--r)">取消</button>`:'';
+    // 振替休日の後日設定：承認済で未定の場合のみ表示（管理者・本人）
+    const canEditFurikae=req.status==='approved'&&!req.furikae&&(isA||req.eid===cUser?.id);
+    const furikaeEditBtn=canEditFurikae
+      ?`<button class="btn sm" onclick="editFurikae('${req.id}')" style="color:var(--b);border-color:var(--b)">📅 振替休日を設定</button>`
+      :'';
     return`<div class="req-card" style="border-left:4px solid ${isPending?'#f0c040':req.status==='approved'?'#6ee7b7':'#fca5a5'}">
       <div class="req-header">
         ${nameArea}
@@ -2280,11 +2307,11 @@ function rHReqList(){
       </div>
       <div class="req-body">申請日: ${appliedDt}${reviewDt?`　査定日: ${reviewDt}`:''}
         ${req.reviewedBy?`　<span style="font-size:10px;color:var(--tx2)">担当: <strong style="color:var(--pr)">${req.reviewedBy}</strong></span>`:''}
-        ${req.furikae?`　振替休日: <strong>${req.furikae}</strong>`:' 　振替休日: 未定'}</div>
+        ${req.furikae?`　振替休日: <strong>${req.furikae}</strong>`:`　<span style="color:var(--a);font-size:10px">振替休日: 未定</span>`}</div>
       ${req.reason?`<div class="req-reason">業務内容: ${req.reason}</div>`:''}
       ${req.reviewNote?`<div class="req-reason" style="border-left-color:${req.status==='rejected'?'var(--r)':'var(--g)'}">
         ${req.status==='rejected'?'却下理由':'承認コメント'}: ${req.reviewNote}</div>`:''}
-      <div class="req-foot">${adminBtns}${cancelBtn}</div>
+      <div class="req-foot">${adminBtns}${furikaeEditBtn}${cancelBtn}</div>
     </div>`;
   }).join('');
 }
