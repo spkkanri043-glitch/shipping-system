@@ -1035,6 +1035,23 @@ function calcMonthOT(eid,y,m){
   }
   return Math.round(ot*10)/10;
 }
+// シフト期（y年m月21日〜翌月20日）の残業時間合計
+function calcPeriodOT(eid,y,m){
+  let ot=0;
+  // 当月21日〜月末
+  const dim1=new Date(y,m+1,0).getDate();
+  for(let d=21;d<=dim1;d++){
+    const s=(SHIFTS[eid]||{})[dkey(y,m,d)]||{type:'OFF',ot:0};
+    if(s.type!=='OFF'&&s.type!=='VAC')ot+=parseFloat(s.ot)||0;
+  }
+  // 翌月1日〜20日
+  let ny=y,nm=m+1;if(nm>11){nm=0;ny++;}
+  for(let d=1;d<=20;d++){
+    const s=(SHIFTS[eid]||{})[dkey(ny,nm,d)]||{type:'OFF',ot:0};
+    if(s.type!=='OFF'&&s.type!=='VAC')ot+=parseFloat(s.ot)||0;
+  }
+  return Math.round(ot*10)/10;
+}
 
 function seedShifts(){
   // 登録済み従業員のシフト領域を初期化する
@@ -1131,7 +1148,7 @@ function rDB(){
   EMPLOYEES.forEach(e=>{
     const tot=getAL(e),u=cntVac(e.id);
     if(tot>=10&&u<5){al+=`<div class="al aw">⚠ <strong>${e.name}</strong>（${e.dept}）：年5日取得 残${5-u}日未達</div>`;ac++;}
-    const ot=calcMonthOT(e.id,td.getFullYear(),td.getMonth());
+    const ot=calcPeriodOT(e.id,td.getFullYear(),td.getMonth());
     if(ot>OT_LIMIT){al+=`<div class="al ar">🚨 <strong>${e.name}</strong>：今月計画残業${ot}H（社内上限${OT_LIMIT}H超過）</div>`;otc++;}
   });
   if(!al)al='<div class="al aok">✓ 現在アラートはありません</div>';
@@ -1393,7 +1410,7 @@ function calcPTHours(){
 function updateOTPreview(){
   if(!edEid||!edDK)return;
   const ot=parseFloat(document.getElementById('mot').value)||0;
-  const curTotal=calcMonthOT(edEid,cY,cM);
+  const curTotal=calcPeriodOT(edEid,cY,cM);
   const prev=(SHIFTS[edEid]||{})[edDK];
   const prevOT=prev&&prev.type!=='OFF'&&prev.type!=='VAC'?parseFloat(prev.ot)||0:0;
   const newTotal=Math.round((curTotal-prevOT+ot)*10)/10;
@@ -1749,6 +1766,7 @@ function approveReq(id){
   const note=prompt('承認コメント（任意）','');
   if(note===null)return;
   req.status='approved';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
+  req.reviewedBy=cUser?cUser.name:'管理者'; // 承認者名を記録
   // シフトに反映（全休・半休の場合）
   if(req.type==='全休'||req.type==='半休前'||req.type==='半休後'){
     const from=new Date(req.from),to=new Date(req.to);
@@ -1779,6 +1797,7 @@ function rejectReq(id){
   if(note===null)return;
   if(!note.trim()){alert('却下理由を入力してください');return;}
   req.status='rejected';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
+  req.reviewedBy=cUser?cUser.name:'管理者'; // 却下者名を記録
   rVreq();updVreqBadge();rDB();
   persistData();scheduleSave();
   alert(`❌ ${req.id} を却下しました。`);
@@ -1881,6 +1900,7 @@ function rVreqList(){
       <div class="req-body">
         申請種別: <strong>${req.type}</strong>　申請日: ${appliedDt}
         ${reviewDt?`　査定日: ${reviewDt}`:''}
+        ${req.reviewedBy?`　<span style="font-size:10px;color:var(--tx2)">担当: <strong style="color:var(--pr)">${req.reviewedBy}</strong></span>`:''}
       </div>
       ${req.reason?`<div class="req-reason">理由: ${req.reason}</div>`:''}
       ${req.reviewNote?`<div class="req-reason" style="border-left-color:${req.status==='rejected'?'var(--r)':'var(--g)'}">
@@ -1909,7 +1929,7 @@ function calcOTReqPreview(){
   const tgtId=isA?(document.getElementById('otreq-target')?.value||''):cUser.id;
   const emp=EMPLOYEES.find(x=>x.id===tgtId);
   if(!emp||!mPrev)return;
-  const curOT=calcMonthOT(emp.id,dt.getFullYear(),dt.getMonth());
+  const curOT=calcPeriodOT(emp.id,dt.getFullYear(),dt.getMonth());
   const newOT=Math.round((curOT+hours)*10)/10;
   const lim=OT_LIMIT;
   const color=newOT>lim?'background:var(--rbg);color:var(--r)':newOT>lim*0.9?'background:var(--abg);color:var(--a)':'background:var(--gbg);color:var(--g)';
@@ -1934,7 +1954,7 @@ function submitOTReq(){
   const reason=document.getElementById('otreq-reason').value.trim();
   if(!reason){alert('残業理由を入力してください');return;}
   const dt=new Date(date);
-  const curOT=calcMonthOT(emp.id,dt.getFullYear(),dt.getMonth());
+  const curOT=calcPeriodOT(emp.id,dt.getFullYear(),dt.getMonth());
   const newOT=Math.round((curOT+hours)*10)/10;
   if(newOT>OT_LIMIT){
     if(!confirm(`社内上限(${OT_LIMIT}H)を超えます（申請後${newOT}H）。申請しますか？`))return;
@@ -1959,6 +1979,7 @@ function approveOTReq(id){
   const note=prompt('承認コメント（任意）','');
   if(note===null)return;
   req.status='approved';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
+  req.reviewedBy=cUser?cUser.name:'管理者'; // 承認者名を記録
   // シフトの残業時間を更新
   const dt=new Date(req.date);
   const k=dkey(dt.getFullYear(),dt.getMonth(),dt.getDate());
@@ -1974,6 +1995,7 @@ function rejectOTReq(id){
   if(note===null)return;
   if(!note.trim()){alert('却下理由を入力してください');return;}
   req.status='rejected';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
+  req.reviewedBy=cUser?cUser.name:'管理者'; // 却下者名を記録
   rOTReq();updAllBadges();rDB();
   alert(`❌ ${req.id} を却下しました。`);
 }
@@ -2046,7 +2068,7 @@ function rOTReqList(){
         <span class="req-days">${req.shift}勤</span>
         <span class="status-badge ${stCls[req.status]}">${stMap[req.status]}</span>
       </div>
-      <div class="req-body">申請日: ${appliedDt}${reviewDt?`　査定日: ${reviewDt}`:''}</div>
+      <div class="req-body">申請日: ${appliedDt}${reviewDt?`　査定日: ${reviewDt}`:''}${req.reviewedBy?`　<span style="font-size:10px;color:var(--tx2)">担当: <strong style="color:var(--pr)">${req.reviewedBy}</strong></span>`:''}</div>
       ${req.reason?`<div class="req-reason">理由: ${req.reason}</div>`:''}
       ${req.reviewNote?`<div class="req-reason" style="border-left-color:${req.status==='rejected'?'var(--r)':'var(--g)'}">
         ${req.status==='rejected'?'却下理由':'承認コメント'}: ${req.reviewNote}</div>`:''}
@@ -2305,15 +2327,16 @@ function calcMonthWorkH(eid,y,m){
   return Math.round(totalMins/6)/10; // 分→時間（小数1桁）
 }
 function rOT(){
-  const y=TODAY.getFullYear(),m=TODAY.getMonth();
-  document.getElementById('ot-mon').textContent=`${y}年${m+1}月`;
+  const y=cY,m=cM; // シフト表の期に合わせる
+  let ny=y,nm=m+1;if(nm>11){nm=0;ny++;}
+  document.getElementById('ot-mon').textContent=`${y}年${m+1}月21日〜${ny}年${nm+1}月20日`;
   let emps=isA?EMPLOYEES:EMPLOYEES.filter(e=>e.id===cUser.id);
   if(curOD!=='all')emps=emps.filter(e=>e.dept===curOD);
   const lim=OT_LIMIT;
   // 残業のある従業員を上位表示（パートは勤務時間カード）
   const nonPT=emps.filter(e=>!isPT(e));
   const ptEmps=emps.filter(e=>isPT(e));
-  const sorted=[...nonPT].map(e=>({e,ot:calcMonthOT(e.id,y,m)})).sort((a,b)=>b.ot-a.ot).slice(0,6);
+  const sorted=[...nonPT].map(e=>({e,ot:calcPeriodOT(e.id,y,m)})).sort((a,b)=>b.ot-a.ot).slice(0,6);
   let cards=sorted.map(({e,ot})=>{
     const over=ot>lim,warn=ot>lim*0.9&&ot<=lim;
     return`<div class="ot-card">
@@ -2337,7 +2360,7 @@ function rOT(){
 
   let tbl=emps.map(e=>{
     const ptEmp=isPT(e);
-    const ot=ptEmp?0:calcMonthOT(e.id,y,m);
+    const ot=ptEmp?0:calcPeriodOT(e.id,y,m);
     const wh=ptEmp?calcMonthWorkH(e.id,y,m):null;
     const over=!ptEmp&&ot>lim,warn=!ptEmp&&ot>lim*0.9&&ot<=lim;
     const st=ptEmp?`<span class="badge bg-g">—</span>`:
