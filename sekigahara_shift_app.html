@@ -20,6 +20,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(--bg);color:var(--tx);font-size:13px;min-height:100vh;-webkit-font-smoothing:antialiased}
+/* ページ読み込み直後はbody全体を非表示にしてログイン画面の一瞬表示を防ぐ */
+body.app-loading{visibility:hidden}
 .hid{display:none!important}
 
 /* LOGIN */
@@ -317,7 +319,7 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
 .badge-cnt{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;border-radius:8px;background:var(--r);color:#fff;font-size:9px;font-weight:700;margin-left:3px;vertical-align:middle;padding:0 3px}
 </style>
 </head>
-<body>
+<body class="app-loading">
 
 <!-- LOGIN -->
 <div id="lw" class="lw">
@@ -1073,6 +1075,7 @@ window.addEventListener('beforeunload', notifyOffline);
 window.addEventListener('pagehide', notifyOffline);
 
 function launch(){
+  document.body.classList.remove('app-loading'); // ログイン確定後に表示
   document.getElementById('lw').classList.add('hid');
   document.getElementById('mainApp').classList.remove('hid');
   document.getElementById('tbmd').textContent=isA?'管理者モード':cUser.name+' さん、ようこそ';
@@ -2666,14 +2669,21 @@ seedShifts();
 
 // ログインセッション復元（リロード時にログアウトしないための処理）
 (function restoreSession() {
-  // SSOトークンがある場合はSSOが処理するので何もしない
+  // SSOトークンがある場合はSSOが処理するので何もしない（SSOのlaunch()でapp-loadingが外れる）
   const params = new URLSearchParams(window.location.search);
   if (params.get('sso')) return;
   try {
     const saved = localStorage.getItem(LS_USER);
-    if (!saved) return;
+    if (!saved) {
+      // セッションなし → ログイン画面を表示
+      document.body.classList.remove('app-loading');
+      return;
+    }
     const sess = JSON.parse(saved);
-    if (!sess || !sess.user || !sess.user.id) return;
+    if (!sess || !sess.user || !sess.user.id) {
+      document.body.classList.remove('app-loading');
+      return;
+    }
     cUser = sess.user;
     isA   = !!sess.isA;
     launch();
@@ -2686,7 +2696,10 @@ seedShifts();
         } catch(e) {}
       }, 400);
     }
-  } catch(e) { console.warn('[restoreSession] エラー:', e); }
+  } catch(e) {
+    console.warn('[restoreSession] エラー:', e);
+    document.body.classList.remove('app-loading'); // エラー時もログイン画面を表示
+  }
 })();
 
 // スプレッドシートに全データを保存
@@ -2919,7 +2932,11 @@ function showSyncBadge(status) {
   const token=params.get('sso');
   if(!token)return;
   const data=parseSSOToken(token);
-  if(!data)return;
+  if(!data){
+    // SSOトークン無効（期限切れ等）→ ログイン画面を表示
+    document.body.classList.remove('app-loading');
+    return;
+  }
 
   // empsパラメータから従業員データを同期してlocalStorageに保存
   const empsParam=params.get('emps');
