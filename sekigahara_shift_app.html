@@ -1038,10 +1038,29 @@ function seedShifts(){
 
 // ══ AUTH ══
 function slt(t){ltab=t;document.getElementById('lt-a').classList.toggle('on',t==='a');document.getElementById('lt-s').classList.toggle('on',t==='s');}
+function saveSession() {
+  try {
+    sessionStorage.setItem('kpk_session_user', JSON.stringify(cUser));
+    sessionStorage.setItem('kpk_session_isA',  JSON.stringify(isA));
+  } catch(e) {}
+}
+function clearSession() {
+  try {
+    sessionStorage.removeItem('kpk_session_user');
+    sessionStorage.removeItem('kpk_session_isA');
+  } catch(e) {}
+}
+
 function doLogin(){
   const id=document.getElementById('lid').value.trim(),pw=document.getElementById('lpw').value;
-  if(ltab==='a'&&id==='admin'&&pw==='admin'){cUser={id:'admin',name:'管理者'};isA=true;launch();}
-  else{const e=EMPLOYEES.find(x=>x.id===id&&x.pw===pw);if(e){cUser={id:e.id,name:e.name};isA=false;launch();}else{alert('IDまたはパスワードが違います');}}
+  if(ltab==='a'&&id==='admin'&&pw==='admin'){
+    cUser={id:'admin',name:'管理者'};isA=true;saveSession();launch();
+  } else {
+    const e=EMPLOYEES.find(x=>x.id===id&&x.pw===pw);
+    if(e){cUser={id:e.id,name:e.name,dept:e.dept||''};isA=false;saveSession();launch();}
+    else{alert('IDまたはパスワードが違います');}
+  }
+}
 }
 document.getElementById('lpw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 // オフライン状態をGASに通知
@@ -1059,6 +1078,7 @@ function notifyOffline() {
 
 function doLogout(){
   notifyOffline();
+  clearSession();
   cUser=null;isA=false;
   document.getElementById('lw').classList.remove('hid');
   document.getElementById('mainApp').classList.add('hid');
@@ -2654,6 +2674,21 @@ function setGasUrl(url) {
 // ══ INIT ══
 restoreData();
 seedShifts();
+
+// ── ページ更新後のセッション自動復元 ──
+(function restoreSession() {
+  try {
+    const savedUser = sessionStorage.getItem('kpk_session_user');
+    const savedIsA  = sessionStorage.getItem('kpk_session_isA');
+    if (savedUser) {
+      cUser = JSON.parse(savedUser);
+      isA   = JSON.parse(savedIsA || 'false');
+      launch(); // ログイン画面を経由せず直接アプリを表示
+    }
+  } catch(e) {
+    console.warn('[session restore] 失敗:', e);
+  }
+})();
 
 // スプレッドシートに全データを保存
 let _saveTimer = null;
