@@ -1900,13 +1900,13 @@ function rVreqList(){
     const appliedDt=new Date(req.appliedAt).toLocaleDateString('ja-JP');
     const reviewDt=req.reviewedAt?new Date(req.reviewedAt).toLocaleDateString('ja-JP'):'';
     const isPending=req.status==='pending';
-    const canCancel=(req.status==='pending'||(req.status==='approved'&&!isA&&req.eid===cUser?.id));
     // 管理者ボタン
     const adminBtns=isA&&isPending?
       `<button class="btn pri sm" onclick="approveReq('${req.id}')">✓ 承認</button>
        <button class="btn danger sm" onclick="rejectReq('${req.id}')">✗ 却下</button>`:'';
-    // 取消ボタン
-    const cancelBtn=(canCancel&&(!isA||isPending))?
+    // 取消：申請中は誰でも、承認済は管理者のみ
+    const canCancel=isPending||(req.status==='approved'&&isA);
+    const cancelBtn=canCancel?
       `<button class="btn sm" onclick="cancelReq('${req.id}')" style="color:var(--r)">取消</button>`:'';
     // 申請者名（管理者は誰の申請か表示）
     const nameArea=isA?`<span class="req-name">${req.name}</span><span style="font-size:10px;color:var(--tx2);margin-left:4px">(${req.dept})</span>`:'';
@@ -2079,7 +2079,7 @@ function rOTReqList(){
     const adminBtns=isA&&isPending?
       `<button class="btn pri sm" onclick="approveOTReq('${req.id}')">✓ 承認</button>
        <button class="btn danger sm" onclick="rejectOTReq('${req.id}')">✗ 却下</button>`:'';
-    const cancelBtn=isPending?`<button class="btn sm" onclick="cancelOTReq('${req.id}')" style="color:var(--r)">取消</button>`:'';
+    const cancelBtn=(isPending||(req.status==='approved'&&isA))?`<button class="btn sm" onclick="cancelOTReq('${req.id}')" style="color:var(--r)">取消</button>`:'';
     return`<div class="req-card" style="border-left:4px solid ${isPending?'#f0c040':req.status==='approved'?'#6ee7b7':'#fca5a5'}">
       <div class="req-header">
         ${nameArea}
