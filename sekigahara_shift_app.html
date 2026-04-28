@@ -1038,29 +1038,10 @@ function seedShifts(){
 
 // ══ AUTH ══
 function slt(t){ltab=t;document.getElementById('lt-a').classList.toggle('on',t==='a');document.getElementById('lt-s').classList.toggle('on',t==='s');}
-function saveSession() {
-  try {
-    sessionStorage.setItem('kpk_session_user', JSON.stringify(cUser));
-    sessionStorage.setItem('kpk_session_isA',  JSON.stringify(isA));
-  } catch(e) {}
-}
-function clearSession() {
-  try {
-    sessionStorage.removeItem('kpk_session_user');
-    sessionStorage.removeItem('kpk_session_isA');
-  } catch(e) {}
-}
-
 function doLogin(){
   const id=document.getElementById('lid').value.trim(),pw=document.getElementById('lpw').value;
-  if(ltab==='a'&&id==='admin'&&pw==='admin'){
-    cUser={id:'admin',name:'管理者'};isA=true;saveSession();launch();
-  } else {
-    const e=EMPLOYEES.find(x=>x.id===id&&x.pw===pw);
-    if(e){cUser={id:e.id,name:e.name,dept:e.dept||''};isA=false;saveSession();launch();}
-    else{alert('IDまたはパスワードが違います');}
-  }
-}
+  if(ltab==='a'&&id==='admin'&&pw==='admin'){cUser={id:'admin',name:'管理者'};isA=true;persistData();launch();}
+  else{const e=EMPLOYEES.find(x=>x.id===id&&x.pw===pw);if(e){cUser={id:e.id,name:e.name,dept:e.dept||''};isA=false;persistData();launch();}else{alert('IDまたはパスワードが違います');}}
 }
 document.getElementById('lpw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 // オフライン状態をGASに通知
@@ -1078,8 +1059,9 @@ function notifyOffline() {
 
 function doLogout(){
   notifyOffline();
-  clearSession();
   cUser=null;isA=false;
+  // セッションをlocalStorageから削除（次回リロード時にログイン画面を表示）
+  try { localStorage.removeItem(LS_USER); } catch(e) {}
   document.getElementById('lw').classList.remove('hid');
   document.getElementById('mainApp').classList.add('hid');
   document.getElementById('lid').value='';
@@ -1102,6 +1084,8 @@ function launch(){
   rDB();rSh();rEmp();rPL();rVreq();rOTReq();rHReq();rOT();rCal();rSt();setupKB();
   restoreSyncLog(); // ログ復元
   startAutoSync(); // 自動同期タイマー開始
+  // ログインセッションをlocalStorageに保存（リロード後も維持）
+  try { localStorage.setItem(LS_USER, JSON.stringify({ user: cUser, isA })); } catch(e) {}
 }
 function sp(pg,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
@@ -2491,6 +2475,7 @@ const LS_EMP   = 'kpk_shift_employees';
 const LS_SHIFT = 'kpk_shift_data';
 const LS_CAL   = 'kpk_cal_special';
 const LS_VER   = 'kpk_data_ver'; // データバージョン管理
+const LS_USER  = 'kpk_session';  // ログインセッション保持
 
 // ══ 旧キー自動マイグレーション（v1→v2: dkeyのm+1修正対応） ══
 // 旧形式: YYYY-0M-DD（mが0始まり, 例: 4月=03）
@@ -2553,6 +2538,10 @@ function persistData() {
     localStorage.setItem('kpk_vac_req', JSON.stringify(VAC_REQUESTS));
     localStorage.setItem('kpk_ot_req',  JSON.stringify(OT_REQUESTS));
     localStorage.setItem('kpk_h_req',   JSON.stringify(H_REQUESTS));
+    // ログインセッションを保持（リロード後も維持）
+    if (cUser) {
+      localStorage.setItem(LS_USER, JSON.stringify({ user: cUser, isA }));
+    }
   } catch(e) { console.warn('保存エラー:', e); }
 }
 
@@ -2675,19 +2664,29 @@ function setGasUrl(url) {
 restoreData();
 seedShifts();
 
-// ── ページ更新後のセッション自動復元 ──
+// ログインセッション復元（リロード時にログアウトしないための処理）
 (function restoreSession() {
+  // SSOトークンがある場合はSSOが処理するので何もしない
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('sso')) return;
   try {
-    const savedUser = sessionStorage.getItem('kpk_session_user');
-    const savedIsA  = sessionStorage.getItem('kpk_session_isA');
-    if (savedUser) {
-      cUser = JSON.parse(savedUser);
-      isA   = JSON.parse(savedIsA || 'false');
-      launch(); // ログイン画面を経由せず直接アプリを表示
+    const saved = localStorage.getItem(LS_USER);
+    if (!saved) return;
+    const sess = JSON.parse(saved);
+    if (!sess || !sess.user || !sess.user.id) return;
+    cUser = sess.user;
+    isA   = !!sess.isA;
+    launch();
+    // GASから最新データを静かに取得
+    if (GAS_URL_SHIFT) {
+      setTimeout(async () => {
+        try {
+          await loadFromSheet();
+          rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
+        } catch(e) {}
+      }, 400);
     }
-  } catch(e) {
-    console.warn('[session restore] 失敗:', e);
-  }
+  } catch(e) { console.warn('[restoreSession] エラー:', e); }
 })();
 
 // スプレッドシートに全データを保存
