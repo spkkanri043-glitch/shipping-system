@@ -412,12 +412,6 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
         <span class="bulk-cnt" id="bulk-cnt">0件選択中</span>
         <select class="sel" id="bulk-type" style="font-size:11px">
           <option value="">─ シフト ─</option>
-          <option value="A">A勤</option><option value="B">B勤</option><option value="C">C勤</option>
-          <option value="D">D勤</option><option value="E">E勤</option><option value="F">F勤</option>
-          <option value="G">G勤</option><option value="H">H勤</option><option value="X">X勤</option>
-          <option value="J">J勤</option><option value="P">P勤（パート/アルバイト）</option>
-          <option value="OFF">休み</option>
-          <option value="VAC">有給</option><option value="HOL-W">休出</option>
         </select>
         <button class="btn pri sm" onclick="applyBulk()">一括適用</button>
         <button class="btn sm" onclick="clearSel()">選択解除</button>
@@ -1106,7 +1100,7 @@ function launch(){
   document.getElementById('kbh').style.display=isA?'flex':'none';
   document.getElementById('sh-hint-txt').textContent=isA?'Shiftクリック:複数選択 / ドラッグ:入替':'閲覧のみ（編集は管理者）';
   sp('db',document.querySelector('.nt.on'));
-  rDB();rSh();rEmp();rPL();rVreq();rOTReq();rHReq();rOT();rCal();rSt();setupKB();
+  rDB();rSh();rEmp();rPL();rVreq();rOTReq();rHReq();rOT();rCal();rSt();setupKB();buildBulkSelect();
   restoreSyncLog(); // ログ復元
   startAutoSync(); // 自動同期タイマー開始
   // ログインセッションをlocalStorageに保存（リロード後も維持）
@@ -1478,6 +1472,28 @@ function saveSh(){
 }
 
 // ══ KEYBOARD ══
+// 一括適用ドロップダウンをSHIFT_DEFから動的生成（勤務時間付き）
+function buildBulkSelect(){
+  const sel=document.getElementById('bulk-type');
+  if(!sel)return;
+  // 勤務シフト（A〜J, P）
+  const workKeys=['A','B','C','D','E','F','G','H','X','J','P'];
+  // その他
+  const otherKeys=[['OFF','休み'],['VAC','有給'],['HOL-W','休出']];
+  let html='<option value="">─ シフト ─</option>';
+  workKeys.forEach(k=>{
+    const d=SHIFT_DEF[k];if(!d)return;
+    const label=k==='P'
+      ? `P勤（パート/アルバイト・個別時間設定）`
+      : `${k}勤 (${d.time})`;
+    html+=`<option value="${k}">${label}</option>`;
+  });
+  otherKeys.forEach(([k,lbl])=>{
+    html+=`<option value="${k}">${lbl}</option>`;
+  });
+  sel.innerHTML=html;
+}
+
 function setupKB(){
   document.addEventListener('keydown',ev=>{
     if(!document.getElementById('smod').classList.contains('hid')){if(ev.key==='Escape')closeMod();return;}
