@@ -376,6 +376,12 @@ body {
   </div>
 </div>
 
+<!-- GAS URL未設定バナー -->
+<div id="gas-url-banner" style="display:none;background:#fce8e8;border-bottom:2px solid #b53030;padding:10px 20px;font-size:13px;color:#b53030;align-items:center;gap:10px;">
+  ⚠️ <strong>GAS URLが未設定のため保存できません。</strong>
+  ポータル（業務管理アプリ）の「製品マスタ管理」ボタンから開き直してください。
+</div>
+
 <div class="main">
 
   <!-- ステップインジケータ -->
@@ -593,9 +599,47 @@ body {
 <script>
 // ============================================================
 // ★ 設定 ★
+// GAS_URLは直接入力 or ポータルからのURLパラメータで自動設定
+// ポータルから開いた場合は自動でセットされます
 // ============================================================
-const GAS_URL = 'ここにGASのURLを貼り付けてください';
+let GAS_URL = 'ここにGASのURLを貼り付けてください';
 // 例: 'https://script.google.com/macros/s/AKfycbXXXXXXXXX/exec'
+
+// ============================================================
+// 起動時の初期化（URLパラメータからGAS_URLを自動取得）
+// ============================================================
+(function init() {
+  const params = new URLSearchParams(location.search);
+
+  // ポータルから gas_url パラメータで渡されたURLを優先使用
+  const gasFromUrl = params.get('gas_url');
+  if (gasFromUrl) {
+    GAS_URL = decodeURIComponent(gasFromUrl);
+    console.log('GAS URL: ポータルから自動取得');
+  }
+
+  // sessionStorageにも保存しておく（リロード時のため）
+  if (GAS_URL && !GAS_URL.includes('ここに')) {
+    try { sessionStorage.setItem('kpk_gas_url', GAS_URL); } catch(e) {}
+  } else {
+    // sessionStorageから復元
+    try {
+      const saved = sessionStorage.getItem('kpk_gas_url');
+      if (saved) { GAS_URL = saved; console.log('GAS URL: sessionStorageから復元'); }
+    } catch(e) {}
+  }
+
+  // GAS URL設定状態をUIに反映
+  window.addEventListener('DOMContentLoaded', function() {
+    const banner = document.getElementById('gas-url-banner');
+    if (!banner) return;
+    if (!GAS_URL || GAS_URL.includes('ここに')) {
+      banner.style.display = 'flex';
+    } else {
+      banner.style.display = 'none';
+    }
+  });
+})();
 
 // ============================================================
 // 作業報告書で「必須」のカラム（青バッジ表示）
@@ -612,18 +656,21 @@ const RECOMMENDED_COLS = [
 // ============================================================
 // 状態
 // ============================================================
-let csvHeaders    = [];  // 元のCSVヘッダー全部
-let csvRows       = [];  // 全行データ（配列の配列）
+let csvHeaders    = [];
+let csvRows       = [];
 let selectedCols  = new Set(RECOMMENDED_COLS);
-let updateMode    = 'merge';   // 'merge' | 'overwrite'
+let updateMode    = 'merge';
 let encoding      = 'sjis';
 let confirmCb     = null;
-let listAllData   = [];  // 一覧キャッシュ
+let listAllData   = [];
 
 // ============================================================
 // GAS通信
 // ============================================================
 async function gasPost(action, data) {
+  if (!GAS_URL || GAS_URL.includes('ここに')) {
+    throw new Error('GAS URLが設定されていません。ポータルから開き直すか、GAS_URLを設定してください。');
+  }
   const body = JSON.stringify({ action, ...data });
   const res  = await fetch(GAS_URL, {
     method: 'POST',
@@ -922,7 +969,10 @@ function startUpload() {
 
 async function doUpload() {
   if (!GAS_URL || GAS_URL.includes('ここに')) {
-    showResult('error', 'GAS URLが未設定です', 'このHTMLファイルの先頭にある\nGAS_URL を正しいURLに変更してください。');
+    showResult('error', 'GAS URLが未設定です',
+      'ポータル（業務管理アプリ）から「製品マスタ管理」を開き直してください。\n\n直接開く場合はHTMLファイルのGAS_URLに正しいURLを設定してください。');
+    setStep(4);
+    document.getElementById('panel-step4').classList.remove('hid');
     return;
   }
 
