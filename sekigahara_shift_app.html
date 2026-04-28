@@ -929,6 +929,24 @@ const SHIFT_DEF = {
 };
 const NIGHT = new Set(['C','E','F','G','H','J']);
 
+// 一括適用ドロップダウンをSHIFT_DEFから動的生成（勤務時間付き）
+function buildBulkSelect(){
+  const sel=document.getElementById('bulk-type');
+  if(!sel)return;
+  const workKeys=['A','B','C','D','E','F','G','H','X','J','P'];
+  const otherKeys=[['OFF','休み'],['VAC','有給'],['HOL-W','休出']];
+  let html='<option value="">─ シフト ─</option>';
+  workKeys.forEach(k=>{
+    const d=SHIFT_DEF[k];if(!d)return;
+    const label=k==='P'?'P勤（パート/アルバイト・個別時間設定）':`${k}勤 (${d.time})`;
+    html+=`<option value="${k}">${label}</option>`;
+  });
+  otherKeys.forEach(([k,lbl])=>{ html+=`<option value="${k}">${lbl}</option>`; });
+  sel.innerHTML=html;
+}
+// DOM構築後に即時実行
+document.addEventListener('DOMContentLoaded', buildBulkSelect);
+
 // パート・アルバイト判定
 const PT_TYPES = new Set(['パートタイマー','アルバイト']);
 function isPT(emp){return PT_TYPES.has(emp?.etype);}
@@ -1472,28 +1490,6 @@ function saveSh(){
 }
 
 // ══ KEYBOARD ══
-// 一括適用ドロップダウンをSHIFT_DEFから動的生成（勤務時間付き）
-function buildBulkSelect(){
-  const sel=document.getElementById('bulk-type');
-  if(!sel)return;
-  // 勤務シフト（A〜J, P）
-  const workKeys=['A','B','C','D','E','F','G','H','X','J','P'];
-  // その他
-  const otherKeys=[['OFF','休み'],['VAC','有給'],['HOL-W','休出']];
-  let html='<option value="">─ シフト ─</option>';
-  workKeys.forEach(k=>{
-    const d=SHIFT_DEF[k];if(!d)return;
-    const label=k==='P'
-      ? `P勤（パート/アルバイト・個別時間設定）`
-      : `${k}勤 (${d.time})`;
-    html+=`<option value="${k}">${label}</option>`;
-  });
-  otherKeys.forEach(([k,lbl])=>{
-    html+=`<option value="${k}">${lbl}</option>`;
-  });
-  sel.innerHTML=html;
-}
-
 function setupKB(){
   document.addEventListener('keydown',ev=>{
     if(!document.getElementById('smod').classList.contains('hid')){if(ev.key==='Escape')closeMod();return;}
