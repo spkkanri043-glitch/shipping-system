@@ -580,14 +580,24 @@ textarea.fi2 { resize: none; line-height: 1.6; }
 
 <script>
 // ============================================================
-// ★★★ 設定 ★★★
-// GAS WebアプリのURLを入れてください（ポータルと同じGASのURL）
+// GAS URL — URLパラメータ or ローカルストレージから自動取得
 // ============================================================
-const GAS_URL = 'ここにGASのURLを貼り付けてください';
-// 例: 'https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxx/exec'
+function getGasUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const fromUrl = params.get('gas_url');
+  if (fromUrl) {
+    localStorage.setItem('sakugyo_gas_url', fromUrl);
+    return fromUrl;
+  }
+  return localStorage.getItem('sakugyo_gas_url') || '';
+}
+const GAS_URL = getGasUrl();
 
 // ポータルのURL（「ポータルに戻る」ボタン用）
-const PORTAL_URL = ''; // 例: 'https://script.google.com/macros/s/XXXX/exec'
+const PORTAL_URL = (function() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('portal_url') || localStorage.getItem('sakugyo_portal_url') || '';
+})();
 
 // ============================================================
 // 状態管理
