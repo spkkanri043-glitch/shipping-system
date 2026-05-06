@@ -1228,7 +1228,11 @@ function closeConfirm() {
   document.getElementById('confirm-overlay').classList.add('hid');
   confirmCb = null;
 }
-function execConfirm() { closeConfirm(); if (confirmCb) confirmCb(); }
+function execConfirm() {
+  const cb = confirmCb;  // 先にコールバックを保存
+  closeConfirm();        // confirmCb = null になる
+  if (cb) cb();          // 保存したcbを実行
+}
 </script>
 </body>
 </html>
