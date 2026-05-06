@@ -651,6 +651,21 @@ const PORTAL_URL = (function() {
   return params.get('portal_url') || localStorage.getItem('sakugyo_portal_url') || '';
 })();
 
+// 従業員データ（不具合作業者選択用）— ポータルから渡される
+const reportEmployees = (function() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const empsJson = params.get('emps');
+    if (empsJson) return JSON.parse(decodeURIComponent(empsJson));
+    const empsKey = params.get('emps_key');
+    if (empsKey) {
+      const stored = sessionStorage.getItem(empsKey);
+      if (stored) return JSON.parse(stored);
+    }
+  } catch(e) {}
+  return [];
+})();
+
 // ============================================================
 // 状態管理
 // ============================================================
@@ -1099,7 +1114,7 @@ function resetPhotos() {
 }
 
 function addDefect() {
-  defects.push({ id: Date.now(), type:'', count:'', detail:'' });
+  defects.push({ id: Date.now(), type:'', count:'', detail:'', worker:'' });
   renderDefects();
 }
 function removeDefect(id) {
@@ -1113,10 +1128,21 @@ function updateDefect(id, key, val) {
 function renderDefects() {
   const el = document.getElementById('defect-list');
   if (!defects.length) { el.innerHTML = '<div class="defect-empty">不具合なし</div>'; return; }
+  const workerOptions = reportEmployees.length
+    ? reportEmployees.map(e => `<option value="${e.name}" ${d && d.worker===e.name?'selected':''}>${e.name}（${e.dept||''}）</option>`).join('')
+    : '';
   el.innerHTML = defects.map((d, i) => `
     <div class="defect-item">
       <div class="defect-no">不具合 #${i+1}</div>
       <button class="defect-del" onclick="removeDefect(${d.id})">×</button>
+      ${reportEmployees.length ? `
+      <div style="margin-bottom:8px">
+        <label style="font-size:11px;color:var(--tx2);font-weight:600">不具合作業者</label>
+        <select class="defect-fi" style="width:100%" onchange="updateDefect(${d.id},'worker',this.value)">
+          <option value="">選択してください</option>
+          ${reportEmployees.map(e => `<option value="${e.name}" ${d.worker===e.name?'selected':''}>${e.name}（${e.dept||''}）</option>`).join('')}
+        </select>
+      </div>` : ''}
       <div class="defect-grid">
         <div>
           <label style="font-size:11px;color:var(--tx2);font-weight:600">種類</label>
