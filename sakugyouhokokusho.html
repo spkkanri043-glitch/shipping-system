@@ -960,11 +960,13 @@ function onHinbanInput() {
 async function searchProduct(code) {
   if (!code) return;
 
-  // ① まずローカルキャッシュから照合（即時応答）
-  const key   = code.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-  const found = products.find(p =>
-    p['品番'] && p['品番'].replace(/[^a-zA-Z0-9]/g, '').toUpperCase().startsWith(key.substring(0, 12))
-  );
+  // 比較用に記号・スペースを除去して大文字化
+  const normalize = s => String(s || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  const key = normalize(code);
+  if (!key) return;
+
+  // ① まずローカルキャッシュから完全一致照合
+  const found = products.find(p => normalize(p['品番']) === key);
   if (found) { applyProduct(found); return; }
 
   // ② キャッシュにない → 製品マスタGASに直接問い合わせ
@@ -973,13 +975,11 @@ async function searchProduct(code) {
     return;
   }
 
-  // 検索中のフィードバック
   showToast('製品マスタを検索中...', '');
   try {
     const res = await gasPost('searchProduct', { code });
     if (res.ok && res.data) {
-      // キャッシュにも追加（次回以降はキャッシュから）
-      products.push(res.data);
+      products.push(res.data); // キャッシュに追加
       applyProduct(res.data);
     } else {
       showToast('品番が見つかりませんでした: ' + code, 'warn');
