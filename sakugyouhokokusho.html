@@ -589,6 +589,8 @@ textarea.fi2 { resize: none; line-height: 1.6; }
 // ▼▼▼ デプロイ後に各GASのURLをここに入力してください ▼▼▼
 const REPORT_GAS_URL_HARDCODED  = 'https://script.google.com/macros/s/AKfycbxDcreg8TY_k0py6cp7WURxOiXGR7WwcMYD0t3Gc5ACiiKe28ahKEBdRhpNwzomNG6aHQ/exec';
 const PRODUCT_GAS_URL_HARDCODED = 'https://script.google.com/macros/s/AKfycbww1lPYGVf7FLmIbjwxODbFMKSn8Q6yxFL9OpPnYmh9AnkAWVf9BgrRgk0Wc8GvK2XN/exec';
+
+
 function getGasUrl() {
   const params = new URLSearchParams(window.location.search);
   const fromUrl = params.get('gas_url');
@@ -760,14 +762,17 @@ function doLogout() {
 }
 
 function goPortal() {
-  if (PORTAL_URL) {
-    try { window.top.location.href = PORTAL_URL; }
-    catch(e) { window.location.href = PORTAL_URL; }
-  } else if (document.referrer) {
-    history.back();
-  } else {
-    showToast('ポータルURLが未設定です', 'warn');
-  }
+  // 作業報告書はGitHub Pagesで開かれるため、タブを閉じるか履歴を戻る
+  try {
+    window.close(); // ポータルから新しいタブで開いた場合は閉じる
+  } catch(e) {}
+  // window.closeが効かない場合は履歴を戻る
+  setTimeout(() => {
+    if (!window.closed) {
+      if (document.referrer) history.back();
+      else showToast('ブラウザの戻るボタンでポータルに戻ってください', 'warn');
+    }
+  }, 300);
 }
 
 // ============================================================
