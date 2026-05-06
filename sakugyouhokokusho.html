@@ -581,28 +581,23 @@ textarea.fi2 { resize: none; line-height: 1.6; }
 <script>
 // ============================================================
 // GAS URL — 各GASのURLを取得
-// ポータルGAS    : URLパラメータ gas_url     or localStorage
-// 作業報告書GAS  : URLパラメータ report_url  or localStorage（ハードコードでも可）
-// 製品マスタGAS  : URLパラメータ product_url or localStorage（ハードコードでも可）
+// ポータルGAS   : URLパラメータ gas_url     or localStorage（ログイン・addLog用）
+// 作業報告書GAS : URLパラメータ report_url  or localStorage（saveReport用）
+// 製品マスタGAS : URLパラメータ product_url or localStorage（getProducts・searchProduct用）
 // ============================================================
 
 // ▼▼▼ デプロイ後に各GASのURLをここに入力してください ▼▼▼
-const REPORT_GAS_URL_HARDCODED  = 'https://docs.google.com/spreadsheets/d/18JkM428GuC4yv5wkzg0f9ubgVZ3t8hDgrU9T1pxyUQQ/edit?gid=0#gid=0';
-const PRODUCT_GAS_URL_HARDCODED = 'https://docs.google.com/spreadsheets/d/1cOaufjGX_PfqwPnR-nJrGTMTVAHjEcRuQDyR4Bfufm8/edit?gid=0#gid=0';
+const REPORT_GAS_URL_HARDCODED  = 'https://script.google.com/macros/s/AKfycbxDcreg8TY_k0py6cp7WURxOiXGR7WwcMYD0t3Gc5ACiiKe28ahKEBdRhpNwzomNG6aHQ/exec';
+const PRODUCT_GAS_URL_HARDCODED = 'https://script.google.com/macros/s/AKfycbww1lPYGVf7FLmIbjwxODbFMKSn8Q6yxFL9OpPnYmh9AnkAWVf9BgrRgk0Wc8GvK2XN/exec';
 
 function getGasUrl() {
-  // ポータルGAS URL（ログイン・ログ用）
   const params = new URLSearchParams(window.location.search);
   const fromUrl = params.get('gas_url');
-  if (fromUrl) {
-    localStorage.setItem('sakugyo_gas_url', fromUrl);
-    return fromUrl;
-  }
+  if (fromUrl) { localStorage.setItem('sakugyo_gas_url', fromUrl); return fromUrl; }
   return localStorage.getItem('sakugyo_gas_url') || '';
 }
 
 function getReportGasUrl() {
-  // 作業報告書GAS URL（saveReport用）
   const params = new URLSearchParams(window.location.search);
   const fromUrl = params.get('report_url');
   if (fromUrl) { localStorage.setItem('sakugyo_report_gas_url', fromUrl); return fromUrl; }
@@ -610,7 +605,6 @@ function getReportGasUrl() {
 }
 
 function getProductGasUrl() {
-  // 製品マスタGAS URL（getProducts・searchProduct用）
   const params = new URLSearchParams(window.location.search);
   const fromUrl = params.get('product_url');
   if (fromUrl) { localStorage.setItem('sakugyo_product_gas_url', fromUrl); return fromUrl; }
@@ -686,16 +680,12 @@ window.addEventListener('load', function() {
 });
 
 // ============================================================
-// GAS通信
+// GAS通信 — actionごとに送り先GASを振り分け
 // ============================================================
-// actionごとに送り先GASを振り分け
 function resolveGasUrl(action) {
-  // 作業報告書GAS
   if (['saveReport', 'getReports'].includes(action)) return REPORT_GAS_URL;
-  // 製品マスタGAS
   if (['getProducts', 'searchProduct'].includes(action)) return PRODUCT_GAS_URL;
-  // ポータルGAS（login・addLog 等）
-  return GAS_URL;
+  return GAS_URL; // login・addLog等はポータルGAS
 }
 
 async function gasPost(action, data) {
@@ -975,8 +965,8 @@ function searchProduct(code) {
   );
   if (found) { applyProduct(found); return; }
 
-  // GASに問い合わせ
-  if (GAS_URL && GAS_URL !== 'ここにGASのURLを貼り付けてください') {
+  // 製品マスタGASに問い合わせ
+  if (PRODUCT_GAS_URL && PRODUCT_GAS_URL !== '★製品マスタGASのURLを入力★') {
     gasPost('searchProduct', { code })
       .then(res => { if (res.ok && res.data) applyProduct(res.data); })
       .catch(() => {});
