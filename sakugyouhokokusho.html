@@ -1128,9 +1128,6 @@ function updateDefect(id, key, val) {
 function renderDefects() {
   const el = document.getElementById('defect-list');
   if (!defects.length) { el.innerHTML = '<div class="defect-empty">不具合なし</div>'; return; }
-  const workerOptions = reportEmployees.length
-    ? reportEmployees.map(e => `<option value="${e.name}" ${d && d.worker===e.name?'selected':''}>${e.name}（${e.dept||''}）</option>`).join('')
-    : '';
   el.innerHTML = defects.map((d, i) => `
     <div class="defect-item">
       <div class="defect-no">不具合 #${i+1}</div>
