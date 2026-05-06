@@ -505,6 +505,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
         <label class="fl2">箱入数 <span class="req">必須</span></label>
         <input class="fi2" type="number" id="f-hakoiri"
           placeholder="箱入数" inputmode="numeric" min="0"
+          readonly style="-moz-appearance:textfield;pointer-events:none"
           oninput="this.classList.remove('err'); calcTotal()">
       </div>
     </div>
@@ -807,7 +808,12 @@ function doLogout() {
 }
 
 function goPortal() {
-  // ポータルから新しいタブで開かれた場合は元のタブにフォーカスを戻す
+  // ポータルURLがある場合は現在のタブをポータルに遷移
+  if (PORTAL_URL) {
+    window.location.href = PORTAL_URL;
+    return;
+  }
+  // ない場合はopenerにフォーカス
   try {
     if (window.opener && !window.opener.closed) {
       window.opener.focus();
@@ -815,12 +821,7 @@ function goPortal() {
       return;
     }
   } catch(e) {}
-  // openerがない場合は履歴を戻る
-  if (history.length > 1) {
-    history.back();
-  } else {
-    showToast('ポータルのタブに切り替えてください', 'warn');
-  }
+  showToast('ポータルのタブに切り替えてください', 'warn');
 }
 
 // ============================================================
