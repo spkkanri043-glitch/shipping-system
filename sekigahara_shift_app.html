@@ -2976,7 +2976,14 @@ async function loadFromSheet() {
     if (calSpecial) { Object.keys(CAL_SPECIAL).forEach(k=>delete CAL_SPECIAL[k]); Object.assign(CAL_SPECIAL, calSpecial); }
 
     const emps = safeParseObj(d.employees, 'employees');
-    if (emps && emps.length) { EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(e)); }
+    // ポータルから従業員データを受け取っていた場合はそちらを優先
+    // シフトGASにemployeesが保存されていない場合のみ上書き
+    if (emps && emps.length && EMPLOYEES.length === 0) {
+      EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(e));
+    } else if (emps && emps.length && !window._portalEmpsReceived) {
+      // ポータルから受け取っていない場合はGASのデータを使用
+      EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(e));
+    }
     persistData();
     showSyncBadge('loaded');
     addSyncLogEntry('読込', true);
@@ -3061,12 +3068,21 @@ function showSyncBadge(status) {
     try{
       const emps=JSON.parse(empsJson);
       syncFromPortalAndPersist(emps);
+      window._portalEmpsReceived = true; // ポータルから受け取ったフラグ
+      // シフトGASにも従業員データを保存（次回loadFromSheet時に正しいデータを返すため）
+      if(GAS_URL_SHIFT || params.get('shift_gas_url') || params.get('gas_url')) {
+        setTimeout(() => {
+          saveShiftKey('employees', JSON.stringify(emps)).catch(()=>{});
+        }, 500);
+      }
     }catch(e){console.warn('従業員同期エラー:',e);}
   }
 
-  // GAS URLを受け取って保存
-  const gasUrlParam=params.get('gas_url');
-  if(gasUrlParam){ setGasUrl(decodeURIComponent(gasUrlParam)); }
+  // シフトGAS URLを受け取って保存（shift_gas_urlパラメータ優先）
+  const shiftGasUrlParam = params.get('shift_gas_url');
+  const gasUrlParam      = params.get('gas_url'); // 旧パラメータ名互換
+  const gasUrl = shiftGasUrlParam || gasUrlParam;
+  if (gasUrl) { setGasUrl(decodeURIComponent(gasUrl)); }
 
   let name=data.name||'';
   try{name=decodeURIComponent(escape(name));}catch(e){}
