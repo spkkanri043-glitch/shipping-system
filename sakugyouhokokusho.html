@@ -570,7 +570,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     <div class="cmp-sub">作業報告書をGoogleスプレッドシートに<br>保存しました</div>
     <div class="cmp-summary" id="cmp-summary"></div>
     <button class="btn-new"    onclick="startNew()">＋ 新しい作業を開始</button>
-    <button class="btn-portal" onclick="goPortal()">← 業務管理ポータルに戻る</button>
+    <button class="btn-portal" onclick="goPortal()">✕ このタブを閉じる（ポータルに戻る）</button>
   </div>
 </div>
 
@@ -808,20 +808,12 @@ function doLogout() {
 }
 
 function goPortal() {
-  // ポータルURLがある場合は現在のタブをポータルに遷移
-  if (PORTAL_URL) {
-    window.location.href = PORTAL_URL;
-    return;
-  }
-  // ない場合はopenerにフォーカス
+  // 作業報告書タブを閉じてポータルタブに戻る
   try {
-    if (window.opener && !window.opener.closed) {
-      window.opener.focus();
-      window.close();
-      return;
-    }
-  } catch(e) {}
-  showToast('ポータルのタブに切り替えてください', 'warn');
+    window.close();
+  } catch(e) {
+    showToast('このタブを閉じてポータルに戻ってください', 'warn');
+  }
 }
 
 // ============================================================
