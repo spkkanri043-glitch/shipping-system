@@ -580,9 +580,18 @@ textarea.fi2 { resize: none; line-height: 1.6; }
 
 <script>
 // ============================================================
-// GAS URL — URLパラメータ or ローカルストレージから自動取得
+// GAS URL — 各GASのURLを取得
+// ポータルGAS    : URLパラメータ gas_url     or localStorage
+// 作業報告書GAS  : URLパラメータ report_url  or localStorage（ハードコードでも可）
+// 製品マスタGAS  : URLパラメータ product_url or localStorage（ハードコードでも可）
 // ============================================================
+
+// ▼▼▼ デプロイ後に各GASのURLをここに入力してください ▼▼▼
+const REPORT_GAS_URL_HARDCODED  = 'https://docs.google.com/spreadsheets/d/18JkM428GuC4yv5wkzg0f9ubgVZ3t8hDgrU9T1pxyUQQ/edit?gid=0#gid=0';
+const PRODUCT_GAS_URL_HARDCODED = 'https://docs.google.com/spreadsheets/d/1cOaufjGX_PfqwPnR-nJrGTMTVAHjEcRuQDyR4Bfufm8/edit?gid=0#gid=0';
+
 function getGasUrl() {
+  // ポータルGAS URL（ログイン・ログ用）
   const params = new URLSearchParams(window.location.search);
   const fromUrl = params.get('gas_url');
   if (fromUrl) {
@@ -591,7 +600,26 @@ function getGasUrl() {
   }
   return localStorage.getItem('sakugyo_gas_url') || '';
 }
-const GAS_URL = getGasUrl();
+
+function getReportGasUrl() {
+  // 作業報告書GAS URL（saveReport用）
+  const params = new URLSearchParams(window.location.search);
+  const fromUrl = params.get('report_url');
+  if (fromUrl) { localStorage.setItem('sakugyo_report_gas_url', fromUrl); return fromUrl; }
+  return localStorage.getItem('sakugyo_report_gas_url') || REPORT_GAS_URL_HARDCODED;
+}
+
+function getProductGasUrl() {
+  // 製品マスタGAS URL（getProducts・searchProduct用）
+  const params = new URLSearchParams(window.location.search);
+  const fromUrl = params.get('product_url');
+  if (fromUrl) { localStorage.setItem('sakugyo_product_gas_url', fromUrl); return fromUrl; }
+  return localStorage.getItem('sakugyo_product_gas_url') || PRODUCT_GAS_URL_HARDCODED;
+}
+
+const GAS_URL         = getGasUrl();         // ポータルGAS（login・addLog）
+const REPORT_GAS_URL  = getReportGasUrl();   // 作業報告書GAS（saveReport）
+const PRODUCT_GAS_URL = getProductGasUrl();  // 製品マスタGAS（getProducts・searchProduct）
 
 // ポータルのURL（「ポータルに戻る」ボタン用）
 const PORTAL_URL = (function() {
@@ -660,9 +688,20 @@ window.addEventListener('load', function() {
 // ============================================================
 // GAS通信
 // ============================================================
+// actionごとに送り先GASを振り分け
+function resolveGasUrl(action) {
+  // 作業報告書GAS
+  if (['saveReport', 'getReports'].includes(action)) return REPORT_GAS_URL;
+  // 製品マスタGAS
+  if (['getProducts', 'searchProduct'].includes(action)) return PRODUCT_GAS_URL;
+  // ポータルGAS（login・addLog 等）
+  return GAS_URL;
+}
+
 async function gasPost(action, data) {
+  const url  = resolveGasUrl(action);
   const body = JSON.stringify({ action, ...data });
-  const res  = await fetch(GAS_URL, {
+  const res  = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
     body
@@ -672,8 +711,9 @@ async function gasPost(action, data) {
 }
 
 async function gasGet(params) {
+  const url = resolveGasUrl(params.action || '');
   const qs  = new URLSearchParams(params).toString();
-  const res = await fetch(GAS_URL + '?' + qs, { redirect: 'follow' });
+  const res = await fetch(url + '?' + qs, { redirect: 'follow' });
   if (!res.ok) throw new Error('通信エラー ' + res.status);
   return res.json();
 }
