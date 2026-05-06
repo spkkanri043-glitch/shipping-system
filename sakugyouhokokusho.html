@@ -255,6 +255,22 @@ textarea.fi2 { resize: none; line-height: 1.6; }
 }
 .defect-empty { font-size: 12px; color: var(--tx3); text-align: center; padding: 14px; }
 
+/* ===== PHOTO ===== */
+.photo-thumb {
+  position: relative; width: 90px; height: 90px;
+  border-radius: 8px; overflow: hidden;
+  border: 2px solid var(--bd); flex-shrink: 0;
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-del {
+  position: absolute; top: 3px; right: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(0,0,0,.6); color: #fff;
+  border: none; font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+
 /* ===== SUBMIT ===== */
 .btn-submit {
   width: 100%; padding: 16px; font-size: 16px; font-weight: 700;
@@ -523,6 +539,20 @@ textarea.fi2 { resize: none; line-height: 1.6; }
       <textarea class="fi2" id="f-fuguai" rows="3" placeholder="不具合の詳細をここに記入..."></textarea>
     </div>
 
+    <!-- 写真撮影 -->
+    <div class="section-card">
+      <div class="sc-title">📸 写真（最大3枚）</div>
+      <div id="photo-list" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px"></div>
+      <button class="btn" id="btn-photo" onclick="addPhoto()" style="width:100%;padding:12px;font-size:13px">
+        📷 写真を追加
+      </button>
+      <input type="file" id="photo-input" accept="image/*" capture="environment"
+        style="display:none" onchange="onPhotoSelected(event)">
+      <div style="font-size:11px;color:var(--tx3);margin-top:6px;text-align:center">
+        撮影した写真は保存時にGoogleドライブにアップロードされます
+      </div>
+    </div>
+
     <!-- 一時保存 -->
     <button class="btn-submit" id="btn-save" onclick="doSave()">💾 一時保存</button>
     <div class="submit-note">「作業終了して保存」で最終保存されます</div>
@@ -629,6 +659,7 @@ let workState   = { status:'working', startTime:null, pauseTime:null, pausedTota
 let timerID     = null;
 let count       = 0;
 let defects     = [];
+let photos      = []; // 写真データ（Base64、最大3枚）
 let scanMode    = 'qr';
 let camStream   = null;
 let scanRAF     = null;
@@ -1017,6 +1048,56 @@ function applyProduct(p) {
 // ============================================================
 // 不具合
 // ============================================================
+// ============================================================
+// 写真管理
+// ============================================================
+function addPhoto() {
+  if (photos.length >= 3) {
+    showToast('写真は最大3枚までです', 'warn');
+    return;
+  }
+  document.getElementById('photo-input').click();
+}
+
+function onPhotoSelected(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (photos.length >= 3) { showToast('写真は最大3枚までです', 'warn'); return; }
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    photos.push(ev.target.result); // Base64データ
+    renderPhotos();
+    // 3枚になったらボタンを無効化
+    document.getElementById('btn-photo').disabled = photos.length >= 3;
+  };
+  reader.readAsDataURL(file);
+  // 同じファイルを再選択できるようリセット
+  e.target.value = '';
+}
+
+function removePhoto(idx) {
+  photos.splice(idx, 1);
+  renderPhotos();
+  document.getElementById('btn-photo').disabled = false;
+}
+
+function renderPhotos() {
+  const list = document.getElementById('photo-list');
+  list.innerHTML = photos.map((src, i) => `
+    <div class="photo-thumb">
+      <img src="${src}" alt="写真${i+1}">
+      <button class="photo-del" onclick="removePhoto(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function resetPhotos() {
+  photos = [];
+  renderPhotos();
+  document.getElementById('btn-photo').disabled = false;
+}
+
 function addDefect() {
   defects.push({ id: Date.now(), type:'', count:'', detail:'' });
   renderDefects();
@@ -1140,7 +1221,8 @@ async function submitReport(isFinal) {
     不具合内容: document.getElementById('f-fuguai').value,
     不具合詳細: JSON.stringify(defects),
     一時停止ログ: JSON.stringify(workState.pauseLog),
-    完了フラグ: isFinal ? '完了' : '作業中'
+    完了フラグ: isFinal ? '完了' : '作業中',
+    photos:     photos  // Base64写真データ（GAS側でドライブに保存）
   };
 
   try {
@@ -1203,6 +1285,7 @@ function resetForm() {
     if (el) { el.value = ''; el.classList.remove('filled','err'); }
   });
   document.getElementById('scan-result-tag').style.display = 'none';
+  resetPhotos(); // 写真もリセット
 }
 
 // ============================================================
