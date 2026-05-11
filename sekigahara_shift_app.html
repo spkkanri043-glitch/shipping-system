@@ -3087,7 +3087,7 @@ function showSyncBadge(status) {
   let name=data.name||'';
   try{name=decodeURIComponent(escape(name));}catch(e){}
   cUser={id:data.id,name,dept:data.dept||''};
-  isA=(data.role==='admin');
+  isA=(data.role==='admin' || data.role==='master');
   window.history.replaceState({},'',window.location.pathname);
   // ログインユーザーをEMPLOYEESに仮登録（申請機能のため）
   if(!isA && !EMPLOYEES.find(x=>x.id===data.id)){
