@@ -1163,16 +1163,20 @@ async function exportCSVByStatus() {
       // ファイル名：元のファイル名_未完了.csv / _完了済.csv / _キャンセル.csv
       const baseName = sourceFileName || ('出荷指示_' + today);
       const res  = await fetch(GAS_DEPLOY_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action:   'saveCSVByStatus',
-          records:  records,
-          today:    today,
-          baseName: baseName
-        })
-      });
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.message);
+  method: 'POST',
+  body: JSON.stringify({
+    action:   'saveCSVByStatus',
+    records:  records,
+    today:    today,
+    baseName: baseName
+  })
+});
+console.log('GASレスポンスステータス:', res.status, res.url);
+const resText = await res.text();
+console.log('GASレスポンス本文:', resText.slice(0, 200));
+let data;
+try { data = JSON.parse(resText); } catch(e) { throw new Error('JSONパース失敗: ' + resText.slice(0,100)); }
+if (!data.ok) throw new Error(data.message);
       // 結果表示
       const msgs = [];
       data.results.forEach(function(r) {
