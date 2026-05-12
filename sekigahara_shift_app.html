@@ -1779,6 +1779,14 @@ function submitVreq(){
   scheduleSave();
   clearVreqForm();
   rVreq();updVreqBadge();rDB();
+ 
+  // ★LINEWORKS通知（申請時→管理者へ）
+  sendShiftNotify('apply', {
+    name:   emp.name,
+    type:   '有給申請（' + type + '）',
+    date:   from + (to && to !== from ? '〜' + to : ''),
+    detail: reason || '理由なし'
+  });
   alert(`✅ 有給申請を提出しました（${req.id}）\n${isA?emp.name+'の':''}申請が完了しました。`);
 }
 
@@ -1811,6 +1819,17 @@ function approveReq(id){
   }
   rVreq();updVreqBadge();rSh();rPL();rDB();rEmp();
   persistData();scheduleSave();
+
+  // ★LINEWORKS通知（承認時→申請者へ）
+  const empNotifyV = EMPLOYEES.find(x => x.id === req.eid);
+  if (empNotifyV && empNotifyV.lwUserId) {
+    sendShiftNotify('approved', {
+      type:     '有給申請（' + req.type + '）',
+      date:     req.from + (req.to && req.to !== req.from ? '〜' + req.to : ''),
+      approver: cUser ? cUser.name : '管理者',
+      lwUserId: empNotifyV.lwUserId
+    });
+  }
   alert(`✅ ${req.id} を承認しました。シフトに反映されました。`);
 }
 function rejectReq(id){
@@ -1822,6 +1841,17 @@ function rejectReq(id){
   req.reviewedBy=cUser?cUser.name:'管理者'; // 却下者名を記録
   rVreq();updVreqBadge();rDB();
   persistData();scheduleSave();
+
+  // ★LINEWORKS通知（却下時→申請者へ）
+  const empNotifyVR = EMPLOYEES.find(x => x.id === req.eid);
+  if (empNotifyVR && empNotifyVR.lwUserId) {
+    sendShiftNotify('rejected', {
+      type:     '有給申請（' + req.type + '）',
+      date:     req.from + (req.to && req.to !== req.from ? '〜' + req.to : ''),
+      reason:   note,
+      lwUserId: empNotifyVR.lwUserId
+    });
+  }
   alert(`❌ ${req.id} を却下しました。`);
 }
 function cancelReq(id){
@@ -1994,6 +2024,25 @@ function submitOTReq(){
   scheduleSave();
   clearOTReqForm();
   rOTReq();updAllBadges();rDB();
+
+  // ★LINEWORKS通知（申請時→管理者へ）
+  sendShiftNotify('apply', {
+    name:   emp.name,
+    type:   '残業申請',
+    date:   date,
+    detail: shift + '勤 ' + hours + 'H　理由: ' + reason
+  });
+
+  // ★LINEWORKS通知（承認時→申請者へ）
+  const empNotifyO = EMPLOYEES.find(x => x.id === req.eid);
+  if (empNotifyO && empNotifyO.lwUserId) {
+    sendShiftNotify('approved', {
+      type:     '残業申請（' + req.shift + '勤 ' + req.hours + 'H）',
+      date:     req.date,
+      approver: cUser ? cUser.name : '管理者',
+      lwUserId: empNotifyO.lwUserId
+    });
+  }
   alert(`✅ 残業申請を提出しました（${req.id}）\n管理者の承認をお待ちください。`);
 }
 function approveOTReq(id){
@@ -2019,6 +2068,17 @@ function rejectOTReq(id){
   req.status='rejected';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
   req.reviewedBy=cUser?cUser.name:'管理者'; // 却下者名を記録
   rOTReq();updAllBadges();rDB();
+
+  // ★LINEWORKS通知（却下時→申請者へ）
+  const empNotifyOR = EMPLOYEES.find(x => x.id === req.eid);
+  if (empNotifyOR && empNotifyOR.lwUserId) {
+    sendShiftNotify('rejected', {
+      type:     '残業申請（' + req.shift + '勤 ' + req.hours + 'H）',
+      date:     req.date,
+      reason:   note,
+      lwUserId: empNotifyOR.lwUserId
+    });
+  }
   alert(`❌ ${req.id} を却下しました。`);
 }
 function cancelOTReq(id){
@@ -3107,6 +3167,28 @@ function showSyncBadge(status) {
     }catch(e){}
   }, 300);
 })();
+
+// ══ LINEWORKS通知送信（シフトGAS経由）══
+function sendShiftNotify(eventType, data) {
+  if (!GAS_URL_SHIFT) return;
+  try {
+    const url = GAS_URL_SHIFT
+      + '?action=notifyShift'
+      + '&eventType=' + encodeURIComponent(eventType)
+      + '&name='      + encodeURIComponent(data.name     || '')
+      + '&type='      + encodeURIComponent(data.type     || '')
+      + '&date='      + encodeURIComponent(data.date     || '')
+      + '&detail='    + encodeURIComponent(data.detail   || '')
+      + '&approver='  + encodeURIComponent(data.approver || '')
+      + '&reason='    + encodeURIComponent(data.reason   || '')
+      + '&lwUserId='  + encodeURIComponent(data.lwUserId || '');
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.send();
+  } catch(e) {
+    console.warn('通知エラー:', e);
+  }
+}
 </script>
 </body>
 </html>
