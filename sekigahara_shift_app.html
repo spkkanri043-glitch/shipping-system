@@ -2233,6 +2233,14 @@ function submitHReq(){
   scheduleSave();
   clearHReqForm();
   rHReq();updAllBadges();rDB();
+
+  // ★LINEWORKS通知（申請時→管理者へ）
+  sendShiftNotify('apply', {
+    name:   emp.name,
+    type:   '休日出勤申請',
+    date:   date,
+    detail: start + '〜' + end + '　業務: ' + reason
+  });
   alert(`✅ 休日出勤申請を提出しました（${req.id}）\n管理者の承認をお待ちください。`);
 }
 function approveHReq(id){
@@ -2254,6 +2262,17 @@ function approveHReq(id){
   }
   rHReq();updAllBadges();rSh();rOT();rDB();
   persistData();scheduleSave();
+
+  // ★LINEWORKS通知（承認時→申請者へ）
+  const empNotifyH = EMPLOYEES.find(x => x.id === req.eid);
+  if (empNotifyH && empNotifyH.lwUserId) {
+    sendShiftNotify('approved', {
+      type:     '休日出勤申請（' + req.start + '〜' + req.end + '）',
+      date:     req.date,
+      approver: cUser ? cUser.name : '管理者',
+      lwUserId: empNotifyH.lwUserId
+    });
+  }
   alert(`✅ ${req.id} を承認しました。シフトに「休出」として反映されました。${req.furikae?'\n振替休日('+req.furikae+')もシフトに反映されました。':''}`);
 }
 function rejectHReq(id){
@@ -2265,6 +2284,17 @@ function rejectHReq(id){
   req.reviewedBy=cUser?cUser.name:'管理者'; // 却下者名を記録
   rHReq();updAllBadges();rDB();
   persistData();scheduleSave();
+
+  // ★LINEWORKS通知（却下時→申請者へ）
+  const empNotifyHR = EMPLOYEES.find(x => x.id === req.eid);
+  if (empNotifyHR && empNotifyHR.lwUserId) {
+    sendShiftNotify('rejected', {
+      type:     '休日出勤申請',
+      date:     req.date,
+      reason:   note,
+      lwUserId: empNotifyHR.lwUserId
+    });
+  }
   alert(`❌ ${req.id} を却下しました。`);
 }
 // 振替休日の後日設定
