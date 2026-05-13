@@ -319,7 +319,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 
 <script>
 // ============================================================
-// ★GAS設定（最初に定義 - 修正済み）
+// ★GAS設定（最初に定義）
 // ============================================================
 const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbx_uWgjmCNjWTqqMdZwyHehcao_Yw7B62pysD60-1u8KG-AUr5YUONxfBRO0wvXqoTwRg/exec';
 const GAS_URL = GAS_DEPLOY_URL;
@@ -328,9 +328,9 @@ const GAS_URL = GAS_DEPLOY_URL;
 // 設定
 // ============================================================
 const ADMIN_PASSWORD = '435511spk';
-const SAVE_KEY = 'shipping_data_v1';
+const SAVE_KEY       = 'shipping_data_v1';
 const SAVE_KEY_FILES = 'shipping_files_v1';
-const SAVE_KEY_LOG = 'shipping_log_v1';
+const SAVE_KEY_LOG   = 'shipping_log_v1';
 
 const USERS = [
   { id: 'admin',  pw: '435511spk', name: '管理者',   admin: true  },
@@ -340,28 +340,35 @@ const USERS = [
 ];
 const SESSION_KEY = 'shipping_session_v1';
 
-let records = [];
-let filterMode = 'all';
-let filterHinban = '';
-let expandedGroups = {};
-let currentHinban = '';
-let modalBC = '';
-let loadedFiles = [];
-let sourceFileName = '';
-let logEntries = [];
-let isAdmin = false;
-let selectedBCs = new Set();
-let autoSaveTimer = null;
-let cloudSaveTimer = null;
+let records          = [];
+let filterMode       = 'all';
+let filterHinban     = '';
+let expandedGroups   = {};
+let currentHinban    = '';
+let modalBC          = '';
+let loadedFiles      = [];
+let sourceFileName   = '';
+let logEntries       = [];
+let isAdmin          = false;
+let selectedBCs      = new Set();
+let autoSaveTimer    = null;
+let cloudSaveTimer   = null;
 let autoRefreshTimer = null;
 let autoRefreshInterval = 300;
-let autoRefreshEnabled = false;
+let autoRefreshEnabled  = false;
 
 function getBaseFileName(filename) {
   var name = filename.replace(/\.(csv|CSV)$/i, '');
   var prev;
   do { prev = name; name = name.replace(/[_　]*(未完了|完了済|キャンセル)$/, ''); } while (name !== prev);
   return name;
+}
+
+function currentUserName() {
+  try {
+    const sess = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+    return sess ? sess.name : '不明';
+  } catch(e) { return '不明'; }
 }
 
 // ============================================================
@@ -493,13 +500,13 @@ function restoreData() {
   try {
     const saved = localStorage.getItem(SAVE_KEY);
     const savedFiles = localStorage.getItem(SAVE_KEY_FILES);
-    const savedLog = localStorage.getItem(SAVE_KEY_LOG);
+    const savedLog   = localStorage.getItem(SAVE_KEY_LOG);
     if (saved) {
       const newRecords = JSON.parse(saved);
       const prevDone = records.filter(r=>isDone(r)).length;
-      records = newRecords;
+      records    = newRecords;
       loadedFiles = savedFiles ? JSON.parse(savedFiles) : [];
-      logEntries = savedLog ? JSON.parse(savedLog) : [];
+      logEntries  = savedLog   ? JSON.parse(savedLog)   : [];
       const newDone = records.filter(r=>isDone(r)).length;
       updateStats(); renderList(); renderHinbanFilter(); updateChips();
       const el = document.getElementById('save-indicator');
@@ -594,7 +601,6 @@ function loadCSVFiles(input) {
   input.value = '';
 }
 
-// ファイル選択inputのonchange用エイリアス
 function loadCSVFromFile(input) { loadCSVFiles(input); }
 
 function splitCSV(line) {
@@ -707,15 +713,14 @@ function doScan() {
 }
 
 function updateStats() {
-  const active=records.filter(r=>!isCancelled(r));
-  const total=active.length;
-  const done=active.filter(r=>isDone(r)).length;
-  const pending=active.filter(r=>isPending(r)).length;
-  const cancelCnt=records.filter(r=>isCancelled(r)).length;
-  document.getElementById('s-total').textContent=total+(cancelCnt>0?` (取消${cancelCnt})` :'');
-  document.getElementById('s-done').textContent=done;
-  document.getElementById('s-remain').textContent=pending;
-  document.getElementById('prog').style.width=(total>0?Math.round(done/total*100):0)+'%';
+  const active   = records.filter(r=>!isCancelled(r));
+  const total    = active.length;
+  const done     = active.filter(r=>isDone(r)).length;
+  const cancelCnt = records.filter(r=>isCancelled(r)).length;
+  document.getElementById('s-total').textContent  = total + (cancelCnt > 0 ? ` (取消${cancelCnt})` : '');
+  document.getElementById('s-done').textContent   = done;
+  document.getElementById('s-remain').textContent = active.filter(r=>isPending(r)).length;
+  document.getElementById('prog').style.width     = (total > 0 ? Math.round(done/total*100) : 0) + '%';
 }
 
 // ============================================================
@@ -811,12 +816,11 @@ function renderList() {
   });
   const rows = [];
   order.forEach(function(hn) {
-    const grp = groups[hn];
+    const grp       = groups[hn];
     const doneCount = grp.filter(r => isDone(r)).length;
-    const total = grp.length;
-    const allDone = doneCount === total;
-    const color = allDone ? '#1e8a55' : '#e8a000';
-    const mukouMap = {};
+    const total     = grp.length;
+    const color     = doneCount === total ? '#1e8a55' : '#e8a000';
+    const mukouMap  = {};
     grp.forEach(function(r) {
       const mk = (r['行先コード'] || '').trim();
       if (!mk) return;
@@ -830,22 +834,24 @@ function renderList() {
       mukouHtml = '<span style="font-size:11px;font-weight:400;margin-left:8px;color:#555;white-space:nowrap">';
       mukouKeys.forEach(function(mk) {
         const info = mukouMap[mk];
-        const mc = info.done === info.total ? '#1e8a55' : '#e8a000';
+        const mc   = info.done === info.total ? '#1e8a55' : '#e8a000';
         mukouHtml += mk + ':<span style="color:' + mc + '">' + info.done + '/' + info.total + '</span>　';
       });
       mukouHtml += '</span>';
     }
     const isOpen = expandedGroups[hn] === true;
-    const arrow = isOpen ? '▲' : '▼';
+    const arrow  = isOpen ? '▲' : '▼';
     rows.push('<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:2px;padding:7px 12px;background:#f0f0ea;border-left:4px solid ' + color + ';border-radius:6px;margin-top:12px;font-size:13px;font-weight:700;cursor:pointer" data-grp="' + hn + '" onclick="toggleGroup(this.dataset.grp)"><span>' + hn + ' <span style="font-size:11px;color:#999;font-weight:400">' + arrow + '</span>' + mukouHtml + '</span><span style="color:' + color + ';font-size:12px;flex-shrink:0">' + doneCount + ' / ' + total + '</span></div>');
     if (!isOpen) return;
     grp.forEach(function(r) {
-      const done = isDone(r); const cancelled = isCancelled(r);
-      const adj = r['納品調整'] || ''; const bc = r['バーコード番号'] || '';
-      const isSel = selectedBCs.has(bc);
-      const adjClass = cancelled ? 'cancelled' : adj==='前倒し' ? 'adjusted-mae' : adj==='後ろ倒し' ? 'adjusted-ato' : '';
-      const badgeAdj = adj==='前倒し' ? 'badge-adj-mae' : adj==='後ろ倒し' ? 'badge-adj-ato' : 'badge-cancel';
-      const bcSafe = bc.replace(/'/g, "\\'");
+      const done      = isDone(r);
+      const cancelled = isCancelled(r);
+      const adj       = r['納品調整'] || '';
+      const bc        = r['バーコード番号'] || '';
+      const isSel     = selectedBCs.has(bc);
+      const adjClass  = cancelled ? 'cancelled' : adj==='前倒し' ? 'adjusted-mae' : adj==='後ろ倒し' ? 'adjusted-ato' : '';
+      const badgeAdj  = adj==='前倒し' ? 'badge-adj-mae' : adj==='後ろ倒し' ? 'badge-adj-ato' : 'badge-cancel';
+      const bcSafe    = bc.replace(/'/g, "\\'");
       rows.push('<div class="list-item ' + (done?'done':'') + ' ' + adjClass + ' ' + (isSel?'selected':'') + '" id="item-' + bc + '" style="border-radius:0;border-top:none">' + (isAdmin && !done && !cancelled ? '<input type="checkbox" class="item-check" ' + (isSel?'checked':'') + ' onchange="toggleSelect(\'' + bcSafe + '\',this)">' : '<div style="width:16px;flex-shrink:0"></div>') + '<div class="item-body"><div class="item-top"><span class="item-hinban">' + (r['品番']||'') + '</span><span style="display:flex;gap:4px;align-items:center;flex-shrink:0">' + (adj ? '<span class="badge ' + badgeAdj + '">' + adj + '</span>' : '') + '<span class="badge ' + (done?'badge-done':cancelled?'badge-cancel':'badge-pending') + '">' + (done?'済':cancelled?'取消':'未') + '</span>' + (isAdmin && !done && !cancelled ? '<button class="adj-btn" onclick="openModal(\'' + bcSafe + '\')">調整</button>' : '') + (isAdmin && cancelled ? '<button class="adj-btn" onclick="restoreRecord(\'' + bcSafe + '\')">復元</button>' : '') + '</span></div><div class="item-bc">' + bc + '</div><div class="item-meta"><span>数量:' + (r['数量']||'') + '</span><span>連番:' + (r['連番']||'') + '/' + (r['総数']||'') + '</span><span>納品日:' + (r['納品日']||'') + '</span><span>発注:' + (r['発注番号']||'') + '</span>' + (done ? '<span style="color:#1e8a55">消込:' + (r['消込日時']||'') + '</span>' : '') + '</div></div></div>');
     });
   });
@@ -855,15 +861,15 @@ function renderList() {
 function switchTab(tab,btn) {
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('tab-list').style.display=tab==='list'?'block':'none';
-  document.getElementById('tab-log').style.display=tab==='log'?'block':'none';
+  document.getElementById('tab-list').style.display = tab==='list' ? 'block' : 'none';
+  document.getElementById('tab-log').style.display  = tab==='log'  ? 'block' : 'none';
   if (tab==='log') renderLog();
 }
 
 function renderLog() {
-  const body=document.getElementById('log-body');
+  const body = document.getElementById('log-body');
   if (!logEntries.length) { body.innerHTML='<div class="empty">消込履歴なし</div>'; return; }
-  body.innerHTML=[...logEntries].reverse().map(r=>`<div class="list-item"><div style="width:16px;flex-shrink:0"></div><div class="item-body"><div class="item-top"><span class="item-hinban">${r['品番']||''}</span><span style="font-size:11px;color:#aaa">${r['ts']||''}</span></div><div class="item-bc">${r['バーコード番号']||''}</div><div class="item-meta"><span>${r['納品先']||''}</span><span>連番:${r['連番']||''}/${r['総数']||''}</span></div></div></div>`).join('');
+  body.innerHTML = [...logEntries].reverse().map(r=>`<div class="list-item"><div style="width:16px;flex-shrink:0"></div><div class="item-body"><div class="item-top"><span class="item-hinban">${r['品番']||''}</span><span style="font-size:11px;color:#aaa">${r['ts']||''}</span></div><div class="item-bc">${r['バーコード番号']||''}</div><div class="item-meta"><span>${r['納品先']||''}</span><span>連番:${r['連番']||''}/${r['総数']||''}</span></div></div></div>`).join('');
 }
 
 // ============================================================
@@ -871,42 +877,42 @@ function renderLog() {
 // ============================================================
 function openModal(bc) {
   if (!isAdmin) { showFB('warn','管理者ログインが必要です'); return; }
-  const r=records.find(r=>r['バーコード番号']===bc); if (!r) return;
-  modalBC=bc;
-  document.getElementById('modal-hinban').textContent=r['品番']||'';
-  document.getElementById('modal-bc').textContent=bc;
-  document.getElementById('modal-current-date').textContent=r['納品日']||'未設定';
-  document.getElementById('modal-date').value=(r['納品日']||'').replace(/\//g,'-');
-  document.getElementById('modal-type').value=r['納品調整']||'前倒し';
+  const r = records.find(r=>r['バーコード番号']===bc); if (!r) return;
+  modalBC = bc;
+  document.getElementById('modal-hinban').textContent      = r['品番']||'';
+  document.getElementById('modal-bc').textContent          = bc;
+  document.getElementById('modal-current-date').textContent = r['納品日']||'未設定';
+  document.getElementById('modal-date').value              = (r['納品日']||'').replace(/\//g,'-');
+  document.getElementById('modal-type').value              = r['納品調整']||'前倒し';
   document.getElementById('modal').classList.add('show');
 }
 function closeModal() { document.getElementById('modal').classList.remove('show'); modalBC=''; }
 function saveAdjust() {
-  const dateVal=document.getElementById('modal-date').value;
-  const typeVal=document.getElementById('modal-type').value;
+  const dateVal = document.getElementById('modal-date').value;
+  const typeVal = document.getElementById('modal-type').value;
   if (!dateVal) { alert('日付を選択してください'); return; }
-  const idx=records.findIndex(r=>r['バーコード番号']===modalBC);
+  const idx = records.findIndex(r=>r['バーコード番号']===modalBC);
   if (idx===-1) { closeModal(); return; }
-  records[idx]['納品日']=dateVal.replace(/-/g,'/');
-  records[idx]['納品調整']=typeVal;
+  records[idx]['納品日']   = dateVal.replace(/-/g,'/');
+  records[idx]['納品調整'] = typeVal;
   updateStats(); renderList(); closeModal(); autoSave();
   showFB('ok','納品日を調整しました：'+typeVal+' → '+records[idx]['納品日']);
 }
 function clearAdjust() {
-  const idx=records.findIndex(r=>r['バーコード番号']===modalBC);
+  const idx = records.findIndex(r=>r['バーコード番号']===modalBC);
   if (idx!==-1) records[idx]['納品調整']='';
   closeModal(); renderList(); autoSave();
   showFB('ok','調整を解除しました');
 }
 function cancelRecord() {
   if (!confirm('このデータをキャンセルしますか？\nキャンセル後も「復元」ボタンで元に戻せます。')) return;
-  const idx=records.findIndex(r=>r['バーコード番号']===modalBC);
+  const idx = records.findIndex(r=>r['バーコード番号']===modalBC);
   if (idx!==-1) { records[idx]['納品調整']='キャンセル'; records[idx]['消込済']='未'; records[idx]['消込日時']=''; }
   closeModal(); updateStats(); renderList(); autoSave();
   showFB('warn','キャンセルしました（「復元」ボタンで元に戻せます）');
 }
 function restoreRecord(bc) {
-  const idx=records.findIndex(r=>r['バーコード番号']===bc);
+  const idx = records.findIndex(r=>r['バーコード番号']===bc);
   if (idx!==-1) records[idx]['納品調整']='';
   updateStats(); renderList(); autoSave();
   showFB('ok','復元しました');
@@ -915,7 +921,7 @@ function bulkCancel() {
   if (!selectedBCs.size) return;
   if (!confirm(selectedBCs.size+'件をキャンセルしますか？')) return;
   selectedBCs.forEach(bc=>{ const idx=records.findIndex(r=>r['バーコード番号']===bc); if (idx!==-1) { records[idx]['納品調整']='キャンセル'; records[idx]['消込済']='未'; records[idx]['消込日時']=''; } });
-  const cnt=selectedBCs.size;
+  const cnt = selectedBCs.size;
   deselectAll(); updateStats(); renderList(); autoSave();
   showFB('warn', cnt+'件をキャンセルしました');
 }
@@ -930,15 +936,17 @@ async function exportCSVByStatus() {
     showFB('ok', '📤 CSV書き出し中...');
     try {
       const baseName = sourceFileName || ('出荷指示_' + today);
-      console.log('GAS_DEPLOY_URL:', GAS_DEPLOY_URL);
-      console.log('baseName:', baseName, 'records:', records.length);
       const res = await fetch(GAS_DEPLOY_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'saveCSVByStatus', records: records, today: today, baseName: baseName })
+        body: JSON.stringify({
+          action:   'saveCSVByStatus',
+          records:  records,
+          today:    today,
+          baseName: baseName,
+          tanto:    currentUserName()
+        })
       });
-      console.log('GASレスポンスステータス:', res.status, res.url);
       const resText = await res.text();
-      console.log('GASレスポンス本文:', resText.slice(0, 200));
       let data;
       try { data = JSON.parse(resText); } catch(e) { throw new Error('JSONパース失敗: ' + resText.slice(0,100)); }
       if (!data.ok) throw new Error(data.message);
@@ -965,33 +973,33 @@ async function exportCSVByStatus() {
 }
 
 function makeCSV(data) {
-  const keys=['品番','数量','バーコード番号','発注番号','納品先','荷姿','行先コード','連番','総数','出荷日','納品日','納品調整','発送元','消込済','消込日時'];
-  let csv='\uFEFF'+keys.join(',')+'\n';
-  data.forEach(r=>{
-    csv+=keys.map(k=>{
-      let v=r[k]||'';
-      if (k==='消込済' && r['納品調整']==='後ろ倒し') v='未';
-      if (k==='消込日時' && r['納品調整']==='後ろ倒し') v='';
-      if(k==='バーコード番号') return '="'+v+'"';
-      return v.includes(',')?'"'+v+'"':v;
-    }).join(',')+'\n';
+  const keys = ['品番','数量','バーコード番号','発注番号','納品先','荷姿','行先コード','連番','総数','出荷日','納品日','納品調整','発送元','消込済','消込日時'];
+  let csv = '\uFEFF' + keys.join(',') + '\n';
+  data.forEach(r => {
+    csv += keys.map(k => {
+      let v = r[k] || '';
+      if (k==='消込済'   && r['納品調整']==='後ろ倒し') v = '未';
+      if (k==='消込日時' && r['納品調整']==='後ろ倒し') v = '';
+      if (k==='バーコード番号') return '="' + v + '"';
+      return v.includes(',') ? '"' + v + '"' : v;
+    }).join(',') + '\n';
   });
   return csv;
 }
 
 function downloadCSV(csv, filename) {
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
-  a.download=filename;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  a.download = filename;
   a.click();
 }
 
 function todayStr() { const d=new Date(); return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate()); }
 function isCancelled(r) { return r['納品調整'] === 'キャンセル'; }
-function isPending(r) { if (isCancelled(r)) return false; return r['消込済'] !== '済' || r['納品調整'] === '後ろ倒し'; }
-function isDone(r) { if (isCancelled(r)) return false; return r['消込済'] === '済' && r['納品調整'] !== '後ろ倒し'; }
-function nowStr() { const d=new Date(); return d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
-function pad(n){ return String(n).padStart(2,'0'); }
+function isPending(r)   { if (isCancelled(r)) return false; return r['消込済'] !== '済' || r['納品調整'] === '後ろ倒し'; }
+function isDone(r)      { if (isCancelled(r)) return false; return r['消込済'] === '済' && r['納品調整'] !== '後ろ倒し'; }
+function nowStr()       { const d=new Date(); return d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
+function pad(n)         { return String(n).padStart(2,'0'); }
 function showFB(type,msg) { const fb=document.getElementById('feedback'); fb.className='feedback '+type; fb.textContent=msg; }
 
 // 起動時にデータ復元
@@ -1003,22 +1011,20 @@ restoreData();
 function switchLoginTab(type) {
   const tabAdmin = document.getElementById('tab-admin');
   const tabStaff = document.getElementById('tab-staff');
-  const idInput  = document.getElementById('login-id');
-  const hint     = document.getElementById('login-hint');
   if (type === 'admin') { tabAdmin.classList.add('active'); tabStaff.classList.remove('active'); }
   else { tabStaff.classList.add('active'); tabAdmin.classList.remove('active'); }
-  idInput.placeholder = '';
-  if (hint) hint.innerHTML = '';
   document.getElementById('login-id').value = '';
   document.getElementById('login-pw').value = '';
   document.getElementById('login-error').style.display = 'none';
+  const hint = document.getElementById('login-hint');
+  if (hint) hint.innerHTML = '';
 }
 
 function doLogin() {
-  const id = document.getElementById('login-id').value.trim();
-  const pw = document.getElementById('login-pw').value;
+  const id    = document.getElementById('login-id').value.trim();
+  const pw    = document.getElementById('login-pw').value;
   const errEl = document.getElementById('login-error');
-  const user = USERS.find(u => u.id === id && u.pw === pw);
+  const user  = USERS.find(u => u.id === id && u.pw === pw);
   if (!user) { errEl.style.display = 'block'; document.getElementById('login-pw').value = ''; return; }
   errEl.style.display = 'none';
   try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id: user.id, name: user.name, admin: user.admin })); } catch(e){}
@@ -1027,16 +1033,16 @@ function doLogin() {
 
 function showMainScreen(user) {
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('main-screen').style.display = 'block';
+  document.getElementById('main-screen').style.display  = 'block';
   const adminBtn = document.getElementById('admin-btn');
   if (user.admin) {
     isAdmin = true;
     document.getElementById('admin-badge').style.display = 'inline-block';
     adminBtn.textContent = '🔓 管理者ログアウト';
-    adminBtn.className = 'top-btn admin-logout';
+    adminBtn.className   = 'top-btn admin-logout';
   } else {
     adminBtn.textContent = '🔑 管理者ログイン';
-    adminBtn.className = 'top-btn admin';
+    adminBtn.className   = 'top-btn admin';
   }
   const nameEl = document.getElementById('user-name-display');
   if (nameEl) nameEl.textContent = '👤 ' + user.name + ' さん';
@@ -1053,14 +1059,14 @@ function notifyOfflineShipping() {
   } catch(e) {}
 }
 window.addEventListener('beforeunload', notifyOfflineShipping);
-window.addEventListener('pagehide', notifyOfflineShipping);
+window.addEventListener('pagehide',     notifyOfflineShipping);
 
 function doLogout() {
   if (!confirm('ログアウトしますか？')) return;
   notifyOfflineShipping();
   try { sessionStorage.removeItem(SESSION_KEY); } catch(e){}
   isAdmin = false; selectedBCs.clear(); stopAutoRefresh();
-  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display  = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-id').value = '';
   document.getElementById('login-pw').value = '';
@@ -1074,13 +1080,13 @@ function doLogout() {
   function parseSSOToken(token) {
     try {
       const decoded = atob(token.split('').reverse().join(''));
-      const data = JSON.parse(decoded);
+      const data    = JSON.parse(decoded);
       if (Date.now() - data.ts > 5 * 60 * 1000) return null;
       return data;
     } catch(e) { return null; }
   }
   const params = new URLSearchParams(window.location.search);
-  const token = params.get('sso');
+  const token  = params.get('sso');
   if (token) {
     const data = parseSSOToken(token);
     if (data) {
@@ -1227,32 +1233,29 @@ async function loadSelectedFiles() {
     } catch(err) { showUrlFb('❌ ' + fileName + ': ' + err.message, 'err'); }
   }
   updateStats(); renderList(); renderHinbanFilter(); updateChips(); autoSave();
-  showUrlFb('✅ 読込完了！追加 ' + totalAdded + '件 / 重複スキップ ' + totalSkipped + '件\nファイルを未完了フォルダに移動中...', 'ok');
- // 読み込んだファイルを読込元フォルダから削除
+  showUrlFb('✅ 読込完了！追加 ' + totalAdded + '件 / 重複スキップ ' + totalSkipped + '件', 'ok');
+
+  // ★読込済みfileIdを記録（一覧から非表示にするため）
   if (GAS_DEPLOY_URL && GAS_DEPLOY_URL !== 'YOUR_DEPLOY_URL') {
     for (var mi = 0; mi < movedFileIds.length; mi++) {
       try {
         await fetch(GAS_DEPLOY_URL, {
           method: 'POST',
-          body: JSON.stringify({
-  action: 'recordLoadedFileId',
-  fileId: movedFileIds[mi]
-          })
+          body: JSON.stringify({ action: 'recordLoadedFileId', fileId: movedFileIds[mi] })
         });
-      } catch(e) { console.warn('削除失敗:', e); }
+      } catch(e) { console.warn('記録失敗:', e); }
     }
-    showUrlFb('✅ 読込完了！' + totalAdded + '件追加\n元ファイルを削除しました', 'ok');
   }
   setTimeout(function() { closeUrlModal(); }, 2500);
 }
 
 function showUrlFb(msg, type) {
   const fb = document.getElementById('url-feedback');
-  fb.style.display = 'block';
-  fb.style.padding = '8px 10px';
+  fb.style.display    = 'block';
+  fb.style.padding    = '8px 10px';
   fb.style.borderRadius = '6px';
-  fb.style.background = type==='ok'?'#ecf9f2':type==='err'?'#fdecea':'#fff8ec';
-  fb.style.color = type==='ok'?'#1e8a55':type==='err'?'#c0392b':'#b56e00';
+  fb.style.background = type==='ok' ? '#ecf9f2' : type==='err' ? '#fdecea' : '#fff8ec';
+  fb.style.color      = type==='ok' ? '#1e8a55' : type==='err' ? '#c0392b' : '#b56e00';
   fb.textContent = msg;
 }
 </script>
