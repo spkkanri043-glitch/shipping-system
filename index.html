@@ -404,14 +404,15 @@ function playSound(type) {
     }
 
     if (type === 'ok') {
-      // OK：ピッ・ピッ（高音2回）
-      beep(1200, t,        0.15, 'sine');
-      beep(1600, t + 0.2,  0.2,  'sine');
-    } else {
-      // エラー：ブッ・ブッ・ブッ（低音3回）
-      beep(200, t,        0.2, 'square');
-      beep(200, t + 0.25, 0.2, 'square');
-      beep(200, t + 0.5,  0.2, 'square');
+  // OK：ピピッ（高音・矩形波で鋭く）
+  beep(1800, t,       0.08, 'square');
+  beep(1800, t + 0.1, 0.12, 'square');
+} else {
+  // エラー：ブブブ（低音3回）
+  beep(180, t,        0.2, 'square');
+  beep(180, t + 0.25, 0.2, 'square');
+  beep(180, t + 0.5,  0.2, 'square');
+}
     }
   } catch(e) { console.warn('音声再生失敗:', e); }
 }
