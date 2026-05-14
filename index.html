@@ -1133,14 +1133,14 @@ function doLogout() {
 
 // SSO
 (function() {
-  function parseSSOToken(token) {
-    try {
-      const decoded = atob(token.split('').reverse().join(''));
-      const data    = JSON.parse(decoded);
-      if (Date.now() - data.ts > 5 * 60 * 1000) return null;
-      return data;
-    } catch(e) { return null; }
-  }
+ function parseSSOToken(token) {
+  try {
+    const decoded = decodeURIComponent(escape(atob(token.split('').reverse().join(''))));
+    const data    = JSON.parse(decoded);
+    if (Date.now() - data.ts > 5 * 60 * 1000) return null;
+    return data;
+  } catch(e) { return null; }
+}
   const params = new URLSearchParams(window.location.search);
   const token  = params.get('sso');
   if (token) {
