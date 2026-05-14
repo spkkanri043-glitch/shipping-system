@@ -385,31 +385,33 @@ function getAudioCtx() {
 
 function playSound(type) {
   try {
-    const ctx       = getAudioCtx();
-    const osc       = ctx.createOscillator();
-    const gain      = ctx.createGain();
-    const compressor = ctx.createDynamicsCompressor();
-    osc.connect(gain);
-    gain.connect(compressor);
-    compressor.connect(ctx.destination);
-    const t = ctx.currentTime;
+    const ctx = getAudioCtx();
+    const t   = ctx.currentTime;
+
+    function beep(freq, startTime, duration, oscType) {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const comp = ctx.createDynamicsCompressor();
+      osc.connect(gain);
+      gain.connect(comp);
+      comp.connect(ctx.destination);
+      osc.type = oscType || 'square';
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(2.0, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+
     if (type === 'ok') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, t);
-      osc.frequency.setValueAtTime(1100, t + 0.12);
-      gain.gain.setValueAtTime(1.5, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-      osc.start(t);
-      osc.stop(t + 0.4);
+      // OK：ピッ・ピッ（高音2回）
+      beep(1200, t,        0.15, 'sine');
+      beep(1600, t + 0.2,  0.2,  'sine');
     } else {
-      osc.type = 'square'; // 矩形波でより大きく聞こえる
-      osc.frequency.setValueAtTime(440, t);
-      osc.frequency.setValueAtTime(220, t + 0.15);
-      osc.frequency.setValueAtTime(440, t + 0.3);
-      gain.gain.setValueAtTime(1.5, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
-      osc.start(t);
-      osc.stop(t + 0.6);
+      // エラー：ブッ・ブッ・ブッ（低音3回）
+      beep(200, t,        0.2, 'square');
+      beep(200, t + 0.25, 0.2, 'square');
+      beep(200, t + 0.5,  0.2, 'square');
     }
   } catch(e) { console.warn('音声再生失敗:', e); }
 }
