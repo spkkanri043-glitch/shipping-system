@@ -601,11 +601,15 @@ async function confirmRecord(id) {
   const btn = document.getElementById('confirm-btn');
   btn.disabled = true; btn.textContent = '送信中...';
   try {
-    const res = await fetch(`${GAS_URL}?action=addConfirmLog`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ recordId: id, userId: currentUser.id, userName: currentUser.name, time: new Date().toLocaleString('ja-JP') })
+    // GASはCORSのためGETパラメータ方式で送信
+    const params = new URLSearchParams({
+      action: 'addConfirmLog',
+      recordId: id,
+      userId: currentUser.id || '',
+      userName: currentUser.name,
+      time: new Date().toLocaleString('ja-JP')
     });
+    const res = await fetch(`${GAS_URL}?${params.toString()}`);
     const data = await res.json();
     if (data.ok) {
       if (!confirmLogs[id]) confirmLogs[id] = [];
@@ -613,11 +617,11 @@ async function confirmRecord(id) {
       showToast('確認しました！', 'ok');
       closeModal(); updateStats(); applyFilter();
     } else {
-      showToast('エラーが発生しました', 'err');
+      showToast('エラー: ' + (data.error || '送信失敗'), 'err');
       btn.disabled = false; btn.textContent = '✔ 確認する';
     }
   } catch(e) {
-    showToast('通信エラー', 'err');
+    showToast('通信エラー: ' + e.message, 'err');
     btn.disabled = false; btn.textContent = '✔ 確認する';
   }
 }
