@@ -545,7 +545,15 @@ function openDetail(id) {
   const alreadyConfirmed = currentUser && logs.some(l => l.name === currentUser.name);
   const photos = [r.photo1, r.photo2, r.photo3].filter(Boolean);
   const photoHtml = photos.length > 0
-    ? photos.map(url => `<a href="${url}" target="_blank"><img class="photo-thumb" src="${url}" alt="写真" onerror="this.style.display='none'"></a>`).join('')
+    ? photos.map(url => {
+        // /preview URLはiframe、それ以外はimgで表示
+        if (url.includes('/preview')) {
+          return `<div style="width:280px;height:200px;border-radius:8px;overflow:hidden;border:1px solid var(--border)">
+            <iframe src="${url}" width="280" height="200" frameborder="0" allowfullscreen style="border:none"></iframe>
+          </div>`;
+        }
+        return `<a href="${url}" target="_blank"><img class="photo-thumb" src="${url}" alt="写真" onerror="this.style.display='none'"></a>`;
+      }).join('')
     : '<div class="photo-placeholder">📷 写真なし</div>';
   const logHtml = logs.length > 0
     ? logs.map(l => `<div class="log-item">
