@@ -35,10 +35,9 @@ body {
   min-height: 100vh;
 }
 
-/* ── ヘッダー ── */
 .header {
   height: var(--header-h);
-  background: var(--accent);
+  background: #1a3a5c;
   display: flex;
   align-items: center;
   padding: 0 20px;
@@ -46,37 +45,24 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 .header-icon {
   width: 32px; height: 32px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(232,160,32,0.2);
+  border: 1px solid rgba(232,160,32,0.4);
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   font-size: 16px;
 }
-.header-title {
-  color: #fff;
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
+.header-title { color: #fff; font-size: 17px; font-weight: 700; letter-spacing: 0.02em; }
 .header-spacer { flex: 1; }
-.header-user {
-  color: rgba(255,255,255,0.85);
-  font-size: 13px;
-  display: flex; align-items: center; gap: 6px;
-}
-.header-user-dot {
-  width: 8px; height: 8px;
-  background: #34d399;
-  border-radius: 50%;
-}
+.header-user { color: rgba(255,255,255,0.85); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.header-user-dot { width: 8px; height: 8px; background: #34d399; border-radius: 50%; }
 
-/* ── メインレイアウト ── */
 .main { max-width: 1200px; margin: 0 auto; padding: 20px 16px; }
 
-/* ── GAS設定パネル ── */
+/* GAS設定パネル */
 .setup-panel {
   background: var(--warn-light);
   border: 1px solid #fcd34d;
@@ -92,84 +78,18 @@ body {
 .setup-label { font-size: 13px; color: var(--warn); font-weight: 600; white-space: nowrap; }
 .setup-input {
   flex: 1; min-width: 300px;
-  border: 1px solid #fcd34d;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 13px;
-  background: #fff;
-  outline: none;
+  border: 1px solid #fcd34d; border-radius: 6px;
+  padding: 8px 12px; font-size: 13px; background: #fff; outline: none;
 }
 .setup-input:focus { border-color: var(--accent); }
 .btn-setup {
-  background: var(--warn);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
+  background: var(--warn); color: #fff; border: none;
+  border-radius: 6px; padding: 8px 16px; font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
 }
 .btn-setup:hover { opacity: 0.9; }
 
-/* ── ツールバー ── */
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-.search-wrap {
-  display: flex;
-  align-items: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0 12px;
-  gap: 8px;
-  flex: 1;
-  min-width: 200px;
-}
-.search-wrap input {
-  border: none; outline: none;
-  font-size: 14px;
-  padding: 9px 0;
-  width: 100%;
-  background: transparent;
-}
-.search-icon { color: var(--text3); font-size: 15px; }
-.filter-select {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 9px 12px;
-  font-size: 13px;
-  background: var(--surface);
-  cursor: pointer;
-  outline: none;
-  color: var(--text);
-}
-.btn {
-  border: none;
-  border-radius: var(--radius);
-  padding: 9px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
-  white-space: nowrap;
-  transition: opacity 0.15s;
-}
-.btn:hover { opacity: 0.85; }
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-outline {
-  background: var(--surface);
-  color: var(--text2);
-  border: 1px solid var(--border);
-}
-
-/* ── 統計カード ── */
+/* 統計カード */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -177,345 +97,208 @@ body {
   margin-bottom: 20px;
 }
 .stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
 }
 .stat-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
 .stat-value { font-size: 24px; font-weight: 700; }
-.stat-card.total .stat-value { color: var(--accent); }
+.stat-card.total .stat-value { color: #1a3a5c; }
 .stat-card.unconfirmed .stat-value { color: var(--danger); }
 .stat-card.confirmed .stat-value { color: var(--ok); }
 .stat-card.today .stat-value { color: var(--warn); }
 
-/* ── テーブル ── */
+/* ツールバー */
+.toolbar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.search-wrap {
+  display: flex; align-items: center;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 0 12px; gap: 8px;
+  flex: 1; min-width: 200px;
+}
+.search-wrap input {
+  border: none; outline: none; font-size: 14px;
+  padding: 9px 0; width: 100%; background: transparent;
+}
+.search-icon { color: var(--text3); font-size: 15px; }
+.filter-select {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 9px 12px; font-size: 13px; background: var(--surface);
+  cursor: pointer; outline: none; color: var(--text);
+}
+.btn {
+  border: none; border-radius: var(--radius); padding: 9px 16px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap; transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.85; }
+.btn-primary { background: #1a3a5c; color: #fff; }
+.btn-outline { background: var(--surface); color: var(--text2); border: 1px solid var(--border); }
+
+/* テーブル */
 .table-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
 }
 .table-header {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
 }
 .table-title { font-weight: 700; font-size: 15px; }
 .table-count { font-size: 13px; color: var(--text2); }
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-thead tr {
-  background: var(--surface2);
-  border-bottom: 1px solid var(--border);
-}
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
 th {
-  padding: 10px 14px;
-  text-align: left;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text2);
-  white-space: nowrap;
-  letter-spacing: 0.03em;
+  padding: 10px 14px; text-align: left; font-size: 12px;
+  font-weight: 700; color: var(--text2); white-space: nowrap; letter-spacing: 0.03em;
 }
 tbody tr {
   border-bottom: 1px solid var(--border);
-  transition: background 0.1s;
-  cursor: pointer;
+  transition: background 0.1s; cursor: pointer;
 }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: var(--accent-light); }
-td {
-  padding: 12px 14px;
-  font-size: 13px;
-  vertical-align: middle;
-}
-.td-id { font-family: monospace; font-size: 11px; color: var(--text2); }
+td { padding: 12px 14px; font-size: 13px; vertical-align: middle; }
 .td-date { white-space: nowrap; color: var(--text2); font-size: 12px; }
 .td-name { font-weight: 600; }
 .td-part { font-family: monospace; font-size: 12px; }
-.td-count {
-  font-weight: 700;
-  color: var(--danger);
-  text-align: center;
-}
-.td-photo a {
-  color: var(--accent);
-  text-decoration: none;
-  font-size: 12px;
-}
-.td-photo a:hover { text-decoration: underline; }
+.td-count { font-weight: 700; color: var(--danger); text-align: center; }
 
-/* バッジ */
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
 }
 .badge-unconfirmed { background: var(--danger-light); color: var(--danger); }
 .badge-confirmed { background: var(--ok-light); color: var(--ok); }
 
-/* ── 詳細モーダル ── */
+/* モーダル */
 .modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 200;
+  align-items: center; justify-content: center; padding: 20px;
 }
 .modal-overlay.open { display: flex; }
 .modal {
-  background: var(--surface);
-  border-radius: 12px;
-  width: 100%;
-  max-width: 700px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  background: var(--surface); border-radius: 12px;
+  width: 100%; max-width: 700px; max-height: 90vh;
+  overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
 }
 .modal-header {
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
 }
 .modal-title { font-size: 17px; font-weight: 700; }
 .modal-close {
-  background: none; border: none;
-  font-size: 20px; color: var(--text2);
-  cursor: pointer; padding: 4px 8px;
-  border-radius: 6px;
+  background: none; border: none; font-size: 20px;
+  color: var(--text2); cursor: pointer; padding: 4px 8px; border-radius: 6px;
 }
 .modal-close:hover { background: var(--surface2); }
 .modal-body { padding: 20px 24px; }
 
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.detail-item {}
-.detail-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text2);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 4px;
-}
-.detail-value {
-  font-size: 14px;
-  font-weight: 500;
-}
-.detail-value.large {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--danger);
-}
-
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.detail-label { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.detail-value { font-size: 14px; font-weight: 500; }
+.detail-value.large { font-size: 22px; font-weight: 700; color: var(--danger); }
 .section-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text2);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 8px;
-  margin-bottom: 14px;
-  margin-top: 20px;
+  font-size: 13px; font-weight: 700; color: var(--text2);
+  border-bottom: 1px solid var(--border); padding-bottom: 8px;
+  margin-bottom: 14px; margin-top: 20px;
 }
 
-/* 写真エリア */
-.photo-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
+.photo-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
 .photo-thumb {
-  width: 160px;
-  height: 120px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  object-fit: cover;
-  cursor: pointer;
+  width: 160px; height: 120px; border-radius: 8px;
+  border: 1px solid var(--border); object-fit: cover; cursor: pointer;
 }
 .photo-placeholder {
-  width: 160px;
-  height: 120px;
-  border-radius: 8px;
-  border: 2px dashed var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text3);
-  font-size: 12px;
+  width: 160px; height: 120px; border-radius: 8px;
+  border: 2px dashed var(--border); display: flex;
+  align-items: center; justify-content: center;
+  color: var(--text3); font-size: 12px;
 }
 
-/* 確認ログ */
-.confirm-log {
-  background: var(--surface2);
-  border-radius: var(--radius);
-  padding: 14px;
-  margin-bottom: 16px;
-}
-.confirm-log-empty {
-  text-align: center;
-  color: var(--text3);
-  font-size: 13px;
-  padding: 8px;
-}
+.confirm-log { background: var(--surface2); border-radius: var(--radius); padding: 14px; margin-bottom: 16px; }
+.confirm-log-empty { text-align: center; color: var(--text3); font-size: 13px; padding: 8px; }
 .log-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 0; border-bottom: 1px solid var(--border);
 }
 .log-item:last-child { border-bottom: none; }
 .log-avatar {
-  width: 28px; height: 28px;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700;
-  flex-shrink: 0;
+  width: 28px; height: 28px; background: #1a3a5c; color: #fff;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
 }
 .log-name { font-weight: 600; font-size: 13px; flex: 1; }
 .log-time { font-size: 11px; color: var(--text3); }
 
-/* 確認ボタンエリア */
 .confirm-area {
-  background: var(--accent-light);
-  border-radius: var(--radius);
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
+  background: var(--accent-light); border-radius: var(--radius);
+  padding: 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
 }
-.confirm-note { font-size: 13px; color: var(--accent); flex: 1; }
+.confirm-note { font-size: 13px; color: #1a3a5c; flex: 1; }
 .btn-confirm {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius);
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
+  background: #1a3a5c; color: #fff; border: none;
+  border-radius: var(--radius); padding: 10px 20px;
+  font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap;
 }
 .btn-confirm:hover { opacity: 0.9; }
-.btn-confirm:disabled {
-  background: var(--ok);
-  cursor: default;
-}
+.btn-confirm:disabled { background: var(--ok); cursor: default; }
 
-/* ── ユーザー選択モーダル ── */
+/* ユーザー選択モーダル */
 .user-modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 300;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 300;
+  align-items: center; justify-content: center; padding: 20px;
 }
 .user-modal-overlay.open { display: flex; }
 .user-modal {
-  background: var(--surface);
-  border-radius: 12px;
-  width: 100%;
-  max-width: 380px;
-  padding: 24px;
+  background: var(--surface); border-radius: 12px;
+  width: 100%; max-width: 380px; padding: 24px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.25);
 }
 .user-modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
 .user-select {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  font-size: 14px;
-  margin-bottom: 14px;
-  outline: none;
-  background: var(--surface);
+  width: 100%; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; font-size: 14px; margin-bottom: 14px;
+  outline: none; background: var(--surface);
 }
 .user-btn-row { display: flex; gap: 8px; justify-content: flex-end; }
 .btn-cancel {
-  background: var(--surface2);
-  color: var(--text2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 9px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
+  background: var(--surface2); color: var(--text2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 9px 16px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
 }
 
-/* ── トースト ── */
+/* トースト */
 .toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
+  position: fixed; bottom: 24px; left: 50%;
   transform: translateX(-50%) translateY(80px);
-  background: #111928;
-  color: #fff;
-  padding: 12px 24px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 600;
-  z-index: 999;
-  transition: transform 0.3s ease;
-  white-space: nowrap;
+  background: #111928; color: #fff; padding: 12px 24px;
+  border-radius: 999px; font-size: 14px; font-weight: 600;
+  z-index: 999; transition: transform 0.3s ease; white-space: nowrap;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.ok { background: var(--ok); }
 .toast.err { background: var(--danger); }
 
-/* ── ローディング ── */
 .loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 60px;
-  color: var(--text2);
-  flex-direction: column;
-  gap: 12px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 60px; color: var(--text2); flex-direction: column; gap: 12px;
 }
 .spinner {
-  width: 32px; height: 32px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
+  width: 32px; height: 32px; border: 3px solid var(--border);
+  border-top-color: #1a3a5c; border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.empty {
-  text-align: center;
-  padding: 60px;
-  color: var(--text3);
-}
+.empty { text-align: center; padding: 60px; color: var(--text3); }
 .empty-icon { font-size: 40px; margin-bottom: 10px; }
 
-/* レスポンシブ */
 @media (max-width: 640px) {
   .detail-grid { grid-template-columns: 1fr; }
   .stats-row { grid-template-columns: 1fr 1fr; }
@@ -525,7 +308,6 @@ td {
 </head>
 <body>
 
-<!-- ヘッダー -->
 <div class="header">
   <div class="header-icon">⚠️</div>
   <div class="header-title">不具合展開シート</div>
@@ -538,34 +320,19 @@ td {
 
 <div class="main">
 
-  <!-- GAS URL設定 -->
   <div class="setup-panel" id="setup-panel">
     <div class="setup-label">⚙️ GAS URL 未設定</div>
     <input class="setup-input" id="gas-url-input" type="text" placeholder="https://script.google.com/macros/s/...../exec">
     <button class="btn-setup" onclick="saveGasUrl()">接続する</button>
   </div>
 
-  <!-- 統計 -->
   <div class="stats-row">
-    <div class="stat-card total">
-      <div class="stat-label">合計件数</div>
-      <div class="stat-value" id="stat-total">—</div>
-    </div>
-    <div class="stat-card unconfirmed">
-      <div class="stat-label">未確認</div>
-      <div class="stat-value" id="stat-unconfirmed">—</div>
-    </div>
-    <div class="stat-card confirmed">
-      <div class="stat-label">確認済み</div>
-      <div class="stat-value" id="stat-confirmed">—</div>
-    </div>
-    <div class="stat-card today">
-      <div class="stat-label">本日発生</div>
-      <div class="stat-value" id="stat-today">—</div>
-    </div>
+    <div class="stat-card total"><div class="stat-label">合計件数</div><div class="stat-value" id="stat-total">—</div></div>
+    <div class="stat-card unconfirmed"><div class="stat-label">未確認</div><div class="stat-value" id="stat-unconfirmed">—</div></div>
+    <div class="stat-card confirmed"><div class="stat-label">確認済み</div><div class="stat-value" id="stat-confirmed">—</div></div>
+    <div class="stat-card today"><div class="stat-label">本日発生</div><div class="stat-value" id="stat-today">—</div></div>
   </div>
 
-  <!-- ツールバー -->
   <div class="toolbar">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
@@ -580,7 +347,6 @@ td {
     <button class="btn btn-primary" onclick="openUserModal()">👤 ユーザー切替</button>
   </div>
 
-  <!-- テーブル -->
   <div class="table-wrap">
     <div class="table-header">
       <div class="table-title">不具合一覧</div>
@@ -618,20 +384,46 @@ td {
   </div>
 </div>
 
-<!-- トースト -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ===================== 設定 =====================
-const STORAGE_KEY_URL   = 'fuguai_gas_url';
-const STORAGE_KEY_USER  = 'fuguai_current_user';
+const STORAGE_KEY_URL  = 'fuguai_gas_url';
+const STORAGE_KEY_USER = 'fuguai_current_user';
 let GAS_URL = localStorage.getItem(STORAGE_KEY_URL) || '';
 let currentUser = JSON.parse(localStorage.getItem(STORAGE_KEY_USER) || 'null');
 let allRecords = [];
-let confirmLogs = {}; // recordId -> [{name, time}]
+let confirmLogs = {};
 
-// ===================== 初期化 =====================
+// ===================== ポータルSSO対応 =====================
+function parseSsoToken(token) {
+  try {
+    const decoded = decodeURIComponent(escape(atob(token.split('').reverse().join(''))));
+    return JSON.parse(decoded);
+  } catch(e) { return null; }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+  // ポータルからのSSO・GAS URL受け取り
+  const params = new URLSearchParams(window.location.search);
+
+  // GAS URLをポータルから受け取る
+  const gasFromPortal = params.get('fuguai_gas_url');
+  if (gasFromPortal) {
+    GAS_URL = gasFromPortal;
+    localStorage.setItem(STORAGE_KEY_URL, GAS_URL);
+  }
+
+  // SSOトークンでユーザー情報を取得
+  const sso = params.get('sso');
+  if (sso) {
+    const user = parseSsoToken(sso);
+    if (user && user.name) {
+      currentUser = { id: user.id, name: user.name };
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
+    }
+  }
+
   if (GAS_URL) {
     document.getElementById('setup-panel').classList.add('hidden');
     document.getElementById('gas-url-input').value = GAS_URL;
@@ -668,7 +460,6 @@ async function loadData() {
     const recordsData = await recordsRes.json();
     const logsData = await logsRes.json();
     allRecords = recordsData.records || [];
-    // ログをrecordIdでグループ化
     confirmLogs = {};
     (logsData.logs || []).forEach(log => {
       if (!confirmLogs[log.recordId]) confirmLogs[log.recordId] = [];
@@ -678,20 +469,16 @@ async function loadData() {
     applyFilter();
   } catch(e) {
     setTableArea('<div class="empty"><div class="empty-icon">❌</div>データの取得に失敗しました<br><small>GAS URLを確認してください</small></div>');
-    console.error(e);
   }
 }
 
-// ===================== 統計更新 =====================
 function updateStats() {
-  const today = new Date().toLocaleDateString('ja-JP');
-  let total = allRecords.length;
-  let unconfirmed = 0, confirmed = 0, todayCount = 0;
+  let total = allRecords.length, unconfirmed = 0, confirmed = 0, todayCount = 0;
+  const todayStr = new Date().toISOString().slice(0, 10);
   allRecords.forEach(r => {
     const logs = confirmLogs[r.id] || [];
-    if (logs.length === 0) unconfirmed++;
-    else confirmed++;
-    if (r.date && r.date.startsWith(new Date().toISOString().slice(0,10).replace(/-/g,'/'))) todayCount++;
+    if (logs.length === 0) unconfirmed++; else confirmed++;
+    if (r.date && r.date.replace(/-/g,'/').startsWith(todayStr.replace(/-/g,'/'))) todayCount++;
   });
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-unconfirmed').textContent = unconfirmed;
@@ -699,25 +486,23 @@ function updateStats() {
   document.getElementById('stat-today').textContent = todayCount;
 }
 
-// ===================== フィルター =====================
 function applyFilter() {
   const q = document.getElementById('search-input').value.toLowerCase();
   const status = document.getElementById('filter-status').value;
   const filtered = allRecords.filter(r => {
     const logs = confirmLogs[r.id] || [];
-    const confirmed = logs.length > 0;
-    if (status === '未確認' && confirmed) return false;
-    if (status === '確認済み' && !confirmed) return false;
+    const isConfirmed = logs.length > 0;
+    if (status === '未確認' && isConfirmed) return false;
+    if (status === '確認済み' && !isConfirmed) return false;
     if (q) {
-      const haystack = [r.part, r.worker, r.defectType, r.customer, r.detail].join(' ').toLowerCase();
-      if (!haystack.includes(q)) return false;
+      const hay = [r.part, r.worker, r.defectType, r.customer, r.detail].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
     }
     return true;
   });
   renderTable(filtered);
 }
 
-// ===================== テーブル描画 =====================
 function renderTable(records) {
   document.getElementById('table-count').textContent = `${records.length} 件`;
   if (records.length === 0) {
@@ -739,7 +524,7 @@ function renderTable(records) {
       <td>${r.defectType || '—'}</td>
       <td class="td-count">${r.defectCount || 0}</td>
       <td>${badge}</td>
-      <td class="td-photo">${hasPhoto ? '📷 あり' : '—'}</td>
+      <td>${hasPhoto ? '📷 あり' : '—'}</td>
     </tr>`;
   }).join('');
   setTableArea(`<table>
@@ -751,25 +536,17 @@ function renderTable(records) {
   </table>`);
 }
 
-function setTableArea(html) {
-  document.getElementById('table-area').innerHTML = html;
-}
+function setTableArea(html) { document.getElementById('table-area').innerHTML = html; }
 
-// ===================== 詳細モーダル =====================
 function openDetail(id) {
   const r = allRecords.find(x => x.id === id);
   if (!r) return;
   const logs = confirmLogs[id] || [];
-  const isConfirmed = logs.length > 0;
   const alreadyConfirmed = currentUser && logs.some(l => l.name === currentUser.name);
-
-  // 写真
   const photos = [r.photo1, r.photo2, r.photo3].filter(Boolean);
   const photoHtml = photos.length > 0
     ? photos.map(url => `<a href="${url}" target="_blank"><img class="photo-thumb" src="${url}" alt="写真" onerror="this.style.display='none'"></a>`).join('')
     : '<div class="photo-placeholder">📷 写真なし</div>';
-
-  // 確認ログ
   const logHtml = logs.length > 0
     ? logs.map(l => `<div class="log-item">
         <div class="log-avatar">${l.name.slice(0,1)}</div>
@@ -778,56 +555,27 @@ function openDetail(id) {
       </div>`).join('')
     : '<div class="confirm-log-empty">まだ確認者がいません</div>';
 
-  const confirmBtnLabel = alreadyConfirmed ? '✔ 確認済み（あなた）' : '✔ 確認する';
-
   document.getElementById('modal-title').textContent = `不具合詳細 — ${r.part || r.id}`;
   document.getElementById('modal-body').innerHTML = `
     <div class="detail-grid">
-      <div class="detail-item">
-        <div class="detail-label">報告書ID</div>
-        <div class="detail-value" style="font-size:12px;font-family:monospace">${r.id}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">発生日</div>
-        <div class="detail-value">${r.date || '—'}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">担当者</div>
-        <div class="detail-value">${r.worker || '—'}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">基本取引先</div>
-        <div class="detail-value">${r.customer || '—'}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">品番</div>
-        <div class="detail-value">${r.part || '—'}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">不良数</div>
-        <div class="detail-value large">${r.defectCount || 0} 個</div>
-      </div>
-      <div class="detail-item" style="grid-column:1/-1">
-        <div class="detail-label">不具合内容</div>
-        <div class="detail-value">${r.defectType || '—'}</div>
-      </div>
-      <div class="detail-item" style="grid-column:1/-1">
-        <div class="detail-label">不具合詳細</div>
-        <div class="detail-value">${r.detail || '—'}</div>
-      </div>
+      <div><div class="detail-label">報告書ID</div><div class="detail-value" style="font-size:12px;font-family:monospace">${r.id}</div></div>
+      <div><div class="detail-label">発生日</div><div class="detail-value">${r.date || '—'}</div></div>
+      <div><div class="detail-label">担当者</div><div class="detail-value">${r.worker || '—'}</div></div>
+      <div><div class="detail-label">基本取引先</div><div class="detail-value">${r.customer || '—'}</div></div>
+      <div><div class="detail-label">品番</div><div class="detail-value">${r.part || '—'}</div></div>
+      <div><div class="detail-label">不良数</div><div class="detail-value large">${r.defectCount || 0} 個</div></div>
+      <div style="grid-column:1/-1"><div class="detail-label">不具合内容</div><div class="detail-value">${r.defectType || '—'}</div></div>
+      <div style="grid-column:1/-1"><div class="detail-label">不具合詳細</div><div class="detail-value">${r.detail || '—'}</div></div>
     </div>
-
     <div class="section-title">📷 写真</div>
     <div class="photo-row">${photoHtml}</div>
-
     <div class="section-title">✅ 確認ログ（${logs.length}名）</div>
     <div class="confirm-log">${logHtml}</div>
-
     ${currentUser ? `
     <div class="confirm-area">
       <div class="confirm-note">${alreadyConfirmed ? 'あなたはすでに確認済みです' : 'この不具合内容を確認しましたか？'}</div>
       <button class="btn-confirm" id="confirm-btn" onclick="confirmRecord('${id}')" ${alreadyConfirmed ? 'disabled' : ''}>
-        ${confirmBtnLabel}
+        ${alreadyConfirmed ? '✔ 確認済み（あなた）' : '✔ 確認する'}
       </button>
     </div>` : `
     <div class="confirm-area">
@@ -838,56 +586,41 @@ function openDetail(id) {
   document.getElementById('detail-modal').classList.add('open');
 }
 
-function closeModal() {
-  document.getElementById('detail-modal').classList.remove('open');
-}
+function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
 
-// ===================== 確認処理 =====================
 async function confirmRecord(id) {
   if (!currentUser) return openUserModal();
   const btn = document.getElementById('confirm-btn');
-  btn.disabled = true;
-  btn.textContent = '送信中...';
+  btn.disabled = true; btn.textContent = '送信中...';
   try {
     const res = await fetch(`${GAS_URL}?action=addConfirmLog`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        recordId: id,
-        userId: currentUser.id,
-        userName: currentUser.name,
-        time: new Date().toLocaleString('ja-JP')
-      })
+      body: JSON.stringify({ recordId: id, userId: currentUser.id, userName: currentUser.name, time: new Date().toLocaleString('ja-JP') })
     });
     const data = await res.json();
     if (data.ok) {
       if (!confirmLogs[id]) confirmLogs[id] = [];
       confirmLogs[id].push({ name: currentUser.name, time: new Date().toLocaleString('ja-JP') });
       showToast('確認しました！', 'ok');
-      closeModal();
-      updateStats();
-      applyFilter();
+      closeModal(); updateStats(); applyFilter();
     } else {
       showToast('エラーが発生しました', 'err');
-      btn.disabled = false;
-      btn.textContent = '✔ 確認する';
+      btn.disabled = false; btn.textContent = '✔ 確認する';
     }
   } catch(e) {
     showToast('通信エラー', 'err');
-    btn.disabled = false;
-    btn.textContent = '✔ 確認する';
+    btn.disabled = false; btn.textContent = '✔ 確認する';
   }
 }
 
-// ===================== ユーザー選択 =====================
 function openUserModal() {
   if (!GAS_URL) { showToast('先にGAS URLを設定してください', 'err'); return; }
   loadEmployees();
   document.getElementById('user-modal').classList.add('open');
 }
-function closeUserModal() {
-  document.getElementById('user-modal').classList.remove('open');
-}
+function closeUserModal() { document.getElementById('user-modal').classList.remove('open'); }
+
 async function loadEmployees() {
   try {
     const res = await fetch(`${GAS_URL}?action=getEmployees`);
@@ -901,13 +634,13 @@ async function loadEmployees() {
       sel.appendChild(opt);
     });
     if (currentUser) {
-      const found = Array.from(sel.options).find(o => {
-        try { return JSON.parse(o.value).id === currentUser.id; } catch { return false; }
+      Array.from(sel.options).forEach(o => {
+        try { if (JSON.parse(o.value).id === currentUser.id) o.selected = true; } catch {}
       });
-      if (found) found.selected = true;
     }
   } catch(e) { console.error(e); }
 }
+
 function confirmUser() {
   const v = document.getElementById('user-select').value;
   if (!v) return showToast('ユーザーを選択してください', 'err');
@@ -918,7 +651,6 @@ function confirmUser() {
   showToast(`${currentUser.name} でログインしました`, 'ok');
 }
 
-// ===================== トースト =====================
 function showToast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -926,13 +658,8 @@ function showToast(msg, type='') {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-// モーダル外クリックで閉じる
-document.getElementById('detail-modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('detail-modal')) closeModal();
-});
-document.getElementById('user-modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('user-modal')) closeUserModal();
-});
+document.getElementById('detail-modal').addEventListener('click', e => { if (e.target === document.getElementById('detail-modal')) closeModal(); });
+document.getElementById('user-modal').addEventListener('click', e => { if (e.target === document.getElementById('user-modal')) closeUserModal(); });
 </script>
 </body>
 </html>
