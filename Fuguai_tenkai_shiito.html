@@ -372,7 +372,10 @@ function updateStats() {
       // 24時間以内
       if (!r.date) return false;
       const d = new Date(r.date.replace(/\//g, '-'));
-      return d.getTime() >= now24h;
+      if (d.getTime() < now24h) return false;
+      // 自分がすでに確認済みの場合は除外
+      if (iConfirmed(r.id)) return false;
+      return true;
     });
     if (newMyRecords.length > 0) {
       newMyAlertEl.classList.remove('hidden');
