@@ -194,6 +194,15 @@ td { padding: 11px 12px; font-size: 13px; vertical-align: middle; }
     <button class="btn-setup" onclick="saveGasUrl()">接続する</button>
   </div>
 
+  <!-- 新着・自分担当アラート -->
+  <div class="my-alert hidden" id="new-my-alert" style="background:#fff3cd;border-color:#ffc107;margin-bottom:10px">
+    <div class="my-alert-icon">🆕</div>
+    <div class="my-alert-text">
+      <div><span class="my-alert-count" id="new-my-count" style="color:#856404">0</span> <span class="my-alert-label" style="color:#856404">件、あなたが担当した新着不具合があります（24時間以内）</span></div>
+      <div class="my-alert-sub">下の一覧を確認してください</div>
+    </div>
+  </div>
+
   <!-- あなたの未確認バナー -->
   <div class="my-alert hidden" id="my-alert">
     <div class="my-alert-icon">🔔</div>
@@ -222,7 +231,7 @@ td { padding: 11px 12px; font-size: 13px; vertical-align: middle; }
       <option value="all">全員確認済み</option>
     </select>
     <button class="btn btn-outline" onclick="loadData()">🔄 更新</button>
-    <button class="btn btn-primary" onclick="openUserModal()">👤 ユーザー切替</button>
+    <!-- ユーザー切替ボタン非表示 -->
   </div>
 
   <div class="table-wrap">
@@ -350,6 +359,29 @@ function updateStats() {
     alertCount.textContent = myUnconfirmed;
   } else {
     alertEl.classList.add('hidden');
+  }
+
+  // 新着・自分担当アラート（24時間以内に自分が担当者の不具合）
+  const newMyAlertEl = document.getElementById('new-my-alert');
+  const newMyCount   = document.getElementById('new-my-count');
+  if (currentUser) {
+    const now24h = Date.now() - 24 * 60 * 60 * 1000;
+    const newMyRecords = allRecords.filter(r => {
+      // 担当者名が自分と一致
+      if (r.worker !== currentUser.name) return false;
+      // 24時間以内
+      if (!r.date) return false;
+      const d = new Date(r.date.replace(/\//g, '-'));
+      return d.getTime() >= now24h;
+    });
+    if (newMyRecords.length > 0) {
+      newMyAlertEl.classList.remove('hidden');
+      newMyCount.textContent = newMyRecords.length;
+    } else {
+      newMyAlertEl.classList.add('hidden');
+    }
+  } else {
+    newMyAlertEl.classList.add('hidden');
   }
 }
 
