@@ -20,42 +20,27 @@
 html { height: 100%; -webkit-text-size-adjust: 100%; }
 body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background: var(--bg); color: var(--tx); font-size: 14px; min-height: 100%; -webkit-font-smoothing: antialiased; }
 .hid { display: none !important; }
-
-/* ── TOPBAR ── */
 .topbar { background: var(--pr); height: 48px; display: flex; align-items: center; padding: 0 14px; gap: 10px; position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 8px rgba(0,0,0,.28); }
 .tb-title { font-size: 14px; font-weight: 700; color: #fff; flex: 1; }
 .tb-user { font-size: 11px; color: rgba(255,255,255,.7); }
 .tb-pct { font-size: 11px; color: var(--ac); font-weight: 700; }
 .pbar { height: 3px; background: rgba(255,255,255,.15); }
 .pfill { height: 100%; background: var(--ac); transition: width .3s; }
-
-/* ── NAV ── */
 .nav { display: flex; background: #112540; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .nav::-webkit-scrollbar { display: none; }
 .nb { flex: 0 0 auto; padding: 9px 12px; font-size: 11px; font-weight: 500; color: rgba(255,255,255,.5); border: none; background: transparent; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
 .nb.on { color: var(--ac); border-bottom-color: var(--ac); }
-
-/* ── SCREENS ── */
 .screen { display: none; }
 .screen.on { display: block; }
 .sec { display: none; padding: 10px 13px 80px; }
 .sec.on { display: block; }
-
-/* ── CARDS ── */
 .card { background: var(--sf); border: 1px solid var(--bd); border-radius: var(--rad); padding: 11px 13px; margin-bottom: 9px; }
 .card.hl { border-color: var(--pr); border-width: 1.5px; }
 .ct { font-size: 10px; font-weight: 700; color: var(--tx2); letter-spacing: .5px; margin-bottom: 9px; display: flex; align-items: center; gap: 5px; }
-
-/* ── FIELDS ── */
 .f { margin-bottom: 8px; }
 .f:last-child { margin-bottom: 0; }
 .f label { display: block; font-size: 11px; color: var(--tx2); margin-bottom: 3px; font-weight: 500; }
-.f input, .f select, .f textarea {
-  width: 100%; padding: 8px 10px;
-  border: 1px solid var(--bd2); border-radius: var(--rads);
-  font-size: 15px; background: #f8fafc; color: var(--tx);
-  font-family: inherit; -webkit-appearance: none; outline: none;
-}
+.f input, .f select, .f textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--bd2); border-radius: var(--rads); font-size: 15px; background: #f8fafc; color: var(--tx); font-family: inherit; -webkit-appearance: none; outline: none; }
 .f input:focus, .f select:focus, .f textarea:focus { border-color: var(--pr); background: #fff; }
 .f textarea { resize: vertical; min-height: 52px; font-size: 13px; }
 .f input.mono { font-family: monospace; letter-spacing: 1.5px; font-size: 16px; font-weight: 700; }
@@ -64,27 +49,19 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
 .hint { font-size: 10px; margin-top: 2px; }
 .hint.ok { color: var(--g); }
 .hint.ng { color: var(--r); }
-
-/* ── CONDITION ROWS ── */
 .cr { display: grid; grid-template-columns: 1fr 80px 36px; gap: 5px; align-items: center; margin-bottom: 5px; padding: 6px 9px; background: var(--sf2); border-radius: var(--rads); }
 .cr2 { grid-template-columns: 1fr 76px 76px 34px; }
 .cl { font-size: 12px; font-weight: 600; line-height: 1.3; }
 .cr-ref { font-size: 10px; color: var(--tx3); }
 .ci { width: 100%; padding: 6px 7px; border: 1px solid var(--bd2); border-radius: 5px; font-size: 14px; text-align: center; background: #fff; color: var(--tx); font-family: inherit; -webkit-appearance: none; }
 .cu { font-size: 10px; color: var(--tx3); text-align: right; }
-
-/* ── OK/NG ── */
 .onr { display: flex; gap: 6px; align-items: center; padding: 6px 9px; background: var(--sf2); border-radius: var(--rads); margin-bottom: 5px; }
 .onl { font-size: 12px; flex: 1; line-height: 1.4; }
 .onb { display: flex; gap: 4px; flex-shrink: 0; }
 .ob { padding: 5px 10px; border-radius: 5px; border: 1px solid var(--bd2); font-size: 11px; font-weight: 700; cursor: pointer; background: #fff; color: var(--tx2); -webkit-appearance: none; }
 .ob.ok { background: var(--gbg); color: var(--g); border-color: #86efac; }
 .ob.ng { background: var(--rbg); color: var(--r); border-color: #fca5a5; }
-
-/* ── SDIV ── */
 .sdiv { font-size: 10px; font-weight: 700; color: var(--tx2); letter-spacing: .5px; margin: 11px 0 5px; padding-bottom: 4px; border-bottom: 1px solid var(--bd); }
-
-/* ── MASTER LIST ── */
 .mi { background: var(--sf); border: 1px solid var(--bd); border-radius: var(--rad); padding: 11px 13px; margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; -webkit-tap-highlight-color: transparent; }
 .mi:active { background: var(--sf2); }
 .mi-ico { width: 36px; height: 36px; border-radius: 8px; background: var(--bbg); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
@@ -92,8 +69,6 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
 .mi-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mi-sub { font-size: 11px; color: var(--tx2); margin-top: 2px; }
 .mi-cnt { font-size: 10px; padding: 2px 7px; border-radius: 99px; background: var(--sf2); color: var(--tx3); border: 1px solid var(--bd); }
-
-/* ── HISTORY ── */
 .hi { background: var(--sf); border: 1px solid var(--bd); border-radius: var(--rads); padding: 10px 12px; margin-bottom: 6px; }
 .hi-dt { font-size: 10px; color: var(--tx3); margin-bottom: 2px; }
 .hi-rn { font-size: 13px; font-weight: 700; font-family: monospace; letter-spacing: .5px; margin-bottom: 4px; }
@@ -101,16 +76,12 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
 .hi-tag { font-size: 10px; padding: 2px 6px; border-radius: 99px; background: var(--sf2); color: var(--tx3); border: 1px solid var(--bd); }
 .hi-tag.xl { background: var(--gbg); color: var(--g); border-color: #86efac; cursor: pointer; }
 .hi-tag.dl { background: var(--bbg); color: var(--b); border-color: #93c5fd; cursor: pointer; text-decoration: none; }
-
-/* ── FOOTER BAR ── */
 .fbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--sf); border-top: 1px solid var(--bd); padding: 9px 13px; display: flex; gap: 7px; z-index: 300; box-shadow: 0 -2px 8px rgba(0,0,0,.08); }
 .fbtn { flex: 1; padding: 12px; border-radius: var(--rads); border: none; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; -webkit-appearance: none; }
 .fbtn-blue { background: var(--pr); color: #fff; }
 .fbtn-green { background: var(--g); color: #fff; }
 .fbtn-out { background: var(--sf2); border: 1px solid var(--bd2); color: var(--tx); flex: 0 0 auto; padding: 12px 13px; }
 .fbtn:disabled { opacity: .5; cursor: not-allowed; }
-
-/* ── MISC ── */
 .btn { padding: 8px 14px; font-size: 12px; font-weight: 700; border-radius: var(--rads); cursor: pointer; border: 1px solid var(--bd2); background: var(--sf2); color: var(--tx); font-family: inherit; -webkit-appearance: none; }
 .btn.pri { background: var(--pr); color: #fff; border-color: transparent; }
 .btn.sm { padding: 5px 11px; font-size: 11px; }
@@ -123,8 +94,6 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
 .m5b { margin-bottom: 10px; }
 .m5b-hd { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--bd); margin-bottom: 7px; }
 .m5b-title { font-size: 13px; font-weight: 700; }
-
-/* ── TOAST / LOADING ── */
 .toast { position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--tx); color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.25); z-index: 999; transition: transform .3s; white-space: nowrap; pointer-events: none; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.ok { background: var(--g); }
@@ -144,7 +113,7 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
 <div class="toast" id="toast"></div>
 <div class="loading-ov hid" id="loading"><div class="spinner"></div><div class="loading-msg" id="loading-msg">処理中...</div></div>
 
-<!-- ========== HOME SCREEN ========== -->
+<!-- HOME -->
 <div class="screen on" id="s-home">
   <div class="topbar">
     <span style="font-size:20px">📋</span>
@@ -161,7 +130,7 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
   </div>
 </div>
 
-<!-- ========== MASTER REGISTER SCREEN ========== -->
+<!-- MASTER REGISTER -->
 <div class="screen" id="s-master">
   <div class="topbar">
     <button onclick="goHome()" style="border:none;background:transparent;color:rgba(255,255,255,.8);cursor:pointer;font-size:22px;padding:0;line-height:1">‹</button>
@@ -192,7 +161,6 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
         <div class="f"><label>乾燥時間(H)</label><input type="number" id="m_drytime"></div>
       </div>
     </div>
-
     <div class="card">
       <div class="ct">🔥 加熱筒温度 — 基準値</div>
       <div class="fr2">
@@ -209,7 +177,6 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
       </div>
       <div class="f" style="max-width:49%"><label>ヒーター５(℃)</label><input type="number" id="m_th5"></div>
     </div>
-
     <div class="card">
       <div class="ct">💧 ホットランナー — 基準値</div>
       <div class="fr2">
@@ -225,7 +192,6 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
         <div class="f"><label>HR6(℃)</label><input type="number" id="m_hr6"></div>
       </div>
     </div>
-
     <div class="card">
       <div class="ct">⏱ タイマー — 基準値</div>
       <div class="fr2">
@@ -238,32 +204,26 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
       </div>
       <div class="f" style="max-width:49%"><label>サイクル(S)</label><input type="number" id="m_tcyc" step="0.1"></div>
     </div>
-
     <div class="card">
       <div class="ct">⚡ 射出速度（切替位置）— 基準値</div>
       <div id="m-speed-wrap"></div>
     </div>
-
     <div class="card">
       <div class="ct">➡ 射出圧力 — 基準値</div>
       <div id="m-press-wrap"></div>
     </div>
-
     <div class="card">
       <div class="ct">🔧 保持圧（速度）— 基準値</div>
       <div id="m-hold-wrap"></div>
     </div>
-
     <div class="card">
       <div class="ct">🔄 可塑化（切替位置）— 基準値</div>
       <div id="m-plas-wrap"></div>
     </div>
-
     <div class="card">
       <div class="ct">↩ 背圧 — 基準値</div>
       <div id="m-back-wrap"></div>
     </div>
-
     <div class="card">
       <div class="ct">📏 スクリュー位置 / その他 — 基準値</div>
       <div class="fr2">
@@ -279,7 +239,6 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
         <div class="f"><label>E/Jストローク(mm)</label><input type="number" id="m_ej"></div>
       </div>
     </div>
-
     <div class="card">
       <div class="ct">🌡 温調 — 基準値</div>
       <div class="fr3">
@@ -293,7 +252,6 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
         <div class="f"><label>可動側回路数</label><input type="number" id="m_cmv"></div>
       </div>
     </div>
-
     <div class="card">
       <div class="ct">⚖ 製品重量 — 基準値</div>
       <div class="fr2">
@@ -305,18 +263,16 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
         <div class="f"><label>許容幅 ±(g)</label><input type="number" id="m_wt2tol" step="0.1"></div>
       </div>
     </div>
-
     <div class="card">
       <div class="ct">📝 製品特有の注意事項</div>
       <div class="f"><textarea id="m_special" rows="3" placeholder="品確確認項目、色差計基準値など"></textarea></div>
     </div>
-
     <button class="btn pri" style="width:100%;padding:13px" onclick="saveMaster()">✓ マスターを登録する</button>
     <div style="height:20px"></div>
   </div>
 </div>
 
-<!-- ========== RECORD ENTRY SCREEN ========== -->
+<!-- RECORD ENTRY -->
 <div class="screen" id="s-rec">
   <div class="topbar">
     <button onclick="goHome()" style="border:none;background:transparent;color:rgba(255,255,255,.8);cursor:pointer;font-size:22px;padding:0;line-height:1">‹</button>
@@ -510,13 +466,11 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
 
 <script>
 // ============================================================
-// CONFIG — URLパラメータから取得
+// CONFIG
 // ============================================================
 const params  = new URLSearchParams(location.search);
 const GAS_URL = decodeURIComponent(params.get('seikei_gas_url') || '');
 let currentUser = null;
-
-// SSO トークン復号
 try {
   const sso = params.get('sso');
   if (sso) {
@@ -526,24 +480,19 @@ try {
   }
 } catch(e) {}
 
-// ============================================================
-// STATE
-// ============================================================
 let masters = [], cur = null, cN = 0;
 
 // ============================================================
 // INIT
 // ============================================================
 window.addEventListener('load', async () => {
-  if (currentUser) {
-    document.getElementById('hm-user').textContent = currentUser.name + 'さん';
-  }
+  if (currentUser) document.getElementById('hm-user').textContent = currentUser.name + 'さん';
   buildMasterFormWrappers();
   await loadMasters();
 });
 
 // ============================================================
-// GAS 通信
+// GAS通信 — JSONP（CORS回避）
 // ============================================================
 async function gasPost(body) {
   if (!GAS_URL) throw new Error('GAS URLが設定されていません。ポータルから起動してください。');
@@ -552,16 +501,21 @@ async function gasPost(body) {
     const url = GAS_URL + '?callback=' + cbName + '&payload=' + encodeURIComponent(JSON.stringify(body));
     window[cbName] = function(data) {
       delete window[cbName];
-      document.body.removeChild(script);
+      try { document.body.removeChild(script); } catch(e) {}
       if (data.ok) resolve(data);
       else reject(new Error(data.message || 'GASエラー'));
     };
     const script = document.createElement('script');
     script.src = url;
-    script.onerror = () => { delete window[cbName]; reject(new Error('通信エラー')); };
+    script.onerror = () => {
+      delete window[cbName];
+      try { document.body.removeChild(script); } catch(e) {}
+      reject(new Error('通信エラー'));
+    };
     document.body.appendChild(script);
   });
 }
+
 // ============================================================
 // SCREEN / TAB
 // ============================================================
@@ -585,10 +539,8 @@ async function loadMasters() {
     if (GAS_URL) {
       const res = await gasPost({ action: 'getMasters' });
       data = res.data || [];
-      // ローカルキャッシュに保存
       try { localStorage.setItem('sk_masters_cache', JSON.stringify(data)); } catch(e) {}
     } else {
-      // オフライン: ローカルキャッシュから読み込み
       const cache = localStorage.getItem('sk_masters_cache');
       if (cache) data = JSON.parse(cache);
     }
@@ -596,7 +548,6 @@ async function loadMasters() {
     renderML();
     badge.className = 'sync-badge ok'; badge.textContent = '同期済';
   } catch(e) {
-    // フォールバック: ローカルキャッシュ
     try {
       const cache = localStorage.getItem('sk_masters_cache');
       if (cache) { masters = JSON.parse(cache); renderML(); }
@@ -628,10 +579,7 @@ function renderML() {
 }
 
 function getLocalRecordCount(pnoA) {
-  try {
-    const cache = localStorage.getItem('sk_records_' + pnoA);
-    return cache ? JSON.parse(cache).length : 0;
-  } catch(e) { return 0; }
+  try { const c = localStorage.getItem('sk_records_' + pnoA); return c ? JSON.parse(c).length : 0; } catch(e) { return 0; }
 }
 
 // ============================================================
@@ -654,31 +602,26 @@ function vReq(ab) {
 }
 
 function buildMasterFormWrappers() {
-  // 射出速度
   document.getElementById('m-speed-wrap').innerHTML = [1,2,3,4,5,6].map(n => `
     <div class="fr2" style="gap:6px;margin-bottom:6px">
       <div class="f" style="margin:0"><label>${n}速(mm/s)</label><input type="number" id="m_v${n}"></div>
       <div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_vp${n}" step="0.1"></div>
     </div>`).join('');
-  // 射出圧力
   document.getElementById('m-press-wrap').innerHTML = [1,2,3,4,5,6].map(n => `
     <div class="fr2" style="gap:6px;margin-bottom:6px">
       <div class="f" style="margin:0"><label>${n===6?'６':n}速(MPa)</label><input type="number" id="m_p${n}"></div>
       <div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_pp${n}" step="0.1"></div>
     </div>`).join('');
-  // 保持圧
   document.getElementById('m-hold-wrap').innerHTML = [1,2,3,4].map(n => `
     <div class="fr2" style="gap:6px;margin-bottom:6px">
       <div class="f" style="margin:0"><label>${n}速(MPa)</label><input type="number" id="m_hp${n}"></div>
       <div class="f" style="margin:0"><label>速度(mm/s)</label><input type="number" id="m_hps${n}" step="0.1"></div>
     </div>`).join('');
-  // 可塑化
   document.getElementById('m-plas-wrap').innerHTML = [1,2,3].map(n => `
     <div class="fr2" style="gap:6px;margin-bottom:6px">
       <div class="f" style="margin:0"><label>${n}速(min⁻¹)</label><input type="number" id="m_sc${n}"></div>
       <div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_scp${n}" step="0.1"></div>
     </div>`).join('');
-  // 背圧
   document.getElementById('m-back-wrap').innerHTML = [1,2,3].map(n => `
     <div class="fr2" style="gap:6px;margin-bottom:6px">
       <div class="f" style="margin:0"><label>${n}速(MPa)</label><input type="number" id="m_bp${n}"></div>
@@ -703,21 +646,21 @@ function clearMF() {
 
 function collectM() {
   const sp = {}, pr = {}, h = {}, pl = {}, bp = {};
-  for (let n = 1; n <= 6; n++) { sp['v'+n] = gv('m_v'+n); sp['p'+n] = gv('m_vp'+n); pr['p'+n] = gv('m_p'+n); pr['pp'+n] = gv('m_pp'+n); }
-  for (let n = 1; n <= 4; n++) { h['hp'+n] = gv('m_hp'+n); h['s'+n] = gv('m_hps'+n); }
-  for (let n = 1; n <= 3; n++) { pl['sc'+n] = gv('m_sc'+n); pl['cp'+n] = gv('m_scp'+n); bp['bp'+n] = gv('m_bp'+n); bp['pp'+n] = gv('m_bpp'+n); }
+  for (let n = 1; n <= 6; n++) { sp['v'+n]=gv('m_v'+n); sp['p'+n]=gv('m_vp'+n); pr['p'+n]=gv('m_p'+n); pr['pp'+n]=gv('m_pp'+n); }
+  for (let n = 1; n <= 4; n++) { h['hp'+n]=gv('m_hp'+n); h['s'+n]=gv('m_hps'+n); }
+  for (let n = 1; n <= 3; n++) { pl['sc'+n]=gv('m_sc'+n); pl['cp'+n]=gv('m_scp'+n); bp['bp'+n]=gv('m_bp'+n); bp['pp'+n]=gv('m_bpp'+n); }
   return {
-    productName: gv('m_pname'), productNoA: gv('m_pnoA'), productNoB: gv('m_pnoB'),
-    material: gv('m_mat'), mbName: gv('m_mb'), mbRatio: gv('m_mbratio'), machine: gv('m_machine'),
-    dryTemp: gv('m_drytemp'), dryTime: gv('m_drytime'),
-    temps:  { noz1:gv('m_tnoz1'), noz2:gv('m_tnoz2'), h1:gv('m_th1'), h2:gv('m_th2'), h3:gv('m_th3'), h4:gv('m_th4'), h5:gv('m_th5') },
-    hr:     { hr1:gv('m_hr1'), hr2:gv('m_hr2'), hr3:gv('m_hr3'), hr4:gv('m_hr4'), hr5:gv('m_hr5'), hr6:gv('m_hr6') },
-    timers: { inj:gv('m_tinj'), h1:gv('m_th1t'), h2:gv('m_th2t'), cool:gv('m_tcool'), cyc:gv('m_tcyc') },
-    speed: sp, press: pr, hold: h, plas: pl, back: bp,
-    pos:    { meas:gv('m_pmeas'), hold:gv('m_phold'), clamp:gv('m_clamp'), sb:gv('m_sb'), cush:gv('m_cush'), ej:gv('m_ej') },
-    cool:   { runner:gv('m_trun'), fixed:gv('m_tfx'), move:gv('m_tmv'), cRun:gv('m_crun'), cFx:gv('m_cfx'), cMv:gv('m_cmv') },
-    weight: { wt1:gv('m_wt1'), wt1tol:gv('m_wt1tol'), wt2:gv('m_wt2'), wt2tol:gv('m_wt2tol') },
-    special: gv('m_special')
+    productName:gv('m_pname'), productNoA:gv('m_pnoA'), productNoB:gv('m_pnoB'),
+    material:gv('m_mat'), mbName:gv('m_mb'), mbRatio:gv('m_mbratio'), machine:gv('m_machine'),
+    dryTemp:gv('m_drytemp'), dryTime:gv('m_drytime'),
+    temps:{ noz1:gv('m_tnoz1'),noz2:gv('m_tnoz2'),h1:gv('m_th1'),h2:gv('m_th2'),h3:gv('m_th3'),h4:gv('m_th4'),h5:gv('m_th5') },
+    hr:{ hr1:gv('m_hr1'),hr2:gv('m_hr2'),hr3:gv('m_hr3'),hr4:gv('m_hr4'),hr5:gv('m_hr5'),hr6:gv('m_hr6') },
+    timers:{ inj:gv('m_tinj'),h1:gv('m_th1t'),h2:gv('m_th2t'),cool:gv('m_tcool'),cyc:gv('m_tcyc') },
+    speed:sp, press:pr, hold:h, plas:pl, back:bp,
+    pos:{ meas:gv('m_pmeas'),hold:gv('m_phold'),clamp:gv('m_clamp'),sb:gv('m_sb'),cush:gv('m_cush'),ej:gv('m_ej') },
+    cool:{ runner:gv('m_trun'),fixed:gv('m_tfx'),move:gv('m_tmv'),cRun:gv('m_crun'),cFx:gv('m_cfx'),cMv:gv('m_cmv') },
+    weight:{ wt1:gv('m_wt1'),wt1tol:gv('m_wt1tol'),wt2:gv('m_wt2'),wt2tol:gv('m_wt2tol') },
+    special:gv('m_special')
   };
 }
 
@@ -729,23 +672,6 @@ async function saveMaster() {
   showLoading('マスターを保存中...');
   try {
     await gasPost({ action: 'saveMaster', master: m });
-    async function gasGet(body) {
-  if (!GAS_URL) throw new Error('GAS URLが設定されていません。');
-  return new Promise((resolve, reject) => {
-    const cbName = 'cb_' + Date.now();
-    const url = GAS_URL + '?callback=' + cbName + '&payload=' + encodeURIComponent(JSON.stringify(body));
-    window[cbName] = function(data) {
-      delete window[cbName];
-      document.body.removeChild(script);
-      if (data.ok) resolve(data);
-      else reject(new Error(data.message || 'GASエラー'));
-    };
-    const script = document.createElement('script');
-    script.src = url;
-    script.onerror = () => { delete window[cbName]; reject(new Error('通信エラー')); };
-    document.body.appendChild(script);
-  });
-}
     await loadMasters();
     toast('マスターを登録しました', 'ok');
     goHome();
@@ -756,27 +682,21 @@ async function saveMaster() {
 function editM(m) {
   clearMF();
   document.getElementById('m-hdr').textContent = '品番マスター編集';
-  sv('m_pname', m.productName); sv('m_pnoA', m.productNoA); sv('m_pnoB', m.productNoB);
-  sv('m_mat', m.material); sv('m_mb', m.mbName); sv('m_mbratio', m.mbRatio); sv('m_machine', m.machine);
-  sv('m_drytemp', m.dryTemp); sv('m_drytime', m.dryTime);
-  const t = m.temps || {};
-  ['noz1','noz2','h1','h2','h3','h4','h5'].forEach(k => sv('m_t' + k, t[k]));
-  const hr = m.hr || {};
-  [1,2,3,4,5,6].forEach(n => sv('m_hr'+n, hr['hr'+n]));
-  const tm = m.timers || {};
-  sv('m_tinj', tm.inj); sv('m_th1t', tm.h1); sv('m_th2t', tm.h2); sv('m_tcool', tm.cool); sv('m_tcyc', tm.cyc);
-  const sp = m.speed || {}; for (let n=1;n<=6;n++) { sv('m_v'+n, sp['v'+n]); sv('m_vp'+n, sp['p'+n]); }
-  const pr = m.press || {}; for (let n=1;n<=6;n++) { sv('m_p'+n, pr['p'+n]); sv('m_pp'+n, pr['pp'+n]); }
-  const h  = m.hold  || {}; for (let n=1;n<=4;n++) { sv('m_hp'+n, h['hp'+n]); sv('m_hps'+n, h['s'+n]); }
-  const pl = m.plas  || {}; for (let n=1;n<=3;n++) { sv('m_sc'+n, pl['sc'+n]); sv('m_scp'+n, pl['cp'+n]); }
-  const bp = m.back  || {}; for (let n=1;n<=3;n++) { sv('m_bp'+n, bp['bp'+n]); sv('m_bpp'+n, bp['pp'+n]); }
-  const ps = m.pos || {};
-  sv('m_pmeas', ps.meas); sv('m_phold', ps.hold); sv('m_clamp', ps.clamp); sv('m_sb', ps.sb); sv('m_cush', ps.cush); sv('m_ej', ps.ej);
-  const c = m.cool || {};
-  sv('m_trun', c.runner); sv('m_tfx', c.fixed); sv('m_tmv', c.move); sv('m_crun', c.cRun); sv('m_cfx', c.cFx); sv('m_cmv', c.cMv);
-  const w = m.weight || {};
-  sv('m_wt1', w.wt1); sv('m_wt1tol', w.wt1tol); sv('m_wt2', w.wt2); sv('m_wt2tol', w.wt2tol);
-  sv('m_special', m.special);
+  sv('m_pname',m.productName); sv('m_pnoA',m.productNoA); sv('m_pnoB',m.productNoB);
+  sv('m_mat',m.material); sv('m_mb',m.mbName); sv('m_mbratio',m.mbRatio); sv('m_machine',m.machine);
+  sv('m_drytemp',m.dryTemp); sv('m_drytime',m.dryTime);
+  const t=m.temps||{}; ['noz1','noz2','h1','h2','h3','h4','h5'].forEach(k=>sv('m_t'+k,t[k]));
+  const hr=m.hr||{}; [1,2,3,4,5,6].forEach(n=>sv('m_hr'+n,hr['hr'+n]));
+  const tm=m.timers||{}; sv('m_tinj',tm.inj); sv('m_th1t',tm.h1); sv('m_th2t',tm.h2); sv('m_tcool',tm.cool); sv('m_tcyc',tm.cyc);
+  const sp=m.speed||{}; for(let n=1;n<=6;n++){sv('m_v'+n,sp['v'+n]);sv('m_vp'+n,sp['p'+n]);}
+  const pr=m.press||{}; for(let n=1;n<=6;n++){sv('m_p'+n,pr['p'+n]);sv('m_pp'+n,pr['pp'+n]);}
+  const h=m.hold||{};  for(let n=1;n<=4;n++){sv('m_hp'+n,h['hp'+n]);sv('m_hps'+n,h['s'+n]);}
+  const pl=m.plas||{}; for(let n=1;n<=3;n++){sv('m_sc'+n,pl['sc'+n]);sv('m_scp'+n,pl['cp'+n]);}
+  const bp=m.back||{}; for(let n=1;n<=3;n++){sv('m_bp'+n,bp['bp'+n]);sv('m_bpp'+n,bp['pp'+n]);}
+  const ps=m.pos||{}; sv('m_pmeas',ps.meas); sv('m_phold',ps.hold); sv('m_clamp',ps.clamp); sv('m_sb',ps.sb); sv('m_cush',ps.cush); sv('m_ej',ps.ej);
+  const c=m.cool||{}; sv('m_trun',c.runner); sv('m_tfx',c.fixed); sv('m_tmv',c.move); sv('m_crun',c.cRun); sv('m_cfx',c.cFx); sv('m_cmv',c.cMv);
+  const w=m.weight||{}; sv('m_wt1',w.wt1); sv('m_wt1tol',w.wt1tol); sv('m_wt2',w.wt2); sv('m_wt2tol',w.wt2tol);
+  sv('m_special',m.special);
   vPno('A'); vPno('B');
   showScr('s-master');
 }
@@ -785,140 +705,92 @@ function editM(m) {
 // RECORD SCREEN
 // ============================================================
 function startRec(m) {
-  cur = m; cN = 0;
-  document.getElementById('rec-title').textContent = m.productName;
-  document.getElementById('r_date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('pA-lbl').textContent = '（' + m.productNoA + '）';
-  const rb = document.getElementById('reqBarea');
-  if (m.productNoB) { rb.style.display = 'block'; document.getElementById('pB-lbl').textContent = '（' + m.productNoB + '）'; }
-  else rb.style.display = 'none';
-  // マスタープレビュー
-  const t = m.temps || {}, tm = m.timers || {};
-  document.getElementById('m-preview').innerHTML = `
+  cur=m; cN=0;
+  document.getElementById('rec-title').textContent=m.productName;
+  document.getElementById('r_date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('pA-lbl').textContent='（'+m.productNoA+'）';
+  const rb=document.getElementById('reqBarea');
+  if(m.productNoB){rb.style.display='block';document.getElementById('pB-lbl').textContent='（'+m.productNoB+'）';}
+  else rb.style.display='none';
+  const t=m.temps||{},tm=m.timers||{};
+  document.getElementById('m-preview').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 10px">
       <div>材料：${m.material||'—'}</div><div>MB名：${m.mbName||'—'}</div>
       <div>MB比率：${m.mbRatio||'—'}</div><div>号機：${m.machine||'—'}</div>
       <div>乾燥：${m.dryTemp||'—'}℃ ${m.dryTime||'—'}H</div><div>サイクル：${tm.cyc||'—'}S</div>
       <div>ノズル１：${t.noz1||'—'}℃</div><div>ヒーター１：${t.h1||'—'}℃</div>
     </div>`;
-  buildCondInputs();
-  buildWtFields();
-  build5M();
-  document.getElementById('choco-list').innerHTML = ''; cN = 0; addChoco();
-  rgo(0); rupd();
-  showScr('s-rec');
+  buildCondInputs(); buildWtFields(); build5M();
+  document.getElementById('choco-list').innerHTML=''; cN=0; addChoco();
+  rgo(0); rupd(); showScr('s-rec');
 }
 
-function mkCR(label, ref, id, unit, wide) {
-  const cls = wide ? 'cr cr2' : 'cr';
-  if (wide) {
-    const [id1, id2] = id, [u1, u2] = unit;
-    return `<div class="${cls}"><div><div class="cl">${label}</div><div class="cr-ref">${ref||''}</div></div><input type="number" class="ci" id="${id1}" step="any" placeholder="実測値"><input type="number" class="ci" id="${id2}" step="any" placeholder="切替mm"><div class="cu">${u2}</div></div>`;
+function mkCR(label,ref,id,unit,wide){
+  if(wide){
+    const[id1,id2]=id,[u1,u2]=unit;
+    return `<div class="cr cr2"><div><div class="cl">${label}</div><div class="cr-ref">${ref||''}</div></div><input type="number" class="ci" id="${id1}" step="any" placeholder="実測値"><input type="number" class="ci" id="${id2}" step="any" placeholder="切替mm"><div class="cu">${u2}</div></div>`;
   }
-  return `<div class="${cls}"><div><div class="cl">${label}</div><div class="cr-ref">${ref||''}</div></div><input type="number" class="ci" id="${id}" step="any" placeholder="実測値"><div class="cu">${unit}</div></div>`;
+  return `<div class="cr"><div><div class="cl">${label}</div><div class="cr-ref">${ref||''}</div></div><input type="number" class="ci" id="${id}" step="any" placeholder="実測値"><div class="cu">${unit}</div></div>`;
 }
 
-function buildCondInputs() {
-  const m = cur, t = m.temps||{}, hr = m.hr||{}, tm = m.timers||{}, sp = m.speed||{}, pr = m.press||{}, h = m.hold||{}, pl = m.plas||{}, bp2 = m.back||{}, ps = m.pos||{}, c = m.cool||{};
-
-  // 安全確認温調
-  document.getElementById('safety-cool').innerHTML =
+function buildCondInputs(){
+  const m=cur,t=m.temps||{},hr=m.hr||{},tm=m.timers||{},sp=m.speed||{},pr=m.press||{},h=m.hold||{},pl=m.plas||{},bp2=m.back||{},ps=m.pos||{},c=m.cool||{};
+  document.getElementById('safety-cool').innerHTML=
     `<div class="onr"><span class="onl">ランナー${c.runner?' 基準'+c.runner+'℃':''}</span><div class="onb"><button class="ob" onclick="tog(this,'OK')">OK</button><button class="ob" onclick="tog(this,'NG')">NG</button></div></div>`+
     `<div class="onr"><span class="onl">固定側${c.fixed?' 基準'+c.fixed+'℃':''}</span><div class="onb"><button class="ob" onclick="tog(this,'OK')">OK</button><button class="ob" onclick="tog(this,'NG')">NG</button></div></div>`+
     `<div class="onr"><span class="onl">可動側${c.move?' 基準'+c.move+'℃':''}</span><div class="onb"><button class="ob" onclick="tog(this,'OK')">OK</button><button class="ob" onclick="tog(this,'NG')">NG</button></div></div>`;
-
-  // 加熱筒温度
-  document.getElementById('cond-temp').innerHTML =
-    mkCR('ノズル１', t.noz1?t.noz1+'℃':'', 'r_tnoz1', '℃') +
-    mkCR('ノズル２', t.noz2?t.noz2+'℃':'', 'r_tnoz2', '℃') +
-    mkCR('ヒーター１', t.h1?t.h1+'℃':'', 'r_th1', '℃') +
-    mkCR('ヒーター２', t.h2?t.h2+'℃':'', 'r_th2', '℃') +
-    mkCR('ヒーター３', t.h3?t.h3+'℃':'', 'r_th3', '℃') +
-    mkCR('ヒーター４', t.h4?t.h4+'℃':'', 'r_th4', '℃') +
-    mkCR('ヒーター５', t.h5?t.h5+'℃':'', 'r_th5', '℃');
-
-  // ホットランナー
-  document.getElementById('cond-hr').innerHTML =
-    [1,2,3,4,5,6].map(n => mkCR('HR'+n, hr['hr'+n]?hr['hr'+n]+'℃':'', 'r_hr'+n, '℃')).join('');
-
-  // タイマー
-  document.getElementById('cond-timer').innerHTML =
-    mkCR('射出', tm.inj?tm.inj+'S':'', 'r_tinj', 'S') +
-    mkCR('保持圧１', tm.h1?tm.h1+'S':'', 'r_th1t', 'S') +
-    mkCR('保持圧２', tm.h2?tm.h2+'S':'', 'r_th2t', 'S') +
-    mkCR('冷却', tm.cool?tm.cool+'S':'', 'r_tcool', 'S');
-  document.getElementById('cond-cyc').innerHTML =
-    mkCR('サイクル', tm.cyc?tm.cyc+'S':'', 'r_tcyc', 'S');
-
-  // 射出速度（速度+切替位置）
-  document.getElementById('cond-speed').innerHTML = [1,2,3,4,5,6].map(n => {
-    const ref = sp['v'+n] ? sp['v'+n]+'mm/s' + (sp['p'+n]?' @'+sp['p'+n]+'mm':'') : '';
-    return mkCR(n+'速', ref, ['r_v'+n, 'r_vp'+n], ['mm/s','mm'], true);
+  document.getElementById('cond-temp').innerHTML=
+    mkCR('ノズル１',t.noz1?t.noz1+'℃':'','r_tnoz1','℃')+mkCR('ノズル２',t.noz2?t.noz2+'℃':'','r_tnoz2','℃')+
+    mkCR('ヒーター１',t.h1?t.h1+'℃':'','r_th1','℃')+mkCR('ヒーター２',t.h2?t.h2+'℃':'','r_th2','℃')+
+    mkCR('ヒーター３',t.h3?t.h3+'℃':'','r_th3','℃')+mkCR('ヒーター４',t.h4?t.h4+'℃':'','r_th4','℃')+
+    mkCR('ヒーター５',t.h5?t.h5+'℃':'','r_th5','℃');
+  document.getElementById('cond-hr').innerHTML=[1,2,3,4,5,6].map(n=>mkCR('HR'+n,hr['hr'+n]?hr['hr'+n]+'℃':'','r_hr'+n,'℃')).join('');
+  document.getElementById('cond-timer').innerHTML=
+    mkCR('射出',tm.inj?tm.inj+'S':'','r_tinj','S')+mkCR('保持圧１',tm.h1?tm.h1+'S':'','r_th1t','S')+
+    mkCR('保持圧２',tm.h2?tm.h2+'S':'','r_th2t','S')+mkCR('冷却',tm.cool?tm.cool+'S':'','r_tcool','S');
+  document.getElementById('cond-cyc').innerHTML=mkCR('サイクル',tm.cyc?tm.cyc+'S':'','r_tcyc','S');
+  document.getElementById('cond-speed').innerHTML=[1,2,3,4,5,6].map(n=>{
+    const ref=sp['v'+n]?sp['v'+n]+'mm/s'+(sp['p'+n]?' @'+sp['p'+n]+'mm':''):'';
+    return mkCR(n+'速',ref,['r_v'+n,'r_vp'+n],['mm/s','mm'],true);
   }).join('');
-
-  // 射出圧力（圧力+切替位置）
-  document.getElementById('cond-press').innerHTML = [1,2,3,4,5,6].map(n => {
-    const ref = pr['p'+n] ? pr['p'+n]+'MPa' + (pr['pp'+n]?' @'+pr['pp'+n]+'mm':'') : '';
-    return mkCR((n===6?'６':n)+'速', ref, ['r_p'+n, 'r_pp'+n], ['MPa','mm'], true);
+  document.getElementById('cond-press').innerHTML=[1,2,3,4,5,6].map(n=>{
+    const ref=pr['p'+n]?pr['p'+n]+'MPa'+(pr['pp'+n]?' @'+pr['pp'+n]+'mm':''):'';
+    return mkCR((n===6?'６':n)+'速',ref,['r_p'+n,'r_pp'+n],['MPa','mm'],true);
   }).join('');
-
-  // 保持圧（圧力+速度）
-  document.getElementById('cond-hold').innerHTML = [1,2,3,4].map(n => {
-    const ref = h['hp'+n] ? h['hp'+n]+'MPa' + (h['s'+n]?' @'+h['s'+n]+'mm/s':'') : '';
-    return mkCR(n+'速', ref, ['r_hp'+n, 'r_hps'+n], ['MPa','mm/s'], true);
+  document.getElementById('cond-hold').innerHTML=[1,2,3,4].map(n=>{
+    const ref=h['hp'+n]?h['hp'+n]+'MPa'+(h['s'+n]?' @'+h['s'+n]+'mm/s':''):'';
+    return mkCR(n+'速',ref,['r_hp'+n,'r_hps'+n],['MPa','mm/s'],true);
   }).join('');
-
-  // 可塑化（回転数+切替位置）
-  document.getElementById('cond-plas').innerHTML = [1,2,3].map(n => {
-    const ref = pl['sc'+n] ? pl['sc'+n]+'rpm' + (pl['cp'+n]?' @'+pl['cp'+n]+'mm':'') : '';
-    return mkCR(n+'速', ref, ['r_sc'+n, 'r_scp'+n], ['rpm','mm'], true);
+  document.getElementById('cond-plas').innerHTML=[1,2,3].map(n=>{
+    const ref=pl['sc'+n]?pl['sc'+n]+'rpm'+(pl['cp'+n]?' @'+pl['cp'+n]+'mm':''):'';
+    return mkCR(n+'速',ref,['r_sc'+n,'r_scp'+n],['rpm','mm'],true);
   }).join('');
-
-  // 背圧（圧力+切替位置）
-  document.getElementById('cond-back').innerHTML = [1,2,3].map(n => {
-    const ref = bp2['bp'+n] ? bp2['bp'+n]+'MPa' + (bp2['pp'+n]?' @'+bp2['pp'+n]+'mm':'') : '';
-    return mkCR(n+'速', ref, ['r_bp'+n, 'r_bpp'+n], ['MPa','mm'], true);
+  document.getElementById('cond-back').innerHTML=[1,2,3].map(n=>{
+    const ref=bp2['bp'+n]?bp2['bp'+n]+'MPa'+(bp2['pp'+n]?' @'+bp2['pp'+n]+'mm':''):'';
+    return mkCR(n+'速',ref,['r_bp'+n,'r_bpp'+n],['MPa','mm'],true);
   }).join('');
-
-  // スクリュー位置
-  document.getElementById('cond-pos').innerHTML =
-    mkCR('計量',       ps.meas?ps.meas+'mm':'',  'r_pmeas', 'mm') +
-    mkCR('保持圧切替', ps.hold?ps.hold+'mm':'',  'r_phold', 'mm') +
-    mkCR('型締力(実測)',ps.clamp?ps.clamp+'ton':'','r_clamp','ton') +
-    mkCR('サックバック量', ps.sb?ps.sb+'mm':'',  'r_sb',    'mm') +
-    mkCR('クッション量',   ps.cush?ps.cush+'mm':'','r_cush', 'mm') +
-    mkCR('E/Jストローク',  ps.ej?ps.ej+'mm':'',  'r_ej',    'mm');
-
-  // 温調（実測＋回路数）
-  document.getElementById('cond-cool').innerHTML =
-    mkCR('ランナー', c.runner?'基準'+c.runner+'℃':'', ['r_trun','r_crun'], ['℃','回路'], true) +
-    mkCR('固定側',   c.fixed?'基準'+c.fixed+'℃':'',  ['r_tfx', 'r_cfx'], ['℃','回路'], true) +
-    mkCR('可動側',   c.move?'基準'+c.move+'℃':'',    ['r_tmv', 'r_cmv'], ['℃','回路'], true);
+  document.getElementById('cond-pos').innerHTML=
+    mkCR('計量',ps.meas?ps.meas+'mm':'','r_pmeas','mm')+mkCR('保持圧切替',ps.hold?ps.hold+'mm':'','r_phold','mm')+
+    mkCR('型締力(実測)',ps.clamp?ps.clamp+'ton':'','r_clamp','ton')+mkCR('サックバック量',ps.sb?ps.sb+'mm':'','r_sb','mm')+
+    mkCR('クッション量',ps.cush?ps.cush+'mm':'','r_cush','mm')+mkCR('E/Jストローク',ps.ej?ps.ej+'mm':'','r_ej','mm');
+  document.getElementById('cond-cool').innerHTML=
+    mkCR('ランナー',c.runner?'基準'+c.runner+'℃':'',['r_trun','r_crun'],['℃','回路'],true)+
+    mkCR('固定側',c.fixed?'基準'+c.fixed+'℃':'',['r_tfx','r_cfx'],['℃','回路'],true)+
+    mkCR('可動側',c.move?'基準'+c.move+'℃':'',['r_tmv','r_cmv'],['℃','回路'],true);
 }
 
-function buildWtFields() {
-  const w = cur.weight || {};
-  let h = `<div class="fr2">
-    <div class="f"><label>初物 基準:${w.wt1||'—'}g±${w.wt1tol||'—'}g</label><input type="number" id="r_wt1f" step="0.1" placeholder="g"></div>
-    <div class="f"><label>終物</label><input type="number" id="r_wt1l" step="0.1" placeholder="g"></div>
-  </div>`;
-  if (cur.productNoB) {
-    h += `<div class="fr2">
-      <div class="f"><label>初物B 基準:${w.wt2||'—'}g±${w.wt2tol||'—'}g</label><input type="number" id="r_wt2f" step="0.1" placeholder="g"></div>
-      <div class="f"><label>終物B</label><input type="number" id="r_wt2l" step="0.1" placeholder="g"></div>
-    </div>`;
-  }
-  document.getElementById('wt-fields').innerHTML = h;
+function buildWtFields(){
+  const w=cur.weight||{};
+  let h=`<div class="fr2"><div class="f"><label>初物 基準:${w.wt1||'—'}g±${w.wt1tol||'—'}g</label><input type="number" id="r_wt1f" step="0.1" placeholder="g"></div><div class="f"><label>終物</label><input type="number" id="r_wt1l" step="0.1" placeholder="g"></div></div>`;
+  if(cur.productNoB) h+=`<div class="fr2"><div class="f"><label>初物B 基準:${w.wt2||'—'}g±${w.wt2tol||'—'}g</label><input type="number" id="r_wt2f" step="0.1" placeholder="g"></div><div class="f"><label>終物B</label><input type="number" id="r_wt2l" step="0.1" placeholder="g"></div></div>`;
+  document.getElementById('wt-fields').innerHTML=h;
 }
 
-function build5M() {
-  const hints = { 人:'例）新人、久しぶり作業 等', 機械:'例）設備修繕後 等', 材料:'例）材料変更、MB変更 等', 方法:'例）条件変更 等', 金型:'例）金型修理後、設変後 等' };
-  document.getElementById('m5-wrap').innerHTML = ['人','機械','材料','方法','金型'].map(k => `
+function build5M(){
+  const hints={人:'例）新人、久しぶり作業 等',機械:'例）設備修繕後 等',材料:'例）材料変更、MB変更 等',方法:'例）条件変更 等',金型:'例）金型修理後、設変後 等'};
+  document.getElementById('m5-wrap').innerHTML=['人','機械','材料','方法','金型'].map(k=>`
     <div class="m5b" data-m="${k}">
-      <div class="m5b-hd">
-        <span class="m5b-title">${k}</span>
-        <div class="onb"><button class="ob" onclick="tog(this,'有')">有</button><button class="ob" onclick="tog(this,'無')">無</button></div>
-      </div>
+      <div class="m5b-hd"><span class="m5b-title">${k}</span><div class="onb"><button class="ob" onclick="tog(this,'有')">有</button><button class="ob" onclick="tog(this,'無')">無</button></div></div>
       <textarea id="m5_${k}" rows="2" placeholder="${hints[k]}" style="width:100%;padding:7px;border:1px solid var(--bd2);border-radius:var(--rads);font-size:13px;font-family:inherit;background:#f8fafc;color:var(--tx)"></textarea>
     </div>`).join('');
 }
@@ -926,197 +798,167 @@ function build5M() {
 // ============================================================
 // CHOCO STOP
 // ============================================================
-function addChoco() {
-  if (cN >= 5) { toast('最大5件まで', 'er'); return; }
-  cN++; const n = cN;
-  const d = document.createElement('div');
-  d.className = 'chb'; d.id = 'ch' + n;
-  d.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+function addChoco(){
+  if(cN>=5){toast('最大5件まで','er');return;}
+  cN++;const n=cN;
+  const d=document.createElement('div');d.className='chb';d.id='ch'+n;
+  d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
     <span style="font-size:12px;font-weight:700">記録${n}</span>
-    <button onclick="document.getElementById('ch${n}').remove()" style="border:none;background:transparent;color:var(--tx3);cursor:pointer;font-size:18px">×</button>
-  </div>
-  <div class="f"><label>停止内容</label><input id="cc${n}" placeholder="例）スタート、チャックミス"></div>
-  <div class="fr2"><div class="f"><label>日付</label><input type="date" id="cd${n}"></div><div class="f"><label>時刻</label><input type="time" id="ct${n}"></div></div>
-  <div class="fr2"><div class="f"><label>捨てショット数</label><input type="number" id="cs${n}" min="0"></div><div class="f"><label>担当者</label><input id="co${n}"></div></div>`;
+    <button onclick="document.getElementById('ch${n}').remove()" style="border:none;background:transparent;color:var(--tx3);cursor:pointer;font-size:18px">×</button></div>
+    <div class="f"><label>停止内容</label><input id="cc${n}" placeholder="例）スタート、チャックミス"></div>
+    <div class="fr2"><div class="f"><label>日付</label><input type="date" id="cd${n}"></div><div class="f"><label>時刻</label><input type="time" id="ct${n}"></div></div>
+    <div class="fr2"><div class="f"><label>捨てショット数</label><input type="number" id="cs${n}" min="0"></div><div class="f"><label>担当者</label><input id="co${n}"></div></div>`;
   document.getElementById('choco-list').appendChild(d);
 }
 
 // ============================================================
-// OK/NG toggle
+// OK/NG
 // ============================================================
-function tog(btn, val) {
-  btn.parentElement.querySelectorAll('.ob').forEach(b => { b.classList.remove('ok','ng'); delete b.dataset.val; });
-  btn.classList.add(['OK','○','有'].includes(val) ? 'ok' : 'ng');
-  btn.dataset.val = val;
-  rupd();
+function tog(btn,val){
+  btn.parentElement.querySelectorAll('.ob').forEach(b=>{b.classList.remove('ok','ng');delete b.dataset.val;});
+  btn.classList.add(['OK','○','有'].includes(val)?'ok':'ng');
+  btn.dataset.val=val; rupd();
 }
-function gbv(row) { const a = row.querySelector('[data-val]'); return a ? a.dataset.val : ''; }
+function gbv(row){const a=row.querySelector('[data-val]');return a?a.dataset.val:'';}
 
 // ============================================================
-// COLLECT RECORD DATA
+// COLLECT RECORD
 // ============================================================
-function collectR() {
-  const m = cur;
-  const safetyLabels = ['クランプ（操作側）','クランプ（反操作側）','E/J後退確認線','ロケートリング'];
-  const safety = {};
-  document.querySelectorAll('#rt1 .card:first-child .onr').forEach((r, i) => { safety[safetyLabels[i]] = gbv(r); });
-  const coolSafety = {};
-  document.querySelectorAll('#safety-cool .onr').forEach((r, i) => { coolSafety[['ランナー','固定側','可動側'][i]] = gbv(r); });
-  const m5 = {};
-  document.querySelectorAll('.m5b').forEach(b => { const k = b.dataset.m; m5[k] = { status: gbv(b), note: gv('m5_'+k) }; });
-  const prodLabels = ['裏面確認','コマ・ピン折れ','欠肉','PL段差・バリ','ゲート部段差','材質マーキング','識別マーキング','品番マーキング','外観確認'];
-  const prod = {};
-  document.querySelectorAll('#rt9 .onr').forEach((r, i) => { if (i < prodLabels.length) prod[prodLabels[i]] = gbv(r); });
-  const chocos = [];
-  for (let i = 1; i <= cN; i++) {
-    if (!document.getElementById('ch'+i)) continue;
-    chocos.push({ content: gv('cc'+i), date: gv('cd'+i), time: gv('ct'+i), shots: gv('cs'+i), operator: gv('co'+i) });
-  }
-  // 実測値
-  const a = {};
-  const aIds = ['tnoz1','tnoz2','th1','th2','th3','th4','th5',
-    'hr1','hr2','hr3','hr4','hr5','hr6',
-    'tinj','th1t','th2t','tcool','tcyc',
-    'pmeas','phold','clamp','sb','cush','ej',
-    'trun','crun','tfx','cfx','tmv','cmv',
-    'wt1f','wt1l','wt2f','wt2l'];
-  for (let n = 1; n <= 6; n++) { aIds.push('v'+n,'vp'+n,'p'+n,'pp'+n); }
-  for (let n = 1; n <= 4; n++) { aIds.push('hp'+n,'hps'+n); }
-  for (let n = 1; n <= 3; n++) { aIds.push('sc'+n,'scp'+n,'bp'+n,'bpp'+n); }
-  aIds.forEach(k => { a[k] = gv('r_'+k); });
-
-  return {
-    id: Date.now(), savedAt: new Date().toLocaleString('ja-JP'),
-    masterRef: m.id, productNoA: m.productNoA, productNoB: m.productNoB || '',
-    productName: m.productName,
-    reqNoA: gv('r_reqA'), reqNoB: gv('r_reqB'),
-    date: gv('r_date'), operator: gv('r_op'), checker1: gv('r_ch1'), checker2: gv('r_ch2'), condNo: gv('r_cond'),
-    safety, coolSafety, m5, chocos, prod, actuals: a,
-    notice: gv('r_notice'), signOp: gv('r_sign_op'), signCh: gv('r_sign_ch'),
-    master: m
+function collectR(){
+  const m=cur;
+  const safetyLabels=['クランプ（操作側）','クランプ（反操作側）','E/J後退確認線','ロケートリング'];
+  const safety={};
+  document.querySelectorAll('#rt1 .card:first-child .onr').forEach((r,i)=>{safety[safetyLabels[i]]=gbv(r);});
+  const coolSafety={};
+  document.querySelectorAll('#safety-cool .onr').forEach((r,i)=>{coolSafety[['ランナー','固定側','可動側'][i]]=gbv(r);});
+  const m5={};
+  document.querySelectorAll('.m5b').forEach(b=>{const k=b.dataset.m;m5[k]={status:gbv(b),note:gv('m5_'+k)};});
+  const prodLabels=['裏面確認','コマ・ピン折れ','欠肉','PL段差・バリ','ゲート部段差','材質マーキング','識別マーキング','品番マーキング','外観確認'];
+  const prod={};
+  document.querySelectorAll('#rt9 .onr').forEach((r,i)=>{if(i<prodLabels.length)prod[prodLabels[i]]=gbv(r);});
+  const chocos=[];
+  for(let i=1;i<=cN;i++){if(!document.getElementById('ch'+i))continue;chocos.push({content:gv('cc'+i),date:gv('cd'+i),time:gv('ct'+i),shots:gv('cs'+i),operator:gv('co'+i)});}
+  const a={};
+  const aIds=['tnoz1','tnoz2','th1','th2','th3','th4','th5','hr1','hr2','hr3','hr4','hr5','hr6',
+    'tinj','th1t','th2t','tcool','tcyc','pmeas','phold','clamp','sb','cush','ej',
+    'trun','crun','tfx','cfx','tmv','cmv','wt1f','wt1l','wt2f','wt2l'];
+  for(let n=1;n<=6;n++){aIds.push('v'+n,'vp'+n,'p'+n,'pp'+n);}
+  for(let n=1;n<=4;n++){aIds.push('hp'+n,'hps'+n);}
+  for(let n=1;n<=3;n++){aIds.push('sc'+n,'scp'+n,'bp'+n,'bpp'+n);}
+  aIds.forEach(k=>{a[k]=gv('r_'+k);});
+  return{
+    id:Date.now(),savedAt:new Date().toLocaleString('ja-JP'),
+    masterRef:m.id,productNoA:m.productNoA,productNoB:m.productNoB||'',
+    productName:m.productName,reqNoA:gv('r_reqA'),reqNoB:gv('r_reqB'),
+    date:gv('r_date'),operator:gv('r_op'),checker1:gv('r_ch1'),checker2:gv('r_ch2'),condNo:gv('r_cond'),
+    safety,coolSafety,m5,chocos,prod,actuals:a,
+    notice:gv('r_notice'),signOp:gv('r_sign_op'),signCh:gv('r_sign_ch'),master:m
   };
 }
 
 // ============================================================
-// SAVE（ローカル＋GAS）
+// SAVE
 // ============================================================
-async function saveRec() {
-  if (gv('r_reqA').length !== 10) { toast('品番Aの依頼番号を10桁で入力してください', 'er'); rgo(0); return; }
-  if (cur.productNoB && gv('r_reqB').length !== 10) { toast('品番Bの依頼番号を10桁で入力してください', 'er'); rgo(0); return; }
-  if (!gv('r_op')) { toast('担当者を入力してください', 'er'); rgo(0); return; }
-  const data = collectR();
-  // ローカルキャッシュに保存
-  try {
-    const key = 'sk_records_' + data.productNoA;
-    const cache = JSON.parse(localStorage.getItem(key) || '[]');
+async function saveRec(){
+  if(gv('r_reqA').length!==10){toast('品番Aの依頼番号を10桁で入力してください','er');rgo(0);return;}
+  if(cur.productNoB&&gv('r_reqB').length!==10){toast('品番Bの依頼番号を10桁で入力してください','er');rgo(0);return;}
+  if(!gv('r_op')){toast('担当者を入力してください','er');rgo(0);return;}
+  const data=collectR();
+  try{
+    const key='sk_records_'+data.productNoA;
+    const cache=JSON.parse(localStorage.getItem(key)||'[]');
     cache.unshift(data);
-    localStorage.setItem(key, JSON.stringify(cache.slice(0, 100)));
-  } catch(e) {}
-  // GASにも非同期保存（失敗しても続行）
-  if (GAS_URL) gasPost({ action: 'saveRecord', record: data }).catch(() => {});
-  toast('保存しました ✓', 'ok');
+    localStorage.setItem(key,JSON.stringify(cache.slice(0,100)));
+  }catch(e){}
+  if(GAS_URL) gasPost({action:'saveRecord',record:data}).catch(()=>{});
+  toast('保存しました ✓','ok');
 }
 
 // ============================================================
-// EXCEL 出力
+// EXCEL出力
 // ============================================================
-async function doExport() {
-  const reqA = gv('r_reqA');
-  if (reqA.length !== 10) { toast('依頼番号を10桁で入力してください', 'er'); rgo(0); return; }
-  if (!GAS_URL) { toast('GAS URLが未設定です。ポータルから起動してください。', 'er'); return; }
-  const btn = document.getElementById('xbtn');
-  btn.disabled = true; btn.textContent = '⏳ 生成中...';
+async function doExport(){
+  const reqA=gv('r_reqA');
+  if(reqA.length!==10){toast('依頼番号を10桁で入力してください','er');rgo(0);return;}
+  if(!GAS_URL){toast('GAS URLが未設定です。ポータルから起動してください。','er');return;}
+  const btn=document.getElementById('xbtn');
+  btn.disabled=true;btn.textContent='⏳ 生成中...';
   showLoading('Excelファイルを生成中...\n（10〜20秒かかります）');
-  try {
-    const data = collectR();
-    const res  = await gasPost({ action: 'exportExcel', record: data });
+  try{
+    const data=collectR();
+    const res=await gasPost({action:'exportExcel',record:data});
     hideLoading();
-    // Drive URLを開く
-    if (res.url) {
-      window.open(res.url, '_blank');
-      toast('Excel出力完了: ' + res.fileName, 'ok');
-      // ローカル履歴にDrive URLを更新
-      updateLocalRecordUrl(data.productNoA, reqA, res.url);
+    if(res.url){
+      window.open(res.url,'_blank');
+      toast('Excel出力完了: '+res.fileName,'ok');
+      updateLocalRecordUrl(data.productNoA,reqA,res.url);
     }
-  } catch(e) {
-    hideLoading();
-    toast('Excel出力エラー: ' + e.message, 'er');
-  }
-  btn.disabled = false; btn.textContent = '📊 Excel出力';
+  }catch(e){hideLoading();toast('Excel出力エラー: '+e.message,'er');}
+  btn.disabled=false;btn.textContent='📊 Excel出力';
 }
 
-function updateLocalRecordUrl(pnoA, reqNoA, url) {
-  try {
-    const key = 'sk_records_' + pnoA;
-    const cache = JSON.parse(localStorage.getItem(key) || '[]');
-    const idx = cache.findIndex(r => r.reqNoA === reqNoA);
-    if (idx >= 0) { cache[idx].driveUrl = url; localStorage.setItem(key, JSON.stringify(cache)); }
-  } catch(e) {}
+function updateLocalRecordUrl(pnoA,reqNoA,url){
+  try{
+    const key='sk_records_'+pnoA;
+    const cache=JSON.parse(localStorage.getItem(key)||'[]');
+    const idx=cache.findIndex(r=>r.reqNoA===reqNoA);
+    if(idx>=0){cache[idx].driveUrl=url;localStorage.setItem(key,JSON.stringify(cache));}
+  }catch(e){}
 }
 
 // ============================================================
 // HISTORY
 // ============================================================
-function renderHist() {
-  const pno  = cur?.productNoA;
-  const key  = 'sk_records_' + pno;
-  let list   = [];
-  try { list = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-  const el = document.getElementById('hist-wrap');
-  if (!list.length) {
-    el.innerHTML = '<div class="empty">🕐 この品番の記録はまだありません</div>';
-    return;
-  }
-  el.innerHTML = `<div style="padding:0 13px;font-size:11px;color:var(--tx3);margin-bottom:6px">${cur.productName} の記録 ${list.length}件</div>` +
-    list.map((r, i) => `
+function renderHist(){
+  const pno=cur?.productNoA,key='sk_records_'+pno;
+  let list=[];
+  try{list=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+  const el=document.getElementById('hist-wrap');
+  if(!list.length){el.innerHTML='<div class="empty">🕐 この品番の記録はまだありません</div>';return;}
+  el.innerHTML=`<div style="padding:0 13px;font-size:11px;color:var(--tx3);margin-bottom:6px">${cur.productName} の記録 ${list.length}件</div>`+
+    list.map((r,i)=>`
     <div class="hi" style="margin:0 13px 6px">
       <div class="hi-dt">${r.savedAt}</div>
-      <div class="hi-rn">${r.reqNoA}${r.reqNoB ? ' / ' + r.reqNoB : ''}</div>
+      <div class="hi-rn">${r.reqNoA}${r.reqNoB?' / '+r.reqNoB:''}</div>
       <div class="hi-tags">
         <span class="hi-tag">${r.date||'—'}</span>
         <span class="hi-tag">担当：${r.operator||'—'}</span>
-        ${r.driveUrl ? `<a class="hi-tag dl" href="${r.driveUrl}" target="_blank">📊 Excel</a>` : `<span class="hi-tag xl" onclick="reExport(${i})">📊 Excel再出力</span>`}
+        ${r.driveUrl?`<a class="hi-tag dl" href="${r.driveUrl}" target="_blank">📊 Excel</a>`:`<span class="hi-tag xl" onclick="reExport(${i})">📊 Excel再出力</span>`}
       </div>
     </div>`).join('');
 }
 
-async function reExport(li) {
-  const pno  = cur?.productNoA;
-  const key  = 'sk_records_' + pno;
-  let list   = [];
-  try { list = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-  const data = list[li];
-  if (!data) return;
-  if (!GAS_URL) { toast('GAS URLが未設定です', 'er'); return; }
+async function reExport(li){
+  const pno=cur?.productNoA,key='sk_records_'+pno;
+  let list=[];
+  try{list=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+  const data=list[li];if(!data)return;
+  if(!GAS_URL){toast('GAS URLが未設定です','er');return;}
   showLoading('Excel再出力中...');
-  try {
-    const res = await gasPost({ action: 'exportExcel', record: data });
+  try{
+    const res=await gasPost({action:'exportExcel',record:data});
     hideLoading();
-    if (res.url) { window.open(res.url, '_blank'); updateLocalRecordUrl(pno, data.reqNoA, res.url); renderHist(); toast('Excel出力完了', 'ok'); }
-  } catch(e) { hideLoading(); toast('エラー: ' + e.message, 'er'); }
+    if(res.url){window.open(res.url,'_blank');updateLocalRecordUrl(pno,data.reqNoA,res.url);renderHist();toast('Excel出力完了','ok');}
+  }catch(e){hideLoading();toast('エラー: '+e.message,'er');}
 }
 
 // ============================================================
-// PROGRESS
+// PROGRESS / TOAST / LOADING
 // ============================================================
-function rupd() {
-  const ids = ['r_reqA','r_date','r_op'];
-  const n = ids.filter(id => { const e = document.getElementById(id); return e && e.value.trim(); }).length;
-  const p = Math.round(n / ids.length * 100);
-  document.getElementById('rec-prog').style.width = p + '%';
-  document.getElementById('rec-pct').textContent = p + '%';
+function rupd(){
+  const ids=['r_reqA','r_date','r_op'];
+  const n=ids.filter(id=>{const e=document.getElementById(id);return e&&e.value.trim();}).length;
+  const p=Math.round(n/ids.length*100);
+  document.getElementById('rec-prog').style.width=p+'%';
+  document.getElementById('rec-pct').textContent=p+'%';
 }
-
-// ============================================================
-// TOAST / LOADING
-// ============================================================
-function toast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast ' + type + ' show';
-  setTimeout(() => t.classList.remove('show'), 3000);
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
-function showLoading(msg) { document.getElementById('loading-msg').textContent = msg; document.getElementById('loading').classList.remove('hid'); }
-function hideLoading() { document.getElementById('loading').classList.add('hid'); }
+function showLoading(msg){document.getElementById('loading-msg').textContent=msg;document.getElementById('loading').classList.remove('hid');}
+function hideLoading(){document.getElementById('loading').classList.add('hid');}
 </script>
 </body>
 </html>
