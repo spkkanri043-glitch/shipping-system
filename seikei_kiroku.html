@@ -880,26 +880,22 @@ async function saveRec(){
 async function doExport(){
   const reqA=gv('r_reqA');
   if(reqA.length!==10){toast('依頼番号を10桁で入力してください','er');rgo(0);return;}
-  if(!GAS_URL){toast('GAS URLが未設定です。ポータルから起動してください。','er');return;}
+  if(!GAS_URL){toast('GAS URLが未設定です。','er');return;}
   const btn=document.getElementById('xbtn');
-  btn.disabled=true;btn.textContent='⏳ 生成中...';
-  showLoading('Excelファイルを生成中...\n（10〜20秒かかります）');
+  btn.disabled=true;btn.textContent='⏳ 送信中...';
   try{
     const data=collectR();
-    // masterを除いた軽量版を送信
-    const sendData = Object.assign({}, data, { master: {
-      productNoA: data.master.productNoA,
-      productNoB: data.master.productNoB,
-      productName: data.master.productName
+    const sendData=Object.assign({},data,{master:{
+      productNoA:data.master.productNoA,
+      productNoB:data.master.productNoB,
+      productName:data.master.productName
     }});
-    const res=await gasPost({action:'exportExcel',record:sendData});
-    hideLoading();
-    if(res.url){
-      window.open(res.url,'_blank');
-      toast('Excel出力完了: '+res.fileName,'ok');
-      updateLocalRecordUrl(data.productNoA,reqA,res.url);
-    }
-  }catch(e){hideLoading();toast('Excel出力エラー: '+e.message,'er');}
+    await gasPost({action:'exportExcel',record:sendData});
+    // Drive フォルダURLを生成して開く
+    const folderUrl='https://drive.google.com/drive/folders/1r434ri4kQ8vGkavBOJXAA2cZ2M6rt2hA';
+    toast('バックグラウンドで生成中です。1分後にDriveを確認してください。','ok');
+    setTimeout(()=>window.open(folderUrl,'_blank'), 2000);
+  }catch(e){toast('エラー: '+e.message,'er');}
   btn.disabled=false;btn.textContent='📊 Excel出力';
 }
 
