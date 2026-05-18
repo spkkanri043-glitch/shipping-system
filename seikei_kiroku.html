@@ -885,7 +885,7 @@ async function doExport(){
   btn.disabled=true;btn.textContent='⏳ 送信中...';
   try{
     const data=collectR();
-    const sendData=Object.assign({},data,{master:{
+const sendData = Object.assign({}, data);
       productNoA:data.master.productNoA,
       productNoB:data.master.productNoB,
       productName:data.master.productName
