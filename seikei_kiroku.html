@@ -886,7 +886,13 @@ async function doExport(){
   showLoading('Excelファイルを生成中...\n（10〜20秒かかります）');
   try{
     const data=collectR();
-    const res=await gasPost({action:'exportExcel',record:data});
+    // masterを除いた軽量版を送信
+    const sendData = Object.assign({}, data, { master: {
+      productNoA: data.master.productNoA,
+      productNoB: data.master.productNoB,
+      productName: data.master.productName
+    }});
+    const res=await gasPost({action:'exportExcel',record:sendData});
     hideLoading();
     if(res.url){
       window.open(res.url,'_blank');
@@ -895,15 +901,6 @@ async function doExport(){
     }
   }catch(e){hideLoading();toast('Excel出力エラー: '+e.message,'er');}
   btn.disabled=false;btn.textContent='📊 Excel出力';
-}
-
-function updateLocalRecordUrl(pnoA,reqNoA,url){
-  try{
-    const key='sk_records_'+pnoA;
-    const cache=JSON.parse(localStorage.getItem(key)||'[]');
-    const idx=cache.findIndex(r=>r.reqNoA===reqNoA);
-    if(idx>=0){cache[idx].driveUrl=url;localStorage.setItem(key,JSON.stringify(cache));}
-  }catch(e){}
 }
 
 // ============================================================
