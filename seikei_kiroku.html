@@ -6,1409 +6,852 @@
 <title>成形記録書</title>
 <style>
   :root {
-    --blue: #1a3a6b;
-    --blue-light: #2955a0;
-    --accent: #c8392b;
-    --bg: #f0f2f5;
-    --white: #ffffff;
-    --border: #b0b8c8;
-    --border-dark: #6a7a96;
-    --text: #1a2035;
-    --text-light: #5a6a85;
-    --cell-bg: #fafbfd;
-    --header-bg: #dce4f0;
-    --section-bg: #eef2f9;
+    --blue:#1a3a6b;--blue2:#2955a0;--accent:#c8392b;
+    --bg:#edf1f6;--white:#fff;--border:#c8d4e8;--border2:#8a9ab8;
+    --text:#1a2035;--text2:#5a6a85;--text3:#9aabb8;
+    --cell:#fafbfd;--head:#dce4f0;--sec:#eef2f9;
+    --g:#27ae60;--r:#e74c3c;--o:#e67e22;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Meiryo', 'MS Gothic', sans-serif;
-    font-size: 12px;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
-
-  /* ===== TOP BAR ===== */
-  .topbar {
-    background: var(--blue);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  }
-  .topbar h1 { font-size: 16px; font-weight: bold; letter-spacing: 2px; }
-  .topbar .company { font-size: 11px; opacity: 0.8; }
-  .topbar .actions { display: flex; gap: 8px; }
-  .btn {
-    padding: 5px 14px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-    transition: all 0.15s;
-  }
-  .btn-save { background: #27ae60; color: #fff; }
-  .btn-save:hover { background: #219a52; }
-  .btn-load { background: #e67e22; color: #fff; }
-  .btn-load:hover { background: #cf6d17; }
-  .btn-new { background: #7f8c8d; color: #fff; }
-  .btn-new:hover { background: #636e72; }
-  .btn-history { background: #8e44ad; color: #fff; }
-  .btn-history:hover { background: #7d3c98; }
-
-  /* ===== MAIN CONTAINER ===== */
-  .container { max-width: 1100px; margin: 0 auto; padding: 12px; }
-
-  /* ===== STATUS BAR ===== */
-  .statusbar {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 12px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-size: 11px;
-    color: var(--text-light);
-  }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #27ae60; }
-  #statusMsg { color: var(--text); font-weight: bold; }
-
-  /* ===== CARD ===== */
-  .card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    margin-bottom: 10px;
-    overflow: hidden;
-  }
-  .card-header {
-    background: var(--blue);
-    color: #fff;
-    padding: 6px 12px;
-    font-weight: bold;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .card-header .icon { font-size: 15px; }
-  .card-body { padding: 10px 12px; }
-
-  /* ===== FORM GRID ===== */
-  .form-grid {
-    display: grid;
-    gap: 6px;
-  }
-  .fg-2 { grid-template-columns: 1fr 1fr; }
-  .fg-3 { grid-template-columns: 1fr 1fr 1fr; }
-  .fg-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .field label {
-    font-size: 10px;
-    color: var(--text-light);
-    font-weight: bold;
-    white-space: nowrap;
-  }
-  .field input, .field select, .field textarea {
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 4px 6px;
-    font-size: 12px;
-    font-family: inherit;
-    background: var(--cell-bg);
-    color: var(--text);
-    transition: border-color 0.15s;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    outline: none;
-    border-color: var(--blue-light);
-    background: #fff;
-  }
-  .field input.num { text-align: right; }
-  .field .unit { font-size: 10px; color: var(--text-light); text-align: right; margin-top: 1px; }
-
-  /* ===== CONDITION TABLE ===== */
-  .cond-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px;
-  }
-  .cond-table th, .cond-table td {
-    border: 1px solid var(--border);
-    padding: 3px 5px;
-    text-align: center;
-  }
-  .cond-table th {
-    background: var(--header-bg);
-    color: var(--blue);
-    font-weight: bold;
-    white-space: nowrap;
-  }
-  .cond-table td.label-cell {
-    background: var(--section-bg);
-    font-weight: bold;
-    text-align: left;
-    white-space: nowrap;
-  }
-  .cond-table td.sub-label {
-    background: #f5f7fa;
-    text-align: left;
-    color: var(--text-light);
-    padding-left: 12px;
-  }
-  .cond-table input[type=number], .cond-table input[type=text] {
-    width: 100%;
-    border: none;
-    background: transparent;
-    text-align: right;
-    font-size: 11px;
-    font-family: inherit;
-    padding: 1px 2px;
-  }
-  .cond-table input:focus { outline: 1px solid var(--blue-light); background: #fff; }
-  .cond-table .unit-cell { color: var(--text-light); white-space: nowrap; }
-  .cond-table .range-cell { color: var(--accent); font-weight: bold; white-space: nowrap; }
-
-  /* ===== OK/NG SELECT ===== */
-  select.okng {
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 2px 4px;
-    font-size: 11px;
-    background: var(--cell-bg);
-    width: 100%;
-  }
-  select.okng.ok { background: #d5f5e3; color: #1e8449; font-weight: bold; }
-  select.okng.ng { background: #fadbd8; color: #c0392b; font-weight: bold; }
-
-  /* ===== TWO COLUMN LAYOUT ===== */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-  /* ===== SMALL TABLE ===== */
-  .small-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .small-table th, .small-table td { border: 1px solid var(--border); padding: 3px 5px; }
-  .small-table th { background: var(--header-bg); color: var(--blue); font-weight: bold; text-align: center; }
-  .small-table td.lbl { background: var(--section-bg); font-weight: bold; white-space: nowrap; }
-  .small-table input { width: 100%; border: none; background: transparent; font-size: 11px; font-family: inherit; padding: 1px 2px; text-align: right; }
-  .small-table input:focus { outline: 1px solid var(--blue-light); background: #fff; }
-  .small-table input.txt { text-align: left; }
-
-  /* ===== RADIO GROUP ===== */
-  .radio-group { display: flex; gap: 10px; align-items: center; }
-  .radio-group label { display: flex; align-items: center; gap: 3px; cursor: pointer; }
-
-  /* ===== CHOCOS TABLE ===== */
-  .choco-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .choco-table th, .choco-table td { border: 1px solid var(--border); padding: 3px 5px; text-align: center; }
-  .choco-table th { background: var(--header-bg); color: var(--blue); font-weight: bold; }
-  .choco-table input { width: 100%; border: none; background: transparent; font-size: 11px; font-family: inherit; text-align: center; }
-  .choco-table input:focus { outline: 1px solid var(--blue-light); background: #fff; }
-
-  /* ===== PRODUCT CHECK ===== */
-  .prod-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .prod-table th, .prod-table td { border: 1px solid var(--border); padding: 3px 5px; }
-  .prod-table th { background: var(--header-bg); color: var(--blue); font-weight: bold; text-align: center; }
-  .prod-table td.lbl { background: var(--section-bg); font-weight: bold; }
-  .prod-table td.val { text-align: center; }
-  .prod-table input { width: 100%; border: none; background: transparent; font-size: 11px; font-family: inherit; text-align: center; }
-  .prod-table input:focus { outline: 1px solid var(--blue-light); background: #fff; }
-
-  /* ===== MODAL ===== */
-  .modal-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  }
-  .modal h2 { font-size: 15px; color: var(--blue); margin-bottom: 12px; }
-  .history-list { display: flex; flex-direction: column; gap: 6px; }
-  .history-item {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .history-item:hover { background: var(--section-bg); border-color: var(--blue-light); }
-  .history-item .hi-main { font-weight: bold; font-size: 12px; }
-  .history-item .hi-sub { font-size: 10px; color: var(--text-light); }
-  .modal-close { float: right; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-light); }
-  .modal-footer { margin-top: 12px; text-align: right; }
-
-  /* ===== LOADING ===== */
-  .loading { text-align: center; padding: 20px; color: var(--text-light); }
-
-  /* ===== SIGN ROW ===== */
-  .sign-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-  .sign-box {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    text-align: center;
-    overflow: hidden;
-  }
-  .sign-box .sign-label { background: var(--header-bg); padding: 3px; font-size: 10px; font-weight: bold; color: var(--blue); }
-  .sign-box input { width: 100%; border: none; padding: 6px 4px; text-align: center; font-size: 11px; font-family: inherit; background: transparent; }
-  .sign-box input:focus { outline: none; background: #f0f8ff; }
-
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 20px; right: 20px;
-    background: var(--blue);
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: bold;
-    z-index: 300;
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-  }
-  .toast.show { opacity: 1; }
-  .toast.error { background: var(--accent); }
-  .toast.success { background: #27ae60; }
-
-  @media (max-width: 700px) {
-    .two-col { grid-template-columns: 1fr; }
-    .fg-4 { grid-template-columns: 1fr 1fr; }
-    .sign-row { grid-template-columns: 1fr 1fr; }
-  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Meiryo','MS Gothic',sans-serif;font-size:12px;background:var(--bg);color:var(--text);min-height:100vh;}
+  .topbar{background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:50px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.35);}
+  .topbar-left{display:flex;flex-direction:column;}
+  .topbar-title{font-size:15px;font-weight:bold;letter-spacing:1px;}
+  .topbar-sub{font-size:10px;opacity:.65;}
+  .topbar-user{display:flex;align-items:center;gap:8px;}
+  .user-badge{font-size:11px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:3px 8px;}
+  .topbar-btns{display:flex;gap:6px;}
+  .btn{padding:5px 12px;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;font-family:inherit;transition:all .15s;}
+  .btn-new{background:#7f8c8d;color:#fff;}.btn-hist{background:#8e44ad;color:#fff;}
+  .btn-mst{background:#2980b9;color:#fff;}.btn-save{background:var(--g);color:#fff;}
+  .btn:hover{filter:brightness(1.1);}
+  .container{max-width:1100px;margin:0 auto;padding:10px 12px;}
+  .statusbar{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:5px 12px;margin-bottom:10px;display:flex;align-items:center;gap:12px;font-size:11px;color:var(--text2);}
+  .s-dot{width:7px;height:7px;border-radius:50%;background:var(--g);flex-shrink:0;}
+  #s-msg{color:var(--text);font-weight:bold;}#s-id{margin-left:auto;color:var(--text3);}
+  .card{background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;}
+  .card-head{background:var(--blue);color:#fff;padding:6px 12px;font-weight:bold;font-size:12px;display:flex;align-items:center;gap:7px;}
+  .card-body{padding:10px 12px;}
+  .fg{display:grid;gap:6px;}.fg2{grid-template-columns:1fr 1fr;}.fg3{grid-template-columns:1fr 1fr 1fr;}.fg4{grid-template-columns:1fr 1fr 1fr 1fr;}
+  .field{display:flex;flex-direction:column;gap:2px;}
+  .field label{font-size:10px;color:var(--text2);font-weight:bold;}
+  .field input,.field select{border:1px solid var(--border);border-radius:3px;padding:5px 7px;font-size:12px;font-family:inherit;background:var(--cell);color:var(--text);transition:border-color .15s;}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--blue2);background:#fff;}
+  .highlight{border:2px solid var(--accent)!important;background:#fff8f8!important;}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  /* 動的条件テーブル */
+  .dyn-section{margin-bottom:12px;}
+  .dyn-sec-title{background:var(--sec);border:1px solid var(--border);border-radius:4px 4px 0 0;padding:5px 10px;font-weight:bold;font-size:11px;color:var(--blue);display:flex;align-items:center;justify-content:space-between;}
+  .add-row-btn{background:var(--blue2);color:#fff;border:none;border-radius:3px;padding:2px 8px;font-size:11px;cursor:pointer;font-family:inherit;}
+  .dyn-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .dyn-table th{background:var(--head);border:1px solid var(--border);padding:4px 6px;text-align:center;color:var(--blue);font-weight:bold;white-space:nowrap;}
+  .dyn-table td{border:1px solid var(--border);padding:2px 4px;text-align:center;}
+  .dyn-table td.lbl{background:var(--sec);text-align:left;white-space:nowrap;}
+  .dyn-table input{width:100%;border:none;background:transparent;font-size:11px;font-family:inherit;padding:2px 3px;text-align:right;}
+  .dyn-table input.txt{text-align:left;}
+  .dyn-table input:focus{outline:1px solid var(--blue2);background:#fff;}
+  .del-btn{background:none;border:none;cursor:pointer;color:var(--r);font-size:13px;padding:0 2px;line-height:1;}
+  .rc{color:var(--accent);font-weight:bold;white-space:nowrap;font-size:10px;}
+  select.okng{width:100%;border:1px solid var(--border);border-radius:3px;padding:2px 4px;font-size:11px;background:var(--cell);font-family:inherit;}
+  select.okng.ok{background:#d5f5e3;color:#1e8449;font-weight:bold;}
+  select.okng.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
+  .sm-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .sm-table th{background:var(--head);border:1px solid var(--border);padding:4px 6px;color:var(--blue);font-weight:bold;text-align:center;}
+  .sm-table td{border:1px solid var(--border);padding:3px 5px;}
+  .sm-table td.lbl{background:var(--sec);font-weight:bold;white-space:nowrap;}
+  .sm-table input{width:100%;border:none;background:transparent;font-size:11px;font-family:inherit;padding:1px 2px;}
+  .sm-table input.txt{text-align:left;}.sm-table input:focus{outline:1px solid var(--blue2);background:#fff;}
+  .sign-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .sign-box{border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+  .sign-lbl{background:var(--head);padding:3px 6px;font-size:10px;font-weight:bold;color:var(--blue);text-align:center;}
+  .sign-name{padding:8px 6px;text-align:center;font-size:12px;min-height:36px;}
+  .sign-check{display:flex;align-items:center;justify-content:center;padding:4px;}
+  .sign-check label{display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;}
+  .sign-check input[type=checkbox]{width:16px;height:16px;cursor:pointer;}
+  .sign-stamp{color:var(--blue2);font-weight:bold;text-align:center;font-size:13px;padding:4px;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:8px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.3);}
+  .modal-head{background:var(--blue);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;font-weight:bold;font-size:14px;border-radius:8px 8px 0 0;position:sticky;top:0;z-index:1;}
+  .modal-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;}
+  .modal-body{padding:16px;}
+  .modal-foot{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+  .hist-item{border:1px solid var(--border);border-radius:5px;padding:9px 12px;margin-bottom:7px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .15s;}
+  .hist-item:hover{background:var(--sec);border-color:var(--blue2);}
+  .hist-main{font-weight:bold;font-size:12px;}.hist-sub{font-size:10px;color:var(--text2);margin-top:2px;}.hist-date{font-size:10px;color:var(--text3);}
+  .master-sec{margin-bottom:16px;}
+  .master-sec h3{font-size:13px;font-weight:bold;color:var(--blue);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+  .part-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:4px;margin-bottom:5px;}
+  .part-info{flex:1;font-size:12px;}.part-no{font-weight:bold;}.part-name{font-size:11px;color:var(--text2);}
+  .mf{display:grid;gap:8px;}.mf2{grid-template-columns:1fr 1fr;display:grid;gap:8px;}
+  .mf input,.mf textarea{border:1px solid var(--border);border-radius:3px;padding:6px 8px;font-size:12px;font-family:inherit;width:100%;}
+  .mf textarea{resize:vertical;height:60px;}
+  .pl{background:var(--sec);border-radius:4px;padding:8px;margin-bottom:8px;}
+  .pi{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;}
+  .pi input[type=text]{flex:1;border:1px solid var(--border);border-radius:3px;padding:3px 6px;font-size:11px;font-family:inherit;}
+  .pi input[type=text]:focus{outline:1px solid var(--blue2);}
+  .toast{position:fixed;bottom:20px;right:20px;background:var(--blue);color:#fff;padding:9px 16px;border-radius:6px;font-size:12px;font-weight:bold;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;max-width:300px;}
+  .toast.show{opacity:1;}.toast.ok{background:var(--g);}.toast.err{background:var(--r);}.toast.warn{background:var(--o);}
+  @media(max-width:700px){.two-col{grid-template-columns:1fr;}.fg4{grid-template-columns:1fr 1fr;}.sign-grid{grid-template-columns:1fr 1fr;}.topbar-user{display:none;}}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
-  <div>
-    <div class="h1" style="font-size:16px;font-weight:bold;letter-spacing:2px;">📋 成形記録書</div>
-    <div class="company">関ヶ原プラ工業株式会社</div>
+  <div class="topbar-left">
+    <div class="topbar-title">📋 成形記録書</div>
+    <div class="topbar-sub">関ヶ原プラ工業株式会社</div>
   </div>
-  <div class="actions">
-    <button class="btn btn-new" onclick="newForm()">🆕 新規</button>
-    <button class="btn btn-history" onclick="openHistory()">📂 履歴</button>
+  <div class="topbar-user"><span class="user-badge" id="user-badge">...</span></div>
+  <div class="topbar-btns">
+    <button class="btn btn-new"  onclick="newForm()">🆕 新規</button>
+    <button class="btn btn-hist" onclick="openHistory()">📂 履歴</button>
+    <button class="btn btn-mst"  onclick="openMasterModal()">⚙️ マスター</button>
     <button class="btn btn-save" onclick="saveRecord()">💾 保存</button>
   </div>
 </div>
 
 <div class="container">
   <div class="statusbar">
-    <div class="status-dot" id="statusDot"></div>
-    <span id="statusMsg">新規作成モード</span>
-    <span id="recordId" style="margin-left:auto;color:#888;font-size:10px;"></span>
+    <div class="s-dot" id="s-dot"></div>
+    <span id="s-msg">新規作成モード</span>
+    <span id="s-id"></span>
   </div>
 
-  <!-- ① 基本情報 -->
+  <!-- 基本情報 -->
   <div class="card">
-    <div class="card-header"><span class="icon">📝</span>基本情報</div>
+    <div class="card-head">📝 基本情報</div>
     <div class="card-body">
-      <div class="form-grid fg-3" style="margin-bottom:8px;">
+      <div class="fg fg4" style="margin-bottom:6px;">
         <div class="field" style="grid-column:span 2;">
-          <label>製品名</label>
-          <input type="text" id="productName" placeholder="製品名を入力">
+          <label>製品名</label><input type="text" id="productName" placeholder="製品名">
         </div>
         <div class="field">
-          <label>記入日</label>
-          <input type="date" id="recordDate">
+          <label>⭐ 品番</label>
+          <input type="text" id="partNo_top" class="highlight" placeholder="品番" oninput="syncF('partNo','partNo_top',this.value)">
+        </div>
+        <div class="field">
+          <label>⭐ 成形依頼番号</label>
+          <input type="text" id="reqNo_top" class="highlight" placeholder="10桁" oninput="syncF('reqNo','reqNo_top',this.value)" maxlength="10">
         </div>
       </div>
-      <div class="form-grid fg-4" style="margin-bottom:8px;">
-        <div class="field">
-          <label>品番</label>
-          <input type="text" id="partNo" placeholder="品番">
-        </div>
-        <div class="field">
-          <label>成形依頼番号</label>
-          <input type="text" id="requestNo" placeholder="10桁番号" maxlength="10">
-        </div>
-        <div class="field">
-          <label>号機名</label>
-          <input type="text" id="machineNo" placeholder="号機名">
-        </div>
-        <div class="field">
-          <label>条件番号</label>
-          <input type="text" id="condNo" placeholder="">
-        </div>
+      <div class="fg fg4" style="margin-bottom:6px;">
+        <div class="field"><label>記入日</label><input type="date" id="recordDate"></div>
+        <div class="field"><label>号機名</label><input type="text" id="machineNo" placeholder="号機名"></div>
+        <div class="field"><label>条件番号</label><input type="text" id="condNo"></div>
+        <div class="field"><label>担当者（自動）</label><input type="text" id="operator" readonly style="background:#f0f4ff;color:var(--blue);font-weight:bold;"></div>
       </div>
-      <div class="form-grid fg-4" style="margin-bottom:8px;">
-        <div class="field">
-          <label>材料名</label>
-          <input type="text" id="material" placeholder="材料名">
-        </div>
-        <div class="field">
-          <label>MB名</label>
-          <input type="text" id="mbName" placeholder="MB名">
-        </div>
-        <div class="field">
-          <label>MB比率</label>
-          <input type="text" id="mbRatio" placeholder="比率">
-        </div>
-        <div class="field">
-          <label>乾燥 (℃・H)</label>
-          <input type="text" id="drying" placeholder="例: 80℃・4H">
-        </div>
+      <div class="fg fg4" style="margin-bottom:6px;">
+        <div class="field"><label>材料名</label><input type="text" id="material" placeholder="材料名"></div>
+        <div class="field"><label>MB名</label><input type="text" id="mbName" placeholder="MB名"></div>
+        <div class="field"><label>MB比率</label><input type="text" id="mbRatio"></div>
+        <div class="field"><label>乾燥(℃・H)</label><input type="text" id="drying" placeholder="例: 80℃・4H"></div>
       </div>
-      <div class="form-grid fg-4">
+      <div class="fg fg4">
         <div class="field">
-          <label>成形機</label>
-          <input type="text" id="moldingMachine" placeholder="">
+          <label>⭐ 品番（確認）</label>
+          <input type="text" id="partNo_bot" class="highlight" placeholder="品番" oninput="syncF('partNo','partNo_bot',this.value)">
         </div>
         <div class="field">
-          <label>取出機</label>
-          <input type="text" id="takeMachine" placeholder="">
+          <label>⭐ 成形依頼番号（確認）</label>
+          <input type="text" id="reqNo_bot" class="highlight" placeholder="10桁" oninput="syncF('reqNo','reqNo_bot',this.value)" maxlength="10">
         </div>
-        <div class="field">
-          <label>箱替機</label>
-          <input type="text" id="boxMachine" placeholder="">
-        </div>
-        <div class="field">
-          <label>担当者</label>
-          <input type="text" id="operator" placeholder="担当者名">
-        </div>
+        <div class="field"><label>成形機</label><input type="text" id="moldMachine"></div>
+        <div class="field"><label>取出機/箱替機</label><input type="text" id="otherMachine"></div>
       </div>
     </div>
   </div>
 
-  <!-- ② 成形条件記録 -->
+  <!-- 成形条件記録 -->
   <div class="card">
-    <div class="card-header"><span class="icon">⚙️</span>成形条件記録</div>
+    <div class="card-head">⚙️ 成形条件記録</div>
+    <div class="card-body" id="condBody"></div>
+  </div>
+
+  <!-- 金型安全 & 注意事項 -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-head">🔒 金型交換後 安全確認</div>
+      <div class="card-body">
+        <table class="sm-table"><tbody>
+          <tr><td class="lbl">クランプ 操作側</td><td><select class="okng" data-k="safe_cop" onchange="upOkNg(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td></tr>
+          <tr><td class="lbl">クランプ 反操作側</td><td><select class="okng" data-k="safe_cnop" onchange="upOkNg(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td></tr>
+          <tr><td class="lbl">E/J後退確認線</td><td><select class="okng" data-k="safe_ej" onchange="upOkNg(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td></tr>
+          <tr><td class="lbl">ロケートリング</td><td><select class="okng" data-k="safe_lr" onchange="upOkNg(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">📌 製品特有の注意事項</div>
+      <div class="card-body">
+        <table class="sm-table">
+          <thead><tr><th>内容</th><th>基準値</th><th>判定</th></tr></thead>
+          <tbody id="notesTbody"></tbody>
+        </table>
+        <button onclick="addNoteRow()" style="margin-top:6px;padding:3px 10px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;">＋ 行追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5M & チョコ停 -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-head">🔄 ５M変化点</div>
+      <div class="card-body">
+        <table class="sm-table">
+          <thead><tr><th>項目</th><th>有・無</th><th>対処方法</th></tr></thead>
+          <tbody id="m5Body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">⏱️ チョコ停捨てショット記録</div>
+      <div class="card-body">
+        <table class="sm-table">
+          <thead><tr><th>停止内容</th><th>日付</th><th>時間</th><th>捨てショット</th><th>担当</th></tr></thead>
+          <tbody id="chocoTbody"></tbody>
+        </table>
+        <button onclick="addChocoRow()" style="margin-top:6px;padding:3px 10px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;">＋ 行追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 製品確認 -->
+  <div class="card">
+    <div class="card-head">
+      ✅ 製品確認
+      <button onclick="openProdEdit()" style="margin-left:auto;padding:2px 9px;font-size:10px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:3px;cursor:pointer;">✏️ 項目編集</button>
+    </div>
     <div class="card-body">
-      <table class="cond-table">
-        <thead>
-          <tr>
-            <th colspan="2">成形条件</th>
-            <th>基準値①</th>
-            <th>単位</th>
-            <th>基準値②</th>
-            <th>単位</th>
-            <th>管理値</th>
-            <th>記入欄</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- 加熱筒温度 -->
-          <tr>
-            <td class="label-cell" rowspan="7">加熱筒温度</td>
-            <td class="sub-label">ノズル１</td>
-            <td><input type="number" class="c-base1" data-key="nozzle1_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" class="c-base2" data-key="nozzle1_b2"></td>
-            <td class="unit-cell"></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" class="c-entry" data-key="nozzle1_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">ノズル２</td>
-            <td><input type="number" class="c-base1" data-key="nozzle2_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" class="c-base2" data-key="nozzle2_b2"></td>
-            <td class="unit-cell"></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" class="c-entry" data-key="nozzle2_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">ヒーター１</td>
-            <td><input type="number" data-key="h1_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="h1_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="h1_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">ヒーター２</td>
-            <td><input type="number" data-key="h2_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="h2_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="h2_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">ヒーター３</td>
-            <td><input type="number" data-key="h3_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="h3_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="h3_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">ヒーター４</td>
-            <td><input type="number" data-key="h4_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="h4_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="h4_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">ヒーター５</td>
-            <td><input type="number" data-key="h5_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="h5_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="h5_v"></td>
-          </tr>
-          <!-- ホットランナー -->
-          <tr>
-            <td class="label-cell" rowspan="6">ホットランナー</td>
-            <td class="sub-label">１</td>
-            <td><input type="number" data-key="hr1_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="hr1_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="hr1_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">２</td>
-            <td><input type="number" data-key="hr2_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="hr2_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="hr2_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">３</td>
-            <td><input type="number" data-key="hr3_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="hr3_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="hr3_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">４</td>
-            <td><input type="number" data-key="hr4_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="hr4_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="hr4_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">５</td>
-            <td><input type="number" data-key="hr5_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="hr5_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="hr5_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">６</td>
-            <td><input type="number" data-key="hr6_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="hr6_b2"></td>
-            <td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="hr6_v"></td>
-          </tr>
-          <!-- タイマー -->
-          <tr>
-            <td class="label-cell" rowspan="4">タイマー</td>
-            <td class="sub-label">射出</td>
-            <td><input type="number" data-key="t_inj_b1"></td>
-            <td class="unit-cell">S</td>
-            <td><input type="number" data-key="t_inj_b2"></td>
-            <td></td>
-            <td class="range-cell">±0.5</td>
-            <td><input type="number" data-key="t_inj_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">保持圧１</td>
-            <td><input type="number" data-key="t_hold1_b1"></td>
-            <td class="unit-cell">S</td>
-            <td><input type="number" data-key="t_hold1_b2"></td>
-            <td></td>
-            <td class="range-cell">±0.5</td>
-            <td><input type="number" data-key="t_hold1_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">保持圧２</td>
-            <td><input type="number" data-key="t_hold2_b1"></td>
-            <td class="unit-cell">S</td>
-            <td><input type="number" data-key="t_hold2_b2"></td>
-            <td></td>
-            <td class="range-cell">±0.5</td>
-            <td><input type="number" data-key="t_hold2_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">冷却</td>
-            <td><input type="number" data-key="t_cool_b1"></td>
-            <td class="unit-cell">S</td>
-            <td><input type="number" data-key="t_cool_b2"></td>
-            <td></td>
-            <td class="range-cell">±0.5</td>
-            <td><input type="number" data-key="t_cool_v"></td>
-          </tr>
-          <!-- 射出速度 -->
-          <tr>
-            <td class="label-cell" rowspan="6">射出速度<br>(切替位置)</td>
-            <td class="sub-label">１速</td>
-            <td><input type="number" data-key="is1_b1"></td>
-            <td class="unit-cell">mm/s</td>
-            <td><input type="number" data-key="is1_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="is1_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">２速</td>
-            <td><input type="number" data-key="is2_b1"></td>
-            <td class="unit-cell">mm/s</td>
-            <td><input type="number" data-key="is2_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="is2_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">３速</td>
-            <td><input type="number" data-key="is3_b1"></td>
-            <td class="unit-cell">mm/s</td>
-            <td><input type="number" data-key="is3_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="is3_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">４速</td>
-            <td><input type="number" data-key="is4_b1"></td>
-            <td class="unit-cell">mm/s</td>
-            <td><input type="number" data-key="is4_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="is4_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">５速</td>
-            <td><input type="number" data-key="is5_b1"></td>
-            <td class="unit-cell">mm/s</td>
-            <td><input type="number" data-key="is5_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="is5_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">６速</td>
-            <td><input type="number" data-key="is6_b1"></td>
-            <td class="unit-cell">mm/s</td>
-            <td><input type="number" data-key="is6_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="is6_v"></td>
-          </tr>
-          <!-- 射出圧力 -->
-          <tr>
-            <td class="label-cell" rowspan="6">射出圧力</td>
-            <td class="sub-label">１速</td>
-            <td><input type="number" data-key="ip1_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="ip1_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="ip1_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">２速</td>
-            <td><input type="number" data-key="ip2_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="ip2_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="ip2_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">３速</td>
-            <td><input type="number" data-key="ip3_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="ip3_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="ip3_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">４速</td>
-            <td><input type="number" data-key="ip4_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="ip4_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="ip4_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">５速</td>
-            <td><input type="number" data-key="ip5_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="ip5_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="ip5_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">６速</td>
-            <td><input type="number" data-key="ip6_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="ip6_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="ip6_v"></td>
-          </tr>
-          <!-- 保持圧 -->
-          <tr>
-            <td class="label-cell" rowspan="4">保持圧<br>(速度)</td>
-            <td class="sub-label">１速</td>
-            <td><input type="number" data-key="hp1_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="hp1_spd"></td>
-            <td class="unit-cell">mm/s</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="hp1_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">２速</td>
-            <td><input type="number" data-key="hp2_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="hp2_spd"></td>
-            <td class="unit-cell">mm/s</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="hp2_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">３速</td>
-            <td><input type="number" data-key="hp3_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="hp3_spd"></td>
-            <td class="unit-cell">mm/s</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="hp3_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">４速</td>
-            <td><input type="number" data-key="hp4_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="hp4_spd"></td>
-            <td class="unit-cell">mm/s</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="hp4_v"></td>
-          </tr>
-          <!-- 可塑化 -->
-          <tr>
-            <td class="label-cell" rowspan="3">可塑化<br>(切替位置)</td>
-            <td class="sub-label">１</td>
-            <td><input type="number" data-key="sc1_b1"></td>
-            <td class="unit-cell">min⁻¹</td>
-            <td><input type="number" data-key="sc1_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="sc1_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">２</td>
-            <td><input type="number" data-key="sc2_b1"></td>
-            <td class="unit-cell">min⁻¹</td>
-            <td><input type="number" data-key="sc2_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="sc2_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">３</td>
-            <td><input type="number" data-key="sc3_b1"></td>
-            <td class="unit-cell">min⁻¹</td>
-            <td><input type="number" data-key="sc3_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="sc3_v"></td>
-          </tr>
-          <!-- 背圧 -->
-          <tr>
-            <td class="label-cell" rowspan="3">背圧</td>
-            <td class="sub-label">１</td>
-            <td><input type="number" data-key="bp1_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="bp1_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="bp1_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">２</td>
-            <td><input type="number" data-key="bp2_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="bp2_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="bp2_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">３</td>
-            <td><input type="number" data-key="bp3_b1"></td>
-            <td class="unit-cell">Mpa</td>
-            <td><input type="number" data-key="bp3_pos"></td>
-            <td class="unit-cell">mm</td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="bp3_v"></td>
-          </tr>
-          <!-- スクリュー位置 -->
-          <tr>
-            <td class="label-cell" rowspan="2">スクリュー位置</td>
-            <td class="sub-label">計量</td>
-            <td><input type="number" data-key="screw_meas_b1"></td>
-            <td class="unit-cell">mm</td>
-            <td></td><td></td>
-            <td class="range-cell">±1.5</td>
-            <td><input type="number" data-key="screw_meas_v"></td>
-          </tr>
-          <tr>
-            <td class="sub-label">保持圧切替</td>
-            <td><input type="number" data-key="screw_hold_b1"></td>
-            <td class="unit-cell">mm</td>
-            <td></td><td></td>
-            <td class="range-cell">±1.5</td>
-            <td><input type="number" data-key="screw_hold_v"></td>
-          </tr>
-          <!-- その他 -->
-          <tr>
-            <td class="label-cell">型締力(実測)</td>
-            <td class="sub-label"></td>
-            <td><input type="number" data-key="clamp_b1"></td>
-            <td class="unit-cell">ton</td>
-            <td></td><td></td>
-            <td class="range-cell">±10</td>
-            <td><input type="number" data-key="clamp_v"></td>
-          </tr>
-          <tr>
-            <td class="label-cell">サックバック量</td>
-            <td class="sub-label"></td>
-            <td><input type="number" data-key="suckback_b1"></td>
-            <td class="unit-cell">mm</td>
-            <td></td><td></td>
-            <td class="range-cell">±3</td>
-            <td><input type="number" data-key="suckback_v"></td>
-          </tr>
-          <tr>
-            <td class="label-cell">クッション量</td>
-            <td class="sub-label"></td>
-            <td><input type="number" data-key="cushion_b1"></td>
-            <td class="unit-cell">mm</td>
-            <td></td><td></td>
-            <td class="range-cell">±1</td>
-            <td><input type="number" data-key="cushion_v"></td>
-          </tr>
-          <tr>
-            <td class="label-cell">エジェクターストローク</td>
-            <td class="sub-label"></td>
-            <td><input type="number" data-key="ejector_b1"></td>
-            <td class="unit-cell">mm</td>
-            <td></td><td></td>
-            <td class="range-cell">±3</td>
-            <td><input type="number" data-key="ejector_v"></td>
-          </tr>
-          <!-- 温調 -->
-          <tr>
-            <td class="label-cell" rowspan="3">温調</td>
-            <td class="sub-label">ランナー</td>
-            <td><input type="number" data-key="temp_runner_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="temp_runner_circuit"></td>
-            <td class="unit-cell">回路数</td>
-            <td></td>
-            <td>
-              <select class="okng" data-key="temp_runner_ok" onchange="updateOkNg(this)">
-                <option value="">-</option>
-                <option value="OK">OK</option>
-                <option value="NG">NG</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td class="sub-label">固定側</td>
-            <td><input type="number" data-key="temp_fix_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="temp_fix_circuit"></td>
-            <td class="unit-cell">回路数</td>
-            <td></td>
-            <td>
-              <select class="okng" data-key="temp_fix_ok" onchange="updateOkNg(this)">
-                <option value="">-</option>
-                <option value="OK">OK</option>
-                <option value="NG">NG</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td class="sub-label">可動側</td>
-            <td><input type="number" data-key="temp_mov_b1"></td>
-            <td class="unit-cell">℃</td>
-            <td><input type="number" data-key="temp_mov_circuit"></td>
-            <td class="unit-cell">回路数</td>
-            <td></td>
-            <td>
-              <select class="okng" data-key="temp_mov_ok" onchange="updateOkNg(this)">
-                <option value="">-</option>
-                <option value="OK">OK</option>
-                <option value="NG">NG</option>
-              </select>
-            </td>
-          </tr>
-          <!-- サイクル -->
-          <tr>
-            <td class="label-cell">サイクル</td>
-            <td class="sub-label"></td>
-            <td><input type="number" data-key="cycle_b1"></td>
-            <td class="unit-cell">S</td>
-            <td></td><td></td>
-            <td class="range-cell">±5</td>
-            <td><input type="number" data-key="cycle_v"></td>
-          </tr>
-        </tbody>
+      <table class="sm-table">
+        <thead><tr><th>内容</th><th>管理値</th><th>初物</th><th>終物</th></tr></thead>
+        <tbody id="prodCheckTbody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- ③ 金型交換後安全確認 & 製品特有注意事項 -->
-  <div class="two-col">
-    <div class="card">
-      <div class="card-header"><span class="icon">🔒</span>金型交換後 安全確認</div>
-      <div class="card-body">
-        <table class="small-table">
-          <tbody>
-            <tr>
-              <td class="lbl">クランプ 操作側</td>
-              <td><select class="okng" data-key="clamp_op" onchange="updateOkNg(this)"><option value="">-</option><option value="OK">OK</option><option value="NG">NG</option></select></td>
-            </tr>
-            <tr>
-              <td class="lbl">クランプ 反操作側</td>
-              <td><select class="okng" data-key="clamp_nop" onchange="updateOkNg(this)"><option value="">-</option><option value="OK">OK</option><option value="NG">NG</option></select></td>
-            </tr>
-            <tr>
-              <td class="lbl">E/J後退確認線</td>
-              <td><select class="okng" data-key="ej_line" onchange="updateOkNg(this)"><option value="">-</option><option value="OK">OK</option><option value="NG">NG</option></select></td>
-            </tr>
-            <tr>
-              <td class="lbl">ロケートリング</td>
-              <td><select class="okng" data-key="locate_ring" onchange="updateOkNg(this)"><option value="">-</option><option value="OK">OK</option><option value="NG">NG</option></select></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><span class="icon">📌</span>製品特有の注意事項</div>
-      <div class="card-body">
-        <table class="small-table">
-          <thead>
-            <tr><th>内容</th><th>基準値</th><th>判定</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><input type="text" class="txt" data-key="note1_content" style="width:100%"></td>
-              <td><input type="text" data-key="note1_std" style="width:100%"></td>
-              <td><select class="okng" data-key="note1_ok" onchange="updateOkNg(this)"><option value="">-</option><option value="OK">OK</option><option value="NG">NG</option></select></td>
-            </tr>
-            <tr>
-              <td><input type="text" class="txt" data-key="note2_content" style="width:100%"></td>
-              <td><input type="text" data-key="note2_std" style="width:100%"></td>
-              <td><select class="okng" data-key="note2_ok" onchange="updateOkNg(this)"><option value="">-</option><option value="OK">OK</option><option value="NG">NG</option></select></td>
-            </tr>
-            <tr>
-              <td><input type="text" class="txt" data-key="note3_content" style="width:100%"></td>
-              <td><input type="text" data-key="note3_std" style="width:100%"></td>
-              <td><select class="okng" data-key="note3_ok" onchange="updateOkNg(this)"><option value="">-</option><option value="OK">OK</option><option value="NG">NG</option></select></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ④ 5M変化点 & チョコ停捨てショット -->
-  <div class="two-col">
-    <div class="card">
-      <div class="card-header"><span class="icon">🔄</span>５M変化点（人・機械・材料・方法・金型）</div>
-      <div class="card-body">
-        <table class="small-table">
-          <thead>
-            <tr><th>項目</th><th>有・無</th><th>対処方法</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="lbl">人</td>
-              <td>
-                <select data-key="m5_people_yn" style="width:100%;border:1px solid var(--border);border-radius:3px;font-size:11px;padding:2px;">
-                  <option value="">-</option><option value="有">有</option><option value="無">無</option>
-                </select>
-              </td>
-              <td><input type="text" class="txt" data-key="m5_people_action"></td>
-            </tr>
-            <tr>
-              <td class="lbl">機械</td>
-              <td>
-                <select data-key="m5_machine_yn" style="width:100%;border:1px solid var(--border);border-radius:3px;font-size:11px;padding:2px;">
-                  <option value="">-</option><option value="有">有</option><option value="無">無</option>
-                </select>
-              </td>
-              <td><input type="text" class="txt" data-key="m5_machine_action"></td>
-            </tr>
-            <tr>
-              <td class="lbl">材料</td>
-              <td>
-                <select data-key="m5_material_yn" style="width:100%;border:1px solid var(--border);border-radius:3px;font-size:11px;padding:2px;">
-                  <option value="">-</option><option value="有">有</option><option value="無">無</option>
-                </select>
-              </td>
-              <td><input type="text" class="txt" data-key="m5_material_action"></td>
-            </tr>
-            <tr>
-              <td class="lbl">方法</td>
-              <td>
-                <select data-key="m5_method_yn" style="width:100%;border:1px solid var(--border);border-radius:3px;font-size:11px;padding:2px;">
-                  <option value="">-</option><option value="有">有</option><option value="無">無</option>
-                </select>
-              </td>
-              <td><input type="text" class="txt" data-key="m5_method_action"></td>
-            </tr>
-            <tr>
-              <td class="lbl">金型</td>
-              <td>
-                <select data-key="m5_mold_yn" style="width:100%;border:1px solid var(--border);border-radius:3px;font-size:11px;padding:2px;">
-                  <option value="">-</option><option value="有">有</option><option value="無">無</option>
-                </select>
-              </td>
-              <td><input type="text" class="txt" data-key="m5_mold_action"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><span class="icon">⏱️</span>チョコ停捨てショット記録</div>
-      <div class="card-body">
-        <table class="choco-table">
-          <thead>
-            <tr><th>停止内容</th><th>日付</th><th>時間</th><th>捨てショット数</th><th>担当者</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><input type="text" data-key="choco1_content"></td>
-              <td><input type="text" data-key="choco1_date" placeholder="月/日"></td>
-              <td><input type="text" data-key="choco1_time" placeholder="時:分"></td>
-              <td><input type="number" data-key="choco1_shots"></td>
-              <td><input type="text" data-key="choco1_person"></td>
-            </tr>
-            <tr>
-              <td><input type="text" data-key="choco2_content"></td>
-              <td><input type="text" data-key="choco2_date" placeholder="月/日"></td>
-              <td><input type="text" data-key="choco2_time" placeholder="時:分"></td>
-              <td><input type="number" data-key="choco2_shots"></td>
-              <td><input type="text" data-key="choco2_person"></td>
-            </tr>
-            <tr>
-              <td><input type="text" data-key="choco3_content"></td>
-              <td><input type="text" data-key="choco3_date" placeholder="月/日"></td>
-              <td><input type="text" data-key="choco3_time" placeholder="時:分"></td>
-              <td><input type="number" data-key="choco3_shots"></td>
-              <td><input type="text" data-key="choco3_person"></td>
-            </tr>
-            <tr>
-              <td><input type="text" data-key="choco4_content"></td>
-              <td><input type="text" data-key="choco4_date" placeholder="月/日"></td>
-              <td><input type="text" data-key="choco4_time" placeholder="時:分"></td>
-              <td><input type="number" data-key="choco4_shots"></td>
-              <td><input type="text" data-key="choco4_person"></td>
-            </tr>
-            <tr>
-              <td><input type="text" data-key="choco5_content"></td>
-              <td><input type="text" data-key="choco5_date" placeholder="月/日"></td>
-              <td><input type="text" data-key="choco5_time" placeholder="時:分"></td>
-              <td><input type="number" data-key="choco5_shots"></td>
-              <td><input type="text" data-key="choco5_person"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ⑤ 製品確認 -->
+  <!-- 確認サイン -->
   <div class="card">
-    <div class="card-header"><span class="icon">✅</span>製品確認（数値管理項目は数値で、他は〇✕で記入）</div>
+    <div class="card-head">🖊️ 確認サイン</div>
     <div class="card-body">
-      <table class="prod-table">
-        <thead>
-          <tr><th>内容</th><th>管理値</th><th>初物</th><th>終物</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="lbl">製品重量①</td>
-            <td class="val"><input type="text" data-key="wt1_std" placeholder="g ±"> g</td>
-            <td class="val"><input type="number" data-key="wt1_first"> g</td>
-            <td class="val"><input type="number" data-key="wt1_last"> g</td>
-          </tr>
-          <tr>
-            <td class="lbl">製品重量②</td>
-            <td class="val"><input type="text" data-key="wt2_std" placeholder="g ±"> g</td>
-            <td class="val"><input type="number" data-key="wt2_first"> g</td>
-            <td class="val"><input type="number" data-key="wt2_last"> g</td>
-          </tr>
-          <tr>
-            <td class="lbl">裏面確認</td>
-            <td>リブ、ボス、ツメのショート・白化無き事</td>
-            <td class="val"><select class="okng" data-key="back_first" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-            <td class="val"><select class="okng" data-key="back_last" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-          </tr>
-          <tr>
-            <td class="lbl">コマ・ピン折れ</td>
-            <td>無き事</td>
-            <td class="val"><select class="okng" data-key="pin_first" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-            <td class="val"><select class="okng" data-key="pin_last" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-          </tr>
-          <tr>
-            <td class="lbl">欠肉</td>
-            <td>無き事</td>
-            <td class="val"><select class="okng" data-key="lack_first" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-            <td class="val"><select class="okng" data-key="lack_last" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-          </tr>
-          <tr>
-            <td class="lbl">PL段差・バリ</td>
-            <td>0.15mm以下</td>
-            <td class="val"><select class="okng" data-key="pl_first" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-            <td class="val"><select class="okng" data-key="pl_last" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-          </tr>
-          <tr>
-            <td class="lbl">ゲート部段差</td>
-            <td>0.5mm以下</td>
-            <td class="val"><select class="okng" data-key="gate_first" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-            <td class="val"><select class="okng" data-key="gate_last" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-          </tr>
-          <tr>
-            <td class="lbl">材質マーキング</td>
-            <td>読み取り可能な事（＞＜）</td>
-            <td class="val"><select class="okng" data-key="mat_mark_first" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-            <td class="val"><select class="okng" data-key="mat_mark_last" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-          </tr>
-          <tr>
-            <td class="lbl">識別マーキング</td>
-            <td>読み取り可能な事（＞＜）</td>
-            <td class="val"><select class="okng" data-key="id_mark_first" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-            <td class="val"><select class="okng" data-key="id_mark_last" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-          </tr>
-          <tr>
-            <td class="lbl">品番マーキング</td>
-            <td>読み取り可能な事</td>
-            <td class="val"><select class="okng" data-key="pn_mark_first" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-            <td class="val"><select class="okng" data-key="pn_mark_last" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-          </tr>
-          <tr>
-            <td class="lbl">外観確認</td>
-            <td style="font-size:10px;">汚れ・ヒケ・ウェルド・白化・シルバー・キズ・異物・擦れキズ・バリ・割れ・色混じり・ツヤムラ・フローマーク無き事</td>
-            <td class="val"><select class="okng" data-key="appear_first" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-            <td class="val"><select class="okng" data-key="appear_last" onchange="updateOkNg(this)"><option value="">-</option><option value="○">○</option><option value="✕">✕</option></select></td>
-          </tr>
-          <tr>
-            <td class="lbl">気付き記入欄</td>
-            <td colspan="3"><input type="text" class="txt" data-key="memo" style="width:100%"></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ⑥ サイン -->
-  <div class="card">
-    <div class="card-header"><span class="icon">🖊️</span>確認サイン</div>
-    <div class="card-body">
-      <div class="sign-row">
+      <div class="sign-grid">
         <div class="sign-box">
-          <div class="sign-label">担当者</div>
-          <input type="text" id="sign_operator" data-key="sign_operator">
+          <div class="sign-lbl">成形スタート者</div>
+          <div class="sign-name" id="sign-start-name">-</div>
+          <div class="sign-stamp" id="sign-start-stamp"></div>
         </div>
         <div class="sign-box">
-          <div class="sign-label">確認（管理者）</div>
-          <input type="text" id="sign_manager" data-key="sign_manager">
+          <div class="sign-lbl">確認（管理者）</div>
+          <div class="sign-name" id="sign-mgr-name">-</div>
+          <div class="sign-check"><label><input type="checkbox" id="sign-mgr-cb" onchange="stampSign('mgr',this.checked)"> 確認済み</label></div>
+          <div class="sign-stamp" id="sign-mgr-stamp"></div>
         </div>
         <div class="sign-box">
-          <div class="sign-label">確認（監督者）</div>
-          <input type="text" id="sign_supervisor" data-key="sign_supervisor">
+          <div class="sign-lbl">確認（監督者）</div>
+          <div class="sign-name" id="sign-sup-name">-</div>
+          <div class="sign-check"><label><input type="checkbox" id="sign-sup-cb" onchange="stampSign('sup',this.checked)"> 確認済み</label></div>
+          <div class="sign-stamp" id="sign-sup-stamp"></div>
         </div>
         <div class="sign-box">
-          <div class="sign-label">集計確認</div>
-          <input type="text" id="sign_office" data-key="sign_office">
+          <div class="sign-lbl">集計確認</div>
+          <div class="sign-name" id="sign-agg-name">-</div>
+          <div class="sign-check"><label><input type="checkbox" id="sign-agg-cb" onchange="stampSign('agg',this.checked)"> 確認済み</label></div>
+          <div class="sign-stamp" id="sign-agg-stamp"></div>
         </div>
       </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:6px;">※確認済みにチェックを入れると、ログイン中のあなたの名前が自動入力されます</div>
     </div>
   </div>
 
-  <div style="text-align:center;color:var(--text-light);font-size:10px;padding:8px 0 20px;">
-    原紙保管：3年　／　データ保管：8年
-  </div>
+  <div style="text-align:center;color:var(--text3);font-size:10px;padding:6px 0 20px;">原紙保管：3年 ／ データ保管：8年</div>
 </div>
 
 <!-- 履歴モーダル -->
-<div class="modal-overlay" id="historyModal">
+<div class="modal-overlay" id="histModal">
   <div class="modal">
-    <button class="modal-close" onclick="closeHistory()">✕</button>
-    <h2>📂 保存済み記録一覧</h2>
-    <div id="historyList" class="history-list">
-      <div class="loading">読み込み中...</div>
+    <div class="modal-head">📂 保存済み記録<button class="modal-close" onclick="closeM('histModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="text" id="histSearch" placeholder="品番・製品名・依頼番号で検索..." oninput="renderHistList()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit;margin-bottom:8px;">
+      <div id="histList"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-new" onclick="closeHistory()">閉じる</button>
+    <div class="modal-foot"><button class="btn btn-new" onclick="closeM('histModal')">閉じる</button></div>
+  </div>
+</div>
+
+<!-- マスター管理モーダル -->
+<div class="modal-overlay" id="masterModal">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-head">⚙️ マスター管理<button class="modal-close" onclick="closeM('masterModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="master-sec">
+        <h3>📦 品番マスター</h3>
+        <div id="partMasterList" style="max-height:200px;overflow-y:auto;margin-bottom:10px;"></div>
+        <div style="border:1px solid var(--border);border-radius:5px;padding:10px;background:var(--sec);">
+          <div style="font-size:11px;font-weight:bold;color:var(--blue);margin-bottom:8px;">➕ 新規登録 / 上書き</div>
+          <div class="mf">
+            <div class="mf2">
+              <div><label style="font-size:10px;color:var(--text2);">品番 *</label><input type="text" id="mp-no" placeholder="品番"></div>
+              <div><label style="font-size:10px;color:var(--text2);">製品名 *</label><input type="text" id="mp-name" placeholder="製品名"></div>
+            </div>
+            <div class="mf2">
+              <div><label style="font-size:10px;color:var(--text2);">材料名</label><input type="text" id="mp-mat" placeholder="材料名"></div>
+              <div><label style="font-size:10px;color:var(--text2);">MB名</label><input type="text" id="mp-mb" placeholder="MB名"></div>
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--text2);">使用する成形条件セクション</label>
+              <div id="mp-sections" class="pl"></div>
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--text2);">製品確認項目</label>
+              <div id="mp-prodcheck" class="pl"></div>
+              <button onclick="addMpPC()" style="margin-top:4px;padding:2px 8px;font-size:11px;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;">＋ 追加</button>
+            </div>
+            <button class="btn btn-save" onclick="savePartMaster()" style="width:100%;padding:8px;">💾 品番マスターを保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="master-sec">
+        <h3>👤 担当者一覧（ポータルから自動取得）</h3>
+        <div id="empMasterList" style="max-height:160px;overflow-y:auto;background:var(--sec);border-radius:4px;padding:8px;font-size:11px;"></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-new" onclick="closeM('masterModal')">閉じる</button></div>
+  </div>
+</div>
+
+<!-- 製品確認項目編集モーダル -->
+<div class="modal-overlay" id="prodEditModal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-head">✏️ 製品確認項目の編集<button class="modal-close" onclick="closeM('prodEditModal')">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">項目を追加・削除できます。</div>
+      <div id="prodEditList"></div>
+      <button onclick="addProdEditRow()" style="margin-top:8px;padding:4px 12px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;">＋ 項目追加</button>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-new" onclick="closeM('prodEditModal')">キャンセル</button>
+      <button class="btn btn-save" onclick="applyProdEdit()">適用</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== GAS URL =====
-// ポータルから渡されるGAS URLを取得、またはここに直接設定
+// ─── CONFIG ───
 const GAS_URL = (() => {
-  try {
-    const p = new URLSearchParams(window.location.search);
-    return p.get('gasUrl') || p.get('seikeiKirokuGas') || '';
-  } catch(e) { return ''; }
+  const p = new URLSearchParams(window.location.search);
+  return p.get('seikei_gas_url') || p.get('gasUrl') || '';
 })();
 
-// ===== STATE =====
-let currentId = null;
+// ─── SSOユーザー復元 ───
+let currentUser = null;
+(function() {
+  try {
+    const token = new URLSearchParams(window.location.search).get('sso');
+    if (token) currentUser = JSON.parse(decodeURIComponent(escape(atob(token.split('').reverse().join('')))));
+  } catch(e) {}
+  if (!currentUser) currentUser = { id:'guest', name:'ゲスト', role:'staff', loginId:'guest' };
+  document.getElementById('user-badge').textContent = currentUser.name + '（' + currentUser.role + '）';
+  document.getElementById('operator').value = currentUser.name;
+  document.getElementById('sign-start-name').textContent = currentUser.name;
+  document.getElementById('sign-start-stamp').textContent = currentUser.name + ' ✔';
+})();
 
-// ===== INIT =====
+// ─── STATE ───
+let currentRecordId = null, historyRecords = [];
+let partMasters = JSON.parse(localStorage.getItem('seikei_part_masters') || '[]');
+let currentPCItems = []; // 製品確認項目
+const signState = { mgr:null, sup:null, agg:null };
+let _partNo = '', _reqNo = '';
+
+// ─── デフォルト成形条件セクション ───
+const DEF_COND = [
+  { key:'heat',   label:'加熱筒温度',        u1:'℃',    u2:'',      r:'±5',   rows:[{n:'ノズル１'},{n:'ノズル２'}] },
+  { key:'hr',     label:'ホットランナー',     u1:'℃',    u2:'',      r:'±5',   rows:[{n:'１'}] },
+  { key:'timer',  label:'タイマー',           u1:'S',     u2:'',      r:'±0.5', rows:[{n:'射出'},{n:'保持圧１'},{n:'冷却'}] },
+  { key:'ispd',   label:'射出速度(切替位置)', u1:'mm/s',  u2:'mm',    r:'±5',   rows:[{n:'１速'},{n:'２速'}] },
+  { key:'iprs',   label:'射出圧力',           u1:'Mpa',   u2:'mm',    r:'±5',   rows:[{n:'１速'},{n:'２速'}] },
+  { key:'holdp',  label:'保持圧(速度)',        u1:'Mpa',   u2:'mm/s',  r:'±5',   rows:[{n:'１速'}] },
+  { key:'plast',  label:'可塑化(切替位置)',    u1:'min⁻¹', u2:'mm',    r:'±5',   rows:[{n:'１'}] },
+  { key:'backp',  label:'背圧',               u1:'Mpa',   u2:'mm',    r:'±5',   rows:[{n:'１'}] },
+  { key:'screw',  label:'スクリュー位置',     u1:'mm',    u2:'',      r:'±1.5', rows:[{n:'計量'},{n:'保持圧切替'}] },
+  { key:'other',  label:'その他',             u1:'',      u2:'',      r:'',     rows:[
+    {n:'型締力(実測)',       u1:'ton', r:'±10'},
+    {n:'サックバック量',    u1:'mm',  r:'±3'},
+    {n:'クッション量',      u1:'mm',  r:'±1'},
+    {n:'エジェクターストローク', u1:'mm', r:'±3'},
+    {n:'サイクル',          u1:'S',   r:'±5'},
+  ]},
+  { key:'tempadj',label:'温調',               u1:'℃',    u2:'回路数', r:'',    rows:[{n:'ランナー'},{n:'固定側'},{n:'可動側'}] },
+];
+
+// デフォルト製品確認
+const DEF_PC = [
+  {c:'製品重量①',s:'g ±',t:'weight'},{c:'製品重量②',s:'g ±',t:'weight'},
+  {c:'裏面確認',s:'リブ、ボス、ツメのショート・白化無き事',t:'okng'},
+  {c:'コマ・ピン折れ',s:'無き事',t:'okng'},{c:'欠肉',s:'無き事',t:'okng'},
+  {c:'PL段差・バリ',s:'0.15mm以下',t:'okng'},{c:'ゲート部段差',s:'0.5mm以下',t:'okng'},
+  {c:'材質マーキング',s:'読み取り可能（><）',t:'okng'},{c:'識別マーキング',s:'読み取り可能（><）',t:'okng'},
+  {c:'品番マーキング',s:'読み取り可能',t:'okng'},
+  {c:'外観確認',s:'汚れ・ヒケ・ウェルド等無き事',t:'okng'},
+  {c:'気付き記入欄',s:'',t:'memo'},
+];
+
+// 5M固定行
+const M5_ITEMS = ['人','機械','材料','方法','金型'];
+
+let condSections = JSON.parse(JSON.stringify(DEF_COND));
+
+// ─── INIT ───
 window.addEventListener('DOMContentLoaded', () => {
-  // 今日の日付をセット
   document.getElementById('recordDate').value = new Date().toISOString().split('T')[0];
-  // ポータルからのパラメータを自動セット
-  const p = new URLSearchParams(window.location.search);
-  if (p.get('partNo')) document.getElementById('partNo').value = p.get('partNo');
-  if (p.get('productName')) document.getElementById('productName').value = p.get('productName');
-  updateStatus('新規作成モード', false);
+  currentPCItems = JSON.parse(JSON.stringify(DEF_PC));
+  renderCondSections();
+  renderProdCheck();
+  renderNoteRows(3);
+  renderChocoRows(5);
+  renderM5();
+  setStatus('新規作成モード', false);
 });
 
-// ===== OK/NG COLOR =====
-function updateOkNg(sel) {
-  sel.className = 'okng';
-  if (sel.value === 'OK' || sel.value === '○') sel.classList.add('ok');
-  else if (sel.value === 'NG' || sel.value === '✕') sel.classList.add('ng');
+// ─── 品番・依頼番号 同期（2か所） ───
+function syncF(field, from, val) {
+  if (field === 'partNo') {
+    _partNo = val;
+    if (from !== 'partNo_top') document.getElementById('partNo_top').value = val;
+    if (from !== 'partNo_bot') document.getElementById('partNo_bot').value = val;
+  } else {
+    _reqNo = val;
+    if (from !== 'reqNo_top') document.getElementById('reqNo_top').value = val;
+    if (from !== 'reqNo_bot') document.getElementById('reqNo_bot').value = val;
+  }
 }
 
-// ===== COLLECT ALL DATA =====
+// ─── 成形条件 描画 ───
+function renderCondSections(saved) {
+  const body = document.getElementById('condBody');
+  body.innerHTML = '';
+  condSections.forEach((sec, si) => {
+    const isTA = sec.key === 'tempadj';
+    const wrap = document.createElement('div');
+    wrap.className = 'dyn-section';
+    wrap.innerHTML = `
+      <div class="dyn-sec-title">
+        <span>${esc(sec.label)}</span>
+        <button class="add-row-btn" onclick="addCondRow(${si})">＋ 行追加</button>
+      </div>
+      <table class="dyn-table">
+        <thead><tr>
+          <th style="width:130px">項目名</th>
+          <th>基準値①</th><th>${esc(sec.u1||'単位')}</th>
+          ${sec.u2 ? `<th>基準値②</th><th>${esc(sec.u2)}</th>` : '<th colspan="2"></th>'}
+          <th>管理値</th><th>記入欄</th>
+          ${isTA ? '<th>OK/NG</th>' : ''}
+          <th style="width:24px"></th>
+        </tr></thead>
+        <tbody id="ctb-${si}"></tbody>
+      </table>`;
+    body.appendChild(wrap);
+    sec.rows.forEach((row, ri) => addCondRowEl(si, ri, row, saved));
+  });
+}
+
+function addCondRow(si) {
+  condSections[si].rows.push({n:''});
+  addCondRowEl(si, condSections[si].rows.length - 1, {n:''}, null);
+}
+
+function addCondRowEl(si, ri, row, saved) {
+  const sec = condSections[si];
+  const isTA = sec.key === 'tempadj';
+  const tbody = document.getElementById('ctb-' + si);
+  const k = `cond_${si}_${ri}`;
+  const d = saved && saved[k] ? saved[k] : {};
+  const u1 = row.u1 !== undefined ? row.u1 : sec.u1 || '';
+  const u2 = row.u2 !== undefined ? row.u2 : sec.u2 || '';
+  const r  = row.r  !== undefined ? row.r  : sec.r  || '';
+  const tr = document.createElement('tr');
+  tr.id = `ctr-${si}-${ri}`;
+  tr.innerHTML = `
+    <td><input type="text" class="txt" value="${esc(row.n||'')}" oninput="condSections[${si}].rows[${ri}].n=this.value" placeholder="項目名"></td>
+    <td><input type="number" value="${d.b1||''}" data-k="${k}_b1"></td>
+    <td class="rc">${esc(u1)}</td>
+    <td><input type="number" value="${d.b2||''}" data-k="${k}_b2"></td>
+    <td class="rc">${esc(u2)}</td>
+    <td class="rc">${esc(r)}</td>
+    <td><input type="number" value="${d.v||''}" data-k="${k}_v"></td>
+    ${isTA ? `<td><select class="okng" data-k="${k}_ok" onchange="upOkNg(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td>` : ''}
+    <td><button class="del-btn" onclick="delCondRow(${si},${ri},this)">🗑</button></td>`;
+  tbody.appendChild(tr);
+  if (isTA && d.ok) { const s = tr.querySelector(`[data-k="${k}_ok"]`); if(s){s.value=d.ok;upOkNg(s);} }
+}
+
+function delCondRow(si, ri, btn) {
+  condSections[si].rows.splice(ri, 1);
+  const tbody = document.getElementById('ctb-' + si);
+  tbody.removeChild(btn.closest('tr'));
+  Array.from(tbody.querySelectorAll('tr')).forEach((tr, newRi) => {
+    tr.id = `ctr-${si}-${newRi}`;
+    tr.querySelectorAll('[data-k]').forEach(el => {
+      el.setAttribute('data-k', el.getAttribute('data-k').replace(/cond_\d+_\d+/, `cond_${si}_${newRi}`));
+    });
+    const db = tr.querySelector('.del-btn');
+    if (db) db.setAttribute('onclick', `delCondRow(${si},${newRi},this)`);
+    const ni = tr.querySelector('input.txt');
+    if (ni) ni.setAttribute('oninput', `condSections[${si}].rows[${newRi}].n=this.value`);
+  });
+}
+
+// ─── 注意事項 ───
+function renderNoteRows(n) {
+  const tb = document.getElementById('notesTbody'); tb.innerHTML = '';
+  for (let i=0;i<n;i++) addNoteRowEl(tb, i);
+}
+function addNoteRow() { const tb=document.getElementById('notesTbody'); addNoteRowEl(tb, tb.rows.length); }
+function addNoteRowEl(tb, i) {
+  const tr = tb.insertRow();
+  tr.innerHTML = `
+    <td><input type="text" class="txt" data-k="note${i}c" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"></td>
+    <td><input type="text" data-k="note${i}s" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;text-align:right;"></td>
+    <td><select class="okng" data-k="note${i}ok" onchange="upOkNg(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td>`;
+}
+
+// ─── チョコ停 ───
+function renderChocoRows(n) {
+  const tb = document.getElementById('chocoTbody'); tb.innerHTML = '';
+  for (let i=0;i<n;i++) addChocoRowEl(tb,i);
+}
+function addChocoRow() { const tb=document.getElementById('chocoTbody'); addChocoRowEl(tb,tb.rows.length); }
+function addChocoRowEl(tb, i) {
+  const tr = tb.insertRow();
+  tr.innerHTML = `
+    <td><input type="text" data-k="ch${i}c" style="width:100%;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
+    <td><input type="text" data-k="ch${i}d" placeholder="月/日" style="width:55px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
+    <td><input type="text" data-k="ch${i}t" placeholder="時:分" style="width:45px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
+    <td><input type="number" data-k="ch${i}s" style="width:50px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
+    <td><input type="text" data-k="ch${i}p" style="width:55px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>`;
+}
+
+// ─── 5M ───
+function renderM5() {
+  const tb = document.getElementById('m5Body'); tb.innerHTML = '';
+  M5_ITEMS.forEach((item, i) => {
+    const tr = tb.insertRow();
+    tr.innerHTML = `
+      <td class="lbl">${esc(item)}</td>
+      <td><select data-k="m5_${i}yn" style="width:100%;font-size:11px;border:1px solid var(--border);border-radius:3px;padding:2px;font-family:inherit;"><option>-</option><option>有</option><option>無</option></select></td>
+      <td><input type="text" class="txt" data-k="m5_${i}ac" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"></td>`;
+  });
+}
+
+// ─── 製品確認 描画 ───
+function renderProdCheck(items) {
+  if (items) currentPCItems = items;
+  const tb = document.getElementById('prodCheckTbody'); tb.innerHTML = '';
+  currentPCItems.forEach((item, i) => {
+    const tr = tb.insertRow();
+    if (item.t === 'weight') {
+      tr.innerHTML = `<td class="lbl">${esc(item.c)}</td>
+        <td><input type="text" data-k="pc${i}s" value="${esc(item.s)}" style="width:80px;border:none;font-size:11px;font-family:inherit;text-align:right;"> g</td>
+        <td style="text-align:center;"><input type="number" data-k="pc${i}f" style="width:60px;border:none;font-size:11px;font-family:inherit;text-align:center;"> g</td>
+        <td style="text-align:center;"><input type="number" data-k="pc${i}l" style="width:60px;border:none;font-size:11px;font-family:inherit;text-align:center;"> g</td>`;
+    } else if (item.t === 'okng') {
+      tr.innerHTML = `<td class="lbl">${esc(item.c)}</td>
+        <td style="font-size:10px;">${esc(item.s)}</td>
+        <td><select class="okng" data-k="pc${i}f" onchange="upOkNg(this)"><option value="">-</option><option>○</option><option>✕</option></select></td>
+        <td><select class="okng" data-k="pc${i}l" onchange="upOkNg(this)"><option value="">-</option><option>○</option><option>✕</option></select></td>`;
+    } else {
+      tr.innerHTML = `<td class="lbl">${esc(item.c)}</td>
+        <td colspan="3"><input type="text" class="txt" data-k="pc${i}m" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"></td>`;
+    }
+  });
+}
+
+// ─── 製品確認 編集モーダル ───
+function openProdEdit() {
+  const list = document.getElementById('prodEditList'); list.innerHTML = '';
+  currentPCItems.forEach(item => addProdEditRowEl(list, item));
+  openM('prodEditModal');
+}
+function addProdEditRow() { addProdEditRowEl(document.getElementById('prodEditList'), {c:'',s:'',t:'okng'}); }
+function addProdEditRowEl(list, item) {
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:5px;';
+  div.innerHTML = `
+    <input type="text" value="${esc(item.c)}" placeholder="項目名" style="flex:2;padding:4px 6px;border:1px solid var(--border);border-radius:3px;font-size:11px;font-family:inherit;">
+    <input type="text" value="${esc(item.s)}" placeholder="管理値" style="flex:2;padding:4px 6px;border:1px solid var(--border);border-radius:3px;font-size:11px;font-family:inherit;">
+    <select style="flex:1;padding:4px;border:1px solid var(--border);border-radius:3px;font-size:11px;font-family:inherit;">
+      <option value="okng" ${item.t==='okng'?'selected':''}>○✕</option>
+      <option value="weight" ${item.t==='weight'?'selected':''}>重量(g)</option>
+      <option value="memo" ${item.t==='memo'?'selected':''}>メモ</option>
+    </select>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--r);font-size:14px;cursor:pointer;">🗑</button>`;
+  list.appendChild(div);
+}
+function applyProdEdit() {
+  const items = [];
+  document.querySelectorAll('#prodEditList > div').forEach(div => {
+    const ins = div.querySelectorAll('input'); const sel = div.querySelector('select');
+    const c = ins[0].value.trim(); if (!c) return;
+    items.push({c, s:ins[1].value.trim(), t:sel.value});
+  });
+  currentPCItems = items; renderProdCheck(); closeM('prodEditModal');
+  toast('製品確認項目を更新しました', 'ok');
+}
+
+// ─── ⑤ サイン ───
+function stampSign(role, checked) {
+  const labels = {mgr:'管理者', sup:'監督者', agg:'集計確認'};
+  if (checked) {
+    const now = new Date();
+    const ts = now.toLocaleDateString('ja-JP') + ' ' + now.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    signState[role] = {name:currentUser.name, id:currentUser.id, loginId:currentUser.loginId, ts};
+    document.getElementById(`sign-${role}-name`).textContent = currentUser.name;
+    document.getElementById(`sign-${role}-stamp`).textContent = currentUser.name + ' ✔';
+    toast(currentUser.name + 'が「' + labels[role] + '」で確認しました', 'ok');
+  } else {
+    signState[role] = null;
+    document.getElementById(`sign-${role}-name`).textContent = '-';
+    document.getElementById(`sign-${role}-stamp`).textContent = '';
+    toast('確認を解除しました', 'warn');
+  }
+}
+
+// ─── マスター管理 ───
+function openMasterModal() {
+  renderPartMasterList(); renderMpSections(); renderMpPC(); renderEmpList();
+  openM('masterModal');
+}
+function renderPartMasterList() {
+  const el = document.getElementById('partMasterList');
+  el.innerHTML = partMasters.length
+    ? partMasters.map((p,i) => `<div class="part-item">
+        <div class="part-info"><div class="part-no">${esc(p.no)}</div><div class="part-name">${esc(p.name)} ／ ${esc(p.mat||'')} ${esc(p.mb||'')}</div></div>
+        <button onclick="loadPM(${i})" style="padding:3px 8px;font-size:10px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;margin-right:4px;">読込</button>
+        <button onclick="delPM(${i})" style="padding:3px 8px;font-size:10px;border:1px solid var(--r);border-radius:3px;background:#fff5f5;color:var(--r);cursor:pointer;">削除</button>
+      </div>`).join('')
+    : '<div style="color:var(--text3);font-size:11px;padding:8px;">登録なし</div>';
+}
+function renderMpSections() {
+  document.getElementById('mp-sections').innerHTML = DEF_COND.map((s,i) =>
+    `<div class="pi"><input type="checkbox" id="mps${i}" value="${i}" checked><label for="mps${i}" style="cursor:pointer;">${esc(s.label)}</label></div>`
+  ).join('');
+}
+function renderMpPC() {
+  const div = document.getElementById('mp-prodcheck'); div.innerHTML = '';
+  DEF_PC.forEach(item => addMpPCEl(div, item));
+}
+function addMpPC() { addMpPCEl(document.getElementById('mp-prodcheck'), {c:'',s:'',t:'okng'}); }
+function addMpPCEl(div, item) {
+  const wrap = document.createElement('div'); wrap.className = 'pi'; wrap.style.marginBottom = '3px';
+  wrap.innerHTML = `
+    <input type="checkbox" checked>
+    <input type="text" value="${esc(item.c)}" placeholder="項目名" style="flex:2;">
+    <input type="text" value="${esc(item.s)}" placeholder="管理値" style="flex:2;">
+    <select style="font-size:11px;border:1px solid var(--border);border-radius:3px;padding:2px;font-family:inherit;">
+      <option value="okng" ${item.t==='okng'?'selected':''}>○✕</option>
+      <option value="weight" ${item.t==='weight'?'selected':''}>重量</option>
+      <option value="memo" ${item.t==='memo'?'selected':''}>メモ</option>
+    </select>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--r);font-size:13px;cursor:pointer;">🗑</button>`;
+  div.appendChild(wrap);
+}
+function savePartMaster() {
+  const no = document.getElementById('mp-no').value.trim();
+  const name = document.getElementById('mp-name').value.trim();
+  if (!no || !name) { toast('品番と製品名は必須です', 'err'); return; }
+  const sections = [];
+  document.querySelectorAll('#mp-sections input[type=checkbox]').forEach((cb,si) => {
+    if (cb.checked) sections.push(JSON.parse(JSON.stringify(DEF_COND[si])));
+  });
+  const prodCheck = [];
+  document.querySelectorAll('#mp-prodcheck > div').forEach(wrap => {
+    const cb = wrap.querySelector('input[type=checkbox]'); if (!cb||!cb.checked) return;
+    const txts = wrap.querySelectorAll('input[type=text]'); const sel = wrap.querySelector('select');
+    const c = txts[0]?txts[0].value.trim():''; if (!c) return;
+    prodCheck.push({c, s:txts[1]?txts[1].value.trim():'', t:sel?sel.value:'okng'});
+  });
+  const m = {no, name, mat:document.getElementById('mp-mat').value.trim(), mb:document.getElementById('mp-mb').value.trim(), sections, prodCheck};
+  const idx = partMasters.findIndex(p => p.no === no);
+  if (idx>=0) partMasters[idx]=m; else partMasters.unshift(m);
+  localStorage.setItem('seikei_part_masters', JSON.stringify(partMasters));
+  renderPartMasterList(); toast('品番マスターを保存しました', 'ok');
+  ['mp-no','mp-name','mp-mat','mp-mb'].forEach(id => document.getElementById(id).value='');
+}
+function loadPM(i) {
+  const m = partMasters[i];
+  document.getElementById('partNo_top').value = m.no; document.getElementById('partNo_bot').value = m.no; _partNo = m.no;
+  document.getElementById('productName').value = m.name;
+  document.getElementById('material').value = m.mat||''; document.getElementById('mbName').value = m.mb||'';
+  if (m.sections&&m.sections.length) { condSections = JSON.parse(JSON.stringify(m.sections)); renderCondSections(); }
+  if (m.prodCheck&&m.prodCheck.length) { renderProdCheck(m.prodCheck); }
+  closeM('masterModal'); toast('品番「'+m.no+'」を読み込みました', 'ok');
+}
+function delPM(i) {
+  if (!confirm('品番「'+partMasters[i].no+'」を削除しますか？')) return;
+  partMasters.splice(i,1); localStorage.setItem('seikei_part_masters',JSON.stringify(partMasters)); renderPartMasterList();
+}
+function renderEmpList() {
+  const div = document.getElementById('empMasterList');
+  try {
+    const emps = JSON.parse(decodeURIComponent(new URLSearchParams(window.location.search).get('emps')||'[]'));
+    if (emps.length) {
+      div.innerHTML = emps.map(e => `<div style="padding:3px 0;font-size:11px;border-bottom:1px solid var(--border);display:flex;gap:8px;"><span style="font-weight:bold;min-width:80px;">${esc(e.name)}</span><span style="color:var(--text3);">${esc(e.loginId)} / ${esc(e.dept||'')} / ${esc(e.role||'')}</span></div>`).join('');
+      return;
+    }
+  } catch(e) {}
+  div.innerHTML = `<div style="color:var(--text3);">ログイン中: ${esc(currentUser.name)}（${esc(currentUser.loginId)}）</div>`;
+}
+
+// ─── データ収集 ───
 function collectData() {
   const data = {
-    id: currentId || Date.now().toString(),
+    id: currentRecordId || Date.now().toString(),
     savedAt: new Date().toISOString(),
-    // 基本情報
-    productName: v('productName'),
-    recordDate: v('recordDate'),
-    partNo: v('partNo'),
-    requestNo: v('requestNo'),
-    machineNo: v('machineNo'),
-    condNo: v('condNo'),
-    material: v('material'),
-    mbName: v('mbName'),
-    mbRatio: v('mbRatio'),
-    drying: v('drying'),
-    moldingMachine: v('moldingMachine'),
-    takeMachine: v('takeMachine'),
-    boxMachine: v('boxMachine'),
-    operator: v('operator'),
+    savedBy: currentUser.id, savedByName: currentUser.name,
+    productName: gv('productName'), partNo: _partNo, reqNo: _reqNo,
+    recordDate: gv('recordDate'), machineNo: gv('machineNo'), condNo: gv('condNo'),
+    operator: currentUser.name, operatorId: currentUser.id,
+    material: gv('material'), mbName: gv('mbName'), mbRatio: gv('mbRatio'),
+    drying: gv('drying'), moldMachine: gv('moldMachine'), otherMachine: gv('otherMachine'),
+    condSections: JSON.parse(JSON.stringify(condSections)),
+    signs: { start:{name:currentUser.name,id:currentUser.id}, mgr:signState.mgr, sup:signState.sup, agg:signState.agg },
+    prodCheckItems: JSON.parse(JSON.stringify(currentPCItems)),
   };
-  // data-key inputs & selects
-  document.querySelectorAll('[data-key]').forEach(el => {
-    data[el.dataset.key] = el.value;
-  });
+  document.querySelectorAll('[data-k]').forEach(el => { data[el.getAttribute('data-k')] = el.value; });
   return data;
 }
+function gv(id) { const e=document.getElementById(id); return e?e.value:''; }
 
-function v(id) {
-  const el = document.getElementById(id);
-  return el ? el.value : '';
-}
-
-// ===== FILL FORM =====
-function fillForm(data) {
-  currentId = data.id;
-  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
-  setVal('productName', data.productName);
-  setVal('recordDate', data.recordDate);
-  setVal('partNo', data.partNo);
-  setVal('requestNo', data.requestNo);
-  setVal('machineNo', data.machineNo);
-  setVal('condNo', data.condNo);
-  setVal('material', data.material);
-  setVal('mbName', data.mbName);
-  setVal('mbRatio', data.mbRatio);
-  setVal('drying', data.drying);
-  setVal('moldingMachine', data.moldingMachine);
-  setVal('takeMachine', data.takeMachine);
-  setVal('boxMachine', data.boxMachine);
-  setVal('operator', data.operator);
-
-  document.querySelectorAll('[data-key]').forEach(el => {
-    if (data[el.dataset.key] !== undefined) {
-      el.value = data[el.dataset.key];
-      if (el.tagName === 'SELECT') updateOkNg(el);
-    }
-  });
-  updateStatus('記録ID: ' + data.id + '　（' + (data.savedAt || '').substring(0,10) + '）', false);
-  document.getElementById('recordId').textContent = 'ID: ' + data.id;
-}
-
-// ===== SAVE =====
-async function saveRecord() {
-  const data = collectData();
-  if (!data.requestNo) { showToast('成形依頼番号を入力してください', 'error'); return; }
-  currentId = data.id;
-  document.getElementById('recordId').textContent = 'ID: ' + data.id;
-
-  if (!GAS_URL) {
-    // GAS未設定時はローカル保存
-    const list = JSON.parse(localStorage.getItem('seikei_records') || '[]');
-    const idx = list.findIndex(r => r.id === data.id);
-    if (idx >= 0) list[idx] = data; else list.unshift(data);
-    localStorage.setItem('seikei_records', JSON.stringify(list));
-    showToast('✅ 保存しました（ローカル）', 'success');
-    updateStatus('保存済み（ローカル） ' + data.id, false);
-    return;
-  }
-
-  // GAS送信
-  updateStatus('保存中...', true);
-  try {
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'saveSeikei', data })
+// ─── フォーム読み込み ───
+function fillForm(d) {
+  currentRecordId = d.id;
+  const sv2 = (id,v) => { const e=document.getElementById(id); if(e) e.value=v||''; };
+  ['productName','recordDate','machineNo','condNo','material','mbName','mbRatio','drying','moldMachine','otherMachine'].forEach(id => sv2(id, d[id]));
+  document.getElementById('partNo_top').value = d.partNo||''; document.getElementById('partNo_bot').value = d.partNo||''; _partNo = d.partNo||'';
+  document.getElementById('reqNo_top').value = d.reqNo||''; document.getElementById('reqNo_bot').value = d.reqNo||''; _reqNo = d.reqNo||'';
+  if (d.condSections) { condSections = JSON.parse(JSON.stringify(d.condSections)); }
+  renderCondSections(d);
+  setTimeout(() => {
+    document.querySelectorAll('[data-k]').forEach(el => {
+      const k = el.getAttribute('data-k');
+      if (d[k] !== undefined) { el.value = d[k]; if (el.tagName==='SELECT') upOkNg(el); }
     });
-    const json = await res.json();
-    if (json.ok) {
-      showToast('✅ 保存しました', 'success');
-      updateStatus('保存済み ' + data.id, false);
-    } else {
-      throw new Error(json.error || '保存失敗');
-    }
-  } catch(e) {
-    // GASエラー時はローカルフォールバック
-    const list = JSON.parse(localStorage.getItem('seikei_records') || '[]');
-    const idx = list.findIndex(r => r.id === data.id);
-    if (idx >= 0) list[idx] = data; else list.unshift(data);
-    localStorage.setItem('seikei_records', JSON.stringify(list));
-    showToast('⚠️ GAS接続失敗 → ローカルに保存', 'error');
-    updateStatus('ローカル保存済み（GAS未接続）', false);
+  }, 80);
+  if (d.prodCheckItems) renderProdCheck(d.prodCheckItems);
+  if (d.signs) {
+    ['mgr','sup','agg'].forEach(role => {
+      const s = d.signs[role];
+      if (s) {
+        signState[role] = s;
+        document.getElementById(`sign-${role}-name`).textContent = s.name;
+        document.getElementById(`sign-${role}-stamp`).textContent = s.name + ' ✔';
+        document.getElementById(`sign-${role}-cb`).checked = true;
+      }
+    });
   }
+  setStatus('読込済: ' + (d.reqNo||d.id), false);
+  document.getElementById('s-id').textContent = 'ID: ' + d.id;
 }
 
-// ===== NEW =====
+// ─── 保存 ───
+async function saveRecord() {
+  if (!_reqNo) { toast('成形依頼番号を入力してください', 'err'); return; }
+  const data = collectData(); currentRecordId = data.id;
+  const list = JSON.parse(localStorage.getItem('seikei_records')||'[]');
+  const idx = list.findIndex(r=>r.id===data.id);
+  if (idx>=0) list[idx]=data; else list.unshift(data);
+  localStorage.setItem('seikei_records', JSON.stringify(list.slice(0,200)));
+  historyRecords = list;
+  document.getElementById('s-id').textContent = 'ID: ' + data.id;
+  if (GAS_URL) {
+    setStatus('保存中...', true);
+    try {
+      const res = await fetch(GAS_URL, {method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'saveSeikei',data})});
+      const json = await res.json();
+      if (json.ok) { toast('✅ 保存しました（スプレッドシート）', 'ok'); setStatus('保存済み '+data.id, false); }
+      else throw new Error(json.error||'保存失敗');
+    } catch(e) { toast('⚠️ ローカルに保存しました（GAS未接続）', 'warn'); setStatus('ローカル保存済み', false); }
+  } else { toast('✅ ローカルに保存しました', 'ok'); setStatus('ローカル保存済み', false); }
+}
+
+// ─── 新規 ───
 function newForm() {
   if (!confirm('入力内容をクリアして新規作成しますか？')) return;
-  currentId = null;
-  document.querySelectorAll('input, select, textarea').forEach(el => {
-    if (el.type === 'date') el.value = new Date().toISOString().split('T')[0];
-    else el.value = '';
+  currentRecordId = null; _partNo = ''; _reqNo = '';
+  ['productName','machineNo','condNo','material','mbName','mbRatio','drying','moldMachine','otherMachine','partNo_top','partNo_bot','reqNo_top','reqNo_bot'].forEach(id => { const e=document.getElementById(id); if(e) e.value=''; });
+  document.getElementById('recordDate').value = new Date().toISOString().split('T')[0];
+  condSections = JSON.parse(JSON.stringify(DEF_COND)); renderCondSections();
+  currentPCItems = JSON.parse(JSON.stringify(DEF_PC)); renderProdCheck();
+  renderNoteRows(3); renderChocoRows(5); renderM5();
+  ['mgr','sup','agg'].forEach(role => {
+    signState[role]=null;
+    document.getElementById(`sign-${role}-name`).textContent='-';
+    document.getElementById(`sign-${role}-stamp`).textContent='';
+    document.getElementById(`sign-${role}-cb`).checked=false;
   });
-  document.querySelectorAll('select.okng').forEach(s => { s.className = 'okng'; });
-  document.getElementById('recordId').textContent = '';
-  updateStatus('新規作成モード', false);
+  document.getElementById('s-id').textContent=''; setStatus('新規作成モード',false);
 }
 
-// ===== HISTORY =====
-function openHistory() {
-  document.getElementById('historyModal').classList.add('show');
-  loadHistory();
-}
-function closeHistory() {
-  document.getElementById('historyModal').classList.remove('show');
-}
-
-async function loadHistory() {
-  const listEl = document.getElementById('historyList');
-  listEl.innerHTML = '<div class="loading">読み込み中...</div>';
-
-  let records = [];
-
-  // GASから取得
+// ─── 履歴 ───
+async function openHistory() {
+  openM('histModal');
+  document.getElementById('histList').innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;">読み込み中...</div>';
+  historyRecords = JSON.parse(localStorage.getItem('seikei_records')||'[]');
   if (GAS_URL) {
     try {
-      const res = await fetch(GAS_URL + '?action=listSeikei&limit=50');
+      const res = await fetch(GAS_URL + '?action=listSeikei&limit=100');
       const json = await res.json();
-      if (json.ok && json.records) records = json.records;
+      if (json.ok && json.records) {
+        const gasIds = json.records.map(r=>r.id);
+        historyRecords = [...json.records, ...historyRecords.filter(r=>!gasIds.includes(r.id))];
+      }
     } catch(e) {}
   }
-
-  // ローカル
-  const local = JSON.parse(localStorage.getItem('seikei_records') || '[]');
-  const gasIds = records.map(r => r.id);
-  local.forEach(r => { if (!gasIds.includes(r.id)) records.push(r); });
-
-  if (records.length === 0) {
-    listEl.innerHTML = '<div class="loading">保存済みデータがありません</div>';
-    return;
-  }
-
-  records.sort((a,b) => (b.savedAt||'').localeCompare(a.savedAt||''));
-  listEl.innerHTML = '';
-  records.forEach(r => {
-    const item = document.createElement('div');
-    item.className = 'history-item';
-    item.innerHTML = `
-      <div>
-        <div class="hi-main">【${r.requestNo || '-'}】${r.productName || '無題'}</div>
-        <div class="hi-sub">品番: ${r.partNo || '-'} ／ 記入日: ${r.recordDate || '-'} ／ 号機: ${r.machineNo || '-'}</div>
-      </div>
-      <div style="font-size:10px;color:#aaa;">${(r.savedAt||'').substring(0,16).replace('T',' ')}</div>
-    `;
-    item.onclick = () => { fillForm(r); closeHistory(); showToast('📂 記録を読み込みました', 'success'); };
-    listEl.appendChild(item);
-  });
+  historyRecords.sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
+  renderHistList();
+}
+function renderHistList() {
+  const q = document.getElementById('histSearch').value.toLowerCase();
+  const el = document.getElementById('histList');
+  const filtered = q ? historyRecords.filter(r=>(r.partNo||'').toLowerCase().includes(q)||(r.productName||'').toLowerCase().includes(q)||(r.reqNo||'').toLowerCase().includes(q)) : historyRecords;
+  el.innerHTML = filtered.length
+    ? filtered.map(r => `<div class="hist-item" onclick="loadRecord(${JSON.stringify(r.id)})">
+        <div>
+          <div class="hist-main">【${esc(r.reqNo||'-')}】 ${esc(r.productName||'無題')}</div>
+          <div class="hist-sub">品番: ${esc(r.partNo||'-')} ／ 記入日: ${esc(r.recordDate||'-')} ／ 号機: ${esc(r.machineNo||'-')} ／ 担当: ${esc(r.operatorId||r.savedByName||'-')}</div>
+        </div>
+        <div class="hist-date">${(r.savedAt||'').substring(0,16).replace('T',' ')}</div>
+      </div>`).join('')
+    : '<div style="text-align:center;color:var(--text3);padding:20px;">記録がありません</div>';
+}
+function loadRecord(id) {
+  const r = historyRecords.find(x=>x.id===id); if (!r) { toast('見つかりません','err'); return; }
+  fillForm(r); closeM('histModal'); toast('📂 記録を読み込みました','ok');
 }
 
-// ===== UI HELPERS =====
-function updateStatus(msg, loading) {
-  document.getElementById('statusMsg').textContent = msg;
-  document.getElementById('statusDot').style.background = loading ? '#e67e22' : '#27ae60';
+// ─── UI HELPERS ───
+function upOkNg(sel) {
+  sel.className = 'okng';
+  if (sel.value==='OK'||sel.value==='○') sel.classList.add('ok');
+  else if (sel.value==='NG'||sel.value==='✕') sel.classList.add('ng');
 }
-
-function showToast(msg, type) {
+function openM(id) { document.getElementById(id).classList.add('show'); }
+function closeM(id) { document.getElementById(id).classList.remove('show'); }
+function setStatus(msg, loading) {
+  document.getElementById('s-msg').textContent = msg;
+  document.getElementById('s-dot').style.background = loading ? 'var(--o)' : 'var(--g)';
+}
+function toast(msg, type) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + (type || '');
-  setTimeout(() => t.className = 'toast', 2500);
+  t.textContent = msg; t.className = 'toast show ' + (type||'');
+  setTimeout(() => t.className='toast', 2800);
 }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if(e.target===el) closeM(el.id); });
+});
 </script>
 </body>
 </html>
