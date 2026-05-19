@@ -212,7 +212,8 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
       <!-- 行4 -->
       <div class="fg fg4">
         <div class="fld"><label>成形機</label><input type="text" id="moldMachine"></div>
-        <div class="fld"><label>取出機/箱替機</label><input type="text" id="otherMachine"></div>
+        <div class="fld"><label>取出機</label><input type="text" id="takeMachine"></div>
+        <div class="fld"><label>箱替機</label><input type="text" id="boxMachine"></div>
       </div>
     </div>
   </div>
@@ -426,7 +427,8 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 // ══════════════════════════════════════════════
 const GAS_URL = (() => {
   const p = new URLSearchParams(window.location.search);
-  return p.get('seikei_gas_url') || p.get('gasUrl') || '';
+  // ポータルから渡されるキー名を全パターン対応
+  return p.get('seikei_gas_url') || p.get('seikeiKirokuGas') || p.get('gasUrl') || '';
 })();
 
 let CU = null; // currentUser
@@ -1027,8 +1029,9 @@ function collectData() {
     recordDate:gv('recordDate'), machineNo:gv('machineNo'), condNo:gv('condNo'),
     operator:CU.name, operatorId:CU.id,
     material:gv('material'), mbName:gv('mbName'), mbRatio:gv('mbRatio'),
+    drying:gv('dryTemp')&&gv('dryTime')?gv('dryTemp')+'℃・'+gv('dryTime')+'H':'',
     dryTemp:gv('dryTemp'), dryTime:gv('dryTime'),
-    moldMachine:gv('moldMachine'), otherMachine:gv('otherMachine'),
+    moldMachine:gv('moldMachine'), takeMachine:gv('takeMachine'), boxMachine:gv('boxMachine'),
     condSections:deep(COND_SECS),
     signs:{start:{name:CU.name,id:CU.id}, mgr:SIGNS.mgr, sup:SIGNS.sup, agg:SIGNS.agg},
     prodCheckItems:deep(PC_ITEMS),
@@ -1043,7 +1046,7 @@ function collectData() {
 function fillForm(d) {
   RID=d.id;
   const sv2=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
-  ['productName','recordDate','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','otherMachine'].forEach(id=>sv2(id,d[id]));
+  ['productName','recordDate','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','takeMachine','boxMachine'].forEach(id=>sv2(id,d[id]));
   PN_PAIRS=d.pnPairs&&d.pnPairs.length?deep(d.pnPairs):[{no:d.partNo||'',req:d.reqNo||''}];
   renderPnPairs();
   if(d.condSections){COND_SECS=deep(d.condSections);}
@@ -1107,7 +1110,7 @@ async function saveRecord() {
 function newForm(){
   if(!confirm('入力内容をクリアして新規作成しますか？'))return;
   RID=null; PN_PAIRS=[{no:'',req:''}]; renderPnPairs();
-  ['productName','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','otherMachine'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['productName','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','takeMachine','boxMachine'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('recordDate').value=today();
   COND_SECS=deep(DEF_SECS); renderCondSecs('condBody',COND_SECS,false,null);
   PC_ITEMS=deep(DEF_PC); renderPC('pcTb',PC_ITEMS,false);
