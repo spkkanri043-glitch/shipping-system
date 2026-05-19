@@ -109,14 +109,13 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
 </style>
 </head>
 <body>
-
 <div class="toast" id="toast"></div>
 <div class="loading-ov hid" id="loading"><div class="spinner"></div><div class="loading-msg" id="loading-msg">処理中...</div></div>
 
 <!-- HOME -->
 <div class="screen on" id="s-home">
   <div class="topbar">
-    <span style="font-size:20px">📋</span>
+    <span style="font-size:20px">&#x1F4CB;</span>
     <div class="tb-title">成形記録書</div>
     <span class="tb-user" id="hm-user"></span>
   </div>
@@ -138,7 +137,7 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
   </div>
   <div style="padding:10px 13px 80px">
     <div class="card">
-      <div class="ct">📦 製品情報</div>
+      <div class="ct">&#x1F4E6; 製品情報</div>
       <div class="f"><label>製品名 <span style="color:var(--r)">*</span></label><input id="m_pname" placeholder="製品名"></div>
       <div class="fr2">
         <div class="f"><label>品番A（10桁）<span style="color:var(--r)">*</span></label>
@@ -162,111 +161,46 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
       </div>
     </div>
     <div class="card">
-      <div class="ct">🔥 加熱筒温度 — 基準値</div>
-      <div class="fr2">
-        <div class="f"><label>ノズル１(℃)</label><input type="number" id="m_tnoz1"></div>
-        <div class="f"><label>ノズル２(℃)</label><input type="number" id="m_tnoz2"></div>
-      </div>
-      <div class="fr2">
-        <div class="f"><label>ヒーター１(℃)</label><input type="number" id="m_th1"></div>
-        <div class="f"><label>ヒーター２(℃)</label><input type="number" id="m_th2"></div>
-      </div>
-      <div class="fr2">
-        <div class="f"><label>ヒーター３(℃)</label><input type="number" id="m_th3"></div>
-        <div class="f"><label>ヒーター４(℃)</label><input type="number" id="m_th4"></div>
-      </div>
+      <div class="ct">&#x1F525; 加熱筒温度 — 基準値</div>
+      <div class="fr2"><div class="f"><label>ノズル１(℃)</label><input type="number" id="m_tnoz1"></div><div class="f"><label>ノズル２(℃)</label><input type="number" id="m_tnoz2"></div></div>
+      <div class="fr2"><div class="f"><label>ヒーター１(℃)</label><input type="number" id="m_th1"></div><div class="f"><label>ヒーター２(℃)</label><input type="number" id="m_th2"></div></div>
+      <div class="fr2"><div class="f"><label>ヒーター３(℃)</label><input type="number" id="m_th3"></div><div class="f"><label>ヒーター４(℃)</label><input type="number" id="m_th4"></div></div>
       <div class="f" style="max-width:49%"><label>ヒーター５(℃)</label><input type="number" id="m_th5"></div>
     </div>
     <div class="card">
-      <div class="ct">💧 ホットランナー — 基準値</div>
-      <div class="fr2">
-        <div class="f"><label>HR1(℃)</label><input type="number" id="m_hr1"></div>
-        <div class="f"><label>HR2(℃)</label><input type="number" id="m_hr2"></div>
-      </div>
-      <div class="fr2">
-        <div class="f"><label>HR3(℃)</label><input type="number" id="m_hr3"></div>
-        <div class="f"><label>HR4(℃)</label><input type="number" id="m_hr4"></div>
-      </div>
-      <div class="fr2">
-        <div class="f"><label>HR5(℃)</label><input type="number" id="m_hr5"></div>
-        <div class="f"><label>HR6(℃)</label><input type="number" id="m_hr6"></div>
-      </div>
+      <div class="ct">&#x1F4A7; ホットランナー — 基準値</div>
+      <div class="fr2"><div class="f"><label>HR1(℃)</label><input type="number" id="m_hr1"></div><div class="f"><label>HR2(℃)</label><input type="number" id="m_hr2"></div></div>
+      <div class="fr2"><div class="f"><label>HR3(℃)</label><input type="number" id="m_hr3"></div><div class="f"><label>HR4(℃)</label><input type="number" id="m_hr4"></div></div>
+      <div class="fr2"><div class="f"><label>HR5(℃)</label><input type="number" id="m_hr5"></div><div class="f"><label>HR6(℃)</label><input type="number" id="m_hr6"></div></div>
     </div>
     <div class="card">
-      <div class="ct">⏱ タイマー — 基準値</div>
-      <div class="fr2">
-        <div class="f"><label>射出(S)</label><input type="number" id="m_tinj" step="0.1"></div>
-        <div class="f"><label>保持圧１(S)</label><input type="number" id="m_th1t" step="0.1"></div>
-      </div>
-      <div class="fr2">
-        <div class="f"><label>保持圧２(S)</label><input type="number" id="m_th2t" step="0.1"></div>
-        <div class="f"><label>冷却(S)</label><input type="number" id="m_tcool" step="0.1"></div>
-      </div>
+      <div class="ct">&#x23F1; タイマー — 基準値</div>
+      <div class="fr2"><div class="f"><label>射出(S)</label><input type="number" id="m_tinj" step="0.1"></div><div class="f"><label>保持圧１(S)</label><input type="number" id="m_th1t" step="0.1"></div></div>
+      <div class="fr2"><div class="f"><label>保持圧２(S)</label><input type="number" id="m_th2t" step="0.1"></div><div class="f"><label>冷却(S)</label><input type="number" id="m_tcool" step="0.1"></div></div>
       <div class="f" style="max-width:49%"><label>サイクル(S)</label><input type="number" id="m_tcyc" step="0.1"></div>
     </div>
+    <div class="card"><div class="ct">&#x26A1; 射出速度（切替位置）— 基準値</div><div id="m-speed-wrap"></div></div>
+    <div class="card"><div class="ct">&#x27A1; 射出圧力 — 基準値</div><div id="m-press-wrap"></div></div>
+    <div class="card"><div class="ct">&#x1F527; 保持圧（速度）— 基準値</div><div id="m-hold-wrap"></div></div>
+    <div class="card"><div class="ct">&#x1F504; 可塑化（切替位置）— 基準値</div><div id="m-plas-wrap"></div></div>
+    <div class="card"><div class="ct">&#x21A9; 背圧 — 基準値</div><div id="m-back-wrap"></div></div>
     <div class="card">
-      <div class="ct">⚡ 射出速度（切替位置）— 基準値</div>
-      <div id="m-speed-wrap"></div>
+      <div class="ct">&#x1F4CF; スクリュー位置 / その他 — 基準値</div>
+      <div class="fr2"><div class="f"><label>計量(mm)</label><input type="number" id="m_pmeas" step="0.1"></div><div class="f"><label>保持圧切替(mm)</label><input type="number" id="m_phold" step="0.1"></div></div>
+      <div class="fr2"><div class="f"><label>型締力(ton)</label><input type="number" id="m_clamp"></div><div class="f"><label>サックバック量(mm)</label><input type="number" id="m_sb" step="0.1"></div></div>
+      <div class="fr2"><div class="f"><label>クッション量(mm)</label><input type="number" id="m_cush" step="0.01"></div><div class="f"><label>E/Jストローク(mm)</label><input type="number" id="m_ej"></div></div>
     </div>
     <div class="card">
-      <div class="ct">➡ 射出圧力 — 基準値</div>
-      <div id="m-press-wrap"></div>
+      <div class="ct">&#x1F321; 温調 — 基準値</div>
+      <div class="fr3"><div class="f"><label>ランナー(℃)</label><input type="number" id="m_trun"></div><div class="f"><label>固定側(℃)</label><input type="number" id="m_tfx"></div><div class="f"><label>可動側(℃)</label><input type="number" id="m_tmv"></div></div>
+      <div class="fr3"><div class="f"><label>ランナー回路数</label><input type="number" id="m_crun"></div><div class="f"><label>固定側回路数</label><input type="number" id="m_cfx"></div><div class="f"><label>可動側回路数</label><input type="number" id="m_cmv"></div></div>
     </div>
     <div class="card">
-      <div class="ct">🔧 保持圧（速度）— 基準値</div>
-      <div id="m-hold-wrap"></div>
+      <div class="ct">&#x2696; 製品重量 — 基準値</div>
+      <div class="fr2"><div class="f"><label>製品重量A 中心値(g)</label><input type="number" id="m_wt1" step="0.1"></div><div class="f"><label>許容幅 ±(g)</label><input type="number" id="m_wt1tol" step="0.1"></div></div>
+      <div class="fr2" id="wt2area"><div class="f"><label>製品重量B 中心値(g)</label><input type="number" id="m_wt2" step="0.1"></div><div class="f"><label>許容幅 ±(g)</label><input type="number" id="m_wt2tol" step="0.1"></div></div>
     </div>
-    <div class="card">
-      <div class="ct">🔄 可塑化（切替位置）— 基準値</div>
-      <div id="m-plas-wrap"></div>
-    </div>
-    <div class="card">
-      <div class="ct">↩ 背圧 — 基準値</div>
-      <div id="m-back-wrap"></div>
-    </div>
-    <div class="card">
-      <div class="ct">📏 スクリュー位置 / その他 — 基準値</div>
-      <div class="fr2">
-        <div class="f"><label>計量(mm)</label><input type="number" id="m_pmeas" step="0.1"></div>
-        <div class="f"><label>保持圧切替(mm)</label><input type="number" id="m_phold" step="0.1"></div>
-      </div>
-      <div class="fr2">
-        <div class="f"><label>型締力(ton)</label><input type="number" id="m_clamp"></div>
-        <div class="f"><label>サックバック量(mm)</label><input type="number" id="m_sb" step="0.1"></div>
-      </div>
-      <div class="fr2">
-        <div class="f"><label>クッション量(mm)</label><input type="number" id="m_cush" step="0.01"></div>
-        <div class="f"><label>E/Jストローク(mm)</label><input type="number" id="m_ej"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ct">🌡 温調 — 基準値</div>
-      <div class="fr3">
-        <div class="f"><label>ランナー(℃)</label><input type="number" id="m_trun"></div>
-        <div class="f"><label>固定側(℃)</label><input type="number" id="m_tfx"></div>
-        <div class="f"><label>可動側(℃)</label><input type="number" id="m_tmv"></div>
-      </div>
-      <div class="fr3">
-        <div class="f"><label>ランナー回路数</label><input type="number" id="m_crun"></div>
-        <div class="f"><label>固定側回路数</label><input type="number" id="m_cfx"></div>
-        <div class="f"><label>可動側回路数</label><input type="number" id="m_cmv"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ct">⚖ 製品重量 — 基準値</div>
-      <div class="fr2">
-        <div class="f"><label>製品重量A 中心値(g)</label><input type="number" id="m_wt1" step="0.1"></div>
-        <div class="f"><label>許容幅 ±(g)</label><input type="number" id="m_wt1tol" step="0.1"></div>
-      </div>
-      <div class="fr2" id="wt2area">
-        <div class="f"><label>製品重量B 中心値(g)</label><input type="number" id="m_wt2" step="0.1"></div>
-        <div class="f"><label>許容幅 ±(g)</label><input type="number" id="m_wt2tol" step="0.1"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ct">📝 製品特有の注意事項</div>
-      <div class="f"><textarea id="m_special" rows="3" placeholder="品確確認項目、色差計基準値など"></textarea></div>
-    </div>
+    <div class="card"><div class="ct">&#x1F4DD; 製品特有の注意事項</div><div class="f"><textarea id="m_special" rows="3" placeholder="品確確認項目、色差計基準値など"></textarea></div></div>
     <button class="btn pri" style="width:100%;padding:13px" onclick="saveMaster()">✓ マスターを登録する</button>
     <div style="height:20px"></div>
   </div>
@@ -293,141 +227,72 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
     <button class="nb" onclick="rgo(9)">製品確認</button>
     <button class="nb" onclick="rgo(10)">履歴</button>
   </div>
-
-  <!-- 0: 依頼番号 -->
   <div class="sec on" id="rt0">
     <div class="card hl">
       <div class="ct">#️⃣ 成形依頼番号（必須・10桁）</div>
-      <div class="f">
-        <label>品番A 依頼番号 <span id="pA-lbl" style="color:var(--tx3);font-weight:400;font-size:10px"></span></label>
+      <div class="f"><label>品番A 依頼番号 <span id="pA-lbl" style="color:var(--tx3);font-weight:400;font-size:10px"></span></label>
         <input id="r_reqA" class="mono" maxlength="10" placeholder="0000000000" oninput="vReq('A');rupd()">
-        <div class="hint" id="h_reqA"></div>
-      </div>
-      <div class="f" id="reqBarea" style="display:none">
-        <label>品番B 依頼番号 <span id="pB-lbl" style="color:var(--tx3);font-weight:400;font-size:10px"></span></label>
+        <div class="hint" id="h_reqA"></div></div>
+      <div class="f" id="reqBarea" style="display:none"><label>品番B 依頼番号 <span id="pB-lbl" style="color:var(--tx3);font-weight:400;font-size:10px"></span></label>
         <input id="r_reqB" class="mono" maxlength="10" placeholder="0000000000" oninput="vReq('B');rupd()">
-        <div class="hint" id="h_reqB"></div>
-      </div>
+        <div class="hint" id="h_reqB"></div></div>
     </div>
     <div class="card">
-      <div class="ct">📅 作業情報</div>
-      <div class="fr2">
-        <div class="f"><label>記入日</label><input type="date" id="r_date" oninput="rupd()"></div>
-        <div class="f"><label>担当者</label><input id="r_op" oninput="rupd()"></div>
-      </div>
-      <div class="fr2">
-        <div class="f"><label>確認（確認者）</label><input id="r_ch1"></div>
-        <div class="f"><label>確認（集計確認）</label><input id="r_ch2"></div>
-      </div>
+      <div class="ct">&#x1F4C5; 作業情報</div>
+      <div class="fr2"><div class="f"><label>記入日</label><input type="date" id="r_date" oninput="rupd()"></div><div class="f"><label>担当者</label><input id="r_op" oninput="rupd()"></div></div>
+      <div class="fr2"><div class="f"><label>確認（確認者）</label><input id="r_ch1"></div><div class="f"><label>確認（集計確認）</label><input id="r_ch2"></div></div>
       <div class="f"><label>条件番号（成形機 / 取出機 / 箱替機）</label><input id="r_cond" placeholder="成形機：　取出機：　箱替機："></div>
     </div>
-    <div class="card">
-      <div class="ct">📊 マスター基準値</div>
-      <div id="m-preview" style="font-size:11px;color:var(--tx2);line-height:1.9"></div>
-    </div>
+    <div class="card"><div class="ct">&#x1F4CA; マスター基準値</div><div id="m-preview" style="font-size:11px;color:var(--tx2);line-height:1.9"></div></div>
   </div>
-
-  <!-- 1: 安全確認 -->
   <div class="sec" id="rt1">
     <div class="card">
-      <div class="ct">🛡 金型交換後 安全確認</div>
+      <div class="ct">&#x1F6E1; 金型交換後 安全確認</div>
       <div class="onr"><span class="onl">クランプ — 操作側</span><div class="onb"><button class="ob" onclick="tog(this,'OK')">OK</button><button class="ob" onclick="tog(this,'NG')">NG</button></div></div>
       <div class="onr"><span class="onl">クランプ — 反操作側</span><div class="onb"><button class="ob" onclick="tog(this,'OK')">OK</button><button class="ob" onclick="tog(this,'NG')">NG</button></div></div>
       <div class="onr"><span class="onl">E/J後退確認線</span><div class="onb"><button class="ob" onclick="tog(this,'OK')">OK</button><button class="ob" onclick="tog(this,'NG')">NG</button></div></div>
       <div class="onr"><span class="onl">ロケートリング</span><div class="onb"><button class="ob" onclick="tog(this,'OK')">OK</button><button class="ob" onclick="tog(this,'NG')">NG</button></div></div>
     </div>
-    <div class="card">
-      <div class="ct">🌡 温調 確認</div>
-      <div id="safety-cool"></div>
-    </div>
+    <div class="card"><div class="ct">&#x1F321; 温調 確認</div><div id="safety-cool"></div></div>
   </div>
-
-  <!-- 2: 温度 -->
   <div class="sec" id="rt2">
-    <div class="card">
-      <div class="ct">🔥 加熱筒温度 — 実測値記入</div>
-      <div id="cond-temp"></div>
-    </div>
-    <div class="card">
-      <div class="ct">💧 ホットランナー — 実測値記入</div>
-      <div id="cond-hr"></div>
-    </div>
+    <div class="card"><div class="ct">&#x1F525; 加熱筒温度 — 実測値記入</div><div id="cond-temp"></div></div>
+    <div class="card"><div class="ct">&#x1F4A7; ホットランナー — 実測値記入</div><div id="cond-hr"></div></div>
   </div>
-
-  <!-- 3: タイマー -->
   <div class="sec" id="rt3">
-    <div class="card">
-      <div class="ct">⏱ タイマー — 実測値記入</div>
-      <div id="cond-timer"></div>
-    </div>
-    <div class="card">
-      <div class="ct">🔁 サイクル</div>
-      <div id="cond-cyc"></div>
-    </div>
+    <div class="card"><div class="ct">&#x23F1; タイマー — 実測値記入</div><div id="cond-timer"></div></div>
+    <div class="card"><div class="ct">&#x1F501; サイクル</div><div id="cond-cyc"></div></div>
   </div>
-
-  <!-- 4: 速度/圧力 -->
   <div class="sec" id="rt4">
-    <div class="card">
-      <div class="ct">⚡ 射出速度（切替位置）— 実測値記入</div>
-      <div id="cond-speed"></div>
-    </div>
-    <div class="card">
-      <div class="ct">➡ 射出圧力 — 実測値記入</div>
-      <div id="cond-press"></div>
-    </div>
+    <div class="card"><div class="ct">&#x26A1; 射出速度（切替位置）— 実測値記入</div><div id="cond-speed"></div></div>
+    <div class="card"><div class="ct">&#x27A1; 射出圧力 — 実測値記入</div><div id="cond-press"></div></div>
   </div>
-
-  <!-- 5: 保持/可塑/背圧 -->
   <div class="sec" id="rt5">
-    <div class="card">
-      <div class="ct">🔧 保持圧（速度）— 実測値記入</div>
-      <div id="cond-hold"></div>
-    </div>
-    <div class="card">
-      <div class="ct">🔄 可塑化（切替位置）— 実測値記入</div>
-      <div id="cond-plas"></div>
-    </div>
-    <div class="card">
-      <div class="ct">↩ 背圧 — 実測値記入</div>
-      <div id="cond-back"></div>
-    </div>
+    <div class="card"><div class="ct">&#x1F527; 保持圧（速度）— 実測値記入</div><div id="cond-hold"></div></div>
+    <div class="card"><div class="ct">&#x1F504; 可塑化（切替位置）— 実測値記入</div><div id="cond-plas"></div></div>
+    <div class="card"><div class="ct">&#x21A9; 背圧 — 実測値記入</div><div id="cond-back"></div></div>
   </div>
-
-  <!-- 6: 位置/温調 -->
   <div class="sec" id="rt6">
-    <div class="card">
-      <div class="ct">📏 スクリュー位置 — 実測値記入</div>
-      <div id="cond-pos"></div>
-    </div>
-    <div class="card">
-      <div class="ct">🌡 温調 — 実測値記入</div>
-      <div id="cond-cool"></div>
-    </div>
+    <div class="card"><div class="ct">&#x1F4CF; スクリュー位置 — 実測値記入</div><div id="cond-pos"></div></div>
+    <div class="card"><div class="ct">&#x1F321; 温調 — 実測値記入</div><div id="cond-cool"></div></div>
   </div>
-
-  <!-- 7: 変化点 -->
   <div class="sec" id="rt7">
     <div class="card">
-      <div class="ct">⚠ 5M変化点（人・機械・材料・方法・金型）</div>
+      <div class="ct">&#x26A0; 5M変化点（人・機械・材料・方法・金型）</div>
       <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">有の場合は内容と対処方法を記入</div>
       <div id="m5-wrap"></div>
     </div>
   </div>
-
-  <!-- 8: チョコ停 -->
   <div class="sec" id="rt8">
     <div class="card">
-      <div class="ct">⏸ チョコ停・捨てショット記録</div>
+      <div class="ct">&#x23F8; チョコ停・捨てショット記録</div>
       <div id="choco-list"></div>
       <button class="btn-add" onclick="addChoco()">＋ 追加（最大5件）</button>
     </div>
   </div>
-
-  <!-- 9: 製品確認 -->
   <div class="sec" id="rt9">
     <div class="card">
-      <div class="ct">📦 製品確認（数値は実測値、他は○✕）</div>
+      <div class="ct">&#x1F4E6; 製品確認（数値は実測値、他は○✕）</div>
       <div class="sdiv">製品重量</div>
       <div id="wt-fields"></div>
       <div class="sdiv">外観・品質確認</div>
@@ -441,33 +306,18 @@ body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:
       <div class="onr"><span class="onl">品番マーキング<br><small style="color:var(--tx3)">読み取り可能な事</small></span><div class="onb"><button class="ob" onclick="tog(this,'○')">○</button><button class="ob" onclick="tog(this,'✕')">✕</button></div></div>
       <div class="onr"><span class="onl">外観確認<br><small style="color:var(--tx3)">汚れ・ヒケ・ウェルド・白化・シルバー・キズ・異物・擦れキズ・バリ・割れ・色混じり・ツヤムラ・フローマーク無き事</small></span><div class="onb"><button class="ob" onclick="tog(this,'○')">○</button><button class="ob" onclick="tog(this,'✕')">✕</button></div></div>
     </div>
-    <div class="card">
-      <div class="ct">✏ 気付き記入欄</div>
-      <div class="f"><textarea id="r_notice" rows="3" style="width:100%"></textarea></div>
-    </div>
-    <div class="card">
-      <div class="ct">👤 サイン</div>
-      <div class="fr2">
-        <div class="f"><label>担当者</label><input id="r_sign_op"></div>
-        <div class="f"><label>確認者</label><input id="r_sign_ch"></div>
-      </div>
-    </div>
+    <div class="card"><div class="ct">&#x270F; 気付き記入欄</div><div class="f"><textarea id="r_notice" rows="3" style="width:100%"></textarea></div></div>
+    <div class="card"><div class="ct">&#x1F464; サイン</div><div class="fr2"><div class="f"><label>担当者</label><input id="r_sign_op"></div><div class="f"><label>確認者</label><input id="r_sign_ch"></div></div></div>
   </div>
-
-  <!-- 10: 履歴 -->
   <div class="sec" id="rt10"><div id="hist-wrap" style="padding:10px 0 80px"></div></div>
-
   <div class="fbar">
-    <button class="fbtn fbtn-out" onclick="rgo(10)" title="履歴">🕐</button>
-    <button class="fbtn fbtn-blue" onclick="saveRec()">💾 保存</button>
-    <button class="fbtn fbtn-green" id="xbtn" onclick="doExport()">📊 Excel出力</button>
+    <button class="fbtn fbtn-out" onclick="rgo(10)" title="履歴">&#x1F550;</button>
+    <button class="fbtn fbtn-blue" onclick="saveRec()">&#x1F4BE; 保存</button>
+    <button class="fbtn fbtn-green" id="xbtn" onclick="doExport()">&#x1F4CA; Excel出力</button>
   </div>
 </div>
 
 <script>
-// ============================================================
-// CONFIG
-// ============================================================
 const params  = new URLSearchParams(location.search);
 const GAS_URL = decodeURIComponent(params.get('seikei_gas_url') || '');
 let currentUser = null;
@@ -479,21 +329,14 @@ try {
     currentUser = JSON.parse(json);
   }
 } catch(e) {}
-
 let masters = [], cur = null, cN = 0;
 
-// ============================================================
-// INIT
-// ============================================================
 window.addEventListener('load', async () => {
   if (currentUser) document.getElementById('hm-user').textContent = currentUser.name + 'さん';
   buildMasterFormWrappers();
   await loadMasters();
 });
 
-// ============================================================
-// GAS通信 — JSONP（CORS回避）
-// ============================================================
 async function gasPost(body) {
   if (!GAS_URL) throw new Error('GAS URLが設定されていません。ポータルから起動してください。');
   return new Promise((resolve, reject) => {
@@ -516,9 +359,6 @@ async function gasPost(body) {
   });
 }
 
-// ============================================================
-// SCREEN / TAB
-// ============================================================
 function showScr(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); }
 function goHome() { showScr('s-home'); loadMasters(); }
 function goNewMaster() { clearMF(); document.getElementById('m-hdr').textContent = '品番マスター登録'; showScr('s-master'); }
@@ -528,9 +368,6 @@ function rgo(i) {
   if (i === 10) renderHist();
 }
 
-// ============================================================
-// MASTER LIST
-// ============================================================
 async function loadMasters() {
   const badge = document.getElementById('sync-badge');
   badge.className = 'sync-badge ld'; badge.textContent = '読込中';
@@ -544,37 +381,26 @@ async function loadMasters() {
       const cache = localStorage.getItem('sk_masters_cache');
       if (cache) data = JSON.parse(cache);
     }
-    masters = data;
-    renderML();
+    masters = data; renderML();
     badge.className = 'sync-badge ok'; badge.textContent = '同期済';
   } catch(e) {
-    try {
-      const cache = localStorage.getItem('sk_masters_cache');
-      if (cache) { masters = JSON.parse(cache); renderML(); }
-    } catch(e2) {}
+    try { const cache = localStorage.getItem('sk_masters_cache'); if (cache) { masters = JSON.parse(cache); renderML(); } } catch(e2) {}
     badge.className = 'sync-badge er'; badge.textContent = 'オフライン';
   }
 }
 
 function renderML() {
   const el = document.getElementById('master-list');
-  if (!masters.length) {
-    el.innerHTML = '<div class="empty">📦 品番が登録されていません<br><small>「新しい品番を登録」から始めてください</small></div>';
-    return;
-  }
+  if (!masters.length) { el.innerHTML = '<div class="empty">&#x1F4E6; 品番が登録されていません<br><small>「新しい品番を登録」から始めてください</small></div>'; return; }
   el.innerHTML = masters.map((m, i) => {
     const cnt = getLocalRecordCount(m.productNoA);
-    return `<div class="mi" onclick="startRec(masters[${i}])">
-      <div class="mi-ico">📦</div>
-      <div class="mi-body">
-        <div class="mi-name">${m.productName}</div>
-        <div class="mi-sub">${m.productNoA}${m.productNoB ? ' / ' + m.productNoB : ''} ｜ ${m.material || '—'} ｜ ${m.machine || '—'}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
-        <span class="mi-cnt">${cnt}件</span>
-        <button onclick="event.stopPropagation();editM(masters[${i}])" class="btn sm">編集</button>
-      </div>
-    </div>`;
+    return '<div class="mi" onclick="startRec(masters[' + i + '])">' +
+      '<div class="mi-ico">&#x1F4E6;</div>' +
+      '<div class="mi-body"><div class="mi-name">' + m.productName + '</div>' +
+      '<div class="mi-sub">' + m.productNoA + (m.productNoB ? ' / ' + m.productNoB : '') + ' ｜ ' + (m.material || '—') + ' ｜ ' + (m.machine || '—') + '</div></div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">' +
+      '<span class="mi-cnt">' + cnt + '件</span>' +
+      '<button onclick="event.stopPropagation();editM(masters[' + i + '])" class="btn sm">編集</button></div></div>';
   }).join('');
 }
 
@@ -582,9 +408,6 @@ function getLocalRecordCount(pnoA) {
   try { const c = localStorage.getItem('sk_records_' + pnoA); return c ? JSON.parse(c).length : 0; } catch(e) { return 0; }
 }
 
-// ============================================================
-// MASTER FORM
-// ============================================================
 function gv(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
 function sv(id, v) { const e = document.getElementById(id); if (e && v != null) e.value = v; }
 
@@ -602,31 +425,16 @@ function vReq(ab) {
 }
 
 function buildMasterFormWrappers() {
-  document.getElementById('m-speed-wrap').innerHTML = [1,2,3,4,5,6].map(n => `
-    <div class="fr2" style="gap:6px;margin-bottom:6px">
-      <div class="f" style="margin:0"><label>${n}速(mm/s)</label><input type="number" id="m_v${n}"></div>
-      <div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_vp${n}" step="0.1"></div>
-    </div>`).join('');
-  document.getElementById('m-press-wrap').innerHTML = [1,2,3,4,5,6].map(n => `
-    <div class="fr2" style="gap:6px;margin-bottom:6px">
-      <div class="f" style="margin:0"><label>${n===6?'６':n}速(MPa)</label><input type="number" id="m_p${n}"></div>
-      <div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_pp${n}" step="0.1"></div>
-    </div>`).join('');
-  document.getElementById('m-hold-wrap').innerHTML = [1,2,3,4].map(n => `
-    <div class="fr2" style="gap:6px;margin-bottom:6px">
-      <div class="f" style="margin:0"><label>${n}速(MPa)</label><input type="number" id="m_hp${n}"></div>
-      <div class="f" style="margin:0"><label>速度(mm/s)</label><input type="number" id="m_hps${n}" step="0.1"></div>
-    </div>`).join('');
-  document.getElementById('m-plas-wrap').innerHTML = [1,2,3].map(n => `
-    <div class="fr2" style="gap:6px;margin-bottom:6px">
-      <div class="f" style="margin:0"><label>${n}速(min⁻¹)</label><input type="number" id="m_sc${n}"></div>
-      <div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_scp${n}" step="0.1"></div>
-    </div>`).join('');
-  document.getElementById('m-back-wrap').innerHTML = [1,2,3].map(n => `
-    <div class="fr2" style="gap:6px;margin-bottom:6px">
-      <div class="f" style="margin:0"><label>${n}速(MPa)</label><input type="number" id="m_bp${n}"></div>
-      <div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_bpp${n}" step="0.1"></div>
-    </div>`).join('');
+  document.getElementById('m-speed-wrap').innerHTML = [1,2,3,4,5,6].map(n =>
+    '<div class="fr2" style="gap:6px;margin-bottom:6px"><div class="f" style="margin:0"><label>' + n + '速(mm/s)</label><input type="number" id="m_v' + n + '"></div><div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_vp' + n + '" step="0.1"></div></div>').join('');
+  document.getElementById('m-press-wrap').innerHTML = [1,2,3,4,5,6].map(n =>
+    '<div class="fr2" style="gap:6px;margin-bottom:6px"><div class="f" style="margin:0"><label>' + (n===6?'６':n) + '速(MPa)</label><input type="number" id="m_p' + n + '"></div><div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_pp' + n + '" step="0.1"></div></div>').join('');
+  document.getElementById('m-hold-wrap').innerHTML = [1,2,3,4].map(n =>
+    '<div class="fr2" style="gap:6px;margin-bottom:6px"><div class="f" style="margin:0"><label>' + n + '速(MPa)</label><input type="number" id="m_hp' + n + '"></div><div class="f" style="margin:0"><label>速度(mm/s)</label><input type="number" id="m_hps' + n + '" step="0.1"></div></div>').join('');
+  document.getElementById('m-plas-wrap').innerHTML = [1,2,3].map(n =>
+    '<div class="fr2" style="gap:6px;margin-bottom:6px"><div class="f" style="margin:0"><label>' + n + '速(min⁻¹)</label><input type="number" id="m_sc' + n + '"></div><div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_scp' + n + '" step="0.1"></div></div>').join('');
+  document.getElementById('m-back-wrap').innerHTML = [1,2,3].map(n =>
+    '<div class="fr2" style="gap:6px;margin-bottom:6px"><div class="f" style="margin:0"><label>' + n + '速(MPa)</label><input type="number" id="m_bp' + n + '"></div><div class="f" style="margin:0"><label>切替位置(mm)</label><input type="number" id="m_bpp' + n + '" step="0.1"></div></div>').join('');
 }
 
 function clearMF() {
@@ -645,21 +453,21 @@ function clearMF() {
 }
 
 function collectM() {
-  const sp = {}, pr = {}, h = {}, pl = {}, bp = {};
-  for (let n = 1; n <= 6; n++) { sp['v'+n]=gv('m_v'+n); sp['p'+n]=gv('m_vp'+n); pr['p'+n]=gv('m_p'+n); pr['pp'+n]=gv('m_pp'+n); }
-  for (let n = 1; n <= 4; n++) { h['hp'+n]=gv('m_hp'+n); h['s'+n]=gv('m_hps'+n); }
-  for (let n = 1; n <= 3; n++) { pl['sc'+n]=gv('m_sc'+n); pl['cp'+n]=gv('m_scp'+n); bp['bp'+n]=gv('m_bp'+n); bp['pp'+n]=gv('m_bpp'+n); }
+  const sp={},pr={},h={},pl={},bp={};
+  for(let n=1;n<=6;n++){sp['v'+n]=gv('m_v'+n);sp['p'+n]=gv('m_vp'+n);pr['p'+n]=gv('m_p'+n);pr['pp'+n]=gv('m_pp'+n);}
+  for(let n=1;n<=4;n++){h['hp'+n]=gv('m_hp'+n);h['s'+n]=gv('m_hps'+n);}
+  for(let n=1;n<=3;n++){pl['sc'+n]=gv('m_sc'+n);pl['cp'+n]=gv('m_scp'+n);bp['bp'+n]=gv('m_bp'+n);bp['pp'+n]=gv('m_bpp'+n);}
   return {
-    productName:gv('m_pname'), productNoA:gv('m_pnoA'), productNoB:gv('m_pnoB'),
-    material:gv('m_mat'), mbName:gv('m_mb'), mbRatio:gv('m_mbratio'), machine:gv('m_machine'),
-    dryTemp:gv('m_drytemp'), dryTime:gv('m_drytime'),
-    temps:{ noz1:gv('m_tnoz1'),noz2:gv('m_tnoz2'),h1:gv('m_th1'),h2:gv('m_th2'),h3:gv('m_th3'),h4:gv('m_th4'),h5:gv('m_th5') },
-    hr:{ hr1:gv('m_hr1'),hr2:gv('m_hr2'),hr3:gv('m_hr3'),hr4:gv('m_hr4'),hr5:gv('m_hr5'),hr6:gv('m_hr6') },
-    timers:{ inj:gv('m_tinj'),h1:gv('m_th1t'),h2:gv('m_th2t'),cool:gv('m_tcool'),cyc:gv('m_tcyc') },
-    speed:sp, press:pr, hold:h, plas:pl, back:bp,
-    pos:{ meas:gv('m_pmeas'),hold:gv('m_phold'),clamp:gv('m_clamp'),sb:gv('m_sb'),cush:gv('m_cush'),ej:gv('m_ej') },
-    cool:{ runner:gv('m_trun'),fixed:gv('m_tfx'),move:gv('m_tmv'),cRun:gv('m_crun'),cFx:gv('m_cfx'),cMv:gv('m_cmv') },
-    weight:{ wt1:gv('m_wt1'),wt1tol:gv('m_wt1tol'),wt2:gv('m_wt2'),wt2tol:gv('m_wt2tol') },
+    productName:gv('m_pname'),productNoA:gv('m_pnoA'),productNoB:gv('m_pnoB'),
+    material:gv('m_mat'),mbName:gv('m_mb'),mbRatio:gv('m_mbratio'),machine:gv('m_machine'),
+    dryTemp:gv('m_drytemp'),dryTime:gv('m_drytime'),
+    temps:{noz1:gv('m_tnoz1'),noz2:gv('m_tnoz2'),h1:gv('m_th1'),h2:gv('m_th2'),h3:gv('m_th3'),h4:gv('m_th4'),h5:gv('m_th5')},
+    hr:{hr1:gv('m_hr1'),hr2:gv('m_hr2'),hr3:gv('m_hr3'),hr4:gv('m_hr4'),hr5:gv('m_hr5'),hr6:gv('m_hr6')},
+    timers:{inj:gv('m_tinj'),h1:gv('m_th1t'),h2:gv('m_th2t'),cool:gv('m_tcool'),cyc:gv('m_tcyc')},
+    speed:sp,press:pr,hold:h,plas:pl,back:bp,
+    pos:{meas:gv('m_pmeas'),hold:gv('m_phold'),clamp:gv('m_clamp'),sb:gv('m_sb'),cush:gv('m_cush'),ej:gv('m_ej')},
+    cool:{runner:gv('m_trun'),fixed:gv('m_tfx'),move:gv('m_tmv'),cRun:gv('m_crun'),cFx:gv('m_cfx'),cMv:gv('m_cmv')},
+    weight:{wt1:gv('m_wt1'),wt1tol:gv('m_wt1tol'),wt2:gv('m_wt2'),wt2tol:gv('m_wt2tol')},
     special:gv('m_special')
   };
 }
@@ -682,30 +490,27 @@ async function saveMaster() {
 function editM(m) {
   clearMF();
   document.getElementById('m-hdr').textContent = '品番マスター編集';
-  sv('m_pname',m.productName); sv('m_pnoA',m.productNoA); sv('m_pnoB',m.productNoB);
-  sv('m_mat',m.material); sv('m_mb',m.mbName); sv('m_mbratio',m.mbRatio); sv('m_machine',m.machine);
-  sv('m_drytemp',m.dryTemp); sv('m_drytime',m.dryTime);
-  const t=m.temps||{}; ['noz1','noz2','h1','h2','h3','h4','h5'].forEach(k=>sv('m_t'+k,t[k]));
-  const hr=m.hr||{}; [1,2,3,4,5,6].forEach(n=>sv('m_hr'+n,hr['hr'+n]));
-  const tm=m.timers||{}; sv('m_tinj',tm.inj); sv('m_th1t',tm.h1); sv('m_th2t',tm.h2); sv('m_tcool',tm.cool); sv('m_tcyc',tm.cyc);
-  const sp=m.speed||{}; for(let n=1;n<=6;n++){sv('m_v'+n,sp['v'+n]);sv('m_vp'+n,sp['p'+n]);}
-  const pr=m.press||{}; for(let n=1;n<=6;n++){sv('m_p'+n,pr['p'+n]);sv('m_pp'+n,pr['pp'+n]);}
-  const h=m.hold||{};  for(let n=1;n<=4;n++){sv('m_hp'+n,h['hp'+n]);sv('m_hps'+n,h['s'+n]);}
-  const pl=m.plas||{}; for(let n=1;n<=3;n++){sv('m_sc'+n,pl['sc'+n]);sv('m_scp'+n,pl['cp'+n]);}
-  const bp=m.back||{}; for(let n=1;n<=3;n++){sv('m_bp'+n,bp['bp'+n]);sv('m_bpp'+n,bp['pp'+n]);}
-  const ps=m.pos||{}; sv('m_pmeas',ps.meas); sv('m_phold',ps.hold); sv('m_clamp',ps.clamp); sv('m_sb',ps.sb); sv('m_cush',ps.cush); sv('m_ej',ps.ej);
-  const c=m.cool||{}; sv('m_trun',c.runner); sv('m_tfx',c.fixed); sv('m_tmv',c.move); sv('m_crun',c.cRun); sv('m_cfx',c.cFx); sv('m_cmv',c.cMv);
-  const w=m.weight||{}; sv('m_wt1',w.wt1); sv('m_wt1tol',w.wt1tol); sv('m_wt2',w.wt2); sv('m_wt2tol',w.wt2tol);
+  sv('m_pname',m.productName);sv('m_pnoA',m.productNoA);sv('m_pnoB',m.productNoB);
+  sv('m_mat',m.material);sv('m_mb',m.mbName);sv('m_mbratio',m.mbRatio);sv('m_machine',m.machine);
+  sv('m_drytemp',m.dryTemp);sv('m_drytime',m.dryTime);
+  const t=m.temps||{};['noz1','noz2','h1','h2','h3','h4','h5'].forEach(k=>sv('m_t'+k,t[k]));
+  const hr=m.hr||{};[1,2,3,4,5,6].forEach(n=>sv('m_hr'+n,hr['hr'+n]));
+  const tm=m.timers||{};sv('m_tinj',tm.inj);sv('m_th1t',tm.h1);sv('m_th2t',tm.h2);sv('m_tcool',tm.cool);sv('m_tcyc',tm.cyc);
+  const sp=m.speed||{};for(let n=1;n<=6;n++){sv('m_v'+n,sp['v'+n]);sv('m_vp'+n,sp['p'+n]);}
+  const pr=m.press||{};for(let n=1;n<=6;n++){sv('m_p'+n,pr['p'+n]);sv('m_pp'+n,pr['pp'+n]);}
+  const h=m.hold||{};for(let n=1;n<=4;n++){sv('m_hp'+n,h['hp'+n]);sv('m_hps'+n,h['s'+n]);}
+  const pl=m.plas||{};for(let n=1;n<=3;n++){sv('m_sc'+n,pl['sc'+n]);sv('m_scp'+n,pl['cp'+n]);}
+  const bp=m.back||{};for(let n=1;n<=3;n++){sv('m_bp'+n,bp['bp'+n]);sv('m_bpp'+n,bp['pp'+n]);}
+  const ps=m.pos||{};sv('m_pmeas',ps.meas);sv('m_phold',ps.hold);sv('m_clamp',ps.clamp);sv('m_sb',ps.sb);sv('m_cush',ps.cush);sv('m_ej',ps.ej);
+  const c=m.cool||{};sv('m_trun',c.runner);sv('m_tfx',c.fixed);sv('m_tmv',c.move);sv('m_crun',c.cRun);sv('m_cfx',c.cFx);sv('m_cmv',c.cMv);
+  const w=m.weight||{};sv('m_wt1',w.wt1);sv('m_wt1tol',w.wt1tol);sv('m_wt2',w.wt2);sv('m_wt2tol',w.wt2tol);
   sv('m_special',m.special);
-  vPno('A'); vPno('B');
+  vPno('A');vPno('B');
   showScr('s-master');
 }
 
-// ============================================================
-// RECORD SCREEN
-// ============================================================
 function startRec(m) {
-  cur=m; cN=0;
+  cur=m;cN=0;
   document.getElementById('rec-title').textContent=m.productName;
   document.getElementById('r_date').value=new Date().toISOString().split('T')[0];
   document.getElementById('pA-lbl').textContent='（'+m.productNoA+'）';
@@ -713,117 +518,76 @@ function startRec(m) {
   if(m.productNoB){rb.style.display='block';document.getElementById('pB-lbl').textContent='（'+m.productNoB+'）';}
   else rb.style.display='none';
   const t=m.temps||{},tm=m.timers||{};
-  document.getElementById('m-preview').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 10px">
-      <div>材料：${m.material||'—'}</div><div>MB名：${m.mbName||'—'}</div>
-      <div>MB比率：${m.mbRatio||'—'}</div><div>号機：${m.machine||'—'}</div>
-      <div>乾燥：${m.dryTemp||'—'}℃ ${m.dryTime||'—'}H</div><div>サイクル：${tm.cyc||'—'}S</div>
-      <div>ノズル１：${t.noz1||'—'}℃</div><div>ヒーター１：${t.h1||'—'}℃</div>
-    </div>`;
-  buildCondInputs(); buildWtFields(); build5M();
-  document.getElementById('choco-list').innerHTML=''; cN=0; addChoco();
-  rgo(0); rupd(); showScr('s-rec');
+  document.getElementById('m-preview').innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 10px">' +
+    '<div>材料：'+(m.material||'—')+'</div><div>MB名：'+(m.mbName||'—')+'</div>' +
+    '<div>MB比率：'+(m.mbRatio||'—')+'</div><div>号機：'+(m.machine||'—')+'</div>' +
+    '<div>乾燥：'+(m.dryTemp||'—')+'℃ '+(m.dryTime||'—')+'H</div><div>サイクル：'+(tm.cyc||'—')+'S</div>' +
+    '<div>ノズル１：'+(t.noz1||'—')+'℃</div><div>ヒーター１：'+(t.h1||'—')+'℃</div></div>';
+  buildCondInputs();buildWtFields();build5M();
+  document.getElementById('choco-list').innerHTML='';cN=0;addChoco();
+  rgo(0);rupd();showScr('s-rec');
 }
 
 function mkCR(label,ref,id,unit,wide){
-  if(wide){
-    const[id1,id2]=id,[u1,u2]=unit;
-    return `<div class="cr cr2"><div><div class="cl">${label}</div><div class="cr-ref">${ref||''}</div></div><input type="number" class="ci" id="${id1}" step="any" placeholder="実測値"><input type="number" class="ci" id="${id2}" step="any" placeholder="切替mm"><div class="cu">${u2}</div></div>`;
-  }
-  return `<div class="cr"><div><div class="cl">${label}</div><div class="cr-ref">${ref||''}</div></div><input type="number" class="ci" id="${id}" step="any" placeholder="実測値"><div class="cu">${unit}</div></div>`;
+  if(wide){const[id1,id2]=id,[u1,u2]=unit;return '<div class="cr cr2"><div><div class="cl">'+label+'</div><div class="cr-ref">'+(ref||'')+'</div></div><input type="number" class="ci" id="'+id1+'" step="any" placeholder="実測値"><input type="number" class="ci" id="'+id2+'" step="any" placeholder="切替mm"><div class="cu">'+u2+'</div></div>';}
+  return '<div class="cr"><div><div class="cl">'+label+'</div><div class="cr-ref">'+(ref||'')+'</div></div><input type="number" class="ci" id="'+id+'" step="any" placeholder="実測値"><div class="cu">'+unit+'</div></div>';
 }
 
 function buildCondInputs(){
   const m=cur,t=m.temps||{},hr=m.hr||{},tm=m.timers||{},sp=m.speed||{},pr=m.press||{},h=m.hold||{},pl=m.plas||{},bp2=m.back||{},ps=m.pos||{},c=m.cool||{};
   document.getElementById('safety-cool').innerHTML=
-    `<div class="onr"><span class="onl">ランナー${c.runner?' 基準'+c.runner+'℃':''}</span><div class="onb"><button class="ob" onclick="tog(this,'OK')">OK</button><button class="ob" onclick="tog(this,'NG')">NG</button></div></div>`+
-    `<div class="onr"><span class="onl">固定側${c.fixed?' 基準'+c.fixed+'℃':''}</span><div class="onb"><button class="ob" onclick="tog(this,'OK')">OK</button><button class="ob" onclick="tog(this,'NG')">NG</button></div></div>`+
-    `<div class="onr"><span class="onl">可動側${c.move?' 基準'+c.move+'℃':''}</span><div class="onb"><button class="ob" onclick="tog(this,'OK')">OK</button><button class="ob" onclick="tog(this,'NG')">NG</button></div></div>`;
+    '<div class="onr"><span class="onl">ランナー'+(c.runner?' 基準'+c.runner+'℃':'')+'</span><div class="onb"><button class="ob" onclick="tog(this,\'OK\')">OK</button><button class="ob" onclick="tog(this,\'NG\')">NG</button></div></div>'+
+    '<div class="onr"><span class="onl">固定側'+(c.fixed?' 基準'+c.fixed+'℃':'')+'</span><div class="onb"><button class="ob" onclick="tog(this,\'OK\')">OK</button><button class="ob" onclick="tog(this,\'NG\')">NG</button></div></div>'+
+    '<div class="onr"><span class="onl">可動側'+(c.move?' 基準'+c.move+'℃':'')+'</span><div class="onb"><button class="ob" onclick="tog(this,\'OK\')">OK</button><button class="ob" onclick="tog(this,\'NG\')">NG</button></div></div>';
   document.getElementById('cond-temp').innerHTML=
     mkCR('ノズル１',t.noz1?t.noz1+'℃':'','r_tnoz1','℃')+mkCR('ノズル２',t.noz2?t.noz2+'℃':'','r_tnoz2','℃')+
     mkCR('ヒーター１',t.h1?t.h1+'℃':'','r_th1','℃')+mkCR('ヒーター２',t.h2?t.h2+'℃':'','r_th2','℃')+
-    mkCR('ヒーター３',t.h3?t.h3+'℃':'','r_th3','℃')+mkCR('ヒーター４',t.h4?t.h4+'℃':'','r_th4','℃')+
-    mkCR('ヒーター５',t.h5?t.h5+'℃':'','r_th5','℃');
+    mkCR('ヒーター３',t.h3?t.h3+'℃':'','r_th3','℃')+mkCR('ヒーター４',t.h4?t.h4+'℃':'','r_th4','℃')+mkCR('ヒーター５',t.h5?t.h5+'℃':'','r_th5','℃');
   document.getElementById('cond-hr').innerHTML=[1,2,3,4,5,6].map(n=>mkCR('HR'+n,hr['hr'+n]?hr['hr'+n]+'℃':'','r_hr'+n,'℃')).join('');
-  document.getElementById('cond-timer').innerHTML=
-    mkCR('射出',tm.inj?tm.inj+'S':'','r_tinj','S')+mkCR('保持圧１',tm.h1?tm.h1+'S':'','r_th1t','S')+
-    mkCR('保持圧２',tm.h2?tm.h2+'S':'','r_th2t','S')+mkCR('冷却',tm.cool?tm.cool+'S':'','r_tcool','S');
+  document.getElementById('cond-timer').innerHTML=mkCR('射出',tm.inj?tm.inj+'S':'','r_tinj','S')+mkCR('保持圧１',tm.h1?tm.h1+'S':'','r_th1t','S')+mkCR('保持圧２',tm.h2?tm.h2+'S':'','r_th2t','S')+mkCR('冷却',tm.cool?tm.cool+'S':'','r_tcool','S');
   document.getElementById('cond-cyc').innerHTML=mkCR('サイクル',tm.cyc?tm.cyc+'S':'','r_tcyc','S');
-  document.getElementById('cond-speed').innerHTML=[1,2,3,4,5,6].map(n=>{
-    const ref=sp['v'+n]?sp['v'+n]+'mm/s'+(sp['p'+n]?' @'+sp['p'+n]+'mm':''):'';
-    return mkCR(n+'速',ref,['r_v'+n,'r_vp'+n],['mm/s','mm'],true);
-  }).join('');
-  document.getElementById('cond-press').innerHTML=[1,2,3,4,5,6].map(n=>{
-    const ref=pr['p'+n]?pr['p'+n]+'MPa'+(pr['pp'+n]?' @'+pr['pp'+n]+'mm':''):'';
-    return mkCR((n===6?'６':n)+'速',ref,['r_p'+n,'r_pp'+n],['MPa','mm'],true);
-  }).join('');
-  document.getElementById('cond-hold').innerHTML=[1,2,3,4].map(n=>{
-    const ref=h['hp'+n]?h['hp'+n]+'MPa'+(h['s'+n]?' @'+h['s'+n]+'mm/s':''):'';
-    return mkCR(n+'速',ref,['r_hp'+n,'r_hps'+n],['MPa','mm/s'],true);
-  }).join('');
-  document.getElementById('cond-plas').innerHTML=[1,2,3].map(n=>{
-    const ref=pl['sc'+n]?pl['sc'+n]+'rpm'+(pl['cp'+n]?' @'+pl['cp'+n]+'mm':''):'';
-    return mkCR(n+'速',ref,['r_sc'+n,'r_scp'+n],['rpm','mm'],true);
-  }).join('');
-  document.getElementById('cond-back').innerHTML=[1,2,3].map(n=>{
-    const ref=bp2['bp'+n]?bp2['bp'+n]+'MPa'+(bp2['pp'+n]?' @'+bp2['pp'+n]+'mm':''):'';
-    return mkCR(n+'速',ref,['r_bp'+n,'r_bpp'+n],['MPa','mm'],true);
-  }).join('');
-  document.getElementById('cond-pos').innerHTML=
-    mkCR('計量',ps.meas?ps.meas+'mm':'','r_pmeas','mm')+mkCR('保持圧切替',ps.hold?ps.hold+'mm':'','r_phold','mm')+
-    mkCR('型締力(実測)',ps.clamp?ps.clamp+'ton':'','r_clamp','ton')+mkCR('サックバック量',ps.sb?ps.sb+'mm':'','r_sb','mm')+
-    mkCR('クッション量',ps.cush?ps.cush+'mm':'','r_cush','mm')+mkCR('E/Jストローク',ps.ej?ps.ej+'mm':'','r_ej','mm');
-  document.getElementById('cond-cool').innerHTML=
-    mkCR('ランナー',c.runner?'基準'+c.runner+'℃':'',['r_trun','r_crun'],['℃','回路'],true)+
-    mkCR('固定側',c.fixed?'基準'+c.fixed+'℃':'',['r_tfx','r_cfx'],['℃','回路'],true)+
-    mkCR('可動側',c.move?'基準'+c.move+'℃':'',['r_tmv','r_cmv'],['℃','回路'],true);
+  document.getElementById('cond-speed').innerHTML=[1,2,3,4,5,6].map(n=>{const ref=sp['v'+n]?sp['v'+n]+'mm/s'+(sp['p'+n]?' @'+sp['p'+n]+'mm':''):'';return mkCR(n+'速',ref,['r_v'+n,'r_vp'+n],['mm/s','mm'],true);}).join('');
+  document.getElementById('cond-press').innerHTML=[1,2,3,4,5,6].map(n=>{const ref=pr['p'+n]?pr['p'+n]+'MPa'+(pr['pp'+n]?' @'+pr['pp'+n]+'mm':''):'';return mkCR((n===6?'６':n)+'速',ref,['r_p'+n,'r_pp'+n],['MPa','mm'],true);}).join('');
+  document.getElementById('cond-hold').innerHTML=[1,2,3,4].map(n=>{const ref=h['hp'+n]?h['hp'+n]+'MPa'+(h['s'+n]?' @'+h['s'+n]+'mm/s':''):'';return mkCR(n+'速',ref,['r_hp'+n,'r_hps'+n],['MPa','mm/s'],true);}).join('');
+  document.getElementById('cond-plas').innerHTML=[1,2,3].map(n=>{const ref=pl['sc'+n]?pl['sc'+n]+'rpm'+(pl['cp'+n]?' @'+pl['cp'+n]+'mm':''):'';return mkCR(n+'速',ref,['r_sc'+n,'r_scp'+n],['rpm','mm'],true);}).join('');
+  document.getElementById('cond-back').innerHTML=[1,2,3].map(n=>{const ref=bp2['bp'+n]?bp2['bp'+n]+'MPa'+(bp2['pp'+n]?' @'+bp2['pp'+n]+'mm':''):'';return mkCR(n+'速',ref,['r_bp'+n,'r_bpp'+n],['MPa','mm'],true);}).join('');
+  document.getElementById('cond-pos').innerHTML=mkCR('計量',ps.meas?ps.meas+'mm':'','r_pmeas','mm')+mkCR('保持圧切替',ps.hold?ps.hold+'mm':'','r_phold','mm')+mkCR('型締力(実測)',ps.clamp?ps.clamp+'ton':'','r_clamp','ton')+mkCR('サックバック量',ps.sb?ps.sb+'mm':'','r_sb','mm')+mkCR('クッション量',ps.cush?ps.cush+'mm':'','r_cush','mm')+mkCR('E/Jストローク',ps.ej?ps.ej+'mm':'','r_ej','mm');
+  document.getElementById('cond-cool').innerHTML=mkCR('ランナー',c.runner?'基準'+c.runner+'℃':'',['r_trun','r_crun'],['℃','回路'],true)+mkCR('固定側',c.fixed?'基準'+c.fixed+'℃':'',['r_tfx','r_cfx'],['℃','回路'],true)+mkCR('可動側',c.move?'基準'+c.move+'℃':'',['r_tmv','r_cmv'],['℃','回路'],true);
 }
 
 function buildWtFields(){
   const w=cur.weight||{};
-  let h=`<div class="fr2"><div class="f"><label>初物 基準:${w.wt1||'—'}g±${w.wt1tol||'—'}g</label><input type="number" id="r_wt1f" step="0.1" placeholder="g"></div><div class="f"><label>終物</label><input type="number" id="r_wt1l" step="0.1" placeholder="g"></div></div>`;
-  if(cur.productNoB) h+=`<div class="fr2"><div class="f"><label>初物B 基準:${w.wt2||'—'}g±${w.wt2tol||'—'}g</label><input type="number" id="r_wt2f" step="0.1" placeholder="g"></div><div class="f"><label>終物B</label><input type="number" id="r_wt2l" step="0.1" placeholder="g"></div></div>`;
+  let h='<div class="fr2"><div class="f"><label>初物 基準:'+(w.wt1||'—')+'g±'+(w.wt1tol||'—')+'g</label><input type="number" id="r_wt1f" step="0.1" placeholder="g"></div><div class="f"><label>終物</label><input type="number" id="r_wt1l" step="0.1" placeholder="g"></div></div>';
+  if(cur.productNoB) h+='<div class="fr2"><div class="f"><label>初物B 基準:'+(w.wt2||'—')+'g±'+(w.wt2tol||'—')+'g</label><input type="number" id="r_wt2f" step="0.1" placeholder="g"></div><div class="f"><label>終物B</label><input type="number" id="r_wt2l" step="0.1" placeholder="g"></div></div>';
   document.getElementById('wt-fields').innerHTML=h;
 }
 
 function build5M(){
   const hints={人:'例）新人、久しぶり作業 等',機械:'例）設備修繕後 等',材料:'例）材料変更、MB変更 等',方法:'例）条件変更 等',金型:'例）金型修理後、設変後 等'};
-  document.getElementById('m5-wrap').innerHTML=['人','機械','材料','方法','金型'].map(k=>`
-    <div class="m5b" data-m="${k}">
-      <div class="m5b-hd"><span class="m5b-title">${k}</span><div class="onb"><button class="ob" onclick="tog(this,'有')">有</button><button class="ob" onclick="tog(this,'無')">無</button></div></div>
-      <textarea id="m5_${k}" rows="2" placeholder="${hints[k]}" style="width:100%;padding:7px;border:1px solid var(--bd2);border-radius:var(--rads);font-size:13px;font-family:inherit;background:#f8fafc;color:var(--tx)"></textarea>
-    </div>`).join('');
+  document.getElementById('m5-wrap').innerHTML=['人','機械','材料','方法','金型'].map(k=>
+    '<div class="m5b" data-m="'+k+'"><div class="m5b-hd"><span class="m5b-title">'+k+'</span><div class="onb"><button class="ob" onclick="tog(this,\'有\')">有</button><button class="ob" onclick="tog(this,\'無\')">無</button></div></div>' +
+    '<textarea id="m5_'+k+'" rows="2" placeholder="'+hints[k]+'" style="width:100%;padding:7px;border:1px solid var(--bd2);border-radius:var(--rads);font-size:13px;font-family:inherit;background:#f8fafc;color:var(--tx)"></textarea></div>').join('');
 }
 
-// ============================================================
-// CHOCO STOP
-// ============================================================
 function addChoco(){
   if(cN>=5){toast('最大5件まで','er');return;}
   cN++;const n=cN;
   const d=document.createElement('div');d.className='chb';d.id='ch'+n;
-  d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
-    <span style="font-size:12px;font-weight:700">記録${n}</span>
-    <button onclick="document.getElementById('ch${n}').remove()" style="border:none;background:transparent;color:var(--tx3);cursor:pointer;font-size:18px">×</button></div>
-    <div class="f"><label>停止内容</label><input id="cc${n}" placeholder="例）スタート、チャックミス"></div>
-    <div class="fr2"><div class="f"><label>日付</label><input type="date" id="cd${n}"></div><div class="f"><label>時刻</label><input type="time" id="ct${n}"></div></div>
-    <div class="fr2"><div class="f"><label>捨てショット数</label><input type="number" id="cs${n}" min="0"></div><div class="f"><label>担当者</label><input id="co${n}"></div></div>`;
+  d.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:12px;font-weight:700">記録'+n+'</span><button onclick="document.getElementById(\'ch'+n+'\').remove()" style="border:none;background:transparent;color:var(--tx3);cursor:pointer;font-size:18px">×</button></div>' +
+    '<div class="f"><label>停止内容</label><input id="cc'+n+'" placeholder="例）スタート、チャックミス"></div>' +
+    '<div class="fr2"><div class="f"><label>日付</label><input type="date" id="cd'+n+'"></div><div class="f"><label>時刻</label><input type="time" id="ct'+n+'"></div></div>' +
+    '<div class="fr2"><div class="f"><label>捨てショット数</label><input type="number" id="cs'+n+'" min="0"></div><div class="f"><label>担当者</label><input id="co'+n+'"></div></div>';
   document.getElementById('choco-list').appendChild(d);
 }
 
-// ============================================================
-// OK/NG
-// ============================================================
 function tog(btn,val){
   btn.parentElement.querySelectorAll('.ob').forEach(b=>{b.classList.remove('ok','ng');delete b.dataset.val;});
   btn.classList.add(['OK','○','有'].includes(val)?'ok':'ng');
-  btn.dataset.val=val; rupd();
+  btn.dataset.val=val;rupd();
 }
 function gbv(row){const a=row.querySelector('[data-val]');return a?a.dataset.val:'';}
 
-// ============================================================
-// COLLECT RECORD
-// ============================================================
 function collectR(){
   const m=cur;
   const safetyLabels=['クランプ（操作側）','クランプ（反操作側）','E/J後退確認線','ロケートリング'];
@@ -851,14 +615,11 @@ function collectR(){
     masterRef:m.id,productNoA:m.productNoA,productNoB:m.productNoB||'',
     productName:m.productName,reqNoA:gv('r_reqA'),reqNoB:gv('r_reqB'),
     date:gv('r_date'),operator:gv('r_op'),checker1:gv('r_ch1'),checker2:gv('r_ch2'),condNo:gv('r_cond'),
-    safety,coolSafety,m5,chocos,prod,actuals:a,
+    safety:safety,coolSafety:coolSafety,m5:m5,chocos:chocos,prod:prod,actuals:a,
     notice:gv('r_notice'),signOp:gv('r_sign_op'),signCh:gv('r_sign_ch'),master:m
   };
 }
 
-// ============================================================
-// SAVE
-// ============================================================
 async function saveRec(){
   if(gv('r_reqA').length!==10){toast('品番Aの依頼番号を10桁で入力してください','er');rgo(0);return;}
   if(cur.productNoB&&gv('r_reqB').length!==10){toast('品番Bの依頼番号を10桁で入力してください','er');rgo(0);return;}
@@ -870,13 +631,10 @@ async function saveRec(){
     cache.unshift(data);
     localStorage.setItem(key,JSON.stringify(cache.slice(0,100)));
   }catch(e){}
-  if(GAS_URL) gasPost({action:'saveRecord',record:data}).catch(()=>{});
+  if(GAS_URL) gasPost({action:'saveRecord',record:data}).catch(function(){});
   toast('保存しました ✓','ok');
 }
 
-// ============================================================
-// EXCEL出力
-// ============================================================
 async function doExport(){
   const reqA=gv('r_reqA');
   if(reqA.length!==10){toast('依頼番号を10桁で入力してください','er');rgo(0);return;}
@@ -885,48 +643,44 @@ async function doExport(){
   btn.disabled=true;btn.textContent='⏳ 送信中...';
   try{
     const data=collectR();
-const sendData = Object.assign({}, data);
-      productNoA:data.master.productNoA,
-      productNoB:data.master.productNoB,
-      productName:data.master.productName
-    }});
-    const res=await gasPost({action:'exportExcel',record:sendData});
-    if(res.pending){
-      toast('生成中です。約30秒後にDriveを確認してください。','ok');
-      setTimeout(()=>window.open(res.folderUrl,'_blank'),3000);
-    } else if(res.url){
+    const res=await gasPost({action:'exportExcel',record:data});
+    if(res.url){
       window.open(res.url,'_blank');
       toast('Excel出力完了: '+res.fileName,'ok');
       updateLocalRecordUrl(data.productNoA,reqA,res.url);
     }
   }catch(e){toast('エラー: '+e.message,'er');}
-  btn.disabled=false;btn.textContent='📊 Excel出力';
+  btn.disabled=false;btn.textContent='&#x1F4CA; Excel出力';
 }
 
-// ============================================================
-// HISTORY
-// ============================================================
+function updateLocalRecordUrl(pnoA,reqNoA,url){
+  try{
+    const key='sk_records_'+pnoA;
+    const cache=JSON.parse(localStorage.getItem(key)||'[]');
+    const idx=cache.findIndex(function(r){return r.reqNoA===reqNoA;});
+    if(idx>=0){cache[idx].driveUrl=url;localStorage.setItem(key,JSON.stringify(cache));}
+  }catch(e){}
+}
+
 function renderHist(){
-  const pno=cur?.productNoA,key='sk_records_'+pno;
+  const pno=cur?cur.productNoA:'',key='sk_records_'+pno;
   let list=[];
   try{list=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
   const el=document.getElementById('hist-wrap');
-  if(!list.length){el.innerHTML='<div class="empty">🕐 この品番の記録はまだありません</div>';return;}
-  el.innerHTML=`<div style="padding:0 13px;font-size:11px;color:var(--tx3);margin-bottom:6px">${cur.productName} の記録 ${list.length}件</div>`+
-    list.map((r,i)=>`
-    <div class="hi" style="margin:0 13px 6px">
-      <div class="hi-dt">${r.savedAt}</div>
-      <div class="hi-rn">${r.reqNoA}${r.reqNoB?' / '+r.reqNoB:''}</div>
-      <div class="hi-tags">
-        <span class="hi-tag">${r.date||'—'}</span>
-        <span class="hi-tag">担当：${r.operator||'—'}</span>
-        ${r.driveUrl?`<a class="hi-tag dl" href="${r.driveUrl}" target="_blank">📊 Excel</a>`:`<span class="hi-tag xl" onclick="reExport(${i})">📊 Excel再出力</span>`}
-      </div>
-    </div>`).join('');
+  if(!list.length){el.innerHTML='<div class="empty">&#x1F550; この品番の記録はまだありません</div>';return;}
+  el.innerHTML='<div style="padding:0 13px;font-size:11px;color:var(--tx3);margin-bottom:6px">'+cur.productName+' の記録 '+list.length+'件</div>'+
+    list.map(function(r,i){
+      return '<div class="hi" style="margin:0 13px 6px">' +
+        '<div class="hi-dt">'+r.savedAt+'</div>' +
+        '<div class="hi-rn">'+r.reqNoA+(r.reqNoB?' / '+r.reqNoB:'')+'</div>' +
+        '<div class="hi-tags"><span class="hi-tag">'+(r.date||'—')+'</span><span class="hi-tag">担当：'+(r.operator||'—')+'</span>' +
+        (r.driveUrl?'<a class="hi-tag dl" href="'+r.driveUrl+'" target="_blank">&#x1F4CA; Excel</a>':'<span class="hi-tag xl" onclick="reExport('+i+')">&#x1F4CA; Excel再出力</span>') +
+        '</div></div>';
+    }).join('');
 }
 
 async function reExport(li){
-  const pno=cur?.productNoA,key='sk_records_'+pno;
+  const pno=cur?cur.productNoA:'',key='sk_records_'+pno;
   let list=[];
   try{list=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
   const data=list[li];if(!data)return;
@@ -939,20 +693,18 @@ async function reExport(li){
   }catch(e){hideLoading();toast('エラー: '+e.message,'er');}
 }
 
-// ============================================================
-// PROGRESS / TOAST / LOADING
-// ============================================================
 function rupd(){
   const ids=['r_reqA','r_date','r_op'];
-  const n=ids.filter(id=>{const e=document.getElementById(id);return e&&e.value.trim();}).length;
+  const n=ids.filter(function(id){const e=document.getElementById(id);return e&&e.value.trim();}).length;
   const p=Math.round(n/ids.length*100);
   document.getElementById('rec-prog').style.width=p+'%';
   document.getElementById('rec-pct').textContent=p+'%';
 }
-function toast(msg,type=''){
+function toast(msg,type){
+  type=type||'';
   const t=document.getElementById('toast');
   t.textContent=msg;t.className='toast '+type+' show';
-  setTimeout(()=>t.classList.remove('show'),3000);
+  setTimeout(function(){t.classList.remove('show');},3000);
 }
 function showLoading(msg){document.getElementById('loading-msg').textContent=msg;document.getElementById('loading').classList.remove('hid');}
 function hideLoading(){document.getElementById('loading').classList.add('hid');}
