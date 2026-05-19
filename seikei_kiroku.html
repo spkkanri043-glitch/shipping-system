@@ -619,20 +619,49 @@ function stampSign(role, checked) {
 }
 
 // ─── マスター管理 ───
-function openMasterModal() {
-  renderPartMasterList(); renderMpSections(); renderMpPC(); renderEmpList();
+async function openMasterModal() {
   openM('masterModal');
+  renderMpSections(); renderMpPC(); renderEmpList();
+  await loadPartMastersFromGas();
 }
+
+// GASから品番マスター取得
+async function loadPartMastersFromGas() {
+  const el = document.getElementById('partMasterList');
+  el.innerHTML = '<div style="color:var(--text3);font-size:11px;padding:8px;">読み込み中...</div>';
+  if (GAS_URL) {
+    try {
+      const res = await fetch(GAS_URL + '?action=listParts');
+      const json = await res.json();
+      if (json.ok && json.parts) {
+        partMasters = json.parts;
+        // ローカルにもキャッシュ
+        localStorage.setItem('seikei_part_masters', JSON.stringify(partMasters));
+      }
+    } catch(e) {
+      // GAS失敗時はローカルキャッシュを使用
+      partMasters = JSON.parse(localStorage.getItem('seikei_part_masters') || '[]');
+    }
+  } else {
+    partMasters = JSON.parse(localStorage.getItem('seikei_part_masters') || '[]');
+  }
+  renderPartMasterList();
+}
+
 function renderPartMasterList() {
   const el = document.getElementById('partMasterList');
   el.innerHTML = partMasters.length
     ? partMasters.map((p,i) => `<div class="part-item">
-        <div class="part-info"><div class="part-no">${esc(p.no)}</div><div class="part-name">${esc(p.name)} ／ ${esc(p.mat||'')} ${esc(p.mb||'')}</div></div>
+        <div class="part-info">
+          <div class="part-no">${esc(p.no)}</div>
+          <div class="part-name">${esc(p.name)} ／ ${esc(p.mat||'')} ${esc(p.mb||'')}</div>
+        </div>
         <button onclick="loadPM(${i})" style="padding:3px 8px;font-size:10px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;margin-right:4px;">読込</button>
-        <button onclick="delPM(${i})" style="padding:3px 8px;font-size:10px;border:1px solid var(--r);border-radius:3px;background:#fff5f5;color:var(--r);cursor:pointer;">削除</button>
+        <button onclick="delPM('${esc(p.no)}')" style="padding:3px 8px;font-size:10px;border:1px solid var(--r);border-radius:3px;background:#fff5f5;color:var(--r);cursor:pointer;">削除</button>
       </div>`).join('')
     : '<div style="color:var(--text3);font-size:11px;padding:8px;">登録なし</div>';
 }
+
 function renderMpSections() {
   document.getElementById('mp-sections').innerHTML = DEF_COND.map((s,i) =>
     `<div class="pi"><input type="checkbox" id="mps${i}" value="${i}" checked><label for="mps${i}" style="cursor:pointer;">${esc(s.label)}</label></div>`
@@ -657,10 +686,12 @@ function addMpPCEl(div, item) {
     <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--r);font-size:13px;cursor:pointer;">🗑</button>`;
   div.appendChild(wrap);
 }
-function savePartMaster() {
-  const no = document.getElementById('mp-no').value.trim();
+
+async function savePartMaster() {
+  const no   = document.getElementById('mp-no').value.trim();
   const name = document.getElementById('mp-name').value.trim();
   if (!no || !name) { toast('品番と製品名は必須です', 'err'); return; }
+
   const sections = [];
   document.querySelectorAll('#mp-sections input[type=checkbox]').forEach((cb,si) => {
     if (cb.checked) sections.push(JSON.parse(JSON.stringify(DEF_COND[si])));
@@ -672,26 +703,70 @@ function savePartMaster() {
     const c = txts[0]?txts[0].value.trim():''; if (!c) return;
     prodCheck.push({c, s:txts[1]?txts[1].value.trim():'', t:sel?sel.value:'okng'});
   });
-  const m = {no, name, mat:document.getElementById('mp-mat').value.trim(), mb:document.getElementById('mp-mb').value.trim(), sections, prodCheck};
+
+  const m = {
+    no, name,
+    mat: document.getElementById('mp-mat').value.trim(),
+    mb:  document.getElementById('mp-mb').value.trim(),
+    sections, prodCheck
+  };
+
+  // ローカルにも保存（キャッシュ）
   const idx = partMasters.findIndex(p => p.no === no);
   if (idx>=0) partMasters[idx]=m; else partMasters.unshift(m);
   localStorage.setItem('seikei_part_masters', JSON.stringify(partMasters));
-  renderPartMasterList(); toast('品番マスターを保存しました', 'ok');
+
+  // GASへ送信
+  if (GAS_URL) {
+    try {
+      const res = await fetch(GAS_URL, {
+        method:'POST', headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({action:'savePart', data:m})
+      });
+      const json = await res.json();
+      if (json.ok) {
+        toast('✅ 品番マスターを保存しました（スプレッドシート）', 'ok');
+      } else throw new Error(json.error);
+    } catch(e) {
+      toast('⚠️ ローカルに保存しました（GAS未接続）', 'warn');
+    }
+  } else {
+    toast('✅ 品番マスターを保存しました（ローカル）', 'ok');
+  }
+
+  renderPartMasterList();
   ['mp-no','mp-name','mp-mat','mp-mb'].forEach(id => document.getElementById(id).value='');
 }
+
 function loadPM(i) {
   const m = partMasters[i];
-  document.getElementById('partNo_top').value = m.no; document.getElementById('partNo_bot').value = m.no; _partNo = m.no;
+  document.getElementById('partNo_top').value = m.no;
+  document.getElementById('partNo_bot').value = m.no; _partNo = m.no;
   document.getElementById('productName').value = m.name;
-  document.getElementById('material').value = m.mat||''; document.getElementById('mbName').value = m.mb||'';
+  document.getElementById('material').value = m.mat||'';
+  document.getElementById('mbName').value = m.mb||'';
   if (m.sections&&m.sections.length) { condSections = JSON.parse(JSON.stringify(m.sections)); renderCondSections(); }
   if (m.prodCheck&&m.prodCheck.length) { renderProdCheck(m.prodCheck); }
   closeM('masterModal'); toast('品番「'+m.no+'」を読み込みました', 'ok');
 }
-function delPM(i) {
-  if (!confirm('品番「'+partMasters[i].no+'」を削除しますか？')) return;
-  partMasters.splice(i,1); localStorage.setItem('seikei_part_masters',JSON.stringify(partMasters)); renderPartMasterList();
+
+async function delPM(partNo) {
+  if (!confirm('品番「'+partNo+'」を削除しますか？')) return;
+  // ローカル削除
+  partMasters = partMasters.filter(p => p.no !== partNo);
+  localStorage.setItem('seikei_part_masters', JSON.stringify(partMasters));
+  // GAS削除
+  if (GAS_URL) {
+    try {
+      await fetch(GAS_URL, {
+        method:'POST', headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({action:'deletePart', partNo})
+      });
+    } catch(e) {}
+  }
+  renderPartMasterList(); toast('削除しました', 'ok');
 }
+
 function renderEmpList() {
   const div = document.getElementById('empMasterList');
   try {
