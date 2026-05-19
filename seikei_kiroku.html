@@ -190,18 +190,27 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
       <!-- 行2 -->
       <div class="fg fg4" style="margin-bottom:6px;">
         <div class="fld"><label>記入日</label><input type="date" id="recordDate"></div>
-        <div class="fld"><label>号機名</label><input type="text" id="machineNo" placeholder="号機名"></div>
-        <div class="fld"><label>条件番号</label><input type="text" id="condNo"></div>
+        <div class="fld"><label>号機名 <span style="font-size:9px;color:var(--tx3);">（マスターから自動）</span></label><input type="text" id="machineNo" readonly title="号機名はマスター管理から設定してください"></div>
+        <div class="fld"><label>条件番号 <span style="font-size:9px;color:var(--tx3);">（マスターから自動）</span></label><input type="text" id="condNo" readonly title="条件番号はマスター管理から設定してください"></div>
         <div class="fld"><label>担当者（自動）</label><input type="text" id="operator" readonly></div>
       </div>
       <!-- 行3 -->
-      <div class="fg fg4">
+      <div class="fg fg4" style="margin-bottom:6px;">
         <div class="fld"><label>材料名</label><input type="text" id="material"></div>
         <div class="fld"><label>MB名</label><input type="text" id="mbName"></div>
         <div class="fld"><label>MB比率</label><input type="text" id="mbRatio"></div>
-        <div class="fld"><label>乾燥(℃・H)</label><input type="text" id="drying" placeholder="例: 80℃・4H"></div>
+        <div class="fld">
+          <label>乾燥 <span style="font-size:9px;color:var(--tx3);">（マスターから自動）</span></label>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <input type="text" id="dryTemp" readonly placeholder="℃" style="flex:1;" title="乾燥温度はマスター管理から設定してください">
+            <span style="font-size:11px;color:var(--tx3);white-space:nowrap;">℃ ×</span>
+            <input type="text" id="dryTime" readonly placeholder="H" style="flex:1;" title="乾燥時間はマスター管理から設定してください">
+            <span style="font-size:11px;color:var(--tx3);white-space:nowrap;">H</span>
+          </div>
+        </div>
       </div>
-      <div class="fg fg4" style="margin-top:6px;">
+      <!-- 行4 -->
+      <div class="fg fg4">
         <div class="fld"><label>成形機</label><input type="text" id="moldMachine"></div>
         <div class="fld"><label>取出機/箱替機</label><input type="text" id="otherMachine"></div>
       </div>
@@ -319,11 +328,30 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
             <div id="m-pnArea" style="margin-top:4px;"></div>
             <button class="pn-add-btn" onclick="addMstPn()" style="margin-top:3px;">＋ 品番追加</button>
           </div>
-          <div class="fg fg4">
+          <!-- 号機名・条件番号 -->
+          <div class="fg fg4" style="margin-bottom:6px;">
+            <div class="fld"><label>号機名</label><input type="text" id="m-machineNo" placeholder="例: 1号機"></div>
+            <div class="fld"><label>条件番号</label><input type="text" id="m-condNo" placeholder="条件番号"></div>
             <div class="fld"><label>材料名</label><input type="text" id="m-material"></div>
             <div class="fld"><label>MB名</label><input type="text" id="m-mbName"></div>
+          </div>
+          <!-- MB比率・乾燥温度・乾燥時間 -->
+          <div class="fg fg4">
             <div class="fld"><label>MB比率</label><input type="text" id="m-mbRatio"></div>
-            <div class="fld"><label>乾燥(℃・H)</label><input type="text" id="m-drying"></div>
+            <div class="fld">
+              <label>乾燥温度</label>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <input type="number" id="m-dryTemp" placeholder="80" style="flex:1;">
+                <span style="font-size:11px;color:var(--tx2);white-space:nowrap;">℃</span>
+              </div>
+            </div>
+            <div class="fld">
+              <label>乾燥時間</label>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <input type="number" id="m-dryTime" placeholder="4" style="flex:1;">
+                <span style="font-size:11px;color:var(--tx2);white-space:nowrap;">H</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -860,16 +888,15 @@ function loadMaster(i) {
   const m=PARTS[i];
   M_PNS = m.nos && m.nos.length ? [...m.nos] : [m.no||''];
   renderMstPns();
-  ['m-productName','m-material','m-mbName','m-mbRatio','m-drying'].forEach(id=>{
-    const key=id.replace('m-','').replace('N','_n'); // rough mapping
-    const e=document.getElementById(id);
-    if(!e)return;
-    if(id==='m-productName') e.value=m.name||'';
-    else if(id==='m-material') e.value=m.mat||'';
-    else if(id==='m-mbName') e.value=m.mb||'';
-    else if(id==='m-mbRatio') e.value=m.mbRatio||'';
-    else if(id==='m-drying') e.value=m.drying||'';
-  });
+  const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
+  sv('m-productName', m.name);
+  sv('m-material',    m.mat);
+  sv('m-mbName',      m.mb);
+  sv('m-mbRatio',     m.mbRatio);
+  sv('m-machineNo',   m.machineNo);
+  sv('m-condNo',      m.condNo);
+  sv('m-dryTemp',     m.dryTemp);
+  sv('m-dryTime',     m.dryTime);
   if(m.sections&&m.sections.length) {
     M_COND_SECS=deep(m.sections);
     renderMstChips();
@@ -918,7 +945,9 @@ async function savePartMaster() {
   const m={
     nos, no:nos[0],
     name, mat:gv('m-material'), mb:gv('m-mbName'),
-    mbRatio:gv('m-mbRatio'), drying:gv('m-drying'),
+    mbRatio:gv('m-mbRatio'),
+    machineNo:gv('m-machineNo'), condNo:gv('m-condNo'),
+    dryTemp:gv('m-dryTemp'), dryTime:gv('m-dryTime'),
     sections:deep(M_COND_SECS),
     prodCheck:deep(M_PC_ITEMS),
   };
@@ -960,11 +989,15 @@ function loadMaster(i) {
   // 品番+依頼番号ペアを生成（依頼番号は空）
   PN_PAIRS=(m.nos||[m.no||'']).map(no=>({no,req:''}));
   renderPnPairs();
-  document.getElementById('productName').value=m.name||'';
-  document.getElementById('material').value=m.mat||'';
-  document.getElementById('mbName').value=m.mb||'';
-  document.getElementById('mbRatio').value=m.mbRatio||'';
-  document.getElementById('drying').value=m.drying||'';
+  const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
+  sv('productName', m.name);
+  sv('material',    m.mat);
+  sv('mbName',      m.mb);
+  sv('mbRatio',     m.mbRatio);
+  sv('machineNo',   m.machineNo);   // マスターから自動入力（readonly）
+  sv('condNo',      m.condNo);      // マスターから自動入力（readonly）
+  sv('dryTemp',     m.dryTemp);     // マスターから自動入力（readonly）
+  sv('dryTime',     m.dryTime);     // マスターから自動入力（readonly）
   if(m.sections&&m.sections.length){COND_SECS=deep(m.sections);renderCondSecs('condBody',COND_SECS,false,null);}
   if(m.prodCheck&&m.prodCheck.length){PC_ITEMS=deep(m.prodCheck);renderPC('pcTb',PC_ITEMS,false);}
   closeM('masterModal');
@@ -994,7 +1027,8 @@ function collectData() {
     recordDate:gv('recordDate'), machineNo:gv('machineNo'), condNo:gv('condNo'),
     operator:CU.name, operatorId:CU.id,
     material:gv('material'), mbName:gv('mbName'), mbRatio:gv('mbRatio'),
-    drying:gv('drying'), moldMachine:gv('moldMachine'), otherMachine:gv('otherMachine'),
+    dryTemp:gv('dryTemp'), dryTime:gv('dryTime'),
+    moldMachine:gv('moldMachine'), otherMachine:gv('otherMachine'),
     condSections:deep(COND_SECS),
     signs:{start:{name:CU.name,id:CU.id}, mgr:SIGNS.mgr, sup:SIGNS.sup, agg:SIGNS.agg},
     prodCheckItems:deep(PC_ITEMS),
@@ -1009,7 +1043,7 @@ function collectData() {
 function fillForm(d) {
   RID=d.id;
   const sv2=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
-  ['productName','recordDate','machineNo','condNo','material','mbName','mbRatio','drying','moldMachine','otherMachine'].forEach(id=>sv2(id,d[id]));
+  ['productName','recordDate','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','otherMachine'].forEach(id=>sv2(id,d[id]));
   PN_PAIRS=d.pnPairs&&d.pnPairs.length?deep(d.pnPairs):[{no:d.partNo||'',req:d.reqNo||''}];
   renderPnPairs();
   if(d.condSections){COND_SECS=deep(d.condSections);}
@@ -1073,7 +1107,7 @@ async function saveRecord() {
 function newForm(){
   if(!confirm('入力内容をクリアして新規作成しますか？'))return;
   RID=null; PN_PAIRS=[{no:'',req:''}]; renderPnPairs();
-  ['productName','machineNo','condNo','material','mbName','mbRatio','drying','moldMachine','otherMachine'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['productName','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','otherMachine'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('recordDate').value=today();
   COND_SECS=deep(DEF_SECS); renderCondSecs('condBody',COND_SECS,false,null);
   PC_ITEMS=deep(DEF_PC); renderPC('pcTb',PC_ITEMS,false);
