@@ -211,9 +211,9 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
       </div>
       <!-- 行4 -->
       <div class="fg fg4">
-        <div class="fld"><label>成形機</label><input type="text" id="moldMachine"></div>
-        <div class="fld"><label>取出機</label><input type="text" id="takeMachine"></div>
-        <div class="fld"><label>箱替機</label><input type="text" id="boxMachine"></div>
+        <div class="fld"><label>成形機 <span style="font-size:9px;color:var(--tx3);">（マスターから自動）</span></label><input type="text" id="moldMachine" readonly title="成形機はマスター管理から設定してください"></div>
+        <div class="fld"><label>取出機 <span style="font-size:9px;color:var(--tx3);">（マスターから自動）</span></label><input type="text" id="takeMachine" readonly title="取出機はマスター管理から設定してください"></div>
+        <div class="fld"><label>箱替機 <span style="font-size:9px;color:var(--tx3);">（マスターから自動）</span></label><input type="text" id="boxMachine"  readonly title="箱替機はマスター管理から設定してください"></div>
       </div>
     </div>
   </div>
@@ -337,7 +337,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
             <div class="fld"><label>MB名</label><input type="text" id="m-mbName"></div>
           </div>
           <!-- MB比率・乾燥温度・乾燥時間 -->
-          <div class="fg fg4">
+          <div class="fg fg4" style="margin-bottom:6px;">
             <div class="fld"><label>MB比率</label><input type="text" id="m-mbRatio"></div>
             <div class="fld">
               <label>乾燥温度</label>
@@ -353,6 +353,12 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
                 <span style="font-size:11px;color:var(--tx2);white-space:nowrap;">H</span>
               </div>
             </div>
+          </div>
+          <!-- 成形機・取出機・箱替機 -->
+          <div class="fg fg4">
+            <div class="fld"><label>成形機</label><input type="text" id="m-moldMachine" placeholder="成形機名"></div>
+            <div class="fld"><label>取出機</label><input type="text" id="m-takeMachine" placeholder="取出機名"></div>
+            <div class="fld"><label>箱替機</label><input type="text" id="m-boxMachine"  placeholder="箱替機名"></div>
           </div>
         </div>
       </div>
@@ -850,7 +856,7 @@ async function openMasterModal() {
   M_PC_ITEMS  = deep(DEF_PC);
   M_PNS = [''];
   // フォームリセット
-  ['m-productName','m-material','m-mbName','m-mbRatio','m-drying'].forEach(id=>{
+  ['m-productName','m-material','m-mbName','m-mbRatio','m-machineNo','m-condNo','m-dryTemp','m-dryTime','m-moldMachine','m-takeMachine','m-boxMachine'].forEach(id=>{
     const e=document.getElementById(id); if(e) e.value='';
   });
   renderMstPns();
@@ -899,6 +905,9 @@ function loadMaster(i) {
   sv('m-condNo',      m.condNo);
   sv('m-dryTemp',     m.dryTemp);
   sv('m-dryTime',     m.dryTime);
+  sv('m-moldMachine', m.moldMachine);
+  sv('m-takeMachine', m.takeMachine);
+  sv('m-boxMachine',  m.boxMachine);
   if(m.sections&&m.sections.length) {
     M_COND_SECS=deep(m.sections);
     renderMstChips();
@@ -950,6 +959,7 @@ async function savePartMaster() {
     mbRatio:gv('m-mbRatio'),
     machineNo:gv('m-machineNo'), condNo:gv('m-condNo'),
     dryTemp:gv('m-dryTemp'), dryTime:gv('m-dryTime'),
+    moldMachine:gv('m-moldMachine'), takeMachine:gv('m-takeMachine'), boxMachine:gv('m-boxMachine'),
     sections:deep(M_COND_SECS),
     prodCheck:deep(M_PC_ITEMS),
   };
@@ -1000,6 +1010,9 @@ function loadMaster(i) {
   sv('condNo',      m.condNo);      // マスターから自動入力（readonly）
   sv('dryTemp',     m.dryTemp);     // マスターから自動入力（readonly）
   sv('dryTime',     m.dryTime);     // マスターから自動入力（readonly）
+  sv('moldMachine', m.moldMachine); // マスターから自動入力（readonly）
+  sv('takeMachine', m.takeMachine); // マスターから自動入力（readonly）
+  sv('boxMachine',  m.boxMachine);  // マスターから自動入力（readonly）
   if(m.sections&&m.sections.length){COND_SECS=deep(m.sections);renderCondSecs('condBody',COND_SECS,false,null);}
   if(m.prodCheck&&m.prodCheck.length){PC_ITEMS=deep(m.prodCheck);renderPC('pcTb',PC_ITEMS,false);}
   closeM('masterModal');
