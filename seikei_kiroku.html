@@ -218,6 +218,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   </div>
   <span class="user-badge" id="user-badge">...</span>
   <div class="tb-btns">
+    <button class="btn" onclick="goPortal()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">🏠 ポータル</button>
     <button class="btn btn-new"  onclick="newForm()">🆕 新規</button>
     <button class="btn btn-hist" onclick="openHistory()">📂 履歴</button>
     <button class="btn btn-mst"  onclick="openPartSelect()">📦 品番選択</button>
@@ -955,6 +956,22 @@ function stamp(role, checked) {
     document.getElementById(`s-${role}`).textContent='-';
     document.getElementById(`ss-${role}`).textContent='';
     toast('確認を解除しました','warn');
+  }
+}
+
+// ══════════════════════════════════════════════
+// ポータルへ戻る
+// ══════════════════════════════════════════════
+function goPortal() {
+  // URLパラメータにportal_urlがあればそこへ、なければhistory.back()
+  const p = new URLSearchParams(window.location.search);
+  const portalUrl = p.get('portal_url');
+  if (portalUrl) {
+    window.location.href = decodeURIComponent(portalUrl);
+  } else if (document.referrer && document.referrer.includes('script.google.com')) {
+    window.location.href = document.referrer;
+  } else {
+    window.history.back();
   }
 }
 
