@@ -490,18 +490,34 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
     <div class="mh">📂 成形記録 履歴<button class="mc-btn" onclick="closeM('histModal')">✕</button></div>
     <div class="mb" style="padding:0;">
 
-      <!-- 上段：検索バー -->
+      <!-- 検索・フィルターエリア -->
       <div style="padding:12px 16px 0;">
-        <input type="text" id="histSearch" placeholder="品番・製品名・依頼番号で検索..."
+        <input type="text" id="histSearch" placeholder="品番・製品名・依頼番号・材料名・号機で検索..."
           oninput="renderHistTabs()"
-          style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:5px;font-size:12px;font-family:inherit;">
+          style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:5px;font-size:12px;font-family:inherit;margin-bottom:8px;">
+        <!-- フィルターチップ -->
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;align-items:center;">
+          <span style="font-size:10px;color:var(--tx3);white-space:nowrap;">絞り込み:</span>
+          <select id="histFilterSign" onchange="renderHistTabs()"
+            style="font-size:11px;padding:3px 7px;border:1px solid var(--bd);border-radius:12px;background:var(--wh);font-family:inherit;cursor:pointer;">
+            <option value="">確認サイン: すべて</option>
+            <option value="mgr">管理者確認済み</option>
+            <option value="sup">監督者確認済み</option>
+            <option value="agg">集計確認済み</option>
+            <option value="none">未確認（サインなし）</option>
+          </select>
+          <button onclick="clearHistFilters()"
+            style="font-size:10px;padding:3px 9px;border:1px solid var(--bd);border-radius:12px;background:var(--wh);cursor:pointer;color:var(--tx2);">
+            🗑 フィルター解除
+          </button>
+        </div>
       </div>
 
       <!-- 品番タブ -->
-      <div style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--bd);margin-top:10px;padding:0 16px;scrollbar-width:none;" id="histTabs"></div>
+      <div style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--bd);margin-top:8px;padding:0 16px;scrollbar-width:none;" id="histTabs"></div>
 
       <!-- 記録リスト -->
-      <div style="padding:12px 16px;min-height:300px;max-height:60vh;overflow-y:auto;" id="histList"></div>
+      <div style="padding:12px 16px;min-height:300px;max-height:58vh;overflow-y:auto;" id="histList"></div>
 
     </div>
     <div class="mf">
@@ -623,7 +639,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderPnPairs();
   renderCondSecs('condBody', COND_SECS, false, null);
   renderPC('pcTb', PC_ITEMS, false);
-  renderNotes(3); renderChocos(5); renderM5();
+  renderNotes(3); renderChocos(1); renderM5();
   setStatus('新規作成モード', 'ok');
   PARTS = JSON.parse(ls('seikei_part_masters') || '[]');
 });
@@ -1496,7 +1512,7 @@ function newForm(){
   document.getElementById('recordDate').value=today();
   COND_SECS=deep(DEF_SECS); renderCondSecs('condBody',COND_SECS,false,null);
   PC_ITEMS=deep(DEF_PC); renderPC('pcTb',PC_ITEMS,false);
-  renderNotes(3); renderChocos(5); renderM5();
+  renderNotes(3); renderChocos(1); renderM5();
   ['mgr','sup','agg'].forEach(role=>{
     SIGNS[role]=null;
     document.getElementById(`s-${role}`).textContent='-';
@@ -1508,9 +1524,16 @@ function newForm(){
 }
 
 // ══════════════════════════════════════════════
-// 履歴（品番タブ付き）
+// 履歴（品番タブ・折りたたみ・フィルター）
 // ══════════════════════════════════════════════
-let HIST_TAB = 'all'; // 現在選択中のタブ
+let HIST_TAB = 'all';
+let HIST_EXPANDED = {};
+
+function clearHistFilters() {
+  document.getElementById('histSearch').value = '';
+  document.getElementById('histFilterSign').value = '';
+  renderHistTabs();
+}
 
 async function openHistory(){
   document.getElementById('histModal').classList.add('show');
@@ -1528,33 +1551,46 @@ async function openHistory(){
   }
   HIST.sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
   HIST_TAB='all';
+  HIST_EXPANDED={};
   renderHistTabs();
 }
 
 function getHistFiltered() {
-  const q = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
+  const q    = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
+  const sign = document.getElementById('histFilterSign')?.value || '';
   return HIST.filter(r => {
-    const nos = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
-    const reqs= (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
+    const nos  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
+    const reqs = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
     const matchQ = !q ||
       nos.toLowerCase().includes(q) ||
       (r.productName||'').toLowerCase().includes(q) ||
       reqs.toLowerCase().includes(q) ||
       (r.machineNo||'').toLowerCase().includes(q) ||
-      (r.operatorId||r.savedByName||'').toLowerCase().includes(q);
+      (r.material||'').toLowerCase().includes(q) ||
+      (r.mbName||'').toLowerCase().includes(q) ||
+      (r.operatorId||r.savedByName||r.operator||'').toLowerCase().includes(q);
+    let matchSign = true;
+    if (sign && r.signs) {
+      if (sign === 'mgr')  matchSign = !!r.signs.mgr;
+      if (sign === 'sup')  matchSign = !!r.signs.sup;
+      if (sign === 'agg')  matchSign = !!r.signs.agg;
+      if (sign === 'none') matchSign = !r.signs.mgr && !r.signs.sup && !r.signs.agg;
+    } else if (sign === 'none' && !r.signs) {
+      matchSign = true;
+    } else if (sign && !r.signs) {
+      matchSign = false;
+    }
     const matchTab = HIST_TAB==='all' || nos.includes(HIST_TAB);
-    return matchQ && matchTab;
+    return matchQ && matchSign && matchTab;
   });
 }
 
-// 品番ごとにグループ化
 function groupByPartNo(records) {
-  const groups = {}; // { partNoKey: { label, records[] } }
+  const groups = {};
   records.forEach(r => {
     const nos = r.pnPairs ? r.pnPairs.map(p=>p.no).filter(Boolean) : [r.partNo||''];
     const key = nos.join('/') || '不明';
     if (!groups[key]) {
-      // マスターから製品名を取得
       const master = PARTS.find(p => (p.nos||[p.no]).some(n => nos.includes(n)));
       groups[key] = { label: key, name: master?.name || r.productName || '', records: [] };
     }
@@ -1564,26 +1600,20 @@ function groupByPartNo(records) {
 }
 
 function renderHistTabs() {
-  const allFiltered = getHistFiltered();
   const groups = groupByPartNo(HIST.filter(r => {
     const q = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
     if (!q) return true;
-    const nos = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
-    const reqs= (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
-    return nos.toLowerCase().includes(q)||(r.productName||'').toLowerCase().includes(q)||reqs.toLowerCase().includes(q);
+    const nos  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
+    const reqs = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
+    return nos.toLowerCase().includes(q)||(r.productName||'').toLowerCase().includes(q)||reqs.toLowerCase().includes(q)||(r.machineNo||'').toLowerCase().includes(q)||(r.material||'').toLowerCase().includes(q);
   }));
-
   const tabsEl = document.getElementById('histTabs');
   tabsEl.innerHTML = '';
-
-  // 「すべて」タブ
   const allBtn = document.createElement('button');
   allBtn.className = 'htab' + (HIST_TAB==='all'?' on':'');
   allBtn.innerHTML = `すべて <span class="hbadge">${HIST.length}</span>`;
   allBtn.onclick = () => { HIST_TAB='all'; renderHistTabs(); };
   tabsEl.appendChild(allBtn);
-
-  // 品番ごとのタブ
   Object.entries(groups).sort((a,b)=>b[1].records.length-a[1].records.length).forEach(([key, g]) => {
     const btn = document.createElement('button');
     btn.className = 'htab' + (HIST_TAB===key?' on':'');
@@ -1591,7 +1621,6 @@ function renderHistTabs() {
     btn.onclick = () => { HIST_TAB=key; renderHistTabs(); };
     tabsEl.appendChild(btn);
   });
-
   renderHistList();
 }
 
@@ -1599,58 +1628,60 @@ function renderHistList(){
   const filtered = getHistFiltered();
   const el = document.getElementById('histList');
   document.getElementById('histCount').textContent = filtered.length + '件';
-
   if (!filtered.length) {
     el.innerHTML = '<div class="hist-empty">📭 記録がありません</div>';
     return;
   }
-
-  // タブが「すべて」の場合は品番グループで表示
   if (HIST_TAB === 'all') {
     const groups = groupByPartNo(filtered);
     let html = '';
     Object.entries(groups).forEach(([key, g]) => {
+      const isExp = !!HIST_EXPANDED[key];
+      const latest = g.records[0];
+      const safeKey = key.replace(/'/g, "\\'");
       html += `
-        <div style="margin-bottom:16px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:5px 8px;background:var(--head);border-radius:5px;">
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 10px;background:var(--head);border-radius:5px;">
             <span style="font-weight:bold;font-size:12px;color:var(--blue);">📦 ${esc(key)}</span>
             <span style="font-size:11px;color:var(--tx2);">${esc(g.name)}</span>
             <span style="margin-left:auto;font-size:10px;color:var(--tx3);">${g.records.length}件</span>
-            <button onclick="newFromMaster(${JSON.stringify(key)})"
+            <button onclick="newFromMaster('${safeKey}')"
               style="padding:2px 8px;font-size:10px;border:none;border-radius:3px;background:var(--g);color:#fff;cursor:pointer;font-weight:bold;">
-              ＋ この品番で新規作成
-            </button>
-            <button onclick="HIST_TAB=${JSON.stringify(key)};renderHistTabs();"
-              style="padding:2px 8px;font-size:10px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;">
-              一覧を見る
+              ＋ 新規作成
             </button>
           </div>
-          ${g.records.slice(0,5).map(r => histRecordCard(r)).join('')}
-          ${g.records.length>5 ? `<div style="text-align:center;padding:4px 0;">
-            <button onclick="HIST_TAB=${JSON.stringify(key)};renderHistTabs();"
-              style="font-size:11px;color:var(--blue2);background:none;border:none;cursor:pointer;text-decoration:underline;">
-              さらに${g.records.length-5}件を表示 →
+          ${histRecordCard(latest)}
+          ${g.records.length > 1 ? `
+            <button onclick="toggleHistGroup('${safeKey}')"
+              style="width:100%;padding:6px;font-size:11px;background:var(--sec);border:1px solid var(--bd);border-radius:4px;cursor:pointer;color:var(--tx2);margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;">
+              ${isExp ? '▲ 閉じる' : `▽ 過去の記録を見る（あと${g.records.length-1}件）`}
             </button>
-          </div>` : ''}
+            ${isExp ? g.records.slice(1).map(r => histRecordCard(r)).join('') : ''}
+          ` : ''}
         </div>`;
     });
     el.innerHTML = html;
   } else {
-    // 特定品番タブ：全件表示 + 新規作成ボタン
     const master = PARTS.find(p => (p.nos||[p.no]).some(n => HIST_TAB.split('/').includes(n)));
-    const newBtn = master ? `
+    const safeTab = HIST_TAB.replace(/'/g, "\'");
+    const newBtn = `
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--sec);border-radius:5px;margin-bottom:10px;border:1px solid var(--bd);">
         <div>
           <span style="font-weight:bold;font-size:12px;color:var(--blue);">📦 ${esc(HIST_TAB)}</span>
-          <span style="font-size:11px;color:var(--tx2);margin-left:8px;">${esc(master.name||'')}</span>
+          ${master ? `<span style="font-size:11px;color:var(--tx2);margin-left:8px;">${esc(master.name||'')}</span>` : ''}
         </div>
-        <button onclick="newFromMaster(${JSON.stringify(HIST_TAB)})"
+        <button onclick="newFromMaster('${safeTab}')"
           style="padding:5px 14px;font-size:11px;font-weight:bold;border:none;border-radius:4px;background:var(--g);color:#fff;cursor:pointer;">
           ＋ この品番で新規作成
         </button>
-      </div>` : '';
+      </div>`;
     el.innerHTML = newBtn + filtered.map(r => histRecordCard(r)).join('');
   }
+}
+
+function toggleHistGroup(key) {
+  HIST_EXPANDED[key] = !HIST_EXPANDED[key];
+  renderHistList();
 }
 
 function histRecordCard(r) {
