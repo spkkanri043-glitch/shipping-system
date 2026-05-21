@@ -336,7 +336,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
       <div class="ch">⏱️ チョコ停捨てショット記録</div>
       <div class="cb">
         <table class="st">
-          <thead><tr><th>停止内容</th><th>日付</th><th>時間</th><th>捨てショット</th><th>担当</th></tr></thead>
+          <thead><tr><th>停止内容</th><th style="width:120px;">日付</th><th style="width:95px;">時間</th><th style="width:70px;">捨てショット</th><th style="width:80px;">担当</th></tr></thead>
           <tbody id="chocoTb"></tbody>
         </table>
         <button onclick="addChocoRow()" style="margin-top:6px;padding:3px 10px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;">＋ 行追加</button>
@@ -912,12 +912,21 @@ function addChocoRow(i){
   const tb=document.getElementById('chocoTb');
   const ri=i!==undefined?i:tb.rows.length;
   const tr=tb.insertRow();
+  const nowDate = new Date();
+  const defDate = nowDate.toISOString().split('T')[0];
+  const defTime = nowDate.toTimeString().substring(0,5);
+  // 1行目 or 行追加ボタン（i===undefined）時は今の日時・ログイン名を自動入力
+  const fillDef = (i===0 || i===undefined);
   tr.innerHTML=`
-    <td><input type="text"   data-k="ch${ri}c" style="width:100%;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
-    <td><input type="text"   data-k="ch${ri}d" placeholder="月/日" style="width:55px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
-    <td><input type="text"   data-k="ch${ri}t" placeholder="時:分" style="width:45px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
-    <td><input type="number" data-k="ch${ri}s" style="width:50px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
-    <td><input type="text"   data-k="ch${ri}p" style="width:55px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>`;
+    <td><input type="text"   data-k="ch${ri}c" style="width:100%;border:none;font-size:11px;font-family:inherit;text-align:center;" placeholder="停止内容"></td>
+    <td><input type="date"   data-k="ch${ri}d" value="${fillDef?defDate:''}" style="width:110px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
+    <td><input type="time"   data-k="ch${ri}t" value="${fillDef?defTime:''}" style="width:85px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
+    <td><input type="number" data-k="ch${ri}s" style="width:50px;border:none;font-size:11px;font-family:inherit;text-align:center;" min="0"></td>
+    <td>
+      <input type="text" data-k="ch${ri}p" value="${fillDef?esc(CU.name||''):''}"
+        style="width:70px;border:none;font-size:11px;font-family:inherit;text-align:center;"
+        placeholder="担当者">
+    </td>`;
 }
 function renderM5(){
   const tb=document.getElementById('m5Tb');tb.innerHTML='';
