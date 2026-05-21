@@ -423,8 +423,9 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
             <div class="fld"><label>材料名</label><input type="text" id="m-material"></div>
             <div class="fld"><label>MB名</label><input type="text" id="m-mbName"></div>
           </div>
-          <!-- MB比率・乾燥温度・乾燥時間 -->
+          <!-- 取引先・MB比率・乾燥 -->
           <div class="fg fg4" style="margin-bottom:6px;">
+            <div class="fld"><label>🏢 取引先名</label><input type="text" id="m-client" placeholder="取引先名（例: ○○自動車）"></div>
             <div class="fld"><label>MB比率</label><input type="text" id="m-mbRatio"></div>
             <div class="fld">
               <label>乾燥温度</label>
@@ -505,6 +506,10 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
             <option value="sup">監督者確認済み</option>
             <option value="agg">集計確認済み</option>
             <option value="none">未確認（サインなし）</option>
+          </select>
+          <select id="histFilterClient" onchange="renderHistTabs()"
+            style="font-size:11px;padding:3px 7px;border:1px solid var(--bd);border-radius:12px;background:var(--wh);font-family:inherit;cursor:pointer;">
+            <option value="">取引先: すべて</option>
           </select>
           <button onclick="clearHistFilters()"
             style="font-size:10px;padding:3px 9px;border:1px solid var(--bd);border-radius:12px;background:var(--wh);cursor:pointer;color:var(--tx2);">
@@ -1143,7 +1148,7 @@ async function openMasterModal() {
   M_PC_ITEMS  = deep(DEF_PC);
   M_PNS = [''];
   // フォームリセット
-  ['m-productName','m-material','m-mbName','m-mbRatio','m-machineNo','m-condNo','m-dryTemp','m-dryTime','m-moldMachine','m-takeMachine','m-boxMachine'].forEach(id=>{
+  ['m-productName','m-material','m-mbName','m-mbRatio','m-client','m-machineNo','m-condNo','m-dryTemp','m-dryTime','m-moldMachine','m-takeMachine','m-boxMachine'].forEach(id=>{
     const e=document.getElementById(id); if(e) e.value='';
   });
   renderMstPns();
@@ -1188,6 +1193,7 @@ function loadMasterToModal(i) {
   sv('m-material',    m.mat);
   sv('m-mbName',      m.mb);
   sv('m-mbRatio',     m.mbRatio);
+  sv('m-client',      m.client);
   sv('m-machineNo',   m.machineNo);
   sv('m-condNo',      m.condNo);
   sv('m-dryTemp',     m.dryTemp);
@@ -1244,6 +1250,7 @@ async function savePartMaster() {
     nos, no:nos[0],
     name, mat:gv('m-material'), mb:gv('m-mbName'),
     mbRatio:gv('m-mbRatio'),
+    client:gv('m-client'),
     machineNo:gv('m-machineNo'), condNo:gv('m-condNo'),
     dryTemp:gv('m-dryTemp'), dryTime:gv('m-dryTime'),
     moldMachine:gv('m-moldMachine'), takeMachine:gv('m-takeMachine'), boxMachine:gv('m-boxMachine'),
@@ -1330,6 +1337,8 @@ function collectData() {
     // operatorは最初の作成者（STARTER）を維持
     operator:   STARTER ? STARTER.name    : CU.name,
     operatorId: STARTER ? STARTER.id      : CU.id,
+    // 取引先（マスターから取得）
+    client: (() => { const m=PARTS.find(p=>(p.nos||[p.no]).some(n=>PN_PAIRS.some(pp=>pp.no===n))); return m?.client||''; })(),
     material:gv('material'), mbName:gv('mbName'), mbRatio:gv('mbRatio'),
     drying:gv('dryTemp')&&gv('dryTime')?gv('dryTemp')+'℃・'+gv('dryTime')+'H':'',
     dryTemp:gv('dryTemp'), dryTime:gv('dryTime'),
@@ -1532,6 +1541,7 @@ let HIST_EXPANDED = {};
 function clearHistFilters() {
   document.getElementById('histSearch').value = '';
   document.getElementById('histFilterSign').value = '';
+  document.getElementById('histFilterClient').value = '';
   renderHistTabs();
 }
 
@@ -1552,12 +1562,18 @@ async function openHistory(){
   HIST.sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
   HIST_TAB='all';
   HIST_EXPANDED={};
+  // 取引先フィルターを動的生成
+  const clients = [...new Set(PARTS.map(p=>p.client||'').filter(Boolean))];
+  const clientSel = document.getElementById('histFilterClient');
+  clientSel.innerHTML = '<option value="">取引先: すべて</option>'
+    + clients.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
   renderHistTabs();
 }
 
 function getHistFiltered() {
-  const q    = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
-  const sign = document.getElementById('histFilterSign')?.value || '';
+  const q      = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
+  const sign   = document.getElementById('histFilterSign')?.value || '';
+  const client = document.getElementById('histFilterClient')?.value || '';
   return HIST.filter(r => {
     const nos  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
     const reqs = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
@@ -1568,6 +1584,7 @@ function getHistFiltered() {
       (r.machineNo||'').toLowerCase().includes(q) ||
       (r.material||'').toLowerCase().includes(q) ||
       (r.mbName||'').toLowerCase().includes(q) ||
+      (r.client||'').toLowerCase().includes(q) ||
       (r.operatorId||r.savedByName||r.operator||'').toLowerCase().includes(q);
     let matchSign = true;
     if (sign && r.signs) {
@@ -1580,8 +1597,10 @@ function getHistFiltered() {
     } else if (sign && !r.signs) {
       matchSign = false;
     }
+    // 取引先フィルター
+    const matchClient = !client || (r.client||'') === client;
     const matchTab = HIST_TAB==='all' || nos.includes(HIST_TAB);
-    return matchQ && matchSign && matchTab;
+    return matchQ && matchSign && matchClient && matchTab;
   });
 }
 
@@ -1639,42 +1658,43 @@ function renderHistList(){
       const isExp = !!HIST_EXPANDED[key];
       const latest = g.records[0];
       const safeKey = key.replace(/'/g, "\\'");
-      html += `
-        <div style="margin-bottom:14px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 10px;background:var(--head);border-radius:5px;">
-            <span style="font-weight:bold;font-size:12px;color:var(--blue);">📦 ${esc(key)}</span>
-            <span style="font-size:11px;color:var(--tx2);">${esc(g.name)}</span>
-            <span style="margin-left:auto;font-size:10px;color:var(--tx3);">${g.records.length}件</span>
-            <button onclick="newFromMaster('${safeKey}')"
-              style="padding:2px 8px;font-size:10px;border:none;border-radius:3px;background:var(--g);color:#fff;cursor:pointer;font-weight:bold;">
-              ＋ 新規作成
-            </button>
-          </div>
-          ${histRecordCard(latest)}
-          ${g.records.length > 1 ? `
-            <button onclick="toggleHistGroup('${safeKey}')"
-              style="width:100%;padding:6px;font-size:11px;background:var(--sec);border:1px solid var(--bd);border-radius:4px;cursor:pointer;color:var(--tx2);margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;">
-              ${isExp ? '▲ 閉じる' : `▽ 過去の記録を見る（あと${g.records.length-1}件）`}
-            </button>
-            ${isExp ? g.records.slice(1).map(r => histRecordCard(r)).join('') : ''}
-          ` : ''}
-        </div>`;
+      const mst = PARTS.find(p => (p.nos||[p.no]).some(n => key.split('/').includes(n)));
+      const client = mst ? (mst.client||'') : '';
+      const groupColors = ['#1a3a6b','#2955a0','#1a6896','#16537e'];
+      const groupIdx = Object.keys(groups).indexOf(key);
+      const hdrColor = groupColors[groupIdx % groupColors.length];
+      html += '<div style="margin-bottom:16px;border:2px solid ' + hdrColor + ';border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">'
+        + '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:' + hdrColor + ';">'
+          + '<div style="flex:1;min-width:0;">'
+            + '<div style="font-weight:bold;font-size:13px;color:#fff;">📦 ' + esc(key) + '</div>'
+            + '<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:1px;">' + esc(g.name) + (client ? ' ／ 🏢 ' + esc(client) : '') + '</div>'
+          + '</div>'
+          + '<span style="font-size:10px;color:rgba(255,255,255,.6);white-space:nowrap;">' + g.records.length + '件</span>'
+          + '<button onclick="newFromMaster(\'' + safeKey + '\')" style="padding:4px 10px;font-size:11px;border:none;border-radius:4px;background:#27ae60;color:#fff;cursor:pointer;font-weight:bold;white-space:nowrap;">＋ 新規作成</button>'
+        + '</div>'
+        + '<div style="padding:8px 8px 0;">' + histRecordCard(latest) + '</div>'
+        + (g.records.length > 1
+          ? '<button onclick="toggleHistGroup(\'' + safeKey + '\')" style="width:100%;padding:7px;font-size:11px;background:' + (isExp?'#eef2f9':'#f8f9fc') + ';border:none;border-top:1px solid #dce4f0;cursor:pointer;color:#5a6a85;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;">'
+            + (isExp ? '▲ 閉じる' : '▽ 過去の記録を見る（あと' + (g.records.length-1) + '件）')
+            + '</button>'
+            + (isExp ? '<div style="padding:0 8px 8px;">' + g.records.slice(1).map(r => histRecordCard(r)).join('') + '</div>' : '')
+          : '<div style="height:8px;"></div>')
+        + '</div>';
     });
     el.innerHTML = html;
   } else {
     const master = PARTS.find(p => (p.nos||[p.no]).some(n => HIST_TAB.split('/').includes(n)));
     const safeTab = HIST_TAB.replace(/'/g, "\'");
-    const newBtn = `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--sec);border-radius:5px;margin-bottom:10px;border:1px solid var(--bd);">
-        <div>
-          <span style="font-weight:bold;font-size:12px;color:var(--blue);">📦 ${esc(HIST_TAB)}</span>
-          ${master ? `<span style="font-size:11px;color:var(--tx2);margin-left:8px;">${esc(master.name||'')}</span>` : ''}
-        </div>
-        <button onclick="newFromMaster('${safeTab}')"
-          style="padding:5px 14px;font-size:11px;font-weight:bold;border:none;border-radius:4px;background:var(--g);color:#fff;cursor:pointer;">
-          ＋ この品番で新規作成
-        </button>
-      </div>`;
+    const masterName = master ? esc(master.name||'') : '';
+    const masterClient = master ? (master.client||'') : '';
+    const newBtn = '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--sec);border-radius:5px;margin-bottom:10px;border:1px solid var(--bd);">'
+      + '<div>'
+        + '<span style="font-weight:bold;font-size:12px;color:var(--blue);">📦 ' + esc(HIST_TAB) + '</span>'
+        + (masterName ? '<span style="font-size:11px;color:var(--tx2);margin-left:8px;">' + masterName + '</span>' : '')
+        + (masterClient ? '<span style="font-size:11px;color:var(--blue2);margin-left:6px;">🏢 ' + esc(masterClient) + '</span>' : '')
+      + '</div>'
+      + '<button onclick="newFromMaster(\'' + safeTab + '\')" style="padding:5px 14px;font-size:11px;font-weight:bold;border:none;border-radius:4px;background:var(--g);color:#fff;cursor:pointer;">＋ この品番で新規作成</button>'
+      + '</div>';
     el.innerHTML = newBtn + filtered.map(r => histRecordCard(r)).join('');
   }
 }
@@ -1685,23 +1705,37 @@ function toggleHistGroup(key) {
 }
 
 function histRecordCard(r) {
-  const nos  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).filter(Boolean).join(' / ');
-  const reqs = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).filter(Boolean).join(' / ');
-  const date = (r.savedAt||'').substring(0,10);
-  const time = (r.savedAt||'').substring(11,16);
-  // IDを文字列に統一してdata属性で渡す（JSON.stringifyのエスケープ問題を回避）
+  const nos    = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).filter(Boolean).join(' / ');
+  const reqs   = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).filter(Boolean).join(' / ');
+  const date   = (r.savedAt||'').substring(0,10);
+  const time   = (r.savedAt||'').substring(11,16);
   const safeId = String(r.id||'').replace(/'/g,"\\'");
+  // マスターから取引先名を取得
+  const master  = PARTS.find(p => (p.nos||[p.no]).some(n => nos.split(' / ').includes(n)));
+  const client  = r.client || master?.client || '';
+  // サインバッジ
+  const signs = r.signs || {};
+  const signBadges = [
+    signs.mgr ? `<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">管理者✔</span>` : '',
+    signs.sup ? `<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">監督者✔</span>` : '',
+    signs.agg ? `<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">集計✔</span>`   : '',
+  ].filter(Boolean).join(' ');
+
   return `<div class="hrec" onclick="loadRecord('${safeId}')">
     <div class="hrec-top">
-      <div>
-        <div class="hrec-req">📋 ${esc(reqs||'依頼番号なし')} <span style="font-size:11px;font-weight:normal;color:var(--tx2);">${esc(r.productName||'')}</span></div>
+      <div style="flex:1;min-width:0;">
+        <div class="hrec-req">📋 ${esc(reqs||'依頼番号なし')}
+          <span style="font-size:11px;font-weight:normal;color:var(--tx2);">${esc(r.productName||'')}</span>
+          ${client ? `<span style="font-size:10px;color:var(--blue2);margin-left:6px;">🏢 ${esc(client)}</span>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;">${signBadges}</div>
       </div>
-      <div class="hrec-date">${esc(date)} ${esc(time)}</div>
+      <div class="hrec-date" style="flex-shrink:0;">${esc(date)}<br>${esc(time)}</div>
     </div>
     <div class="hrec-sub">
       <div class="hrec-tag"><span>品番</span> <strong>${esc(nos||'-')}</strong></div>
       <div class="hrec-tag"><span>号機</span> <strong>${esc(r.machineNo||'-')}</strong></div>
-      <div class="hrec-tag"><span>担当</span> <strong>${esc(r.operatorId||r.savedByName||'-')}</strong></div>
+      <div class="hrec-tag"><span>担当</span> <strong>${esc(r.operator||r.operatorId||r.savedByName||'-')}</strong></div>
       <div class="hrec-tag"><span>記入日</span> <strong>${esc(r.recordDate||'-')}</strong></div>
     </div>
     <span class="hrec-arrow">›</span>
