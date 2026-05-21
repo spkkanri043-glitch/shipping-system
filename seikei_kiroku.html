@@ -1495,7 +1495,9 @@ function histRecordCard(r) {
   const reqs = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).filter(Boolean).join(' / ');
   const date = (r.savedAt||'').substring(0,10);
   const time = (r.savedAt||'').substring(11,16);
-  return `<div class="hrec" onclick="loadRecord(${JSON.stringify(r.id)})">
+  // IDを文字列に統一してdata属性で渡す（JSON.stringifyのエスケープ問題を回避）
+  const safeId = String(r.id||'').replace(/'/g,"\\'");
+  return `<div class="hrec" onclick="loadRecord('${safeId}')">
     <div class="hrec-top">
       <div>
         <div class="hrec-req">📋 ${esc(reqs||'依頼番号なし')} <span style="font-size:11px;font-weight:normal;color:var(--tx2);">${esc(r.productName||'')}</span></div>
@@ -1513,9 +1515,16 @@ function histRecordCard(r) {
 }
 
 function loadRecord(id){
-  const r=HIST.find(x=>x.id===id);
-  if(!r){toast('見つかりません','err');return;}
-  fillForm(r);closeM('histModal');toast('📂 記録を読み込みました','ok');
+  // IDを文字列・数値両方で検索
+  const sid = String(id);
+  const r = HIST.find(x => String(x.id) === sid);
+  if(!r){
+    toast('記録が見つかりません（ID: '+sid+'）', 'err');
+    return;
+  }
+  fillForm(r);
+  closeM('histModal');
+  toast('📂 記録を読み込みました','ok');
 }
 
 // 品番マスターから新規記録書を作成
