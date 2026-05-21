@@ -963,15 +963,26 @@ function stamp(role, checked) {
 // ポータルへ戻る
 // ══════════════════════════════════════════════
 function goPortal() {
-  // URLパラメータにportal_urlがあればそこへ、なければhistory.back()
+  // 別タブで開いている場合はタブを閉じる（ポータルに戻る）
+  try {
+    // window.openerがあれば（ポータルから別タブで開かれた場合）
+    if (window.opener && !window.opener.closed) {
+      window.close();
+      return;
+    }
+  } catch(e) {}
+
+  // URLパラメータにportal_urlがあればそこへ
   const p = new URLSearchParams(window.location.search);
   const portalUrl = p.get('portal_url');
   if (portalUrl) {
     window.location.href = decodeURIComponent(portalUrl);
-  } else if (document.referrer && document.referrer.includes('script.google.com')) {
-    window.location.href = document.referrer;
-  } else {
-    window.history.back();
+    return;
+  }
+
+  // それ以外はタブを閉じる
+  if (confirm('このタブを閉じてポータルに戻りますか？')) {
+    window.close();
   }
 }
 
