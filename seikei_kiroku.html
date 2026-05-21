@@ -540,6 +540,8 @@ const GAS_URL = (() => {
 })();
 
 let CU = null; // currentUser
+let STARTER = null; // 記録書の最初の作成者（上書きしない）
+
 (function initUser() {
   try {
     const t = new URLSearchParams(window.location.search).get('sso');
@@ -547,7 +549,7 @@ let CU = null; // currentUser
   } catch(e) {}
   if (!CU) CU = {id:'guest', name:'ゲスト', role:'staff', loginId:'guest'};
   document.getElementById('user-badge').textContent = CU.name + '（' + CU.role + '）';
-  document.getElementById('operator').value = CU.name;
+  // operator欄は新規作成時のみ設定（fillFormで上書きされる）
   document.getElementById('s-start').textContent = CU.name;
   document.getElementById('ss-start').textContent = CU.name + ' ✔';
 })();
@@ -613,6 +615,9 @@ const M5 = ['人','機械','材料','方法','金型'];
 // ══════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('recordDate').value = today();
+  // 新規作成時の担当者を設定
+  STARTER = {name: CU.name, id: CU.id, loginId: CU.loginId};
+  document.getElementById('operator').value = CU.name;
   COND_SECS  = deep(DEF_SECS);
   PC_ITEMS   = deep(DEF_PC);
   renderPnPairs();
@@ -1067,6 +1072,9 @@ function usePartMaster(i) {
   if (!m) { toast('マスターが見つかりません', 'err'); return; }
   // 新規フォームにマスターを適用
   RID = null;
+  // 新規作成なので現在のユーザーがSTARTER
+  STARTER = { name: CU.name, id: CU.id, loginId: CU.loginId };
+  document.getElementById('operator').value = CU.name;
   PN_PAIRS = (m.nos || [m.no || '']).map(no => ({no, req:''}));
   renderPnPairs();
   const sv = (id, v) => { const e=document.getElementById(id); if(e) e.value=v||''; };
@@ -1297,19 +1305,22 @@ function collectData() {
   const data={
     id:RID||Date.now().toString(),
     savedAt:new Date().toISOString(),
-    savedBy:CU.id, savedByName:CU.name,
+    savedBy:CU.id, savedByName:CU.name,  // 最後に保存した人
     productName:gv('productName'),
     pnPairs:deep(PN_PAIRS),
     partNo:PN_PAIRS[0]?.no||'',
     reqNo:PN_PAIRS[0]?.req||'',
     recordDate:gv('recordDate'), machineNo:gv('machineNo'), condNo:gv('condNo'),
-    operator:CU.name, operatorId:CU.id,
+    // operatorは最初の作成者（STARTER）を維持
+    operator:   STARTER ? STARTER.name    : CU.name,
+    operatorId: STARTER ? STARTER.id      : CU.id,
     material:gv('material'), mbName:gv('mbName'), mbRatio:gv('mbRatio'),
     drying:gv('dryTemp')&&gv('dryTime')?gv('dryTemp')+'℃・'+gv('dryTime')+'H':'',
     dryTemp:gv('dryTemp'), dryTime:gv('dryTime'),
     moldMachine:gv('moldMachine'), takeMachine:gv('takeMachine'), boxMachine:gv('boxMachine'),
     condSections:deep(COND_SECS),
-    signs:{start:{name:CU.name,id:CU.id}, mgr:SIGNS.mgr, sup:SIGNS.sup, agg:SIGNS.agg},
+    signs:{start:{name: STARTER ? STARTER.name : CU.name, id: STARTER ? STARTER.id : CU.id},
+           mgr:SIGNS.mgr, sup:SIGNS.sup, agg:SIGNS.agg},
     prodCheckItems:deep(PC_ITEMS),
   };
   document.querySelectorAll('[data-k]').forEach(el=>{
@@ -1323,6 +1334,18 @@ function fillForm(d) {
   RID=d.id;
   const sv2=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
   ['productName','recordDate','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','takeMachine','boxMachine'].forEach(id=>sv2(id,d[id]));
+
+  // 担当者（最初の作成者）を復元 → 他の人が開いても上書きしない
+  const origOperator = d.operator || d.operatorId || '';
+  const origOperatorId = d.operatorId || '';
+  STARTER = { name: origOperator, id: origOperatorId, loginId: origOperatorId };
+  sv2('operator', origOperator); // 保存済みの担当者名を表示
+
+  // 成形スタートサインも最初の作成者を表示
+  const startSign = d.signs && d.signs.start ? d.signs.start : null;
+  document.getElementById('s-start').textContent  = startSign ? startSign.name : origOperator;
+  document.getElementById('ss-start').textContent = startSign ? startSign.name + ' ✔' : origOperator + ' ✔';
+
   PN_PAIRS=d.pnPairs&&d.pnPairs.length?deep(d.pnPairs):[{no:d.partNo||'',req:d.reqNo||''}];
   renderPnPairs();
   if(d.condSections){COND_SECS=deep(d.condSections);}
@@ -1462,7 +1485,13 @@ async function saveRecord() {
 // ══════════════════════════════════════════════
 function newForm(){
   if(!confirm('入力内容をクリアして新規作成しますか？'))return;
-  RID=null; PN_PAIRS=[{no:'',req:''}]; renderPnPairs();
+  RID=null;
+  PN_PAIRS=[{no:'',req:''}]; renderPnPairs();
+  // 新規作成なので現在のユーザーがSTARTER
+  STARTER = { name: CU.name, id: CU.id, loginId: CU.loginId };
+  document.getElementById('operator').value = CU.name;
+  document.getElementById('s-start').textContent  = CU.name;
+  document.getElementById('ss-start').textContent = CU.name + ' ✔';
   ['productName','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','takeMachine','boxMachine'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('recordDate').value=today();
   COND_SECS=deep(DEF_SECS); renderCondSecs('condBody',COND_SECS,false,null);
