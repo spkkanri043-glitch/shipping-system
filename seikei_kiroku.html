@@ -135,9 +135,75 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--blue);color:#fff;padding:9px 16px;border-radius:6px;font-size:12px;font-weight:bold;z-index:400;opacity:0;transition:opacity .3s;pointer-events:none;max-width:320px;}
 .toast.show{opacity:1;}.toast.ok{background:var(--g);}.toast.err{background:var(--r);}.toast.warn{background:var(--o);}
 
+/* 履歴タブ */
+.htab{padding:8px 16px;font-size:11px;font-weight:bold;color:var(--tx2);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s;user-select:none;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
+.htab:hover{color:var(--blue);background:var(--sec);}
+.htab.on{color:var(--blue);border-bottom-color:var(--blue);background:var(--wh);}
+.htab .hbadge{display:inline-block;background:var(--head);color:var(--tx2);border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px;}
+.htab.on .hbadge{background:var(--blue);color:#fff;}
+
+/* 履歴カード */
+.hrec{border:1px solid var(--bd);border-radius:6px;padding:10px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s;position:relative;}
+.hrec:hover{background:var(--sec);border-color:var(--blue2);transform:translateX(2px);}
+.hrec-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.hrec-req{font-weight:bold;font-size:13px;color:var(--blue);}
+.hrec-date{font-size:10px;color:var(--tx3);white-space:nowrap;}
+.hrec-sub{font-size:11px;color:var(--tx2);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap;}
+.hrec-tag{display:inline-flex;align-items:center;gap:3px;}
+.hrec-tag span{font-size:10px;color:var(--tx3);}
+.hrec-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:16px;}
+.hist-empty{text-align:center;color:var(--tx3);padding:40px 20px;font-size:12px;}
+
 /* loading spinner */
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px;}
 @keyframes spin{to{transform:rotate(360deg);}}
+
+/* 品番選択カード */
+.ps-card{border:1px solid var(--bd);border-radius:8px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s;}
+.ps-card:hover{background:var(--sec);border-color:var(--blue2);transform:translateX(2px);}
+.ps-icon{width:40px;height:40px;border-radius:8px;background:var(--head);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ps-info{flex:1;min-width:0;}
+.ps-no{font-weight:bold;font-size:13px;color:var(--blue);}
+.ps-name{font-size:11px;color:var(--tx2);margin-top:2px;}
+.ps-meta{font-size:10px;color:var(--tx3);margin-top:2px;}
+.ps-use-btn{padding:6px 16px;background:var(--g);color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:bold;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+.ps-use-btn:hover{filter:brightness(1.1);}
+
+/* ═══ 印刷スタイル ═══ */
+@media print {
+  body { background: #fff !important; font-size: 10pt !important; color: #000 !important; }
+  .topbar, .sbar, .tb-btns, .mo, .toast, .pn-add-btn, .add-r-btn, .mv, .db, .pm,
+  button:not(.no-print-hide), .btn { display: none !important; }
+  .wrap { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+  .card { break-inside: avoid; border: 1px solid #aaa !important; margin-bottom: 8px !important; box-shadow: none !important; border-radius: 4px !important; overflow: visible !important; }
+  .ch { background: #1a3a6b !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 4px 10px !important; font-size: 10pt !important; }
+  .two { grid-template-columns: 1fr 1fr !important; }
+  .fg4 { grid-template-columns: 1fr 1fr 1fr 1fr !important; }
+  .sg { grid-template-columns: repeat(4,1fr) !important; }
+  .fld input, .fld select { border: 1px solid #aaa !important; background: #fff !important; color: #000 !important; font-size: 9pt !important; }
+  .fld input[readonly] { background: #f0f0f0 !important; color: #333 !important; }
+  .dt input, .st input { font-size: 9pt !important; }
+  .dt { font-size: 9pt !important; }
+  .dt th, .dt td, .st th, .st td { border: 1px solid #888 !important; padding: 2px 4px !important; }
+  .dt th, .st th { background: #dce4f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .dt td.L, .st td.L { background: #eef2f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .rc { color: #c8392b !important; }
+  .on { border: 1px solid #aaa !important; }
+  .on.ok { background: #d5f5e3 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .on.ng { background: #fadbd8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .pn-pair { border: 1px solid #aaa !important; }
+  .pn-pair input { border: 1px solid #c8392b !important; background: #fff8f8 !important; }
+  .sg .sb { border: 1px solid #aaa !important; }
+  .sl { background: #dce4f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* 印刷時に品番追加ボタン・行操作ボタン等を非表示 */
+  .dsh button, .cb > button, .sc label input { display: none !important; }
+  /* ページ設定 */
+  @page { size: A4; margin: 10mm; }
+  h1 { display: none; }
+  /* 印刷ヘッダー */
+  .print-header { display: block !important; text-align: center; font-size: 16pt; font-weight: bold; margin-bottom: 6px; color: #1a3a6b; }
+  .print-company { display: block !important; text-align: center; font-size: 10pt; color: #555; margin-bottom: 8px; }
+}
 
 @media(max-width:700px){.two{grid-template-columns:1fr;}.fg4{grid-template-columns:1fr 1fr;}.sg{grid-template-columns:1fr 1fr;}.md{max-width:100%;}}
 </style>
@@ -154,13 +220,19 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   <div class="tb-btns">
     <button class="btn btn-new"  onclick="newForm()">🆕 新規</button>
     <button class="btn btn-hist" onclick="openHistory()">📂 履歴</button>
-    <button class="btn btn-mst"  onclick="openMasterModal()">⚙️ マスター</button>
+    <button class="btn btn-mst"  onclick="openPartSelect()">📦 品番選択</button>
+    <button class="btn btn-mst"  onclick="openMasterModal()" style="background:#1a6896;">⚙️ マスター</button>
+    <button class="btn" onclick="printForm()" style="background:#8e44ad;color:#fff;">🖨️ 印刷</button>
     <button class="btn btn-save" onclick="saveRecord()">💾 保存</button>
   </div>
 </div>
 
 <!-- ═══ 日々の記録画面 ═══ -->
 <div class="wrap" id="main-wrap">
+  <!-- 印刷時のみ表示 -->
+  <div class="print-header" style="display:none;">成 形 記 録 書</div>
+  <div class="print-company" style="display:none;">関ヶ原プラ工業株式会社</div>
+
   <div class="sbar">
     <div class="sdot" id="sdot"></div>
     <span id="smsg">新規作成モード</span>
@@ -299,7 +371,21 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   <div style="text-align:center;color:var(--tx3);font-size:10px;padding:6px 0 20px;">原紙保管：3年 ／ データ保管：8年</div>
 </div>
 
-<!-- ═══ マスター管理モーダル（記録書と同レイアウト） ═══ -->
+<!-- ═══ 品番選択モーダル ═══ -->
+<div class="mo" id="partSelectModal">
+  <div class="md" style="max-width:560px;">
+    <div class="mh">📦 品番を選んで記録書を作成<button class="mc-btn" onclick="closeM('partSelectModal')">✕</button></div>
+    <div class="mb">
+      <input type="text" id="psSearch" placeholder="品番・製品名で検索..."
+        oninput="renderPartSelect()"
+        style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:5px;font-size:12px;font-family:inherit;margin-bottom:12px;">
+      <div id="psList"></div>
+    </div>
+    <div class="mf"><button class="btn btn-new" onclick="closeM('partSelectModal')">閉じる</button></div>
+  </div>
+</div>
+
+<!-- ═══ マスター管理モーダル ═══ -->
 <div class="mo" id="masterModal">
   <div class="md" style="max-width:1100px;">
     <div class="mh">⚙️ 品番マスター登録<button class="mc-btn" onclick="closeM('masterModal')">✕</button></div>
@@ -397,15 +483,30 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   </div>
 </div>
 
-<!-- ═══ 履歴モーダル ═══ -->
+<!-- ═══ 履歴モーダル（品番タブ付き） ═══ -->
 <div class="mo" id="histModal">
-  <div class="md" style="max-width:700px;">
-    <div class="mh">📂 保存済み記録<button class="mc-btn" onclick="closeM('histModal')">✕</button></div>
-    <div class="mb">
-      <input type="text" id="histSearch" placeholder="品番・製品名・依頼番号で検索..." oninput="renderHistList()" style="width:100%;padding:7px 10px;border:1px solid var(--bd);border-radius:4px;font-size:12px;font-family:inherit;margin-bottom:8px;">
-      <div id="histList"></div>
+  <div class="md" style="max-width:860px;">
+    <div class="mh">📂 成形記録 履歴<button class="mc-btn" onclick="closeM('histModal')">✕</button></div>
+    <div class="mb" style="padding:0;">
+
+      <!-- 上段：検索バー -->
+      <div style="padding:12px 16px 0;">
+        <input type="text" id="histSearch" placeholder="品番・製品名・依頼番号で検索..."
+          oninput="renderHistTabs()"
+          style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:5px;font-size:12px;font-family:inherit;">
+      </div>
+
+      <!-- 品番タブ -->
+      <div style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--bd);margin-top:10px;padding:0 16px;scrollbar-width:none;" id="histTabs"></div>
+
+      <!-- 記録リスト -->
+      <div style="padding:12px 16px;min-height:300px;max-height:60vh;overflow-y:auto;" id="histList"></div>
+
     </div>
-    <div class="mf"><button class="btn btn-new" onclick="closeM('histModal')">閉じる</button></div>
+    <div class="mf">
+      <span style="font-size:10px;color:var(--tx3);" id="histCount"></span>
+      <button class="btn btn-new" onclick="closeM('histModal')">閉じる</button>
+    </div>
   </div>
 </div>
 
@@ -849,8 +950,113 @@ function stamp(role, checked) {
 }
 
 // ══════════════════════════════════════════════
-// マスター管理モーダル
+// 品番選択モーダル
 // ══════════════════════════════════════════════
+async function openPartSelect() {
+  // GASから最新のマスターを取得
+  if (GAS_URL && PARTS.length === 0) {
+    try {
+      const r = await gasGet('listParts');
+      if (r.ok && r.parts) { PARTS = r.parts; lsSet('seikei_part_masters', PARTS); }
+    } catch(e) {
+      PARTS = JSON.parse(ls('seikei_part_masters') || '[]');
+    }
+  } else if (PARTS.length === 0) {
+    PARTS = JSON.parse(ls('seikei_part_masters') || '[]');
+  }
+  document.getElementById('psSearch').value = '';
+  renderPartSelect();
+  document.getElementById('partSelectModal').classList.add('show');
+}
+
+function renderPartSelect() {
+  const q = document.getElementById('psSearch').value.toLowerCase();
+  const el = document.getElementById('psList');
+  const filtered = PARTS.filter(p => {
+    const nos = (p.nos || [p.no || '']).join(' ');
+    return !q || nos.toLowerCase().includes(q) || (p.name||'').toLowerCase().includes(q) || (p.mat||'').toLowerCase().includes(q);
+  });
+
+  if (!filtered.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--tx3);padding:30px;font-size:12px;">📭 マスターが登録されていません<br><span style="font-size:10px;">⚙️ マスターボタンから品番を登録してください</span></div>';
+    return;
+  }
+
+  el.innerHTML = filtered.map((p, i) => {
+    const nos   = (p.nos || [p.no || '']).join(' / ');
+    const count = HIST.filter(r => {
+      const rnos = (r.pnPairs ? r.pnPairs.map(x=>x.no) : [r.partNo||'']).join(' ');
+      return (p.nos||[p.no||'']).some(n => rnos.includes(n));
+    }).length;
+    const idx = PARTS.indexOf(p);
+    return `<div class="ps-card">
+      <div class="ps-icon">📦</div>
+      <div class="ps-info">
+        <div class="ps-no">${esc(nos)}</div>
+        <div class="ps-name">${esc(p.name||'')}</div>
+        <div class="ps-meta">
+          ${p.mat ? '材料: '+esc(p.mat) : ''}
+          ${p.machineNo ? ' ／ 号機: '+esc(p.machineNo) : ''}
+          ${count > 0 ? ' ／ 過去記録: <strong>'+count+'件</strong>' : ''}
+        </div>
+      </div>
+      <button class="ps-use-btn" onclick="usePartMaster(${idx})">この品番で作成</button>
+    </div>`;
+  }).join('');
+}
+
+function usePartMaster(i) {
+  const m = PARTS[i];
+  if (!m) { toast('マスターが見つかりません', 'err'); return; }
+  // 新規フォームにマスターを適用
+  RID = null;
+  PN_PAIRS = (m.nos || [m.no || '']).map(no => ({no, req:''}));
+  renderPnPairs();
+  const sv = (id, v) => { const e=document.getElementById(id); if(e) e.value=v||''; };
+  sv('productName', m.name);
+  sv('material',    m.mat);
+  sv('mbName',      m.mb);
+  sv('mbRatio',     m.mbRatio);
+  sv('machineNo',   m.machineNo);
+  sv('condNo',      m.condNo);
+  sv('dryTemp',     m.dryTemp);
+  sv('dryTime',     m.dryTime);
+  sv('moldMachine', m.moldMachine);
+  sv('takeMachine', m.takeMachine);
+  sv('boxMachine',  m.boxMachine);
+  sv('recordDate',  today());
+  if (m.sections && m.sections.length) {
+    COND_SECS = deep(m.sections);
+    renderCondSecs('condBody', COND_SECS, false, null);
+  }
+  if (m.prodCheck && m.prodCheck.length) {
+    PC_ITEMS = deep(m.prodCheck);
+    renderPC('pcTb', PC_ITEMS, false);
+  }
+  ['mgr','sup','agg'].forEach(role => {
+    SIGNS[role] = null;
+    document.getElementById(`s-${role}`).textContent = '-';
+    document.getElementById(`ss-${role}`).textContent = '';
+    document.getElementById(`cb-${role}`).checked = false;
+  });
+  document.getElementById('sid').textContent = '';
+  setStatus('新規作成モード（品番: ' + (m.nos||[m.no]).join('/') + '）', 'ok');
+  closeM('partSelectModal');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  toast('📦 品番「' + (m.nos||[m.no]).join('/') + '」を読み込みました。依頼番号を入力してください。', 'ok');
+}
+
+// ══════════════════════════════════════════════
+// 印刷・PDF出力
+// ══════════════════════════════════════════════
+function printForm() {
+  // 印刷前に成形依頼番号確認
+  const hasReq = PN_PAIRS.some(p => p.req.trim());
+  if (!hasReq) {
+    if (!confirm('成形依頼番号が未入力です。このまま印刷しますか？')) return;
+  }
+  window.print();
+}
 async function openMasterModal() {
   M_COND_SECS = deep(DEF_SECS);
   M_PC_ITEMS  = deep(DEF_PC);
@@ -1139,11 +1345,14 @@ function newForm(){
 }
 
 // ══════════════════════════════════════════════
-// 履歴
+// 履歴（品番タブ付き）
 // ══════════════════════════════════════════════
+let HIST_TAB = 'all'; // 現在選択中のタブ
+
 async function openHistory(){
   document.getElementById('histModal').classList.add('show');
-  document.getElementById('histList').innerHTML='<div style="text-align:center;color:var(--tx3);padding:20px;">読み込み中...</div>';
+  document.getElementById('histList').innerHTML='<div class="hist-empty">読み込み中...</div>';
+  document.getElementById('histTabs').innerHTML='';
   HIST=JSON.parse(ls('seikei_records')||'[]');
   if(GAS_URL){
     try{
@@ -1155,38 +1364,209 @@ async function openHistory(){
     }catch(e){}
   }
   HIST.sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
+  HIST_TAB='all';
+  renderHistTabs();
+}
+
+function getHistFiltered() {
+  const q = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
+  return HIST.filter(r => {
+    const nos = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
+    const reqs= (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
+    const matchQ = !q ||
+      nos.toLowerCase().includes(q) ||
+      (r.productName||'').toLowerCase().includes(q) ||
+      reqs.toLowerCase().includes(q) ||
+      (r.machineNo||'').toLowerCase().includes(q) ||
+      (r.operatorId||r.savedByName||'').toLowerCase().includes(q);
+    const matchTab = HIST_TAB==='all' || nos.includes(HIST_TAB);
+    return matchQ && matchTab;
+  });
+}
+
+// 品番ごとにグループ化
+function groupByPartNo(records) {
+  const groups = {}; // { partNoKey: { label, records[] } }
+  records.forEach(r => {
+    const nos = r.pnPairs ? r.pnPairs.map(p=>p.no).filter(Boolean) : [r.partNo||''];
+    const key = nos.join('/') || '不明';
+    if (!groups[key]) {
+      // マスターから製品名を取得
+      const master = PARTS.find(p => (p.nos||[p.no]).some(n => nos.includes(n)));
+      groups[key] = { label: key, name: master?.name || r.productName || '', records: [] };
+    }
+    groups[key].records.push(r);
+  });
+  return groups;
+}
+
+function renderHistTabs() {
+  const allFiltered = getHistFiltered();
+  const groups = groupByPartNo(HIST.filter(r => {
+    const q = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
+    if (!q) return true;
+    const nos = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
+    const reqs= (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
+    return nos.toLowerCase().includes(q)||(r.productName||'').toLowerCase().includes(q)||reqs.toLowerCase().includes(q);
+  }));
+
+  const tabsEl = document.getElementById('histTabs');
+  tabsEl.innerHTML = '';
+
+  // 「すべて」タブ
+  const allBtn = document.createElement('button');
+  allBtn.className = 'htab' + (HIST_TAB==='all'?' on':'');
+  allBtn.innerHTML = `すべて <span class="hbadge">${HIST.length}</span>`;
+  allBtn.onclick = () => { HIST_TAB='all'; renderHistTabs(); };
+  tabsEl.appendChild(allBtn);
+
+  // 品番ごとのタブ
+  Object.entries(groups).sort((a,b)=>b[1].records.length-a[1].records.length).forEach(([key, g]) => {
+    const btn = document.createElement('button');
+    btn.className = 'htab' + (HIST_TAB===key?' on':'');
+    btn.innerHTML = `${esc(key)} <span class="hbadge">${g.records.length}</span>`;
+    btn.onclick = () => { HIST_TAB=key; renderHistTabs(); };
+    tabsEl.appendChild(btn);
+  });
+
   renderHistList();
 }
 
 function renderHistList(){
-  const q=document.getElementById('histSearch').value.toLowerCase();
-  const el=document.getElementById('histList');
-  const filtered=q
-    ? HIST.filter(r=>{
-        const nos=(r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
-        const reqs=(r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
-        return nos.toLowerCase().includes(q)||(r.productName||'').toLowerCase().includes(q)||reqs.toLowerCase().includes(q);
-      })
-    : HIST;
-  el.innerHTML=filtered.length
-    ? filtered.map(r=>{
-        const nos=(r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' / ');
-        const reqs=(r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).filter(Boolean).join(' / ');
-        return `<div class="hi" onclick="loadRecord(${JSON.stringify(r.id)})">
-          <div>
-            <div class="hm">【${esc(reqs||'-')}】${esc(r.productName||'無題')}</div>
-            <div class="hs">品番: ${esc(nos)} ／ 記入日: ${esc(r.recordDate||'-')} ／ 号機: ${esc(r.machineNo||'-')} ／ 担当: ${esc(r.operatorId||r.savedByName||'-')}</div>
+  const filtered = getHistFiltered();
+  const el = document.getElementById('histList');
+  document.getElementById('histCount').textContent = filtered.length + '件';
+
+  if (!filtered.length) {
+    el.innerHTML = '<div class="hist-empty">📭 記録がありません</div>';
+    return;
+  }
+
+  // タブが「すべて」の場合は品番グループで表示
+  if (HIST_TAB === 'all') {
+    const groups = groupByPartNo(filtered);
+    let html = '';
+    Object.entries(groups).forEach(([key, g]) => {
+      html += `
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:5px 8px;background:var(--head);border-radius:5px;">
+            <span style="font-weight:bold;font-size:12px;color:var(--blue);">📦 ${esc(key)}</span>
+            <span style="font-size:11px;color:var(--tx2);">${esc(g.name)}</span>
+            <span style="margin-left:auto;font-size:10px;color:var(--tx3);">${g.records.length}件</span>
+            <button onclick="newFromMaster(${JSON.stringify(key)})"
+              style="padding:2px 8px;font-size:10px;border:none;border-radius:3px;background:var(--g);color:#fff;cursor:pointer;font-weight:bold;">
+              ＋ この品番で新規作成
+            </button>
+            <button onclick="HIST_TAB=${JSON.stringify(key)};renderHistTabs();"
+              style="padding:2px 8px;font-size:10px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;">
+              一覧を見る
+            </button>
           </div>
-          <div class="hd">${(r.savedAt||'').substring(0,16).replace('T',' ')}</div>
+          ${g.records.slice(0,5).map(r => histRecordCard(r)).join('')}
+          ${g.records.length>5 ? `<div style="text-align:center;padding:4px 0;">
+            <button onclick="HIST_TAB=${JSON.stringify(key)};renderHistTabs();"
+              style="font-size:11px;color:var(--blue2);background:none;border:none;cursor:pointer;text-decoration:underline;">
+              さらに${g.records.length-5}件を表示 →
+            </button>
+          </div>` : ''}
         </div>`;
-      }).join('')
-    : '<div style="text-align:center;color:var(--tx3);padding:20px;">記録がありません</div>';
+    });
+    el.innerHTML = html;
+  } else {
+    // 特定品番タブ：全件表示 + 新規作成ボタン
+    const master = PARTS.find(p => (p.nos||[p.no]).some(n => HIST_TAB.split('/').includes(n)));
+    const newBtn = master ? `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--sec);border-radius:5px;margin-bottom:10px;border:1px solid var(--bd);">
+        <div>
+          <span style="font-weight:bold;font-size:12px;color:var(--blue);">📦 ${esc(HIST_TAB)}</span>
+          <span style="font-size:11px;color:var(--tx2);margin-left:8px;">${esc(master.name||'')}</span>
+        </div>
+        <button onclick="newFromMaster(${JSON.stringify(HIST_TAB)})"
+          style="padding:5px 14px;font-size:11px;font-weight:bold;border:none;border-radius:4px;background:var(--g);color:#fff;cursor:pointer;">
+          ＋ この品番で新規作成
+        </button>
+      </div>` : '';
+    el.innerHTML = newBtn + filtered.map(r => histRecordCard(r)).join('');
+  }
+}
+
+function histRecordCard(r) {
+  const nos  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).filter(Boolean).join(' / ');
+  const reqs = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).filter(Boolean).join(' / ');
+  const date = (r.savedAt||'').substring(0,10);
+  const time = (r.savedAt||'').substring(11,16);
+  return `<div class="hrec" onclick="loadRecord(${JSON.stringify(r.id)})">
+    <div class="hrec-top">
+      <div>
+        <div class="hrec-req">📋 ${esc(reqs||'依頼番号なし')} <span style="font-size:11px;font-weight:normal;color:var(--tx2);">${esc(r.productName||'')}</span></div>
+      </div>
+      <div class="hrec-date">${esc(date)} ${esc(time)}</div>
+    </div>
+    <div class="hrec-sub">
+      <div class="hrec-tag"><span>品番</span> <strong>${esc(nos||'-')}</strong></div>
+      <div class="hrec-tag"><span>号機</span> <strong>${esc(r.machineNo||'-')}</strong></div>
+      <div class="hrec-tag"><span>担当</span> <strong>${esc(r.operatorId||r.savedByName||'-')}</strong></div>
+      <div class="hrec-tag"><span>記入日</span> <strong>${esc(r.recordDate||'-')}</strong></div>
+    </div>
+    <span class="hrec-arrow">›</span>
+  </div>`;
 }
 
 function loadRecord(id){
   const r=HIST.find(x=>x.id===id);
   if(!r){toast('見つかりません','err');return;}
   fillForm(r);closeM('histModal');toast('📂 記録を読み込みました','ok');
+}
+
+// 品番マスターから新規記録書を作成
+function newFromMaster(partNoKey) {
+  const nos = partNoKey.split('/');
+  const master = PARTS.find(p => (p.nos||[p.no]).some(n => nos.includes(n)));
+  if (!master) { toast('マスターデータが見つかりません', 'err'); return; }
+
+  // 新規フォームをクリア
+  RID = null;
+  // 品番+依頼番号ペアを生成（依頼番号は空）
+  PN_PAIRS = (master.nos||[master.no||'']).map(no => ({no, req:''}));
+  renderPnPairs();
+
+  const sv = (id, v) => { const e=document.getElementById(id); if(e) e.value=v||''; };
+  sv('productName', master.name);
+  sv('material',    master.mat);
+  sv('mbName',      master.mb);
+  sv('mbRatio',     master.mbRatio);
+  sv('machineNo',   master.machineNo);
+  sv('condNo',      master.condNo);
+  sv('dryTemp',     master.dryTemp);
+  sv('dryTime',     master.dryTime);
+  sv('moldMachine', master.moldMachine);
+  sv('takeMachine', master.takeMachine);
+  sv('boxMachine',  master.boxMachine);
+  sv('recordDate',  today());
+
+  if (master.sections && master.sections.length) {
+    COND_SECS = deep(master.sections);
+    renderCondSecs('condBody', COND_SECS, false, null);
+  }
+  if (master.prodCheck && master.prodCheck.length) {
+    PC_ITEMS = deep(master.prodCheck);
+    renderPC('pcTb', PC_ITEMS, false);
+  }
+
+  // サインリセット
+  ['mgr','sup','agg'].forEach(role => {
+    SIGNS[role] = null;
+    document.getElementById(`s-${role}`).textContent = '-';
+    document.getElementById(`ss-${role}`).textContent = '';
+    document.getElementById(`cb-${role}`).checked = false;
+  });
+
+  document.getElementById('sid').textContent = '';
+  setStatus('新規作成モード（品番: ' + partNoKey + '）', 'ok');
+  closeM('histModal');
+  // ページトップへスクロール
+  window.scrollTo({top:0, behavior:'smooth'});
+  toast('📦 品番「' + partNoKey + '」で新規作成します。依頼番号を入力してください。', 'ok');
 }
 
 // ══════════════════════════════════════════════
