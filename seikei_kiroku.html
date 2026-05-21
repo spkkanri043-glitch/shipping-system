@@ -935,9 +935,45 @@ function renderM5(){
     const tr=tb.insertRow();
     tr.innerHTML=`
       <td class="L">${esc(item)}</td>
-      <td><select data-k="m5_${i}yn" style="width:100%;font-size:11px;border:1px solid var(--bd);border-radius:3px;padding:2px;font-family:inherit;"><option>-</option><option>有</option><option>無</option></select></td>
-      <td><input type="text" class="tx" data-k="m5_${i}ac" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"></td>`;
+      <td><select data-k="m5_${i}yn" onchange="onM5Change(${i},this)"
+        style="width:100%;font-size:11px;border:1px solid var(--bd);border-radius:3px;padding:2px;font-family:inherit;">
+        <option>-</option><option>有</option><option>無</option>
+      </select></td>
+      <td><input type="text" class="tx" data-k="m5_${i}ac" id="m5ac${i}"
+        style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"
+        placeholder="対処方法を記入してください"
+        oninput="onM5ActionInput(${i},this)"></td>`;
   });
+}
+
+// 5M「有」選択時：対処方法欄をハイライト
+function onM5Change(i, sel) {
+  const acEl = document.getElementById(`m5ac${i}`);
+  if (!acEl) return;
+  if (sel.value === '有') {
+    acEl.style.outline   = '2px solid var(--r)';
+    acEl.style.background = '#fff5f5';
+    acEl.placeholder = '⚠️ 必須：対処方法を記入してください';
+    acEl.focus();
+  } else {
+    acEl.style.outline   = '';
+    acEl.style.background = '';
+    acEl.placeholder = '対処方法を記入してください';
+  }
+}
+
+// 対処方法入力時：入力されたらハイライト解除
+function onM5ActionInput(i, inp) {
+  const ynEl = document.querySelector(`[data-k="m5_${i}yn"]`);
+  if (ynEl && ynEl.value === '有') {
+    if (inp.value.trim()) {
+      inp.style.outline   = '1px solid var(--g)';
+      inp.style.background = '#f0fff4';
+    } else {
+      inp.style.outline   = '2px solid var(--r)';
+      inp.style.background = '#fff5f5';
+    }
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -1314,11 +1350,88 @@ function fillForm(d) {
 }
 
 // ══════════════════════════════════════════════
+// バリデーション
+// ══════════════════════════════════════════════
+function validateForm() {
+  const errors   = []; // 必須エラー（保存ブロック）
+  const warnings = []; // 警告（確認後に保存可）
+
+  // ① 5M変化点：「有」なのに対処方法が空
+  const M5_LABELS = ['人','機械','材料','方法','金型'];
+  M5_LABELS.forEach((label, i) => {
+    const ynEl = document.querySelector(`[data-k="m5_${i}yn"]`);
+    const acEl = document.querySelector(`[data-k="m5_${i}ac"]`);
+    if (ynEl && acEl) {
+      if (ynEl.value === '有' && !acEl.value.trim()) {
+        errors.push(`5M変化点「${label}」が「有」になっていますが、対処方法が未記入です。`);
+        // 視覚的にハイライト
+        acEl.style.outline = '2px solid var(--r)';
+        acEl.style.background = '#fff5f5';
+      } else {
+        acEl.style.outline = '';
+        acEl.style.background = '';
+      }
+    }
+  });
+
+  // ② 成形条件の記入欄：マスターに基準値が設定されているのに記入欄が空
+  let emptyCondCount = 0;
+  COND_SECS.forEach((sec, si) => {
+    sec.rows.forEach((row, ri) => {
+      const k   = `c_${si}_${ri}`;
+      const b1El = document.querySelector(`[data-k="${k}_b1"]`);
+      const vEl  = document.querySelector(`[data-k="${k}_v"]`);
+      if (b1El && vEl) {
+        const hasStd   = b1El.value.trim() !== '';
+        const hasEntry = vEl.value.trim()  !== '';
+        if (hasStd && !hasEntry) {
+          emptyCondCount++;
+          vEl.style.outline   = '2px solid var(--o)';
+          vEl.style.background = '#fffbf0';
+        } else {
+          vEl.style.outline   = '';
+          vEl.style.background = '';
+        }
+      }
+    });
+  });
+  if (emptyCondCount > 0) {
+    warnings.push(`成形条件の記入欄が ${emptyCondCount} 箇所未記入です。このまま保存しますか？`);
+  }
+
+  return { errors, warnings };
+}
+
+// ══════════════════════════════════════════════
 // 保存
 // ══════════════════════════════════════════════
 async function saveRecord() {
   const hasReq = PN_PAIRS.some(p=>p.req.trim());
   if(!hasReq){toast('成形依頼番号を少なくとも1つ入力してください','err');return;}
+
+  // バリデーション
+  const { errors, warnings } = validateForm();
+
+  // 必須エラーがあれば保存不可
+  if (errors.length > 0) {
+    alert('【保存できません】\n\n' + errors.join('\n'));
+    // エラー箇所にスクロール
+    const firstErrEl = document.querySelector('[style*="outline: 2px solid var(--r)"]');
+    if (firstErrEl) firstErrEl.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
+  // 警告があれば確認ダイアログ
+  if (warnings.length > 0) {
+    const ok = confirm('【確認】\n\n' + warnings.join('\n') + '\n\nこのまま保存しますか？');
+    if (!ok) {
+      // 警告箇所にスクロール
+      const firstWarnEl = document.querySelector('[style*="outline: 2px solid var(--o)"]');
+      if (firstWarnEl) firstWarnEl.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+  }
+
   const data=collectData(); RID=data.id;
   // ローカル保存
   const list=JSON.parse(ls('seikei_records')||'[]');
