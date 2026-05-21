@@ -218,7 +218,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   </div>
   <span class="user-badge" id="user-badge">...</span>
   <div class="tb-btns">
-    <button class="btn" onclick="goPortal()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">🏠 ポータル</button>
+    <button class="btn" onclick="goPortal()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">✕ 閉じる</button>
     <button class="btn btn-new"  onclick="newForm()">🆕 新規</button>
     <button class="btn btn-hist" onclick="openHistory()">📂 履歴</button>
     <button class="btn btn-mst"  onclick="openPartSelect()">📦 品番選択</button>
@@ -960,21 +960,14 @@ function stamp(role, checked) {
 }
 
 // ══════════════════════════════════════════════
-// ポータルへ戻る
+// ポータルへ戻る（このタブを閉じる）
 // ══════════════════════════════════════════════
 function goPortal() {
-  try {
-    // ポータルタブ（開き元）にフォーカスしてこのタブを閉じる
-    if (window.opener && !window.opener.closed) {
-      window.opener.focus();
-      window.close();
-      return;
-    }
-  } catch(e) {}
-
-  // openerがない場合はポータルGAS URLへ遷移
-  const PORTAL_URL = 'https://script.google.com/macros/s/AKfycbzAB87ZCwdp3mgVTMe8kS-bAgQAEIeWotqJGS72GJCx3UkNKoLu-i2r2WBgibzpN9sU/exec';
-  window.open(PORTAL_URL, '_blank');
+  window.close();
+  // window.close()が効かないブラウザ向けのフォールバック
+  setTimeout(() => {
+    alert('このタブを手動で閉じてください。\n（ポータルタブが隣にあります）');
+  }, 300);
 }
 
 // ══════════════════════════════════════════════
