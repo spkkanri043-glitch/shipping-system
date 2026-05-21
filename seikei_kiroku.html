@@ -963,27 +963,19 @@ function stamp(role, checked) {
 // ポータルへ戻る
 // ══════════════════════════════════════════════
 function goPortal() {
-  // 別タブで開いている場合はタブを閉じる（ポータルに戻る）
-  try {
-    // window.openerがあれば（ポータルから別タブで開かれた場合）
-    if (window.opener && !window.opener.closed) {
-      window.close();
-      return;
-    }
-  } catch(e) {}
-
-  // URLパラメータにportal_urlがあればそこへ
   const p = new URLSearchParams(window.location.search);
+
+  // 1. portal_urlパラメータがあればそこへ
   const portalUrl = p.get('portal_url');
   if (portalUrl) {
     window.location.href = decodeURIComponent(portalUrl);
     return;
   }
 
-  // それ以外はタブを閉じる
-  if (confirm('このタブを閉じてポータルに戻りますか？')) {
-    window.close();
-  }
+  // 2. SSOトークンからポータルGAS URLを復元
+  //    ポータルGASのURLは固定なのでハードコード
+  const PORTAL_URL = 'https://script.google.com/macros/s/AKfycbzAB87ZCwdp3mgVTMe8kS-bAgQAEIeWotqJGS72GJCx3UkNKoLu-i2r2WBgibzpN9sU/exec';
+  window.location.href = PORTAL_URL;
 }
 
 // ══════════════════════════════════════════════
