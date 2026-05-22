@@ -1327,7 +1327,7 @@ function collectData() {
   });
   const data={
     id:RID||Date.now().toString(),
-    savedAt:new Date().toISOString(),
+    savedAt: toJST(new Date()),
     savedBy:CU.id, savedByName:CU.name,  // 最後に保存した人
     productName:gv('productName'),
     pnPairs:deep(PN_PAIRS),
@@ -1713,8 +1713,16 @@ function histRecordCard(r) {
   };
   const nos    = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).filter(Boolean).join(' / ');
   const reqs   = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).filter(Boolean).join(' / ');
-  const date   = (r.savedAt||'').substring(0,10);
-  const time   = (r.savedAt||'').substring(11,16);
+  // savedAtをJST表示に変換
+  const savedAtJST = (() => {
+    try {
+      const d = new Date(r.savedAt||'');
+      if (isNaN(d)) return r.savedAt||'';
+      return d.toLocaleString('ja-JP', {timeZone:'Asia/Tokyo', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+    } catch(e) { return r.savedAt||''; }
+  })();
+  const date   = savedAtJST.substring(0, 10);
+  const time   = savedAtJST.substring(11, 16);
   const safeId = String(r.id||'').replace(/'/g,"\'");
   const master  = PARTS.find(p => (p.nos||[p.no]).some(n => nos.split(' / ').includes(n)));
   const client  = r.client || master?.client || '';
@@ -1829,6 +1837,12 @@ async function gasPost(body){
 // ══════════════════════════════════════════════
 // UI HELPERS
 // ══════════════════════════════════════════════
+// 日本時間（JST）で ISO形式文字列を生成
+function toJST(date) {
+  const jst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return jst.toISOString().replace('Z', '+09:00');
+}
+
 function upOn(sel){
   sel.className='on';
   if(sel.value==='OK'||sel.value==='○')sel.classList.add('ok');
