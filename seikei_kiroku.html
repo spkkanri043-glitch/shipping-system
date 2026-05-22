@@ -1705,42 +1705,50 @@ function toggleHistGroup(key) {
 }
 
 function histRecordCard(r) {
+  const safeStr = (v) => {
+    if (!v) return '';
+    const s = String(v);
+    if (s.trim().startsWith('{') || s.trim().startsWith('[')) return '';
+    return s.length > 80 ? s.substring(0, 80) + '...' : s;
+  };
   const nos    = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).filter(Boolean).join(' / ');
   const reqs   = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).filter(Boolean).join(' / ');
   const date   = (r.savedAt||'').substring(0,10);
   const time   = (r.savedAt||'').substring(11,16);
-  const safeId = String(r.id||'').replace(/'/g,"\\'");
-  // マスターから取引先名を取得
+  const safeId = String(r.id||'').replace(/'/g,"\'");
   const master  = PARTS.find(p => (p.nos||[p.no]).some(n => nos.split(' / ').includes(n)));
   const client  = r.client || master?.client || '';
-  // サインバッジ
   const signs = r.signs || {};
   const signBadges = [
-    signs.mgr ? `<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">管理者✔</span>` : '',
-    signs.sup ? `<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">監督者✔</span>` : '',
-    signs.agg ? `<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">集計✔</span>`   : '',
+    signs.mgr ? '<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">管理者✔</span>' : '',
+    signs.sup ? '<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">監督者✔</span>' : '',
+    signs.agg ? '<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">集計✔</span>'   : '',
   ].filter(Boolean).join(' ');
-
-  return `<div class="hrec" onclick="loadRecord('${safeId}')">
-    <div class="hrec-top">
-      <div style="flex:1;min-width:0;">
-        <div class="hrec-req">📋 ${esc(reqs||'依頼番号なし')}
-          <span style="font-size:11px;font-weight:normal;color:var(--tx2);">${esc(r.productName||'')}</span>
-          ${client ? `<span style="font-size:10px;color:var(--blue2);margin-left:6px;">🏢 ${esc(client)}</span>` : ''}
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;">${signBadges}</div>
-      </div>
-      <div class="hrec-date" style="flex-shrink:0;">${esc(date)}<br>${esc(time)}</div>
-    </div>
-    <div class="hrec-sub">
-      <div class="hrec-tag"><span>品番</span> <strong>${esc(nos||'-')}</strong></div>
-      <div class="hrec-tag"><span>号機</span> <strong>${esc(r.machineNo||'-')}</strong></div>
-      <div class="hrec-tag"><span>担当</span> <strong>${esc(r.operator||r.operatorId||r.savedByName||'-')}</strong></div>
-      <div class="hrec-tag"><span>記入日</span> <strong>${esc(r.recordDate||'-')}</strong></div>
-    </div>
-    <span class="hrec-arrow">›</span>
-  </div>`;
+  const productName = safeStr(r.productName);
+  const operator    = safeStr(r.operator || r.operatorId || r.savedByName);
+  const machineNo   = safeStr(r.machineNo);
+  const recordDate  = safeStr(r.recordDate);
+  return '<div class="hrec" onclick="loadRecord(\'' + safeId + '\')">'
+    + '<div class="hrec-top">'
+      + '<div style="flex:1;min-width:0;">'
+        + '<div class="hrec-req">📋 ' + esc(reqs||'依頼番号なし')
+          + '<span style="font-size:11px;font-weight:normal;color:var(--tx2);margin-left:6px;">' + esc(productName) + '</span>'
+          + (client ? '<span style="font-size:10px;color:var(--blue2);margin-left:6px;">🏢 ' + esc(client) + '</span>' : '')
+        + '</div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;">' + signBadges + '</div>'
+      + '</div>'
+      + '<div class="hrec-date" style="flex-shrink:0;">' + esc(date) + '<br>' + esc(time) + '</div>'
+    + '</div>'
+    + '<div class="hrec-sub">'
+      + '<div class="hrec-tag"><span>品番</span> <strong>' + esc(nos||'-') + '</strong></div>'
+      + '<div class="hrec-tag"><span>号機</span> <strong>' + esc(machineNo||'-') + '</strong></div>'
+      + '<div class="hrec-tag"><span>担当</span> <strong>' + esc(operator||'-') + '</strong></div>'
+      + '<div class="hrec-tag"><span>記入日</span> <strong>' + esc(recordDate||'-') + '</strong></div>'
+    + '</div>'
+    + '<span class="hrec-arrow">›</span>'
+    + '</div>';
 }
+
 
 function loadRecord(id){
   // IDを文字列・数値両方で検索
