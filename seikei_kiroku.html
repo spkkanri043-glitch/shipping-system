@@ -1013,6 +1013,22 @@ function stamp(role, checked) {
     document.getElementById(`s-${role}`).textContent=CU.name;
     document.getElementById(`ss-${role}`).textContent=CU.name+' ✔';
     toast(CU.name+'が「'+labels[role]+'」で確認しました','ok');
+
+    // GASへサイン通知を送信
+    if (GAS_URL) {
+      const notifyData = {
+        action:      'sendSign',
+        role:        role,
+        signerName:  CU.name,
+        signerId:    CU.id,
+        partNo:      PN_PAIRS[0]?.no || '',
+        pnPairs:     PN_PAIRS,
+        reqNo:       PN_PAIRS[0]?.req || '',
+        productName: gv('productName'),
+        recordId:    RID || '',
+      };
+      gasPost(notifyData).catch(e => console.warn('サイン通知失敗:', e));
+    }
   } else {
     SIGNS[role]=null;
     document.getElementById(`s-${role}`).textContent='-';
