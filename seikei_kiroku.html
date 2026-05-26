@@ -413,8 +413,15 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
           <!-- 品番のみ（依頼番号なし） -->
           <div style="margin-bottom:6px;">
             <label style="font-size:10px;color:var(--tx2);font-weight:bold;">⭐ 品番（マスター）</label>
+            <div style="font-size:10px;color:var(--tx3);margin-bottom:3px;">品番を入力すると製品マスタから製品名・取引先を自動取得できます</div>
             <div id="m-pnArea" style="margin-top:4px;"></div>
-            <button class="pn-add-btn" onclick="addMstPn()" style="margin-top:3px;">＋ 品番追加</button>
+            <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap;">
+              <button class="pn-add-btn" onclick="addMstPn()">＋ 品番追加</button>
+              <button onclick="fetchFromProductMaster()" style="padding:4px 12px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;font-family:inherit;">
+                🔍 製品マスタから自動入力
+              </button>
+              <span id="m-fetch-status" style="font-size:10px;color:var(--tx3);"></span>
+            </div>
           </div>
           <!-- 号機名・条件番号 -->
           <div class="fg fg4" style="margin-bottom:6px;">
@@ -556,8 +563,13 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 // ══════════════════════════════════════════════
 const GAS_URL = (() => {
   const p = new URLSearchParams(window.location.search);
-  // ポータルから渡されるキー名を全パターン対応
   return p.get('seikei_gas_url') || p.get('seikeiKirokuGas') || p.get('gasUrl') || '';
+})();
+
+// 製品マスタGAS URL（ポータルから product_url パラメータで渡される）
+const PRODUCT_GAS_URL = (() => {
+  const p = new URLSearchParams(window.location.search);
+  return p.get('product_url') || '';
 })();
 
 let CU = null; // currentUser
@@ -1159,6 +1171,83 @@ function printForm() {
   }
   window.print();
 }
+
+// ══════════════════════════════════════════════
+// 製品マスタ連携（品番 → 製品名・取引先の自動補完）
+// ══════════════════════════════════════════════
+let PRODUCT_CACHE = null;
+
+async function fetchProductMasterAll() {
+  if (PRODUCT_CACHE) return PRODUCT_CACHE;
+  if (!PRODUCT_GAS_URL) {
+    toast('製品マスタURLが未設定です（ポータルから開き直してください）', 'warn');
+    return null;
+  }
+  try {
+    // 複数のaction名を試す
+    for (const action of ['list', 'getProducts', 'listProducts']) {
+      try {
+        const r = await fetch(PRODUCT_GAS_URL + '?action=' + action);
+        const d = await r.json();
+        const products = d.products || d.data || d.items;
+        if (d.ok && products) { PRODUCT_CACHE = products; return products; }
+      } catch(e) {}
+    }
+    return null;
+  } catch(e) {
+    console.warn('製品マスタ取得失敗:', e);
+    return null;
+  }
+}
+
+async function fetchFromProductMaster() {
+  const nos = M_PNS.filter(n => n.trim());
+  if (!nos.length) { toast('品番を入力してから実行してください', 'warn'); return; }
+
+  const statusEl = document.getElementById('m-fetch-status');
+  statusEl.textContent = '🔄 製品マスタを検索中...';
+
+  const products = await fetchProductMasterAll();
+  if (!products) { statusEl.textContent = '❌ 製品マスタに接続できません'; return; }
+
+  // 複数キー名に対応した値取得
+  const get = (obj, ...keys) => {
+    for (const k of keys) { if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim()) return String(obj[k]).trim(); }
+    return '';
+  };
+
+  // 品番で検索（完全一致優先、次に部分一致）
+  const found = [];
+  nos.forEach(no => {
+    const no_t = no.trim();
+    let match = products.find(p => get(p,'partNo','品番','itemNo','item_no') === no_t);
+    if (!match) match = products.find(p => get(p,'partNo','品番','itemNo','item_no').includes(no_t));
+    if (match) found.push({ no, product: match });
+  });
+
+  if (!found.length) {
+    statusEl.textContent = '⚠️ 該当品番が見つかりません';
+    toast('製品マスタに該当品番が見つかりませんでした', 'warn');
+    return;
+  }
+
+  const first = found[0].product;
+  const productName = get(first, 'productName','製品名','name','product_name','itemName');
+  const client      = get(first, 'basicClient','基本取引先','client','customer','clientName','取引先');
+
+  // 空欄の場合のみ自動入力
+  const nameEl   = document.getElementById('m-productName');
+  const clientEl = document.getElementById('m-client');
+  if (nameEl   && !nameEl.value.trim()   && productName) nameEl.value   = productName;
+  if (clientEl && !clientEl.value.trim() && client)      clientEl.value = client;
+
+  const updates = [];
+  if (productName) updates.push('製品名: ' + productName);
+  if (client)      updates.push('取引先: ' + client);
+  statusEl.textContent = '✅ ' + found.length + '件の品番が見つかりました';
+  toast('製品マスタから自動入力しました（' + updates.join(' / ') + '）', 'ok');
+}
+
 async function openMasterModal() {
   M_COND_SECS = deep(DEF_SECS);
   M_PC_ITEMS  = deep(DEF_PC);
