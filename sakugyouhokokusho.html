@@ -481,9 +481,9 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     <div class="section-card">
       <div class="sc-title">📦 製品情報</div>
       <div class="scan-tabs">
-        <div class="scan-tab on"  id="tab-qr"     onclick="setScanMode('qr')">📱 QR</div>
-        <div class="scan-tab"     id="tab-bc"     onclick="setScanMode('barcode')">🔲 バーコード</div>
-        <div class="scan-tab"     id="tab-manual" onclick="setScanMode('manual')">⌨️ 手入力</div>
+  <div class="scan-tab on" id="tab-scan"   onclick="setScanMode('scan')">📷 スキャン</div>
+  <div class="scan-tab"    id="tab-manual" onclick="setScanMode('manual')">⌨️ 手入力</div>
+</div>
       </div>
       <div class="frow">
         <label class="fl2">品番 <span class="req">必須</span></label>
@@ -935,7 +935,7 @@ function loadJsQR() {
 
 function setScanMode(mode) {
   scanMode = mode;
-  ['qr','bc','manual'].forEach(m => {
+  ['scan','manual'].forEach(m => {
     document.getElementById('tab-' + m).classList.toggle('on', m === mode);
   });
   document.getElementById('btn-scan').style.display = mode === 'manual' ? 'none' : 'flex';
@@ -966,28 +966,28 @@ async function startScan() {
 
 function startScanLoop(video) {
   const canvas = document.getElementById('cam-canvas');
-  const ctx = canvas.getContext('2d');
+  const ctx    = canvas.getContext('2d');
   function tick() {
     if (!camStream) return;
     if (video.readyState < 2) { scanRAF = requestAnimationFrame(tick); return; }
-    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
-    if (scanMode === 'qr') {
-      const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(img.data, img.width, img.height);
-      if (code && code.data) { onScanned(code.data, 'QR'); return; }
-    } else {
-  try {
-    const hints = new Map();
-    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.CODE_39]);
-    const codeReader = new ZXing.MultiFormatReader();
-    codeReader.setHints(hints);
-    const luminance = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
-    const bitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminance));
-    const result = codeReader.decode(bitmap);
-    if (result) { onScanned(result.getText(), 'バーコード'); return; }
-  } catch(e) {}
-}
+    const img  = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(img.data, img.width, img.height);
+    if (code && code.data) { onScanned(code.data, 'QR'); return; }
+    if (typeof ZXing !== 'undefined') {
+      try {
+        const hints = new Map();
+        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.CODE_39]);
+        const reader = new ZXing.MultiFormatReader();
+        reader.setHints(hints);
+        const luminance = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
+        const bitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminance));
+        const result = reader.decode(bitmap);
+        if (result) { onScanned(result.getText(), 'バーコード'); return; }
+      } catch(e) {}
+    }
     scanRAF = requestAnimationFrame(tick);
   }
   scanRAF = requestAnimationFrame(tick);
