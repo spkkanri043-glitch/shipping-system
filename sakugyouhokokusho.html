@@ -1138,7 +1138,7 @@ function renderDefects() {
           <label style="font-size:11px;color:var(--tx2);font-weight:600">種類</label>
           <select class="defect-fi" onchange="updateDefect(${d.id},'type',this.value)">
             <option value="">選択</option>
-            ${['外観不良','寸法不良','異物混入','欠品','その他'].map(v=>
+            ${['スタートサンプル','黒点','異物','S.S','フラッシュ','キズ','ヒケ','色むら','フローマーク','離形不良','焼け','汚れ','ムクレ','変形','入り数不足','入り数過多','その他','タイムサンプル','ゲート高','終了サンプル','製品落下','捨てショット','リークNG','欠品','加工不良','バリ','ウェルド'].map(v=>
               `<option value="${v}" ${d.type===v?'selected':''}>${v}</option>`).join('')}
           </select>
         </div>
