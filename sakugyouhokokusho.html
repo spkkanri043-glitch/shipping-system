@@ -1318,8 +1318,7 @@ function startNew() {
   startTimer();
 }
 
-function resetForm() {
-  ['f-sakugyo','f-hinban','f-torihiki','f-hakoiri','f-fuguai','f-hasuu'].forEach
+['f-sakugyo','f-hinban','f-torihiki','f-hakoiri','f-fuguai','f-hasuu'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.value = ''; el.classList.remove('filled','err'); }
   });
