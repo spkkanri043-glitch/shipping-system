@@ -977,14 +977,17 @@ function startScanLoop(video) {
       const code = jsQR(img.data, img.width, img.height);
       if (code && code.data) { onScanned(code.data, 'QR'); return; }
     } else {
-      try {
-        const codeReader = new ZXing.MultiFormatReader();
-        const luminance = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
-        const bitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminance));
-        const result = codeReader.decode(bitmap);
-        if (result) { onScanned(result.getText(), 'バーコード'); return; }
-      } catch(e) {}
-    }
+  try {
+    const hints = new Map();
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.CODE_39]);
+    const codeReader = new ZXing.MultiFormatReader();
+    codeReader.setHints(hints);
+    const luminance = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
+    const bitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminance));
+    const result = codeReader.decode(bitmap);
+    if (result) { onScanned(result.getText(), 'バーコード'); return; }
+  } catch(e) {}
+}
     scanRAF = requestAnimationFrame(tick);
   }
   scanRAF = requestAnimationFrame(tick);
