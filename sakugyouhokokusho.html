@@ -701,7 +701,6 @@ function loadZXing() {
   s.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js';
   document.head.appendChild(s);
 }
-                        
   // URLパラメータから sso トークンを取得
   const params = new URLSearchParams(location.search);
   const ssoToken = params.get('sso');
