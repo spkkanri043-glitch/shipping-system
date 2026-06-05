@@ -1319,12 +1319,12 @@ function startNew() {
 }
 
 function resetForm() {
- ['f-sakugyo','f-hinban','f-torihiki','f-hakoiri','f-fuguai','f-hasuu'].forEach(id => {
+  ['f-sakugyo','f-hinban','f-torihiki','f-hakoiri','f-fuguai','f-hasuu'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.value = ''; el.classList.remove('filled','err'); }
   });
   document.getElementById('scan-result-tag').style.display = 'none';
-  resetPhotos(); // 写真もリセット
+  resetPhotos();
 }
 
 // ============================================================
