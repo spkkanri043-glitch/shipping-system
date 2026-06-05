@@ -518,8 +518,14 @@ textarea.fi2 { resize: none; line-height: 1.6; }
         <div class="count-display" id="count-disp">0</div>
         <button class="count-btn plus" onclick="countChange(1)">＋</button>
       </div>
-      <div class="count-unit">箱</div>
-      <div class="total-row">
+     <div class="count-unit">箱</div>
+<div class="frow" style="margin-top:10px">
+  <label class="fl2">端数個数（最後の箱が半端な場合）</label>
+  <input class="fi2" type="number" id="f-hasuu" value="0" min="0"
+    inputmode="numeric" style="-moz-appearance:textfield"
+    oninput="calcTotal()">
+</div>
+<div class="total-row">
         <span class="total-label">合計数量</span>
         <span><span class="total-value" id="total-disp">0</span><span class="total-unit">個</span></span>
       </div>
@@ -920,7 +926,8 @@ function countChange(d) {
 }
 function calcTotal() {
   const h = parseInt(document.getElementById('f-hakoiri').value) || 0;
-  document.getElementById('total-disp').textContent = count * h;
+  const hasuu = parseInt(document.getElementById('f-hasuu').value) || 0;
+  document.getElementById('total-disp').textContent = count * h + hasuu;
 }
 
 // ============================================================
@@ -1312,7 +1319,7 @@ function startNew() {
 }
 
 function resetForm() {
-  ['f-sakugyo','f-hinban','f-torihiki','f-hakoiri','f-fuguai'].forEach(id => {
+  ['f-sakugyo','f-hinban','f-torihiki','f-hakoiri','f-fuguai','f-hasuu'].forEach
     const el = document.getElementById(id);
     if (el) { el.value = ''; el.classList.remove('filled','err'); }
   });
