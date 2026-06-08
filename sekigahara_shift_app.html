@@ -2840,6 +2840,7 @@ function syncFromPortalAndPersist(portalEmps) {
       ptEnd:   existing ? existing.ptEnd   : '18:00',
       pw:      existing ? existing.pw      : '1234',
       al:      e.nenkyuu !== undefined && e.nenkyuu !== '' ? Number(e.nenkyuu) : (existing ? existing.al : 10),
+      lwUserId: e.lwUserId || (existing ? existing.lwUserId : ''),
     };
   });
 
