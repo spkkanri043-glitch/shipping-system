@@ -2058,6 +2058,7 @@ function approveOTReq(id){
   const cur=SHIFTS[req.eid][k]||{type:req.shift,ot:0};
   SHIFTS[req.eid][k]={...cur,type:req.shift,ot:req.hours,reqId:req.id};
   rOTReq();updAllBadges();rSh();rOT();rDB();
+  persistData();scheduleSave(); // ★追加
   alert(`✅ ${req.id} を承認しました。シフトの残業時間に反映されました。`);
 }
 function rejectOTReq(id){
@@ -2079,6 +2080,7 @@ function rejectOTReq(id){
       lwUserId: empNotifyOR.lwUserId
     });
   }
+  persistData();scheduleSave(); // ★追加
   alert(`❌ ${req.id} を却下しました。`);
 }
 function cancelOTReq(id){
@@ -2792,6 +2794,10 @@ function restoreData() {
       if (vacJson2) { const s=JSON.parse(vacJson2); VAC_REQUESTS.length=0; s.forEach(r=>VAC_REQUESTS.push(r)); }
       if (otJson2)  { const s=JSON.parse(otJson2);  OT_REQUESTS.length=0;  s.forEach(r=>OT_REQUESTS.push(r)); }
       if (hJson2)   { const s=JSON.parse(hJson2);   H_REQUESTS.length=0;   s.forEach(r=>H_REQUESTS.push(r)); }
+      // IDカウンターを復元
+if (VAC_REQUESTS.length) { const mx=Math.max(...VAC_REQUESTS.map(r=>parseInt(r.id?.replace('REQ',''))||0)); if(mx>=_rid)_rid=mx+1; }
+if (OT_REQUESTS.length)  { const mx=Math.max(...OT_REQUESTS.map(r=>parseInt(r.id?.replace('OTR',''))||0)); if(mx>=_orid)_orid=mx+1; }
+if (H_REQUESTS.length)   { const mx=Math.max(...H_REQUESTS.map(r=>parseInt(r.id?.replace('HWR',''))||0)); if(mx>=_hrid)_hrid=mx+1; }
     } catch(e2) {}
 
     // 申請データの復元
@@ -2848,7 +2854,7 @@ function syncFromPortalAndPersist(portalEmps) {
 // ══ GASスプレッドシート保存・読み込み ══
 const LS_GAS_URL = 'kpk_shift_gas_url';
 // GASのURL（ポータルと同じURL）
-const GAS_URL_HARDCODED = 'https://script.google.com/macros/s/AKfycbzAB87ZCwdp3mgVTMe8kS-bAgQAEleWotqJGS72GJCx3UkNKoLu-i2r2WBgibzpN9sU/exec';
+const GAS_URL_HARDCODED = 'https://script.google.com/macros/s/AKfycbwfAkY2iW48xUKPhyjznxYQW_-n19qLa4QcJ0qIB1zSnyY66UyAhOkm0grR8KTgjcza/exec';
 let GAS_URL_SHIFT = GAS_URL_HARDCODED; // まずハードコード値をセット
 try {
   const saved = localStorage.getItem(LS_GAS_URL);
