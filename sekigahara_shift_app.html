@@ -353,7 +353,7 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       <button onclick="manualSyncSheet()" style="font-size:10px;padding:3px 8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;cursor:pointer;margin-left:4px" title="最新データに同期（手動）">🔄 同期</button>
       <span id="auto-sync-badge" style="font-size:9px;color:rgba(255,255,255,.45);margin-left:4px" title="自動同期（1時間ごと）">⏱ 自動</span>
     </div>
-    <div class="tbr"><span class="rbg ra" id="rbg">管理者</span><button class="blo" onclick="doLogout()">ログアウト</button></div>
+    <div class="tbr"><span class="rbg ra" id="rbg">管理者</span><button class="blo" onclick="doLogoutAndClose()">✕ タブを閉じる</button></div>
   </div>
   <div class="nav">
     <div class="nt on" onclick="sp('db',this)">📊 ダッシュボード</div>
@@ -1107,6 +1107,22 @@ function doLogout(){
 // ページを閉じる・離脱する時もオフラインを記録
 window.addEventListener('beforeunload', notifyOffline);
 window.addEventListener('pagehide', notifyOffline);
+
+  function doLogoutAndClose() {
+  notifyOffline();
+  cUser = null; isA = false;
+  try { localStorage.removeItem(LS_USER); } catch(e) {}
+  try {
+    window.close();
+  } catch(e) {}
+  // window.close()が効かない場合はログイン画面へ
+  setTimeout(() => {
+    document.getElementById('lw').classList.remove('hid');
+    document.getElementById('mainApp').classList.add('hid');
+    document.getElementById('lid').value = '';
+    document.getElementById('lpw').value = '';
+  }, 300);
+}
 
 function launch(){
   document.body.classList.remove('app-loading'); // ログイン確定後に表示
