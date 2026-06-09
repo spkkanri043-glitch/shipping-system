@@ -184,6 +184,11 @@ td { padding: 11px 12px; font-size: 13px; vertical-align: middle; }
     <div class="header-user-dot"></div>
     <span id="current-user-name">未ログイン</span>
   </div>
+  <button onclick="closeTab()" style="
+    padding:5px 11px;font-size:11px;font-weight:600;
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+    color:#fff;border-radius:6px;cursor:pointer;white-space:nowrap;margin-left:8px;
+  ">✕ タブを閉じる</button>
 </div>
 
 <div class="main">
@@ -613,6 +618,16 @@ function showToast(msg, type='') {
 
 document.getElementById('detail-modal').addEventListener('click', e => { if (e.target === document.getElementById('detail-modal')) closeModal(); });
 document.getElementById('user-modal').addEventListener('click', e => { if (e.target === document.getElementById('user-modal')) closeUserModal(); });
+
+function closeTab() {
+  try {
+    window.close();
+  } catch(e) {}
+  setTimeout(() => {
+    showToast('このタブを閉じてポータルに戻ってください', '');
+  }, 300);
+}
+</script>
 </script>
 </body>
 </html>
