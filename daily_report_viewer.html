@@ -182,7 +182,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
       <div class="header-user-dot"></div>
       <span id="header-user-name"></span>
     </div>
-    <button class="btn-portal-back" id="btn-portal-back" onclick="goPortal()">← ポータルに戻る</button>
+    <button class="btn-portal-back" id="btn-portal-back" onclick="goPortal()">✕ タブを閉じる</button>
   </div>
 </div>
 
@@ -350,11 +350,19 @@ function saveUrl() {
 }
 
 function goPortal() {
-  if (portalUrl) {
-    window.location.href = portalUrl;
-  } else {
-    try { window.close(); } catch(e) {}
-    showToast('ポータルURLが不明です。タブを閉じてください', '');
+  // 別タブで開かれているので、このタブを閉じてポータルに戻る
+  try {
+    window.close();
+    // window.close() が効かない場合（直接開いた場合）はポータルURLへ遷移
+    setTimeout(() => {
+      if (portalUrl && !portalUrl.includes('googleusercontent')) {
+        window.location.href = portalUrl;
+      } else {
+        showToast('このタブを閉じてポータルに戻ってください', '');
+      }
+    }, 300);
+  } catch(e) {
+    showToast('このタブを閉じてポータルに戻ってください', '');
   }
 }
 
