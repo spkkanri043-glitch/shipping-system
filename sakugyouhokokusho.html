@@ -811,13 +811,19 @@ function doLogout() {
     stopTimer(); stopCamera();
     sessionStorage.removeItem('kpk_report_user');
     currentUser = null;
-    document.getElementById('s-main').classList.remove('on');
-    document.getElementById('s-login').classList.add('on');
-    document.getElementById('inp-pw').value = '';
-    document.getElementById('login-err').style.display = 'none';
+    // タブを閉じてポータルに戻る
+    try {
+      window.close();
+    } catch(e) {}
+    // window.close()が効かない場合はログイン画面に戻す
+    setTimeout(() => {
+      document.getElementById('s-main').classList.remove('on');
+      document.getElementById('s-login').classList.add('on');
+      document.getElementById('inp-pw').value = '';
+      document.getElementById('login-err').style.display = 'none';
+    }, 300);
   });
 }
-
 function goPortal() {
   // 作業報告書タブを閉じてポータルタブに戻る
   try {
