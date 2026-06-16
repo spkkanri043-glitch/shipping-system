@@ -447,17 +447,19 @@ function fmtDateTime(val) {
 function applyFilter() {
   const from = document.getElementById('date-from').value;
   const to   = document.getElementById('date-to').value;
-  const fromD = from ? new Date(from) : new Date('2020-01-01');
-  const toD   = to   ? new Date(to + 'T23:59:59') : new Date();
+  // "YYYY-MM-DD" をそのまま文字列比較用のプレフィックスとして使う（タイムゾーンずれ回避）
+  const fromStr = from || '2020-01-01';
+  const toStr   = to   || fmtDate(new Date());
   const fWorker  = activeWorker || document.getElementById('f-worker').value;
   const fPart    = document.getElementById('f-part').value;
   const fSakugyo = document.getElementById('f-sakugyo').value;
 
   filtered = allReports.filter(r => {
-    const raw = String(r['作成日時'] || '').replace(' ','T');
+    // 作成日時の先頭10文字（YYYY-MM-DD または YYYY/MM/DD）を正規化して比較
+    const raw = String(r['作成日時'] || '');
     if (!raw) return false;
-    const d = new Date(raw);
-    if (isNaN(d) || d < fromD || d > toD) return false;
+    const dateStr = raw.slice(0,10).replace(/\//g, '-'); // "YYYY-MM-DD" に統一
+    if (dateStr < fromStr || dateStr > toStr) return false;
     if (fWorker  && r['担当者']   !== fWorker)  return false;
     if (fPart    && r['品番']     !== fPart)    return false;
     if (fSakugyo && r['作業項目'] !== fSakugyo) return false;
