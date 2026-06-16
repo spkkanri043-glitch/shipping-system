@@ -1244,8 +1244,9 @@ async function submitReport(isFinal) {
 
   const endTime    = new Date();
   const workMin    = Math.round((endTime - workState.startTime - workState.pausedTotal) / 60000);
-  const hakoiri    = parseInt(document.getElementById('f-hakoiri').value) || 0;
-  const totalCount = count * hakoiri;
+ const hakoiri    = parseInt(document.getElementById('f-hakoiri').value) || 0;
+const hasuu      = parseInt(document.getElementById('f-hasuu')?.value) || 0;
+const totalCount = count * hakoiri + hasuu;
   const fuguaiCount = defects.reduce((s, d) => s + (parseInt(d.count) || 0), 0);
 
   const report = {
