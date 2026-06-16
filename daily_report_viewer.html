@@ -555,6 +555,7 @@ function renderTable() {
       <td>${r['作業項目']||'—'}</td>
       <td style="font-family:monospace;font-size:11px">${r['品番']||'—'}</td>
       <td style="text-align:center">${r['カウント']||0} 箱</td>
+      <td style="text-align:center;color:var(--tx2)">${Number(r['端数個数']||0) > 0 ? `+${r['端数個数']}個` : '—'}</td>
       <td style="text-align:center;font-weight:700;color:var(--pr)">${(Number(r['合計'])||0).toLocaleString()}</td>
       <td style="text-align:center">${r['作業時間分']||0} 分</td>
       <td style="text-align:center">
@@ -573,6 +574,7 @@ function renderTable() {
           <th>作業項目</th>
           <th>品番</th>
           <th>カウント</th>
+          <th>端数</th>
           <th>合計数量</th>
           <th>作業時間</th>
           <th>不具合</th>
@@ -685,6 +687,7 @@ function openDetail(idx) {
         <div class="detail-item"><div class="detail-label">基本取引先</div><div class="detail-value">${r['基本取引先']||'—'}</div></div>
         <div class="detail-item"><div class="detail-label">箱入数</div><div class="detail-value">${r['箱入数']||'—'} 個/箱</div></div>
         <div class="detail-item"><div class="detail-label">カウント</div><div class="detail-value">${r['カウント']||0} 箱</div></div>
+        <div class="detail-item"><div class="detail-label">端数個数</div><div class="detail-value">${Number(r['端数個数']||0)} 個</div></div>
         <div class="detail-item"><div class="detail-label">合計数量</div><div class="detail-value large">${(Number(r['合計'])||0).toLocaleString()} 個</div></div>
         <div class="detail-item"><div class="detail-label">作業時間</div><div class="detail-value">${r['作業時間分']||0} 分</div></div>
       </div>
