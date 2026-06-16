@@ -447,7 +447,6 @@ function fmtDateTime(val) {
 function applyFilter() {
   const from = document.getElementById('date-from').value;
   const to   = document.getElementById('date-to').value;
-  // "YYYY-MM-DD" をそのまま文字列比較用のプレフィックスとして使う（タイムゾーンずれ回避）
   const fromStr = from || '2020-01-01';
   const toStr   = to   || fmtDate(new Date());
   const fWorker  = activeWorker || document.getElementById('f-worker').value;
@@ -455,10 +454,21 @@ function applyFilter() {
   const fSakugyo = document.getElementById('f-sakugyo').value;
 
   filtered = allReports.filter(r => {
-    // 作成日時の先頭10文字（YYYY-MM-DD または YYYY/MM/DD）を正規化して比較
     const raw = String(r['作成日時'] || '');
     if (!raw) return false;
-    const dateStr = raw.slice(0,10).replace(/\//g, '-'); // "YYYY-MM-DD" に統一
+
+    // 日付部分を日本時間で取得（ISOString UTC / スペース区切り / スラッシュ区切りすべて対応）
+    let dateStr;
+    if (raw.includes('T') && raw.includes('Z')) {
+      // ISO UTC形式（例: 2026-06-12T23:04:00.000Z）→ JSTに+9時間して日付取得
+      const d = new Date(raw);
+      const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+      dateStr = jst.toISOString().slice(0, 10); // YYYY-MM-DD
+    } else {
+      // "2026-06-13 8:04" や "2026/06/13 08:04" など → 先頭10文字をそのまま使用
+      dateStr = raw.slice(0, 10).replace(/\//g, '-');
+    }
+
     if (dateStr < fromStr || dateStr > toStr) return false;
     if (fWorker  && r['担当者']   !== fWorker)  return false;
     if (fPart    && r['品番']     !== fPart)    return false;
