@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>出荷照合システム(カナモリ向け)</title>
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACc0lEQVR4nL1XPWgTYRh+LvQgaWPvgnFoTEMIVFChCUUbq4M/6CCZpIjQIaCDg0t1csrk5OiSsUMX6aSDXaSC0khsFaHgD1Yol6RtCAR6tcWGtKkO6V3v++6+++ld71ne732/983z3Pv9XI4DBXm79Y+OeQkxHOS0fsBPciOOAGvCLxGcF+SxVMZ0fmhyRB1/mJxSx2I4yHFuySfuP8b84jfmfOphAqG4oPo7q5uEiIBRkVfQkpfzRZTzRYTiAq6+eKDm9HhB9Ce6UzeKZ4ABrT82/UiX44mA/mZowCieOrDlfFG1tAjXeyAWS5nODz29hlBcUMnpPeCJgL83+k1z0hcPT8Hv5++xvr6i+p4sgRWWPn9Vx73UnKtT0PPzh5vy7m9YJbRK47oYv7YPAOgc+AlMzNoh22s3cjJe2RegJVdIAWD3tPPG7bUbOaM4U4BC7pbYCjoBrdI4+LV98A5IqyNvoza4FgCgt4QsU0Bn5o4p8ZfFhVkAuDCaNWznUUAIqPe1Dx2ZXdSUW4Qf+5TOMlJ1kLFC+LoliBR3mcURnOs++Rw7xylcX0SZ0csQ+zqQN5oQI1FTu7W1jZNnh4n6Y30d0xhMJHUxXQfGJMmwuFKpbBrFPwIYvnRbGEwknwGAGOkeCJYFUNDWEx2Qlpds3WhaXLl1VwAAeaNZAIDaqTphlbhiafi6BJYCkmfSrs/3iWWesNcbvwhLQ7cHWGt9XCD+kKy+yeH8vTnHArSb0Aq1qlSYf/da9XUd+D5zU6BjCpRNql8qHrWqZLjJrBCgv9WOgpdP7N+M2qcXw0FOJffz00whBzSnwItOOCUnBPglgub4Dxaa44PD4JhWAAAAAElFTkSuQmCC">
-<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAJ5UlEQVR4nO3dT4hd1R3A8d/ESUxsTGYgIs3EJCgGYiDR1kZtAhloRUohIEFEF4WKuHCTduWidOXKlWbjIi0KLpSslKEuAgoTOtIa22IK0ZJAyUtmIpLBmTFDZzSZpIvxDu/dd+97957zO3/ued8PiMnMe+fd4NeT8859974bhATm79Y+OeQkxHOS0fsBPciOOAGvCLxGcF+SxVMZ0fmhyRB1/mJxSx2I4yHFuySfuP8b84jfmfOphAqG4oPo7q5uEiIBRkVfQkpfzRZTzRYTiAq6+eKDm9HhB9Ce6UzeKZ4ABrT82/UiX44mA/mZowCieOrDlfFG1tAjXeyAWS5nODz29hlBcUMnpPeCJgL83+k1z0hcPT8Hv5++xvr6i+p4sgRWWPn9Vx73UnKtT0PPzh5vy7m9YJbRK47oYv7YPAOgc+AlMzNoh22s3cjJe2RegJVdIAWD3tPPG7bUbOaM4U4BC7pbYCjoBrdI4+LV98A5IqyNvoza4FgCgt4QsU0Bn5o4p8ZfFhVkAuDCaNWznUUAIqPe1Dx2ZXdSUW4Qf+5TOMlJ1kLFC+LoliBR3mcURnOs++Rw7xylcX0SZ0csQ+zqQN5oQI1FTu7W1jZNnh4n6Y30d0xhMJHUxXQfGJMmwuFKpbBrFPwIYvnRbGEwknwGAGOkeCJYFUNDWEx2Qlpds3WhaXLl1VwAAeaNZAIDaqTphlbhiafi6BJYCkmfSrs/3iWWesNcbvwhLQ7cHWGt9XCD+kKy+yeH8vTnHArSb0Aq1qlSYf/da9XUd+D5zU6BjCpRNql8qHrWqZLjJrBCgv9WOgpdP7N+M2qcXw0FOJffz00whBzSnwItOOCUnBPglgub4Dxaa44PD4JhWAAAAAElFTkSuQmCC">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAJ5UlEQVR4nO3dT4hd1R3A8d/ESUxsTGYgIs3EJCgGYiDR1kZtAhloRUohIEFEF4WKuHCTduWidOXKlWbjIi0KLpSslKEuAgoTOtIa22IK0ZJAyUtmIpLBmTFDZzSZpIvxDu/dd+97957zO3/ned8PiMnMe+fd4NeT8859974bhATm79Y+OeQkxHOS0fsBPciOOAGvCLxGcF+SxVMZ0fmhyRB1/mJxSx2I4yHFuySfuP8b84jfmfOphAqG4oPo7q5uEiIBRkVfQkpfzRZTzRYTiAq6+eKDm9HhB9Ce6UzeKZ4ABrT82/UiX44mA/mZowCieOrDlfFG1tAjXeyAWS5nODz29hlBcUMnpPeCJgL83+k1z0hcPT8Hv5++xvr6i+p4sgRWWPn9Vx73UnKtT0PPzh5vy7m9YJbRK47oYv7YPAOgc+AlMzNoh22s3cjJe2RegJVdIAWD3tPPG7bUbOaM4U4BC7pbYCjoBrdI4+LV98A5IqyNvoza4FgCgt4QsU0Bn5o4p8ZfFhVkAuDCaNWznUUAIqPe1Dx2ZXdSUW4Qf+5TOMlJ1kLFC+LoliBR3mcURnOs++Rw7xylcX0SZ0csQ+zqQN5oQI1FTu7W1jZNnh4n6Y30d0xhMJHUxXQfGJMmwuFKpbBrFPwIYvnRbGEwknwGAGOkeCJYFUNDWEx2Qlpds3WhaXLl1VwAAeaNZAIDaqTphlbhiafi6BJYCkmfSrs/3iWWesNcbvwhLQ7cHWGt9XCD+kKy+yeH8vTnHArSb0Aq1qlSYf/da9XUd+D5zU6BjCpRNql8qHrWqZLjJrBCgv9WOgpdP7N+M2qcXw0FOJffz00whBzSnwItOOCUnBPglgub4Dxaa44PD4JhWAAAAAElFTkSuQmCC">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="出荷照合">
@@ -43,8 +43,6 @@ body{font-family:'Meiryo','Hiragino Sans',sans-serif;background:#f5f5f2;color:#1
 .top-btn{font-size:11px;background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap}
 .top-btn:hover{background:rgba(255,255,255,0.25)}
 .top-btn.danger{background:rgba(220,50,50,0.4)}
-.top-btn.admin{background:rgba(59,123,220,0.6);border:1px solid rgba(100,160,255,0.5)}
-.top-btn.admin-logout{background:rgba(180,30,30,0.7);border:1px solid rgba(255,100,100,0.5)}
 .container{padding:14px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .stat{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:12px 14px}
@@ -79,11 +77,6 @@ input[type=text]:focus,input[type=password]:focus{border-color:#3a7bdc}
 .filter-btn{font-size:11px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;color:#555}
 .filter-btn.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
 .search-box{flex:1;min-width:100px;font-size:12px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;outline:none;font-family:inherit}
-.bulk-bar{display:none;background:#3a7bdc;color:#fff;border-radius:8px;padding:10px 14px;margin-bottom:10px;align-items:center;gap:10px;flex-wrap:wrap}
-.bulk-bar.show{display:flex}
-.bulk-bar span{font-size:13px;font-weight:600;flex:1}
-.bulk-btn{font-size:12px;padding:5px 12px;border:1px solid rgba(255,255,255,0.4);border-radius:6px;background:rgba(255,255,255,0.15);color:#fff;cursor:pointer;white-space:nowrap}
-.bulk-btn:hover{background:rgba(255,255,255,0.25)}
 .list-item{background:#fff;border:1px solid #e5e5e0;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
 .list-item.done{opacity:.45}
 .list-item.adjusted-mae{border-left:3px solid #3a7bdc}
@@ -91,8 +84,6 @@ input[type=text]:focus,input[type=password]:focus{border-color:#3a7bdc}
 .list-item.cancelled{border-left:3px solid #aaa;background:#f5f5f5;opacity:.5}
 .list-item.cancelled .item-hinban{text-decoration:line-through;color:#aaa}
 .list-item.cancelled .item-bc{text-decoration:line-through}
-.list-item.selected{border-color:#3a7bdc;background:#f0f5ff}
-.item-check{margin-top:2px;width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#3a7bdc}
 .item-body{flex:1;min-width:0}
 .item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px}
 .item-hinban{font-weight:700;font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -104,13 +95,10 @@ input[type=text]:focus,input[type=password]:focus{border-color:#3a7bdc}
 .badge-adj-mae{background:#dceeff;color:#1a5fb4}
 .badge-adj-ato{background:#fdecea;color:#c0392b}
 .badge-cancel{background:#e5e5e0;color:#888}
-.adj-btn{font-size:11px;padding:3px 8px;border:1px solid #ddd;border-radius:5px;background:#fff;cursor:pointer;color:#555;white-space:nowrap}
-.adj-btn:hover{background:#f0f0ed}
 .file-chips-wrap{margin-bottom:10px}
 .section-title{font-size:11px;font-weight:700;color:#aaa;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase}
 .file-chip{display:inline-flex;align-items:center;gap:4px;background:#f0f0ed;border-radius:99px;padding:3px 10px;font-size:11px;margin:2px;color:#555}
 .empty{text-align:center;color:#aaa;padding:32px;font-size:14px}
-.admin-badge{display:inline-block;background:#3a7bdc;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;margin-left:8px;font-weight:700}
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:100;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.show{display:flex}
 .modal{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:420px}
@@ -123,18 +111,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 .modal-actions button{flex:1;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer}
 .btn-cancel{background:#f0f0ed;color:#555}
 .btn-ok{background:#1a1a18;color:#fff}
-.btn-clear{background:#fdecea;color:#c0392b}
 .pw-hint{font-size:11px;color:#aaa;margin-top:6px}
-/* 納期調整タブ専用スタイル */
-.adj-card{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px}
-.adj-card-title{font-size:11px;font-weight:700;color:#aaa;margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase}
-.adj-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.adj-label{font-size:11px;color:#888;margin-bottom:4px;font-weight:600}
-.adj-input{width:100%;font-size:14px;padding:9px 11px;border:1px solid #ccc;border-radius:7px;outline:none;font-family:inherit}
-.adj-input:focus{border-color:#1a2f4e}
-.adj-group-header{background:#f0f0ea;border-radius:6px;padding:7px 12px;margin-top:10px;font-size:13px;font-weight:700;display:flex;justify-content:space-between}
-.adj-item{background:#fff;border:1px solid #e5e5e0;border-top:none;border-radius:0;padding:10px 12px;display:flex;gap:10px;align-items:flex-start}
-.adj-item.selected{border-color:#3a7bdc;background:#f0f5ff}
 </style>
 </head>
 <body>
@@ -174,7 +151,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 <div class="top-bar">
   <div class="top-bar-row1">
     <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
-      <h1>出荷照合・消込 <span id="admin-badge" style="display:none" class="admin-badge">管理者</span></h1>
+      <h1>出荷照合・消込</h1>
       <div id="user-name-display" class="top-bar-user"></div>
     </div>
     <div style="font-size:10px;color:rgba(255,255,255,0.4);white-space:nowrap" id="save-indicator"></div>
@@ -185,11 +162,12 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
     <button class="top-btn" id="refresh-btn" onclick="manualRefresh()">🔄 更新</button>
     <button class="top-btn" onclick="loadFromCloud()" title="クラウドからデータを復元">☁️ クラウド復元</button>
     <button class="top-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()">⏱ 自動更新 OFF</button>
-    <button class="top-btn admin" id="admin-btn" onclick="showAdminLogin()">🔑 管理者ログイン</button>
     <button class="top-btn danger" onclick="doLogout()">ログアウト</button>
     <button class="top-btn danger" onclick="clearAll()">リセット</button>
+    <button class="top-btn" onclick="closeTab()">✕ タブを閉じる</button>
   </div>
 </div>
+
 
 <div class="container">
   <div id="file-chips-wrap" class="file-chips-wrap" style="display:none">
@@ -221,7 +199,6 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
   <div class="tabs">
     <button class="tab active" onclick="switchTab('list',this)">出荷リスト</button>
     <button class="tab" onclick="switchTab('log',this)">消込履歴</button>
-    <button class="tab" id="tab-adjust-btn" style="display:none" onclick="switchTab('adjust',this)">📋 納期調整</button>
   </div>
   <div id="tab-list">
     <div class="filter-row">
@@ -232,139 +209,10 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
       <button class="filter-btn" onclick="setFilter('cancelled',this)">キャンセル</button>
       <input type="text" class="search-box" id="search-box" placeholder="品番・BC検索" oninput="renderList()">
     </div>
-    <div class="bulk-bar" id="bulk-bar">
-      <span id="bulk-count">0件選択中</span>
-      <button class="bulk-btn" onclick="bulkAdjust()">一括 納期調整</button>
-      <button class="bulk-btn" onclick="bulkClearAdjust()">一括 調整解除</button>
-      <button class="bulk-btn" style="background:rgba(150,150,150,0.3)" onclick="bulkCancel()">一括 キャンセル</button>
-      <button class="bulk-btn" onclick="deselectAll()">選択解除</button>
-    </div>
     <div id="list-body"><div class="empty">CSVを読み込んでください<br><small style="font-size:11px;margin-top:8px;display:block">複数ファイルを同時に選択できます</small></div></div>
   </div>
   <div id="tab-log" style="display:none">
     <div id="log-body"><div class="empty">消込履歴なし</div></div>
-  </div>
-
-  <!-- ▼▼▼ 納期調整タブ ▼▼▼ -->
-  <div id="tab-adjust" style="display:none">
-    <div style="background:#fff3d6;border:1px solid #f5d98b;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#b56e00;font-weight:600">
-      ⚠️ 管理者専用機能です。実行すると元ファイルから該当データが削除されます。
-    </div>
-
-    <!-- 検索フォーム -->
-    <div class="adj-card">
-      <div class="adj-card-title">🔍 対象データを検索（スプレッドシートから）</div>
-      <div class="adj-grid">
-        <div>
-          <div class="adj-label">品番（部分一致）</div>
-          <input type="text" class="adj-input" id="adj-hinban" placeholder="例: 13KYK014P02">
-        </div>
-        <div>
-          <div class="adj-label">納品日 From</div>
-          <input type="date" class="adj-input" id="adj-from">
-        </div>
-      </div>
-      <div class="adj-grid">
-        <div>
-          <div class="adj-label">納品日 To</div>
-          <input type="date" class="adj-input" id="adj-to">
-        </div>
-        <div style="display:flex;align-items:flex-end">
-          <button onclick="searchForAdjust()" style="width:100%;padding:10px;background:#1a2f4e;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer">🔍 検索</button>
-        </div>
-      </div>
-      <div id="adj-search-status" style="font-size:12px;color:#aaa;min-height:18px;margin-top:4px"></div>
-    </div>
-
-    <!-- 変更設定 -->
-    <div id="adj-setting-area" style="display:none" class="adj-card">
-      <div class="adj-card-title">⚙️ 変更内容を設定</div>
-      <div class="adj-grid">
-        <div>
-          <div class="adj-label">調整種別</div>
-          <select id="adj-type" class="adj-input" onchange="onAdjTypeChange()">
-            <option value="前倒し">前倒し</option>
-            <option value="後ろ倒し">後ろ倒し</option>
-            <option value="キャンセル">キャンセル</option>
-          </select>
-        </div>
-        <div id="adj-todate-wrap">
-          <div class="adj-label">変更後 納品日</div>
-          <input type="date" class="adj-input" id="adj-newdate" onchange="updateAdjFilenamePreview()">
-        </div>
-      </div>
-      <div style="font-size:12px;color:#888;margin-bottom:12px">
-        📄 ファイル名プレビュー：<span id="adj-filename-preview" style="font-weight:700;color:#1a1a18">─</span>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <div style="font-size:12px;color:#555">選択中：<span id="adj-selected-count" style="font-weight:700;color:#3a7bdc">0件</span></div>
-        <div style="flex:1"></div>
-        <button onclick="selectAllAdjust()" style="padding:7px 14px;background:#f0f0ed;border:1px solid #ccc;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">全選択</button>
-        <button onclick="deselectAllAdjust()" style="padding:7px 14px;background:#f0f0ed;border:1px solid #ccc;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">全解除</button>
-        <button onclick="execAdjustment()" style="padding:9px 20px;background:#c0392b;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer">✅ 調整実行</button>
-      </div>
-    </div>
-
-    <!-- 検索結果 -->
-    <div id="adj-result-body">
-      <div class="empty">品番・納品日で検索してください</div>
-    </div>
-  </div>
-  <!-- ▲▲▲ 納期調整タブここまで ▲▲▲ -->
-
-</div>
-
-<!-- 管理者ログインモーダル -->
-<div class="modal-overlay" id="login-modal">
-  <div class="modal">
-    <div class="modal-title">管理者ログイン</div>
-    <div class="modal-field">
-      <div class="modal-label">パスワード</div>
-      <input type="password" id="pw-input" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doAdminLogin()">
-      <div class="pw-hint" id="pw-error" style="color:#c0392b;display:none">パスワードが違います</div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeLoginModal()">キャンセル</button>
-      <button class="btn-ok" onclick="doAdminLogin()">ログイン</button>
-    </div>
-  </div>
-</div>
-
-<!-- 納品日調整モーダル -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <div class="modal-title">納品日を調整</div>
-    <div class="modal-field"><div class="modal-label">品番</div><div class="modal-val" id="modal-hinban"></div></div>
-    <div class="modal-field"><div class="modal-label">バーコード番号</div><div class="modal-val" style="font-family:monospace;font-size:12px" id="modal-bc"></div></div>
-    <div class="modal-field"><div class="modal-label">現在の納品日</div><div class="modal-val" id="modal-current-date"></div></div>
-    <div class="modal-field"><div class="modal-label">調整後 納品日</div><input type="date" id="modal-date"></div>
-    <div class="modal-field">
-      <div class="modal-label">調整区分</div>
-      <select id="modal-type"><option value="前倒し">前倒し納入</option><option value="後ろ倒し">後ろ倒し納入</option></select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">閉じる</button>
-      <button class="btn-clear" onclick="clearAdjust()">調整解除</button>
-      <button style="flex:1;padding:10px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#888;color:#fff" onclick="cancelRecord()">キャンセル</button>
-      <button class="btn-ok" onclick="saveAdjust()">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- 一括調整モーダル -->
-<div class="modal-overlay" id="bulk-modal">
-  <div class="modal">
-    <div class="modal-title" id="bulk-modal-title">一括 納期調整</div>
-    <div class="modal-field"><div class="modal-label" id="bulk-modal-count"></div></div>
-    <div class="modal-field"><div class="modal-label">調整後 納品日</div><input type="date" id="bulk-date"></div>
-    <div class="modal-field">
-      <div class="modal-label">調整区分</div>
-      <select id="bulk-type"><option value="前倒し">前倒し納入</option><option value="後ろ倒し">後ろ倒し納入</option></select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeBulkModal()">キャンセル</button>
-      <button class="btn-ok" onclick="saveBulkAdjust()">一括保存</button>
-    </div>
   </div>
 </div>
 </div>
@@ -406,7 +254,6 @@ const GAS_URL = GAS_DEPLOY_URL;
 // ============================================================
 // 設定
 // ============================================================
-const ADMIN_PASSWORD = '435511spk';
 const SAVE_KEY       = 'shipping_data_v1';
 const SAVE_KEY_FILES = 'shipping_files_v1';
 const SAVE_KEY_LOG   = 'shipping_log_v1';
@@ -424,21 +271,14 @@ let filterMode       = 'all';
 let filterHinban     = '';
 let expandedGroups   = {};
 let currentHinban    = '';
-let modalBC          = '';
 let loadedFiles      = [];
 let sourceFileName   = '';
 let logEntries       = [];
-let isAdmin          = false;
-let selectedBCs      = new Set();
 let autoSaveTimer    = null;
 let cloudSaveTimer   = null;
 let autoRefreshTimer = null;
 let autoRefreshInterval = 300;
 let autoRefreshEnabled  = false;
-
-// 納期調整タブ用
-let adjRecords     = [];
-let adjSelectedBCs = new Set();
 
 function getBaseFileName(filename) {
   var name = filename.replace(/\.(csv|CSV)$/i, '');
@@ -562,11 +402,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (hinbanEl) hinbanEl.addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); setHinban(); } });
   const scanEl = document.getElementById('scan-input');
   if (scanEl) scanEl.addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); doScan(); } });
-  // 納期調整プレビュー更新
-  ['adj-from','adj-to','adj-newdate'].forEach(function(id) {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('change', updateAdjFilenamePreview);
-  });
 });
 
 // ============================================================
@@ -634,70 +469,6 @@ function restoreData() {
       if (prevDone > 0 && newDone !== prevDone) showFB('ok', `データが更新されました（消込済: ${prevDone}→${newDone}件）`);
     }
   } catch(e) { console.warn('復元失敗:', e); }
-}
-
-// ============================================================
-// 管理者ログイン
-// ============================================================
-function showAdminLogin() {
-  if (isAdmin) { doAdminLogout(); return; }
-  document.getElementById('pw-input').value = '';
-  document.getElementById('pw-error').style.display = 'none';
-  document.getElementById('login-modal').classList.add('show');
-  setTimeout(() => document.getElementById('pw-input').focus(), 100);
-}
-
-function doAdminLogin() {
-  const pw = document.getElementById('pw-input').value;
-  if (pw === ADMIN_PASSWORD) {
-    isAdmin = true;
-    document.getElementById('login-modal').classList.remove('show');
-    document.getElementById('admin-badge').style.display = 'inline-block';
-    document.getElementById('admin-btn').textContent = 'ログアウト';
-    document.getElementById('admin-btn').style.background = 'rgba(220,50,50,0.4)';
-    showFB('ok', '管理者でログインしました。納期調整・一括操作が可能です。');
-    showAdjustTab();
-    renderList();
-  } else {
-    document.getElementById('pw-error').style.display = 'block';
-    document.getElementById('pw-input').value = '';
-    document.getElementById('pw-input').focus();
-  }
-}
-
-function doAdminLogout() {
-  if (!confirm('管理者からログアウトしますか？')) return;
-  isAdmin = false; selectedBCs.clear();
-  document.getElementById('admin-badge').style.display = 'none';
-  const adminBtn = document.getElementById('admin-btn');
-  adminBtn.textContent = '🔑 管理者ログイン';
-  adminBtn.className = 'top-btn admin';
-  document.getElementById('bulk-bar').classList.remove('show');
-  hideAdjustTab();
-  renderList();
-  showFB('warn', 'ログアウトしました');
-}
-
-function closeLoginModal() { document.getElementById('login-modal').classList.remove('show'); }
-
-// ============================================================
-// 納期調整タブ 表示・非表示
-// ============================================================
-function showAdjustTab() {
-  const btn = document.getElementById('tab-adjust-btn');
-  if (btn) btn.style.display = '';
-}
-function hideAdjustTab() {
-  const btn = document.getElementById('tab-adjust-btn');
-  if (btn) btn.style.display = 'none';
-  // 納期調整タブが表示中だったら出荷リストに戻す
-  if (document.getElementById('tab-adjust').style.display !== 'none') {
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-list').style.display   = 'block';
-    document.getElementById('tab-log').style.display    = 'none';
-    document.getElementById('tab-adjust').style.display = 'none';
-    document.querySelector('.tab').classList.add('active');
-  }
 }
 
 // ============================================================
@@ -865,58 +636,6 @@ function updateStats() {
 }
 
 // ============================================================
-// 選択・一括操作
-// ============================================================
-function toggleSelect(bc, chk) {
-  if (chk.checked) selectedBCs.add(bc); else selectedBCs.delete(bc);
-  updateBulkBar();
-  const item = chk.closest('.list-item');
-  if (item) item.classList.toggle('selected', chk.checked);
-}
-
-function updateBulkBar() {
-  const bar = document.getElementById('bulk-bar');
-  if (isAdmin && selectedBCs.size > 0) { bar.classList.add('show'); document.getElementById('bulk-count').textContent = selectedBCs.size + '件選択中'; }
-  else bar.classList.remove('show');
-}
-
-function deselectAll() {
-  selectedBCs.clear();
-  document.querySelectorAll('.item-check').forEach(c => c.checked=false);
-  document.querySelectorAll('.list-item.selected').forEach(i => i.classList.remove('selected'));
-  updateBulkBar();
-}
-
-function bulkAdjust() {
-  if (!selectedBCs.size) return;
-  document.getElementById('bulk-modal-title').textContent = '一括 納期調整';
-  document.getElementById('bulk-modal-count').textContent = selectedBCs.size + '件を一括調整します';
-  document.getElementById('bulk-date').value = '';
-  document.getElementById('bulk-modal').classList.add('show');
-}
-
-function bulkClearAdjust() {
-  if (!selectedBCs.size) return;
-  if (!confirm(selectedBCs.size + '件の調整を解除しますか？')) return;
-  selectedBCs.forEach(bc => { const idx = records.findIndex(r=>r['バーコード番号']===bc); if (idx!==-1) records[idx]['納品調整']=''; });
-  deselectAll(); updateStats(); renderList();
-  showFB('ok', '調整を解除しました');
-}
-
-function closeBulkModal() { document.getElementById('bulk-modal').classList.remove('show'); }
-
-function saveBulkAdjust() {
-  const dateVal = document.getElementById('bulk-date').value;
-  const typeVal = document.getElementById('bulk-type').value;
-  if (!dateVal) { alert('日付を選択してください'); return; }
-  const newDate = dateVal.replace(/-/g,'/');
-  selectedBCs.forEach(bc => { const idx = records.findIndex(r=>r['バーコード番号']===bc); if (idx!==-1) { records[idx]['納品日']=newDate; records[idx]['納品調整']=typeVal; } });
-  const cnt = selectedBCs.size;
-  deselectAll(); closeBulkModal(); updateStats(); renderList(); autoSave();
-  showFB('ok', cnt + '件を一括調整しました：' + typeVal + ' → ' + newDate);
-}
-
-// ============================================================
 // リスト描画
 // ============================================================
 function setFilter(mode,btn) {
@@ -983,11 +702,9 @@ function renderList() {
       const cancelled = isCancelled(r);
       const adj       = r['納品調整'] || '';
       const bc        = r['バーコード番号'] || '';
-      const isSel     = selectedBCs.has(bc);
       const adjClass  = cancelled ? 'cancelled' : adj==='前倒し' ? 'adjusted-mae' : adj==='後ろ倒し' ? 'adjusted-ato' : '';
       const badgeAdj  = adj==='前倒し' ? 'badge-adj-mae' : adj==='後ろ倒し' ? 'badge-adj-ato' : 'badge-cancel';
-      const bcSafe    = bc.replace(/'/g, "\\'");
-      rows.push('<div class="list-item ' + (done?'done':'') + ' ' + adjClass + ' ' + (isSel?'selected':'') + '" id="item-' + bc + '" style="border-radius:0;border-top:none">' + (isAdmin && !done && !cancelled ? '<input type="checkbox" class="item-check" ' + (isSel?'checked':'') + ' onchange="toggleSelect(\'' + bcSafe + '\',this)">' : '<div style="width:16px;flex-shrink:0"></div>') + '<div class="item-body"><div class="item-top"><span class="item-hinban">' + (r['品番']||'') + '</span><span style="display:flex;gap:4px;align-items:center;flex-shrink:0">' + (adj ? '<span class="badge ' + badgeAdj + '">' + adj + '</span>' : '') + '<span class="badge ' + (done?'badge-done':cancelled?'badge-cancel':'badge-pending') + '">' + (done?'済':cancelled?'取消':'未') + '</span>' + (isAdmin && !done && !cancelled ? '<button class="adj-btn" onclick="openModal(\'' + bcSafe + '\')">調整</button>' : '') + (isAdmin && cancelled ? '<button class="adj-btn" onclick="restoreRecord(\'' + bcSafe + '\')">復元</button>' : '') + '</span></div><div class="item-bc">' + bc + '</div><div class="item-meta"><span>数量:' + (r['数量']||'') + '</span><span>連番:' + (r['連番']||'') + '/' + (r['総数']||'') + '</span><span>納品日:' + (r['納品日']||'') + '</span><span>発注:' + (r['発注番号']||'') + '</span>' + (done ? '<span style="color:#1e8a55">消込:' + (r['消込日時']||'') + '</span>' : '') + '</div></div></div>');
+      rows.push('<div class="list-item ' + (done?'done':'') + ' ' + adjClass + '" id="item-' + bc + '" style="border-radius:0;border-top:none"><div style="width:0;flex-shrink:0"></div><div class="item-body"><div class="item-top"><span class="item-hinban">' + (r['品番']||'') + '</span><span style="display:flex;gap:4px;align-items:center;flex-shrink:0">' + (adj ? '<span class="badge ' + badgeAdj + '">' + adj + '</span>' : '') + '<span class="badge ' + (done?'badge-done':cancelled?'badge-cancel':'badge-pending') + '">' + (done?'済':cancelled?'取消':'未') + '</span></span></div><div class="item-bc">' + bc + '</div><div class="item-meta"><span>数量:' + (r['数量']||'') + '</span><span>連番:' + (r['連番']||'') + '/' + (r['総数']||'') + '</span><span>納品日:' + (r['納品日']||'') + '</span><span>発注:' + (r['発注番号']||'') + '</span>' + (done ? '<span style="color:#1e8a55">消込:' + (r['消込日時']||'') + '</span>' : '') + '</div></div></div>');
     });
   });
   body.innerHTML = rows.join('');
@@ -998,75 +715,13 @@ function switchTab(tab,btn) {
   btn.classList.add('active');
   document.getElementById('tab-list').style.display   = tab==='list'   ? 'block' : 'none';
   document.getElementById('tab-log').style.display    = tab==='log'    ? 'block' : 'none';
-  document.getElementById('tab-adjust').style.display = tab==='adjust' ? 'block' : 'none';
   if (tab==='log') renderLog();
-  if (tab==='adjust' && !isAdmin) {
-    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-    document.querySelector('.tab').classList.add('active');
-    document.getElementById('tab-list').style.display   = 'block';
-    document.getElementById('tab-adjust').style.display = 'none';
-    showFB('warn','管理者ログインが必要です');
-  }
 }
 
 function renderLog() {
   const body = document.getElementById('log-body');
   if (!logEntries.length) { body.innerHTML='<div class="empty">消込履歴なし</div>'; return; }
   body.innerHTML = [...logEntries].reverse().map(r=>`<div class="list-item"><div style="width:16px;flex-shrink:0"></div><div class="item-body"><div class="item-top"><span class="item-hinban">${r['品番']||''}</span><span style="font-size:11px;color:#aaa">${r['ts']||''}</span></div><div class="item-bc">${r['バーコード番号']||''}</div><div class="item-meta"><span>${r['納品先']||''}</span><span>連番:${r['連番']||''}/${r['総数']||''}</span></div></div></div>`).join('');
-}
-
-// ============================================================
-// 単体調整モーダル
-// ============================================================
-function openModal(bc) {
-  if (!isAdmin) { showFB('warn','管理者ログインが必要です'); return; }
-  const r = records.find(r=>r['バーコード番号']===bc); if (!r) return;
-  modalBC = bc;
-  document.getElementById('modal-hinban').textContent       = r['品番']||'';
-  document.getElementById('modal-bc').textContent           = bc;
-  document.getElementById('modal-current-date').textContent = r['納品日']||'未設定';
-  document.getElementById('modal-date').value               = (r['納品日']||'').replace(/\//g,'-');
-  document.getElementById('modal-type').value               = r['納品調整']||'前倒し';
-  document.getElementById('modal').classList.add('show');
-}
-function closeModal() { document.getElementById('modal').classList.remove('show'); modalBC=''; }
-function saveAdjust() {
-  const dateVal = document.getElementById('modal-date').value;
-  const typeVal = document.getElementById('modal-type').value;
-  if (!dateVal) { alert('日付を選択してください'); return; }
-  const idx = records.findIndex(r=>r['バーコード番号']===modalBC);
-  if (idx===-1) { closeModal(); return; }
-  records[idx]['納品日']   = dateVal.replace(/-/g,'/');
-  records[idx]['納品調整'] = typeVal;
-  updateStats(); renderList(); closeModal(); autoSave();
-  showFB('ok','納品日を調整しました：'+typeVal+' → '+records[idx]['納品日']);
-}
-function clearAdjust() {
-  const idx = records.findIndex(r=>r['バーコード番号']===modalBC);
-  if (idx!==-1) records[idx]['納品調整']='';
-  closeModal(); renderList(); autoSave();
-  showFB('ok','調整を解除しました');
-}
-function cancelRecord() {
-  if (!confirm('このデータをキャンセルしますか？\nキャンセル後も「復元」ボタンで元に戻せます。')) return;
-  const idx = records.findIndex(r=>r['バーコード番号']===modalBC);
-  if (idx!==-1) { records[idx]['納品調整']='キャンセル'; records[idx]['消込済']='未'; records[idx]['消込日時']=''; }
-  closeModal(); updateStats(); renderList(); autoSave();
-  showFB('warn','キャンセルしました（「復元」ボタンで元に戻せます）');
-}
-function restoreRecord(bc) {
-  const idx = records.findIndex(r=>r['バーコード番号']===bc);
-  if (idx!==-1) records[idx]['納品調整']='';
-  updateStats(); renderList(); autoSave();
-  showFB('ok','復元しました');
-}
-function bulkCancel() {
-  if (!selectedBCs.size) return;
-  if (!confirm(selectedBCs.size+'件をキャンセルしますか？')) return;
-  selectedBCs.forEach(bc=>{ const idx=records.findIndex(r=>r['バーコード番号']===bc); if (idx!==-1) { records[idx]['納品調整']='キャンセル'; records[idx]['消込済']='未'; records[idx]['消込日時']=''; } });
-  const cnt = selectedBCs.size;
-  deselectAll(); updateStats(); renderList(); autoSave();
-  showFB('warn', cnt+'件をキャンセルしました');
 }
 
 // ============================================================
@@ -1081,7 +736,7 @@ async function exportCSVByStatus() {
       const baseName = sourceFileName || ('出荷指示_' + today);
       const res = await fetch(GAS_DEPLOY_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'saveCSVByStatus', records: records, today: today, baseName: baseName, tanto: currentUserName() })
+        body: JSON.stringify({ action: 'saveCSVByStatus', records: records, today: today, baseName: baseName, tanto: currentUserName(), sourceFileNames: loadedFiles })
       });
       const resText = await res.text();
       let data;
@@ -1130,194 +785,6 @@ function downloadCSV(csv, filename) {
 }
 
 // ============================================================
-// 【新機能】納期調整タブ
-// ============================================================
-function onAdjTypeChange() {
-  const type = document.getElementById('adj-type').value;
-  const wrap = document.getElementById('adj-todate-wrap');
-  if (wrap) wrap.style.display = type === 'キャンセル' ? 'none' : '';
-  updateAdjFilenamePreview();
-}
-
-function updateAdjFilenamePreview() {
-  const type    = (document.getElementById('adj-type')    || {}).value || '';
-  const newDate = (document.getElementById('adj-newdate') || {}).value || '';
-  const fromVal = (document.getElementById('adj-from')    || {}).value || '';
-  function fmtDate(d) {
-    if (!d) return '?';
-    const parts = d.split('-');
-    return parts[0] + '.' + parseInt(parts[1]) + '.' + parseInt(parts[2]);
-  }
-  let name = '';
-  if (type === 'キャンセル') { name = 'キャンセル_' + fmtDate(fromVal) + '.csv'; }
-  else { name = type + '_' + fmtDate(fromVal) + '→' + fmtDate(newDate) + '.csv'; }
-  const el = document.getElementById('adj-filename-preview');
-  if (el) el.textContent = name || '─';
-}
-
-async function searchForAdjust() {
-  if (!GAS_DEPLOY_URL || GAS_DEPLOY_URL.includes('YOUR_DEPLOY_URL')) {
-    document.getElementById('adj-search-status').textContent = 'GAS URLが未設定です';
-    return;
-  }
-  const hinban   = (document.getElementById('adj-hinban') || {}).value || '';
-  const fromDate = (document.getElementById('adj-from')   || {}).value || '';
-  const toDate   = (document.getElementById('adj-to')     || {}).value || '';
-
-  document.getElementById('adj-search-status').textContent = '検索中...';
-  document.getElementById('adj-result-body').innerHTML = '<div style="text-align:center;color:#aaa;padding:24px">検索中...</div>';
-
-  try {
-    const params = new URLSearchParams({ action:'searchForAdjust', hinban:hinban, nouhiFrom:fromDate, nouhiTo:toDate });
-    const res  = await fetch(GAS_DEPLOY_URL + '?' + params.toString());
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.message);
-
-    adjRecords = data.records || [];
-    adjSelectedBCs.clear();
-    document.getElementById('adj-search-status').textContent = adjRecords.length + '件見つかりました';
-    document.getElementById('adj-setting-area').style.display = adjRecords.length > 0 ? '' : 'none';
-    if (adjRecords.length > 0) updateAdjFilenamePreview();
-    renderAdjResults();
-  } catch(err) {
-    document.getElementById('adj-search-status').textContent = 'エラー: ' + err.message;
-    document.getElementById('adj-result-body').innerHTML = '<div style="text-align:center;color:#c0392b;padding:24px">検索失敗: ' + err.message + '</div>';
-  }
-}
-
-function renderAdjResults() {
-  const body = document.getElementById('adj-result-body');
-  if (!adjRecords.length) { body.innerHTML = '<div class="empty">該当データなし</div>'; return; }
-
-  const groups = {}; const order = [];
-  adjRecords.forEach(function(r) {
-    const hn = (r['品番'] || '(不明)').replace(/-/g,'');
-    if (!groups[hn]) { groups[hn] = []; order.push(hn); }
-    groups[hn].push(r);
-  });
-
-  const rows = [];
-  order.forEach(function(hn) {
-    const grp = groups[hn];
-    rows.push('<div class="adj-group-header"><span>' + hn + '</span><span style="font-size:11px;color:#888;font-weight:400">' + grp.length + '件</span></div>');
-    grp.forEach(function(r) {
-      const bc    = r['バーコード番号'] || '';
-      const bcSafe = bc.replace(/'/g, "\\'");
-      const isSel = adjSelectedBCs.has(bc);
-      const adj   = r['納品調整'] || '';
-      let adjBadge = '';
-      if (adj === '前倒し')  adjBadge = '<span class="badge badge-adj-mae">前倒し</span> ';
-      if (adj === '後ろ倒し') adjBadge = '<span class="badge badge-adj-ato">後ろ倒し</span> ';
-      rows.push(
-        '<div class="adj-item' + (isSel?' selected':'') + '">' +
-        '<input type="checkbox"' + (isSel?' checked':'') + ' style="width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:#3a7bdc" onchange="toggleAdjSelect(\'' + bcSafe + '\',this)">' +
-        '<div style="flex:1;min-width:0">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">' +
-        '<span style="font-weight:700;font-size:13px">' + (r['品番'] || '') + '</span>' +
-        adjBadge +
-        '</div>' +
-        '<div style="font-family:monospace;font-size:11px;color:#888;margin-bottom:3px">' + bc + '</div>' +
-        '<div style="font-size:11px;color:#aaa;display:flex;gap:10px;flex-wrap:wrap">' +
-        '<span>数量:' + (r['数量'] || '') + '</span>' +
-        '<span>連番:' + (r['連番'] || '') + '/' + (r['総数'] || '') + '</span>' +
-        '<span style="color:#1a2f4e;font-weight:600">納品日:' + (r['納品日'] || '') + '</span>' +
-        '<span>発注:' + (r['発注番号'] || '') + '</span>' +
-        '<span>納品先:' + (r['納品先'] || '') + '</span>' +
-        '</div></div></div>'
-      );
-    });
-  });
-  body.innerHTML = rows.join('');
-  updateAdjSelectedCount();
-}
-
-function toggleAdjSelect(bc, chk) {
-  if (chk.checked) adjSelectedBCs.add(bc); else adjSelectedBCs.delete(bc);
-  updateAdjSelectedCount();
-  // チェックボックスの親要素のスタイルを更新
-  const item = chk.closest('.adj-item');
-  if (item) item.classList.toggle('selected', chk.checked);
-}
-
-function selectAllAdjust() {
-  adjRecords.forEach(function(r) { adjSelectedBCs.add(r['バーコード番号']); });
-  renderAdjResults();
-}
-function deselectAllAdjust() { adjSelectedBCs.clear(); renderAdjResults(); }
-function updateAdjSelectedCount() {
-  const el = document.getElementById('adj-selected-count');
-  if (el) el.textContent = adjSelectedBCs.size + '件';
-}
-
-function buildAdjFilenameJS(adjustType, fromDate, toDate) {
-  function fmtDate(d) { return d.replace(/\//g, '.').replace(/\.0(\d)/g, '.$1'); }
-  if (adjustType === 'キャンセル') return 'キャンセル_' + fmtDate(fromDate) + '.csv';
-  return adjustType + '_' + fmtDate(fromDate) + '→' + fmtDate(toDate) + '.csv';
-}
-
-async function execAdjustment() {
-  if (!adjSelectedBCs.size) { showFB('err', '対象を選択してください'); return; }
-  const adjustType = (document.getElementById('adj-type')    || {}).value || '';
-  const newDateVal = (document.getElementById('adj-newdate') || {}).value || '';
-  const fromDateVal= (document.getElementById('adj-from')    || {}).value || '';
-
-  if (adjustType !== 'キャンセル' && !newDateVal) { showFB('err', '変更後の納品日を選択してください'); return; }
-  if (!fromDateVal) { showFB('err', '検索のFrom日付を入力してください（ファイル名に使います）'); return; }
-
-  function fmtSlash(d) { return d.replace(/-/g, '/'); }
-  const fromDate = fmtSlash(fromDateVal);
-  const toDate   = newDateVal ? fmtSlash(newDateVal) : '';
-
-  const selected = adjRecords.filter(function(r) { return adjSelectedBCs.has(r['バーコード番号']); });
-  const updated  = selected.map(function(r) {
-    const copy = Object.assign({}, r);
-    copy['納品調整'] = adjustType;
-    if (adjustType !== 'キャンセル') copy['納品日'] = toDate;
-    return copy;
-  });
-
-  const filename = buildAdjFilenameJS(adjustType, fromDate, toDate);
-  const msg = '以下の内容で納期調整を実行します。\n\n' +
-    '調整種別：' + adjustType + '\n' +
-    '変更前：'   + fromDate + '\n' +
-    (toDate ? '変更後：' + toDate + '\n' : '') +
-    '対象件数：' + updated.length + '件\n' +
-    '新ファイル名：' + filename + '\n\n' +
-    '元ファイルから該当データが削除されます。実行しますか？';
-
-  if (!confirm(msg)) return;
-
-  showFB('ok', '納期調整を実行中...');
-
-  try {
-    const res = await fetch(GAS_DEPLOY_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action:'saveAdjustment', records:updated, adjustType:adjustType, fromDate:fromDate, toDate:toDate, tanto:currentUserName() })
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.message);
-
-    const removedInfo = (data.removed || []).map(function(r) { return r.file + '(' + r.removed + '件削除)'; }).join(', ');
-    showFB('ok',
-      '✅ 納期調整完了！\n' +
-      '新ファイル: ' + data.newFileName + '\n' +
-      '対象: ' + data.count + '件\n' +
-      (removedInfo ? '元ファイルから削除: ' + removedInfo : '')
-    );
-
-    adjSelectedBCs.clear();
-    adjRecords = adjRecords.filter(function(r) {
-      return !selected.find(function(s) { return s['バーコード番号'] === r['バーコード番号']; });
-    });
-    renderAdjResults();
-    document.getElementById('adj-search-status').textContent = adjRecords.length + '件（調整済みを除外）';
-
-  } catch(err) {
-    showFB('err', '納期調整失敗: ' + err.message);
-  }
-}
-
-// ============================================================
 // ユーティリティ
 // ============================================================
 function todayStr()     { const d=new Date(); return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate()); }
@@ -1357,18 +824,6 @@ function doLogin() {
 function showMainScreen(user) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-screen').style.display  = 'block';
-  const adminBtn = document.getElementById('admin-btn');
-  if (user.admin) {
-    isAdmin = true;
-    document.getElementById('admin-badge').style.display = 'inline-block';
-    adminBtn.textContent = '🔓 管理者ログアウト';
-    adminBtn.className   = 'top-btn admin-logout';
-    showAdjustTab();
-  } else {
-    adminBtn.textContent = '🔑 管理者ログイン';
-    adminBtn.className   = 'top-btn admin';
-    hideAdjustTab();
-  }
   const nameEl = document.getElementById('user-name-display');
   if (nameEl) nameEl.textContent = '👤 ' + user.name + ' さん';
   restoreData();
@@ -1390,15 +845,20 @@ function doLogout() {
   if (!confirm('ログアウトしますか？')) return;
   notifyOfflineShipping();
   try { sessionStorage.removeItem(SESSION_KEY); } catch(e){}
-  isAdmin = false; selectedBCs.clear(); adjSelectedBCs.clear(); stopAutoRefresh();
+  stopAutoRefresh();
   document.getElementById('main-screen').style.display  = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-id').value = '';
   document.getElementById('login-pw').value = '';
-  document.getElementById('admin-badge').style.display = 'none';
-  document.getElementById('admin-btn').textContent = '管理者ログイン';
-  document.getElementById('admin-btn').style.background = 'rgba(59,123,220,0.5)';
-  hideAdjustTab();
+}
+
+// ポータルへ戻る既定URL（ポータルからの起動時はportal_urlパラメータが優先される）
+const DEFAULT_PORTAL_URL = 'https://script.google.com/macros/s/AKfycbzAB87ZCwdp3mgVTMe8kS-bAgQAEleWotqJGS72GJCx3UkNKoLu-i2r2WBgibzpN9sU/exec';
+
+function closeTab() {
+  notifyOfflineShipping();
+  const portalUrl = new URLSearchParams(window.location.search).get('portal_url');
+  window.location.href = portalUrl ? decodeURIComponent(portalUrl) : DEFAULT_PORTAL_URL;
 }
 
 // SSO
