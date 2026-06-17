@@ -161,7 +161,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 <div class="top-bar">
   <div class="top-bar-row1">
     <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
-      <h1>出荷照合システム(カナモリ向け)</h1>
+      <h1>出荷照合アプリ（カナモリ）</h1>
       <div id="user-name-display" class="top-bar-user"></div>
     </div>
     <div style="font-size:10px;color:rgba(255,255,255,0.4);white-space:nowrap" id="save-indicator"></div>
@@ -886,8 +886,12 @@ const DEFAULT_PORTAL_URL = 'https://script.google.com/macros/s/AKfycbzAB87ZCwdp3
 
 function closeTab() {
   notifyOfflineShipping();
-  const portalUrl = new URLSearchParams(window.location.search).get('portal_url');
-  window.location.href = portalUrl ? decodeURIComponent(portalUrl) : DEFAULT_PORTAL_URL;
+  try { window.close(); } catch(e) {}
+  // window.close()が効かない場合（タブがスクリプト経由で開かれていない等）のフォールバック
+  setTimeout(function() {
+    const portalUrl = new URLSearchParams(window.location.search).get('portal_url');
+    window.location.href = portalUrl ? decodeURIComponent(portalUrl) : DEFAULT_PORTAL_URL;
+  }, 300);
 }
 
 // SSO
