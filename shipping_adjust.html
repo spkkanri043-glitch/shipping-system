@@ -139,21 +139,6 @@ select.fi{cursor:pointer}
 .rec-meta{font-size:12px;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap}
 .rec-meta span{white-space:nowrap}
 .rec-meta .nouhi{color:var(--accent);font-weight:600}
-/* ── 調整依頼一覧（日付ごとグループ・簡素化カード） ── */
-.hist-group-hd{background:var(--dark3);border:1px solid var(--border);border-radius:var(--radius-sm) var(--radius-sm) 0 0;padding:11px 15px;font-size:14px;font-weight:700;color:var(--text);display:flex;justify-content:space-between;align-items:center;cursor:pointer;margin-top:12px}
-.hist-group-hd:hover{background:var(--card2)}
-.hist-group-body{border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);overflow:hidden}
-.hist-row{padding:13px 15px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
-.hist-row:last-child{border-bottom:none}
-.hist-row:hover{background:var(--card2)}
-.hist-row-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.hist-hinban{font-size:16px;font-weight:700;color:var(--text)}
-.hist-row-meta{font-size:13px;color:var(--text2);display:flex;gap:12px;flex-wrap:wrap}
-.hist-row-date{font-size:14px;color:var(--text2);display:flex;align-items:center;gap:8px;font-weight:600}
-.hist-row-date .from{color:var(--text3);font-weight:400}
-.hist-row-date .to{color:var(--accent);font-weight:700}
-.hist-row-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:2px;flex-wrap:wrap;gap:8px}
-.hist-tanto{font-size:12px;color:var(--text3)}
 /* スクロール */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--dark)}
@@ -186,7 +171,6 @@ select.fi{cursor:pointer}
 <!-- ナビ -->
 <div class="nav">
   <div class="nav-item on" id="nav-adjust" onclick="goPage('adjust')">📋 出荷調整</div>
-  <div class="nav-item" id="nav-history" onclick="goPage('history')">📑 調整依頼一覧</div>
 </div>
 
 <!-- ▼ 出荷調整ページ -->
@@ -272,33 +256,6 @@ select.fi{cursor:pointer}
 
 </div>
 
-<!-- ▼ 調整依頼一覧ページ -->
-<div class="page" id="page-history">
-  <div class="card">
-    <div class="section-hd">
-      <div class="card-title" style="margin:0">調整依頼一覧</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <select class="fi btn-sm" id="hist-filter-type" style="width:130px;font-size:13px" onchange="loadHistory()">
-          <option value="">種別：すべて</option>
-          <option value="前倒し">前倒し</option>
-          <option value="後ろ倒し">後ろ倒し</option>
-          <option value="キャンセル">キャンセル</option>
-        </select>
-        <select class="fi btn-sm" id="hist-filter-status" style="width:130px;font-size:13px" onchange="loadHistory()">
-          <option value="">状況：すべて</option>
-          <option value="対応済">対応済</option>
-          <option value="未対応">未対応</option>
-        </select>
-        <button class="btn btn-secondary btn-sm" onclick="loadHistory()">🔄 更新</button>
-      </div>
-    </div>
-    <div id="hist-status" class="status-bar" style="display:none"></div>
-    <div id="hist-body"></div>
-    <div style="font-size:12px;color:var(--text3);margin-top:10px;text-align:right" id="hist-count"></div>
-  </div>
-</div>
-</div>
-
 <!-- 調整モーダル -->
 <div class="modal-overlay" id="adj-modal">
   <div class="modal">
@@ -338,10 +295,6 @@ let filterMode   = 'all';
 let expandedGrps = {};
 let currentAdjType = '';
 let loadedFileNames = [];
-
-// 調整依頼一覧用
-let lastHistList   = [];
-let histExpandedGrps = {};
 
 // ============================================================
 // 起動処理
@@ -387,7 +340,6 @@ function enterApp() {
     return;
   }
   document.getElementById('disp-user').textContent = '👤 ' + currentUser.name + '（管理者）';
-  loadHistory();
 }
 
 function goPortal() {
@@ -410,7 +362,6 @@ function goPage(p) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('on'));
   document.getElementById('page-' + p).classList.add('on');
   document.getElementById('nav-' + p).classList.add('on');
-  if (p === 'history') loadHistory();
 }
 
 // ============================================================
@@ -838,7 +789,7 @@ async function execExport() {
         baseName:  baseName,
         today:     today,
         tanto:     currentUser ? currentUser.name : '不明',
-        saveHistory: true
+        saveHistory: false
       })
     });
     const data = await res.json();
@@ -861,123 +812,6 @@ function getBaseFileName(filename) {
   let prev;
   do { prev = name; name = name.replace(/[_　]*(未完了|完了済|キャンセル|前倒し|後ろ倒し).*$/, ''); } while (name !== prev);
   return name;
-}
-
-// ============================================================
-// 調整履歴一覧（日付ごとグループ・簡素化表示）
-// ============================================================
-async function loadHistory() {
-  if (!GAS_URL) {
-    document.getElementById('hist-body').innerHTML = '<div style="text-align:center;color:var(--text3);padding:24px">GAS URLが未設定です</div>';
-    return;
-  }
-  const typeFilter   = document.getElementById('hist-filter-type').value;
-  const statusFilter = document.getElementById('hist-filter-status').value;
-  const histStatus   = document.getElementById('hist-status');
-  histStatus.style.display = 'flex';
-  histStatus.className     = 'status-bar loading';
-  histStatus.textContent   = '⏳ 読込中...';
-
-  try {
-    const params = new URLSearchParams({ action:'getAdjustHistory', typeFilter, statusFilter });
-    const res  = await fetch(GAS_URL + '?' + params.toString());
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.message);
-
-    lastHistList = data.records || [];
-    histStatus.style.display = 'none';
-    document.getElementById('hist-count').textContent = lastHistList.length + '件';
-    renderHistory();
-
-  } catch(err) {
-    histStatus.className   = 'status-bar err';
-    histStatus.textContent = '❌ ' + err.message;
-  }
-}
-
-function renderHistory() {
-  const body = document.getElementById('hist-body');
-  const list = lastHistList;
-
-  if (!list.length) {
-    body.innerHTML = '<div style="text-align:center;color:var(--text3);padding:24px">データなし</div>';
-    return;
-  }
-
-  // 依頼日（ts の日付部分）でグループ化
-  const groups = {}; const order = [];
-  list.forEach(r => {
-    const dateKey = (r.ts || '').split(' ')[0] || '日付不明';
-    if (!groups[dateKey]) { groups[dateKey] = []; order.push(dateKey); }
-    groups[dateKey].push(r);
-  });
-
-  const typeBadge = t =>
-    t === '前倒し'     ? '<span class="badge badge-mae">前倒し</span>' :
-    t === '後ろ倒し'   ? '<span class="badge badge-ato">後ろ倒し</span>' :
-    t === 'キャンセル' ? '<span class="badge badge-cancel">キャンセル</span>' :
-    `<span class="badge">${escHtml(t||'')}</span>`;
-
-  const statusBadge = s =>
-    s === '対応済' ? '<span class="badge badge-done">対応済</span>' :
-                     '<span class="badge badge-pending">未対応</span>';
-
-  const html = [];
-  order.forEach(dateKey => {
-    const items  = groups[dateKey];
-    const isOpen = histExpandedGrps[dateKey] !== false;
-    const unresolvedCnt = items.filter(r => r.status !== '対応済').length;
-    html.push(
-      `<div class="hist-group-hd" onclick="toggleHistGrp('${dateKey.replace(/'/g,"\\'")}')">
-        <span>📅 ${escHtml(dateKey)} <span style="font-size:12px;color:var(--text3);font-weight:400">${isOpen?'▲':'▼'}</span></span>
-        <span style="font-size:12px;color:var(--text2)">${unresolvedCnt > 0 ? `<span style="color:var(--accent)">未対応${unresolvedCnt}件</span> / ` : ''}${items.length}件</span>
-      </div>`
-    );
-    if (!isOpen) return;
-    html.push('<div class="hist-group-body">');
-    items.forEach(r => {
-      const time = (r.ts || '').split(' ')[1] || '';
-      html.push(
-        `<div class="hist-row">
-          <div class="hist-row-top">
-            <span class="hist-hinban">${escHtml(r.hinban)}</span>
-            ${typeBadge(r.adjustType)}
-            ${statusBadge(r.status)}
-          </div>
-          <div class="hist-row-meta">
-            <span>数量:${escHtml(r.qty)}</span>
-            <span>発注:${escHtml(r.orderNo)}</span>
-            <span>客先:${escHtml(r.customer)}</span>
-          </div>
-          <div class="hist-row-date">
-            <span class="from">${escHtml(r.fromDate)}</span> → <span class="to">${escHtml(r.toDate)}</span>
-          </div>
-          <div class="hist-row-bottom">
-            <span class="hist-tanto">依頼者: ${escHtml(r.tanto)}${time ? ' ・ ' + escHtml(time) : ''}</span>
-            ${r.status !== '対応済' ? `<button class="btn btn-green btn-sm" onclick="markDone('${r.rowIndex}')">対応済にする</button>` : ''}
-          </div>
-        </div>`
-      );
-    });
-    html.push('</div>');
-  });
-
-  body.innerHTML = html.join('');
-}
-
-function toggleHistGrp(key) {
-  histExpandedGrps[key] = histExpandedGrps[key] === false ? true : false;
-  renderHistory();
-}
-
-async function markDone(rowIndex) {
-  if (!GAS_URL || !rowIndex) return;
-  try {
-    const res  = await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'markAdjustDone', rowIndex }) });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.message);
-    loadHistory();
-  } catch(err) { alert('更新失敗: ' + err.message); }
 }
 
 // ============================================================
