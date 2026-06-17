@@ -47,9 +47,9 @@ body{font-family:'Meiryo','Hiragino Sans',sans-serif;background:#f5f5f2;color:#1
 .top-btn.exit{background:#b4913e;border-color:#d4b860;color:#1a1a18;font-weight:700}
 .top-btn.exit:hover{background:#c9a64f}
 .more-wrap{position:relative}
-.more-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#26261f;border:1px solid rgba(255,255,255,0.15);border-radius:9px;box-shadow:0 10px 28px rgba(0,0,0,0.45);padding:6px;min-width:180px;flex-direction:column;gap:4px;z-index:200}
+.more-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#26261f;border:1px solid rgba(255,255,255,0.15);border-radius:9px;box-shadow:0 10px 28px rgba(0,0,0,0.45);padding:6px;min-width:170px;max-width:calc(100vw - 16px);flex-direction:column;gap:4px;z-index:200;box-sizing:border-box}
 .more-menu.show{display:flex}
-.more-item{font-size:13px;font-weight:600;background:transparent;border:none;color:#fff;padding:9px 12px;border-radius:6px;cursor:pointer;text-align:left;white-space:nowrap}
+.more-item{font-size:13px;font-weight:600;background:transparent;border:none;color:#fff;padding:9px 12px;border-radius:6px;cursor:pointer;text-align:left;white-space:normal;word-break:keep-all}
 .more-item:hover{background:rgba(255,255,255,0.12)}
 .more-item.danger{color:#ff8a8a}
 .more-item.danger:hover{background:rgba(220,60,60,0.25)}
@@ -814,10 +814,29 @@ function showFB(type,msg) { const fb=document.getElementById('feedback'); fb.cla
 // 「その他」ドロップダウンメニュー
 // ============================================================
 function toggleMoreMenu() {
-  document.getElementById('more-menu').classList.toggle('show');
+  const menu = document.getElementById('more-menu');
+  const opening = !menu.classList.contains('show');
+  menu.classList.toggle('show');
+  if (opening) positionMoreMenu();
 }
 function closeMoreMenu() {
   document.getElementById('more-menu').classList.remove('show');
+}
+function positionMoreMenu() {
+  const menu = document.getElementById('more-menu');
+  const wrap = document.querySelector('.more-wrap');
+  if (!menu || !wrap) return;
+  // いったん基準位置（右端揃え）に戻して幅を計測
+  menu.style.left  = 'auto';
+  menu.style.right = '0';
+  const margin   = 8;
+  const wrapRect = wrap.getBoundingClientRect();
+  const menuRect = menu.getBoundingClientRect();
+  if (menuRect.left < margin) {
+    // 画面左端からはみ出す場合はボタンの左端に揃えて右側に開く
+    menu.style.right = 'auto';
+    menu.style.left  = (margin - wrapRect.left) + 'px';
+  }
 }
 document.addEventListener('click', function(e) {
   const wrap = document.querySelector('.more-wrap');
