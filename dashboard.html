@@ -413,6 +413,14 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 <script>
 const LS_KEY = 'defect_dash_url';
 let defectUrl = localStorage.getItem(LS_KEY) || '';
+
+const _qp = new URLSearchParams(location.search);
+const _paramGasUrl = _qp.get('fuguai_gas_url');
+if (_paramGasUrl) {
+  defectUrl = _paramGasUrl;
+  localStorage.setItem(LS_KEY, defectUrl);
+}
+  
 let allRecords = [];
 let filtered = [];
 let trendMode = 'cnt';
