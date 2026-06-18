@@ -43,6 +43,16 @@ body {
 .ctab:hover  { color: #333; }
 .ctab.active { color: #1D9E75; border-bottom-color: #1D9E75; font-weight: 500; }
 .online-tab-badge { font-size: 11px; color: #1D9E75; font-weight: 700; margin-left: 4px; background: #e3f6ed; border-radius: 10px; padding: 1px 6px; }
+
+/* セル単位の編集状況表示 */
+td.cell-being-edited { outline: 2px solid #ff6b6b !important; outline-offset: -1px; background: #fff0f0 !important; }
+.cell-live-badge {
+  position: absolute; top: -8px; left: 2px; z-index: 8;
+  background: #ff6b6b; color: #fff; font-size: 9px; font-weight: 700;
+  padding: 1px 5px; border-radius: 8px; white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  pointer-events: none;
+}
 /* ツールバー */
 .toolbar { background: #fff; border-bottom: 1px solid #ddd; padding: 8px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .excel-menu-wrap { position: relative; display: inline-block; }
@@ -793,10 +803,11 @@ function startOnlineHeartbeat() {
   if (_onlineHeartbeatTimer) return;
   sendOnlineStatus('active');
   refreshOnlineUsers();
+  startCellPolling();
   _onlineHeartbeatTimer = setInterval(() => {
     sendOnlineStatus('active');
     refreshOnlineUsers();
-  }, 25000); // 25秒ごとに更新
+  }, 8000); // 8秒ごとに更新（高速化）
   window.addEventListener('beforeunload', () => { sendOnlineStatus('leave'); });
 }
 
@@ -846,6 +857,103 @@ function renderGroupTabOnlineBadges() {
       badge.remove();
     }
   });
+}
+
+// ============================================================
+//  セル単位の編集状況（誰がどのセルを編集中か／最終更新者）
+// ============================================================
+let cellFocusData   = [];   // [{ productId, rowType, day, userId, userName }] 他の人がフォーカス中
+let cellHistoryData = {};   // key: `${productId}_${rowType}_${day}` -> { userId, userName, updatedAt }
+let _cellPollTimer  = null;
+let _myFocusedCell  = null; // 自分が今フォーカスしているセル { productId, rowType, day }
+
+function cellHistKey(pid, rt, d) { return `${pid}_${rt}_${d}`; }
+
+async function onCellFocus(e) {
+  const { pid, rt, d } = e.target.dataset;
+  if (!currentUser || !selCid) return;
+  _myFocusedCell = { pid, rt, d };
+  try {
+    await api({ action: 'setCellFocus', clientId: selCid, productId: pid, rowType: rt, day: d,
+                userId: currentUser.id, userName: currentUser.name, action2: 'focus' });
+  } catch (err) {}
+}
+
+async function onCellBlur(e) {
+  const { pid, rt, d } = e.target.dataset;
+  if (!currentUser || !selCid) return;
+  _myFocusedCell = null;
+  try {
+    await api({ action: 'setCellFocus', clientId: selCid, productId: pid, rowType: rt, day: d,
+                userId: currentUser.id, userName: currentUser.name, action2: 'blur' });
+  } catch (err) {}
+}
+
+// 現在表示中の全製品IDのリスト（フォーカス/履歴取得の問い合わせ範囲を絞る）
+function getVisibleProductIds() {
+  return products.map(p => p.id).join(',');
+}
+
+async function refreshCellFocusAndHistory() {
+  if (!currentUser || !selCid) return;
+  const productIds = getVisibleProductIds();
+  if (!productIds) return;
+  try {
+    const [focusRes, histRes] = await Promise.all([
+      api({ action: 'getCellFocusList', clientId: selCid, productIds }),
+      api({ action: 'getCellHistoryList', clientId: selCid, productIds }),
+    ]);
+    cellFocusData = ((focusRes && focusRes.data) || []).filter(c => String(c.userId) !== String(currentUser.id));
+    const histMap = {};
+    ((histRes && histRes.data) || []).forEach(h => {
+      histMap[cellHistKey(h.productId, h.rowType, h.day)] = h;
+    });
+    cellHistoryData = histMap;
+    applyCellEditBadges();
+  } catch (e) {}
+}
+
+// セルに「編集中」枠線・最終更新者ツールチップを反映
+function applyCellEditBadges() {
+  const mainTbody = document.getElementById('main-tbody');
+  if (!mainTbody) return;
+  mainTbody.querySelectorAll('input[data-pid]').forEach(inp => {
+    const { pid, rt, d } = inp.dataset;
+    const td = inp.closest('td');
+    if (!td) return;
+
+    // 他の人が今フォーカス中 → 枠線+名前バッジ
+    const focusUser = cellFocusData.find(c => String(c.productId) === String(pid) && c.rowType === rt && String(c.day) === String(d));
+    td.classList.toggle('cell-being-edited', !!focusUser);
+    let liveBadge = td.querySelector('.cell-live-badge');
+    if (focusUser) {
+      if (!liveBadge) {
+        liveBadge = document.createElement('div');
+        liveBadge.className = 'cell-live-badge';
+        td.style.position = 'relative';
+        td.appendChild(liveBadge);
+      }
+      liveBadge.textContent = focusUser.userName;
+    } else if (liveBadge) {
+      liveBadge.remove();
+    }
+
+    // 最終更新者 → ツールチップ（title属性）
+    const hist = cellHistoryData[cellHistKey(pid, rt, d)];
+    if (hist) {
+      const dt = hist.updatedAt ? new Date(hist.updatedAt) : null;
+      const dtStr = dt ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
+      td.title = `最終更新: ${hist.userName}${dtStr ? '（' + dtStr + '）' : ''}`;
+    } else {
+      td.removeAttribute('title');
+    }
+  });
+}
+
+function startCellPolling() {
+  if (_cellPollTimer) return;
+  refreshCellFocusAndHistory();
+  _cellPollTimer = setInterval(refreshCellFocusAndHistory, 6000); // 6秒ごと（高速化要望対応）
 }
 
 document.getElementById('gas-url-input').value    = GAS_URL;
@@ -963,6 +1071,10 @@ const MOCK_PRODUCTS = {
 const DEMO_STORE = { initStock:{}, cells:{} };
 
 async function api(params) {
+  // saveCell呼び出し時は自動的にユーザー情報を付与（最終更新者記録用）
+  if (params.action === 'saveCell' && currentUser) {
+    params = { ...params, userId: currentUser.id, userName: currentUser.name };
+  }
   if (!GAS_URL) return mockApi(params);
   const url = GAS_URL + '?' + new URLSearchParams(params).toString();
   try {
@@ -2274,13 +2386,18 @@ function renderTable() {
 
   // イベント登録
   const mainTbody = document.getElementById('main-tbody');
-  mainTbody.querySelectorAll('input[data-pid]').forEach(i => i.addEventListener('change', onCell));
+  mainTbody.querySelectorAll('input[data-pid]').forEach(i => {
+    i.addEventListener('change', onCell);
+    i.addEventListener('focus', onCellFocus);
+    i.addEventListener('blur', onCellBlur);
+  });
   mainTbody.querySelectorAll('[data-del]').forEach(b  => b.addEventListener('click', () => openDeleteConfirm(b.dataset.del)));
   mainTbody.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => openEditModal(b.dataset.edit)));
   mainTbody.querySelectorAll('[data-up]').forEach(b => b.addEventListener('click', () => moveProduct(b.dataset.up, 'up')));
   mainTbody.querySelectorAll('[data-dn]').forEach(b => b.addEventListener('click', () => moveProduct(b.dataset.dn, 'dn')));
   mainTbody.querySelectorAll('[data-unlock]').forEach(b => b.addEventListener('click', () => onUnlock(b.dataset.unlock)));
   mainTbody.querySelectorAll('[data-relock]').forEach(b => b.addEventListener('click', () => onRelock(b.dataset.relock)));
+  applyCellEditBadges();
 }
 
 function renderTableOnly() { renderTable(); checkWarnItems(); }
