@@ -392,7 +392,7 @@ tr.parts-detail-row td { padding:0 !important; background:#faf5ff !important; bo
   <span id="current-user-badge" style="font-size:12px;color:#1D9E75;font-weight:600;margin-right:8px"></span>
   <div class="save-ind" id="save-ind"><span class="spinner"></span>保存中…</div>
   <button class="btn-settings" id="btn-settings">⚙ 設定</button>
-  <button class="btn-back" id="btn-back">← ポータルへ</button>
+  <button class="btn-back" id="btn-back">✕ タブを閉じる</button>
 </div>
 
 
@@ -2839,7 +2839,19 @@ async function switchMonth() {
 }
 
 document.getElementById('btn-back').addEventListener('click', () => {
-  if(window.opener) window.close(); else location.href=PORTAL_URL||'/';
+  sendOnlineStatus('leave');
+  try {
+    window.close();
+    // window.close()が効かない場合（ブラウザ仕様で閉じれないタブ）への対応
+    setTimeout(() => {
+      if (!window.closed) {
+        if (PORTAL_URL) { location.href = PORTAL_URL; }
+        else { showToast('このタブは閉じられません。手動でタブを閉じてください'); }
+      }
+    }, 300);
+  } catch (e) {
+    if (PORTAL_URL) location.href = PORTAL_URL;
+  }
 });
 
 // ============================================================
