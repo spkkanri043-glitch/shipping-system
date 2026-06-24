@@ -951,9 +951,10 @@ function addChocoRow(i){
   const tb=document.getElementById('chocoTb');
   const ri=i!==undefined?i:tb.rows.length;
   const tr=tb.insertRow();
-  const nowDate = new Date();
-  const defDate = nowDate.toISOString().split('T')[0];
-  const defTime = nowDate.toTimeString().substring(0,5);
+  // JST基準で初期日時を生成（PCのタイムゾーンに依存しない）
+  const jstNow = new Date(Date.now() + 9*60*60*1000);
+  const defDate = jstNow.toISOString().split('T')[0];
+  const defTime = jstNow.toISOString().substring(11,16);
   // 1行目 or 行追加ボタン（i===undefined）時は今の日時・ログイン名を自動入力
   const fillDef = (i===0 || i===undefined);
   tr.innerHTML=`
@@ -1480,13 +1481,40 @@ function fillForm(d) {
   renderPnPairs();
   if(d.condSections){COND_SECS=deep(d.condSections);}
   renderCondSecs('condBody',COND_SECS,false,d);
+
+  // 動的テーブル（注意事項・チョコ停・5M）を保存件数で再描画
+  // → 前の記録の行が残る／行数超過分が復元漏れするのを防ぐ
+  const nNotes = countDataRows(d, /^nt(\d+)(?:c|s|ok)$/);
+  const nChoco = countDataRows(d, /^ch(\d+)(?:c|d|t|s|p)$/);
+  renderNotes(nNotes > 0 ? nNotes : 3);
+  renderChocos(nChoco);            // 0件なら空（＋行追加で足せる）
+  renderM5();
+
   setTimeout(()=>{
     document.querySelectorAll('[data-k]').forEach(el=>{
       const k=el.getAttribute('data-k');
       if(d[k]!==undefined){el.value=d[k];if(el.tagName==='SELECT')upOn(el);}
     });
+    // 5M「有」の行は対処方法欄をハイライト（フォーカスは移動しない）
+    M5.forEach((label,i)=>{
+      const ynEl=document.querySelector(`[data-k="m5_${i}yn"]`);
+      const acEl=document.getElementById(`m5ac${i}`);
+      if(ynEl&&acEl&&ynEl.value==='有'){
+        if(acEl.value.trim()){ acEl.style.outline='1px solid var(--g)'; acEl.style.background='#f0fff4'; }
+        else{ acEl.style.outline='2px solid var(--r)'; acEl.style.background='#fff5f5'; }
+      }
+    });
   },80);
+
   if(d.prodCheckItems){PC_ITEMS=deep(d.prodCheckItems);renderPC('pcTb',PC_ITEMS,false);}
+
+  // サイン表示を一旦リセットしてから復元（前の記録の✔が残らないように）
+  ['mgr','sup','agg'].forEach(role=>{
+    SIGNS[role]=null;
+    document.getElementById(`s-${role}`).textContent='-';
+    document.getElementById(`ss-${role}`).textContent='';
+    document.getElementById(`cb-${role}`).checked=false;
+  });
   if(d.signs){
     ['mgr','sup','agg'].forEach(role=>{
       const s=d.signs[role];
@@ -1501,7 +1529,6 @@ function fillForm(d) {
   setStatus('読込済: '+(d.pnPairs?d.pnPairs.map(p=>p.no).join('/'):d.partNo||d.id), 'ok');
   document.getElementById('sid').textContent='ID: '+d.id;
 }
-
 // ══════════════════════════════════════════════
 // バリデーション
 // ══════════════════════════════════════════════
@@ -1942,10 +1969,10 @@ async function gasPost(body){
 // ══════════════════════════════════════════════
 // UI HELPERS
 // ══════════════════════════════════════════════
-// 日本時間（JST）で ISO形式文字列を生成
-function toJST(date) {
-  const jst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-  return jst.toISOString().replace('Z', '+09:00');
+function today(){
+  // JST基準の当日（UTC変換による前日ズレを防ぐ）
+  const jst = new Date(Date.now() + 9*60*60*1000);
+  return jst.toISOString().split('T')[0];
 }
 
 function upOn(sel){
