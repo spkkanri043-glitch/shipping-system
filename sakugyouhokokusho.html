@@ -144,6 +144,48 @@ select.fi { cursor: pointer; }
 .btn-end:active    { background: #fecaca; }
 .btn-pause:disabled, .btn-resume:disabled { opacity: .4; cursor: not-allowed; }
 
+/* ===== BREAK OVERLAY（休憩中の全画面表示） ===== */
+.break-overlay {
+  position: fixed; inset: 0; z-index: 700;
+  background: linear-gradient(160deg, #7a4d00 0%, #b07000 55%, #7a4d00 100%);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px; text-align: center;
+}
+.break-overlay.on { display: flex; }
+.break-icon {
+  width: 96px; height: 96px; border-radius: 50%;
+  background: rgba(255,255,255,.15); border: 3px solid rgba(255,255,255,.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 46px; margin-bottom: 22px;
+  animation: breathe 2.2s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.08); } }
+.break-title {
+  font-size: 30px; font-weight: 800; color: #fff; letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.break-sub {
+  font-size: 13px; color: rgba(255,255,255,.75); margin-bottom: 26px;
+}
+.break-timer {
+  font-size: 44px; font-weight: 700; color: #fff;
+  font-family: 'Courier New', monospace; letter-spacing: 2px;
+  margin-bottom: 36px; font-variant-numeric: tabular-nums;
+}
+.btn-break-resume {
+  width: 100%; max-width: 320px; padding: 18px;
+  background: #fff; color: var(--a);
+  border: none; border-radius: 14px;
+  font-size: 18px; font-weight: 800; letter-spacing: 1px;
+  cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  -webkit-appearance: none;
+}
+.btn-break-resume:active { background: #fff7e6; transform: scale(.98); }
+.break-start-label {
+  font-size: 12px; color: rgba(255,255,255,.6); margin-top: 16px;
+}
+
 /* ===== SECTION CARD ===== */
 .section-card {
   background: var(--sf); border: 1px solid var(--bd);
@@ -568,6 +610,15 @@ textarea.fi2 { resize: none; line-height: 1.6; }
   </div><!-- /content -->
 </div><!-- /s-main -->
 
+<!-- ===== BREAK OVERLAY（休憩中・全画面表示） ===== -->
+<div id="break-overlay" class="break-overlay">
+  <div class="break-icon">☕</div>
+  <div class="break-title">休憩中</div>
+  <div class="break-sub" id="break-start-label">開始: --:--</div>
+  <div class="break-timer" id="break-timer">00:00</div>
+  <button class="btn-break-resume" onclick="doResume()">▶ 再開する</button>
+</div>
+
 <!-- ===== COMPLETE ===== -->
 <div id="s-complete">
   <div class="cmp-box">
@@ -813,7 +864,7 @@ async function doLogin() {
 
 function doLogout() {
   openConfirm('ログアウトしますか？\n保存していない作業データは失われます。', '確認', () => {
-    stopTimer(); stopCamera(true);
+    stopTimer(); stopCamera(true); hideBreakOverlay();
     sessionStorage.removeItem('kpk_report_user');
     currentUser = null;
     // タブを閉じてポータルに戻る
@@ -889,6 +940,8 @@ function pad(n) { return String(n).padStart(2,'0'); }
 // ============================================================
 // 一時停止 / 再開
 // ============================================================
+let breakTimerID = null;
+
 function doPause() {
   if (workState.status !== 'working') return;
   workState.status    = 'paused';
@@ -898,6 +951,7 @@ function doPause() {
   document.getElementById('btn-pause').disabled  = true;
   document.getElementById('btn-resume').disabled = false;
   showToast('一時停止しました', 'warn');
+  showBreakOverlay();
 }
 function doResume() {
   if (workState.status !== 'paused') return;
@@ -909,7 +963,30 @@ function doResume() {
   document.getElementById('btn-pause').disabled  = false;
   document.getElementById('btn-resume').disabled = true;
   showToast('作業を再開しました', 'success');
+  hideBreakOverlay();
 }
+
+// 休憩中の全画面オーバーレイ表示
+function showBreakOverlay() {
+  document.getElementById('break-start-label').textContent = '開始: ' + fmtT(workState.pauseTime);
+  document.getElementById('break-overlay').classList.add('on');
+  updateBreakTimer();
+  if (breakTimerID) clearInterval(breakTimerID);
+  breakTimerID = setInterval(updateBreakTimer, 1000);
+}
+function hideBreakOverlay() {
+  document.getElementById('break-overlay').classList.remove('on');
+  if (breakTimerID) { clearInterval(breakTimerID); breakTimerID = null; }
+}
+function updateBreakTimer() {
+  if (!workState.pauseTime) return;
+  const ms = Date.now() - workState.pauseTime.getTime();
+  const s  = Math.floor(Math.max(0, ms) / 1000);
+  const m  = pad(Math.floor(s / 60));
+  const ss = pad(s % 60);
+  document.getElementById('break-timer').textContent = m + ':' + ss;
+}
+
 function updateStatusBar() {
   const bar   = document.getElementById('status-bar');
   const label = document.getElementById('status-label');
@@ -1362,6 +1439,7 @@ function showComplete(r) {
 function startNew() {
   document.getElementById('s-complete').classList.remove('on');
   document.getElementById('s-main').classList.add('on');
+  hideBreakOverlay();
   resetForm();
   count   = 0;
   defects = [];
