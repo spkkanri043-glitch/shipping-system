@@ -654,14 +654,46 @@ function openDetail(idx) {
         ? `<div class="defect-list-item"><div class="defect-list-header"><span style="color:var(--r)">不具合数: ${r['不具合数']}個</span></div>${r['不具合内容']?`<div class="defect-list-detail">${r['不具合内容']}</div>`:''}</div>`
         : '<span style="color:var(--tx3);font-size:12px">不具合なし</span>');
 
-  // 一時停止ログ
-  const pauseHtml = pauseLog.length
-    ? `<div>${pauseLog.map(l => `
+  // 一時停止ログ → 休憩の時間帯（pause〜resume）に組み立てる
+  const breakPeriods = [];
+  let openPause = null;
+  pauseLog.forEach(l => {
+    if (l.type === 'pause') {
+      openPause = l.time;
+    } else if (l.type === 'resume' && openPause) {
+      breakPeriods.push({ start: openPause, end: l.time });
+      openPause = null;
+    }
+  });
+  // 終了日時までに再開していない（=保存時点でまだ一時停止中だった）場合
+  if (openPause) {
+    breakPeriods.push({ start: openPause, end: r['終了日時'] || null, ongoing: true });
+  }
+
+  const totalBreakMin = breakPeriods.reduce((sum, p) => {
+    if (!p.end) return sum;
+    const ms = new Date(p.end) - new Date(p.start);
+    return sum + (ms > 0 ? Math.round(ms / 60000) : 0);
+  }, 0);
+
+  const pauseHtml = breakPeriods.length
+    ? `
+      <div style="display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap">
+        <div style="font-size:12px;color:var(--tx2)">休憩回数: <strong style="color:var(--tx);font-size:14px">${breakPeriods.length}</strong> 回</div>
+        <div style="font-size:12px;color:var(--tx2)">合計休憩時間: <strong style="color:var(--r);font-size:14px">${totalBreakMin}</strong> 分</div>
+      </div>
+      <div>${breakPeriods.map((p, i) => {
+        const startStr = fmtDateTime(p.start).slice(11,16);
+        const endStr = p.end ? fmtDateTime(p.end).slice(11,16) : '—';
+        const dur = p.end ? Math.round((new Date(p.end) - new Date(p.start)) / 60000) : null;
+        return `
         <div class="pause-log-item">
-          <span class="pause-type ${l.type}">${l.type==='pause'?'⏸ 一時停止':'▶ 再開'}</span>
-          <span>${fmtDateTime(l.time)}</span>
-        </div>`).join('')}</div>`
-    : '<span style="color:var(--tx3);font-size:12px">一時停止なし</span>';
+          <span class="pause-type pause">休憩 #${i+1}</span>
+          <span style="font-weight:600">${startStr} 〜 ${endStr}</span>
+          ${dur !== null ? `<span style="color:var(--tx2)">（${dur}分）</span>` : `<span style="color:var(--a)">（未再開）</span>`}
+        </div>`;
+      }).join('')}</div>`
+    : '<span style="color:var(--tx3);font-size:12px">休憩なし</span>';
 
   document.getElementById('modal-title').textContent = `作業詳細 — ${r['担当者']||''} ${String(r['作成日時']||'').slice(0,10)}`;
   document.getElementById('modal-body').innerHTML = `
@@ -706,9 +738,9 @@ function openDetail(idx) {
       ${photoHtml}
     </div>
 
-    <!-- 一時停止ログ -->
+    <!-- 休憩時間 -->
     <div class="detail-section">
-      <div class="detail-section-title">⏸ 一時停止ログ</div>
+      <div class="detail-section-title">☕ 休憩時間</div>
       ${pauseHtml}
     </div>
   `;
