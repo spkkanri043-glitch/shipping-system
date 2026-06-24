@@ -962,8 +962,9 @@ async function startScan() {
   document.getElementById('cam-overlay').classList.remove('hid');
 
   try {
+    // 低スペック機種対応: 解像度を抑えて取得負荷を下げる（640x480で十分認識可能）
     camStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} }
+      video: { facingMode: 'environment', width:{ideal:640}, height:{ideal:480} }
     });
     const video = document.getElementById('cam-video');
     video.srcObject = camStream;
@@ -975,24 +976,58 @@ async function startScan() {
   }
 }
 
+// ZXingのReaderは毎フレーム生成せず再利用（生成コストが高いため）
+let _zxingReader = null;
+function getZXingReader() {
+  if (_zxingReader) return _zxingReader;
+  if (typeof ZXing === 'undefined') return null;
+  const hints = new Map();
+  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.CODE_39]);
+  _zxingReader = new ZXing.MultiFormatReader();
+  _zxingReader.setHints(hints);
+  return _zxingReader;
+}
+
 function startScanLoop(video) {
   const canvas = document.getElementById('cam-canvas');
-  const ctx    = canvas.getContext('2d');
-  function tick() {
+  const ctx    = canvas.getContext('2d', { willReadFrequently: true });
+
+  let lastTick = 0;
+  const FRAME_INTERVAL = 150; // 低スペック機種向け: 解析を間引いてCPU負荷を下げる（約6-7fps）
+
+  function tick(now) {
     if (!camStream) return;
     if (video.readyState < 2) { scanRAF = requestAnimationFrame(tick); return; }
-    canvas.width  = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0);
-    const img  = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    // フレーム間引き: 毎フレーム処理せず一定間隔だけ解析する
+    if (now - lastTick < FRAME_INTERVAL) {
+      scanRAF = requestAnimationFrame(tick);
+      return;
+    }
+    lastTick = now;
+
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (!vw || !vh) { scanRAF = requestAnimationFrame(tick); return; }
+
+    // 中央の枠部分だけを切り出して解析（カメラ枠 cam-frame と同程度の比率）
+    // フル画像を処理しないことで解析対象ピクセル数を大幅に削減
+    const cropWRatio = 0.62, cropHRatio = 0.55;
+    const cropW = Math.round(vw * cropWRatio);
+    const cropH = Math.round(vh * cropHRatio);
+    const sx = Math.round((vw - cropW) / 2);
+    const sy = Math.round((vh - cropH) / 2);
+
+    canvas.width  = cropW;
+    canvas.height = cropH;
+    ctx.drawImage(video, sx, sy, cropW, cropH, 0, 0, cropW, cropH);
+
+    const img  = ctx.getImageData(0, 0, cropW, cropH);
     const code = jsQR(img.data, img.width, img.height);
     if (code && code.data) { onScanned(code.data, 'QR'); return; }
-    if (typeof ZXing !== 'undefined') {
+
+    const reader = getZXingReader();
+    if (reader) {
       try {
-        const hints = new Map();
-        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.CODE_39]);
-        const reader = new ZXing.MultiFormatReader();
-        reader.setHints(hints);
         const luminance = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
         const bitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminance));
         const result = reader.decode(bitmap);
