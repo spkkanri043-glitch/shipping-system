@@ -1054,7 +1054,7 @@ async function startScan() {
     }
     // 低スペック機種対応: 解像度を抑えて取得負荷を下げる（640x480で十分認識可能）
     camStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width:{ideal:640}, height:{ideal:480} }
+      video: { facingMode: 'environment', width:{ideal:960}, height:{ideal:540} }
     });
     video.srcObject = camStream;
     await video.play();
@@ -1071,7 +1071,13 @@ function getZXingReader() {
   if (_zxingReader) return _zxingReader;
   if (typeof ZXing === 'undefined') return null;
   const hints = new Map();
-  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.CODE_39]);
+  // 現場のラベルにCODE128（16桁品番など）とCODE39が混在しているため両方を対象にする
+  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+    ZXing.BarcodeFormat.CODE_128,
+    ZXing.BarcodeFormat.CODE_39
+  ]);
+  // 認識率向上のため、ライト判定をなるべく試行する
+  hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
   _zxingReader = new ZXing.MultiFormatReader();
   _zxingReader.setHints(hints);
   return _zxingReader;
@@ -1082,7 +1088,9 @@ function startScanLoop(video) {
   const ctx    = canvas.getContext('2d', { willReadFrequently: true });
 
   let lastTick = 0;
-  const FRAME_INTERVAL = 150; // 低スペック機種向け: 解析を間引いてCPU負荷を下げる（約6-7fps）
+  // ZXingのTRY_HARDERは1フレームあたりの処理が重いため、間引き間隔をやや広げてカクつきを防ぐ
+  const FRAME_INTERVAL = 200; // 約5fps
+
   isScanning = true;
 
   function tick(now) {
@@ -1099,9 +1107,9 @@ function startScanLoop(video) {
     const vw = video.videoWidth, vh = video.videoHeight;
     if (!vw || !vh) { scanRAF = requestAnimationFrame(tick); return; }
 
-    // 中央の枠部分だけを切り出して解析（カメラ枠 cam-frame と同程度の比率）
+    // 中央の枠部分だけを切り出して解析（横長バーコード・QR両方をカバーする比率）
     // フル画像を処理しないことで解析対象ピクセル数を大幅に削減
-    const cropWRatio = 0.62, cropHRatio = 0.55;
+    const cropWRatio = 0.85, cropHRatio = 0.45;
     const cropW = Math.round(vw * cropWRatio);
     const cropH = Math.round(vh * cropHRatio);
     const sx = Math.round((vw - cropW) / 2);
@@ -1111,10 +1119,8 @@ function startScanLoop(video) {
     canvas.height = cropH;
     ctx.drawImage(video, sx, sy, cropW, cropH, 0, 0, cropW, cropH);
 
-    const img  = ctx.getImageData(0, 0, cropW, cropH);
-    const code = jsQR(img.data, img.width, img.height);
-    if (code && code.data) { onScanned(code.data, 'QR'); return; }
-
+    // バーコードモードのときはZXing（CODE128/39）を先に試す方が高速
+    // QR/手入力切替がないため、まずバーコードを優先（多くの現場ラベルがCODE128のため）
     const reader = getZXingReader();
     if (reader) {
       try {
@@ -1124,6 +1130,11 @@ function startScanLoop(video) {
         if (result) { onScanned(result.getText(), 'バーコード'); return; }
       } catch(e) {}
     }
+
+    const img  = ctx.getImageData(0, 0, cropW, cropH);
+    const code = jsQR(img.data, img.width, img.height);
+    if (code && code.data) { onScanned(code.data, 'QR'); return; }
+
     scanRAF = requestAnimationFrame(tick);
   }
   scanRAF = requestAnimationFrame(tick);
