@@ -685,6 +685,7 @@ let photos      = []; // 写真データ（Base64、最大3枚）
 let scanMode    = 'qr';
 let camStream   = null;
 let scanRAF     = null;
+let isScanning  = false;
 let confirmCb   = null;
 let products    = []; // 製品マスタキャッシュ
 let jsQRReady   = false;
@@ -692,6 +693,10 @@ let jsQRReady   = false;
 // ============================================================
 // 起動時 — SSOトークンの解析
 // ============================================================
+// ページ離脱時はカメラを確実に解放する（保持し続けるとブラウザ/端末に負荷が残るため）
+window.addEventListener('pagehide', () => stopCamera(true));
+window.addEventListener('beforeunload', () => stopCamera(true));
+
 window.addEventListener('load', function() {
   loadJsQR();
   loadZXing();
@@ -808,7 +813,7 @@ async function doLogin() {
 
 function doLogout() {
   openConfirm('ログアウトしますか？\n保存していない作業データは失われます。', '確認', () => {
-    stopTimer(); stopCamera();
+    stopTimer(); stopCamera(true);
     sessionStorage.removeItem('kpk_report_user');
     currentUser = null;
     // タブを閉じてポータルに戻る
@@ -962,16 +967,23 @@ async function startScan() {
   document.getElementById('cam-overlay').classList.remove('hid');
 
   try {
+    const video = document.getElementById('cam-video');
+    // カメラストリームを保持している場合は再起動せず再利用（初期化コストを回避）
+    if (camStream && camStream.active) {
+      video.srcObject = camStream;
+      await video.play();
+      startScanLoop(video);
+      return;
+    }
     // 低スペック機種対応: 解像度を抑えて取得負荷を下げる（640x480で十分認識可能）
     camStream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'environment', width:{ideal:640}, height:{ideal:480} }
     });
-    const video = document.getElementById('cam-video');
     video.srcObject = camStream;
     await video.play();
     startScanLoop(video);
   } catch(e) {
-    stopCamera();
+    stopCamera(true);
     showToast('カメラへのアクセスが許可されていません', 'error');
   }
 }
@@ -994,9 +1006,10 @@ function startScanLoop(video) {
 
   let lastTick = 0;
   const FRAME_INTERVAL = 150; // 低スペック機種向け: 解析を間引いてCPU負荷を下げる（約6-7fps）
+  isScanning = true;
 
   function tick(now) {
-    if (!camStream) return;
+    if (!isScanning) return;
     if (video.readyState < 2) { scanRAF = requestAnimationFrame(tick); return; }
 
     // フレーム間引き: 毎フレーム処理せず一定間隔だけ解析する
@@ -1040,7 +1053,7 @@ function startScanLoop(video) {
 }
 
 function onScanned(raw, type) {
-  stopCamera();
+  stopCamera(); // キャンセルと同様、ストリームは保持して次回の起動を高速化
   const data = raw.split('|')[0].replace(/[\s\-]/g, '');
   document.getElementById('f-hinban').value = data;
   document.getElementById('f-hinban').classList.add('filled');
@@ -1049,9 +1062,15 @@ function onScanned(raw, type) {
   showToast(type + 'スキャン: ' + data, 'success');
 }
 
-function stopCamera() {
-  if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
-  if (scanRAF)   { cancelAnimationFrame(scanRAF); scanRAF = null; }
+// stopCamera(forceStop): 通常はストリームを保持したまま解析ループだけ止める（次回起動を高速化）
+// forceStop=true の場合は完全にカメラを解放する（画面離脱時・エラー時など）
+function stopCamera(forceStop = false) {
+  isScanning = false;
+  if (scanRAF) { cancelAnimationFrame(scanRAF); scanRAF = null; }
+  if (forceStop && camStream) {
+    camStream.getTracks().forEach(t => t.stop());
+    camStream = null;
+  }
   document.getElementById('cam-overlay').classList.add('hid');
 }
 
