@@ -709,8 +709,10 @@ const PORTAL_URL = (function() {
   return params.get('portal_url') || localStorage.getItem('sakugyo_portal_url') || '';
 })();
 
-// 従業員データ（不具合作業者選択用）— ポータルから渡される
-const reportEmployees = (function() {
+// 従業員データ（不具合作業者選択用）
+// 優先順位: ① URLパラメータ(emps) → ② sessionStorage(emps_key) → ③ ポータルGASから直接取得
+// ※ 別タブで開く構成のため②はsessionStorageが共有されず空になりやすい。③をフォールバックとして必ず用意する。
+let reportEmployees = (function() {
   try {
     const params = new URLSearchParams(window.location.search);
     const empsJson = params.get('emps');
@@ -723,6 +725,19 @@ const reportEmployees = (function() {
   } catch(e) {}
   return [];
 })();
+
+// ポータルGASから従業員データを直接取得（①②が空 or 不十分だった場合のフォールバック）
+async function loadReportEmployeesFromPortal() {
+  if (reportEmployees.length > 0) return; // 既に取得済みなら不要
+  if (!GAS_URL) return;
+  try {
+    const res = await gasPost('getEmployees', {});
+    if (res && res.ok && Array.isArray(res.data)) {
+      reportEmployees = res.data.filter(e => e.status === 'active' || e.status === '在職' || !e.status);
+      renderDefects(); // 既に表示中の不具合フォームがあれば再描画して反映
+    }
+  } catch(e) { /* サイレント失敗（手入力で運用継続できるため） */ }
+}
 
 // ============================================================
 // 状態管理
@@ -904,6 +919,7 @@ function enterMain() {
   updateStatusBar();
   startTimer();
   loadProducts();
+  loadReportEmployeesFromPortal();
 }
 
 // ============================================================
