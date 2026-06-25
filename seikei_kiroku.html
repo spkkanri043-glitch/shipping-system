@@ -273,6 +273,21 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   .tb-title{ font-size:13px; }
   .tb-sub{ display:none; }
 }
+
+/* 変更履歴 */
+.clog-item{ border-left:3px solid var(--acc); background:var(--sec); border-radius:0 5px 5px 0; padding:8px 12px; margin-bottom:8px; }
+.clog-head{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:5px; }
+.clog-who{ font-weight:bold; font-size:12px; color:var(--blue); }
+.clog-ts{ font-size:10px; color:var(--tx3); white-space:nowrap; }
+.clog-reason{ font-size:11px; color:var(--tx); background:#fff; border:1px solid var(--bd); border-radius:4px; padding:4px 8px; margin-bottom:6px; }
+.clog-reason b{ color:var(--acc); }
+.clog-diff{ font-size:11px; color:var(--tx2); padding:2px 0; border-top:1px dashed var(--bd); }
+.clog-diff:first-of-type{ border-top:none; }
+.clog-field{ font-weight:bold; color:var(--tx); }
+.clog-before{ color:var(--tx3); text-decoration:line-through; }
+.clog-after{ color:var(--g); font-weight:bold; }
+@media print{ #changeLogCard{ break-inside:avoid; } .clog-item{ background:#f7f7f7 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } }  
+  
 </style>
 </head>
 <body>
@@ -424,6 +439,12 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
         <tbody id="pcTb"></tbody>
       </table>
     </div>
+  </div>
+
+  <!-- 変更履歴 -->
+  <div class="card" id="changeLogCard" style="display:none;">
+    <div class="ch">📝 条件変更の履歴<span id="clogCount" style="font-size:10px;opacity:.7;margin-left:8px;"></span></div>
+    <div class="cb" id="changeLogBody"></div>
   </div>
 
   <!-- 確認サイン -->
@@ -1425,6 +1446,8 @@ function usePartMaster(i) {
   });
   document.getElementById('sid').textContent = '';
   applyLock(false);
+  CHANGE_LOG = [];
+  renderChangeLog();
   setStatus('新規作成モード（品番: ' + (m.nos||[m.no]).join('/') + '）', 'ok');
   closeM('partSelectModal');
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -1756,7 +1779,8 @@ function collectData() {
     condSections:deep(COND_SECS),
     signs:{start:{name: STARTER ? STARTER.name : CU.name, id: STARTER ? STARTER.id : CU.id},
            mgr:SIGNS.mgr, sup:SIGNS.sup, agg:SIGNS.agg},
-    prodCheckItems:deep(PC_ITEMS),
+   prodCheckItems:deep(PC_ITEMS),
+    changeLog: deep(CHANGE_LOG),
   };
   document.querySelectorAll('[data-k]').forEach(el=>{
     const k=el.getAttribute('data-k');
@@ -1826,7 +1850,14 @@ function fillForm(d) {
   }
   setStatus('読込済: '+(d.pnPairs?d.pnPairs.map(p=>p.no).join('/'):d.partNo||d.id), 'ok');
   document.getElementById('sid').textContent='ID: '+d.id;
-  applyLock(!!SIGNS.agg);
+ applyLock(!!SIGNS.agg);
+
+  // 変更履歴を復元
+  CHANGE_LOG = d.changeLog ? deep(d.changeLog) : [];
+  renderChangeLog();
+
+  // 読込完了後、現在値をスナップショットとして記録（差分の基準点）
+  setTimeout(() => { LAST_SNAPSHOT = takeSnapshot(); }, 120);
 }
 
 // ══════════════════════════════════════════════
@@ -1906,6 +1937,43 @@ async function saveRecord() {
     }
   }
 
+  // ── 既存記録の変更なら差分をチェックして理由を聞く ──
+  // RID があり、かつ前回スナップショットが存在する場合のみ（＝2回目以降の保存）
+  const isExisting = !!RID && Object.keys(LAST_SNAPSHOT).length > 0;
+  if (isExisting) {
+    const diffs = diffFromSnapshot();
+    if (diffs.length > 0) {
+      // 変更内容のプレビューを作る
+      const preview = diffs.slice(0, 8).map(d =>
+        '・' + d.field + '：' + (d.before||'(空欄)') + ' → ' + (d.after||'(空欄)')
+      ).join('\n');
+      const more = diffs.length > 8 ? '\n…ほか' + (diffs.length - 8) + '件' : '';
+
+      const reason = prompt(
+        '⚠️ 前回保存から ' + diffs.length + ' 箇所の変更があります。\n\n'
+        + preview + more + '\n\n'
+        + '変更理由を入力してください（記録に残ります）：',
+        ''
+      );
+
+      // キャンセル時は保存を中断
+      if (reason === null) {
+        toast('保存を中止しました', 'warn');
+        return;
+      }
+
+      // 変更履歴に追加
+      CHANGE_LOG.push({
+        ts: new Date().toLocaleString('ja-JP', {timeZone:'Asia/Tokyo', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}),
+        byName: CU.name,
+        byId: CU.id,
+        reason: reason.trim() || '(理由未記入)',
+        diffs: diffs,
+      });
+      renderChangeLog();
+    }
+  }
+
   const data=collectData(); RID=data.id;
   const list=JSON.parse(ls('seikei_records')||'[]');
   const idx=list.findIndex(r=>r.id===data.id);
@@ -1929,9 +1997,11 @@ async function saveRecord() {
     setStatus('⚠️ ローカル保存済み（GAS未設定）','warn');
   }
 
+  // 保存後、現在値を新たなスナップショットにする（次回の差分基準）
+  LAST_SNAPSHOT = takeSnapshot();
+
   if (SIGNS.agg) applyLock(true);
 }
-
 // ══════════════════════════════════════════════
 // 新規
 // ══════════════════════════════════════════════
@@ -1955,6 +2025,8 @@ function newForm(){
     document.getElementById(`cb-${role}`).checked=false;
   });
   document.getElementById('sid').textContent='';
+  CHANGE_LOG = [];
+  renderChangeLog();
   setStatus('新規作成モード','ok');
   applyLock(false);
 }
@@ -2244,6 +2316,8 @@ function newFromMaster(partNoKey) {
 
   document.getElementById('sid').textContent = '';
   applyLock(false);
+  CHANGE_LOG = [];
+  renderChangeLog();
   setStatus('新規作成モード（品番: ' + partNoKey + '）', 'ok');
   closeM('histModal');
   window.scrollTo({top:0, behavior:'smooth'});
@@ -2385,6 +2459,43 @@ function diffFromSnapshot() {
     }
   });
   return diffs;
+}
+
+  // 変更履歴を記録書内に描画
+function renderChangeLog() {
+  const card = document.getElementById('changeLogCard');
+  const body = document.getElementById('changeLogBody');
+  const cnt  = document.getElementById('clogCount');
+  if (!card || !body) return;
+
+  if (!CHANGE_LOG || !CHANGE_LOG.length) {
+    card.style.display = 'none';
+    body.innerHTML = '';
+    if (cnt) cnt.textContent = '';
+    return;
+  }
+
+  card.style.display = '';
+  if (cnt) cnt.textContent = '（全' + CHANGE_LOG.length + '回）';
+
+  // 新しい順に表示
+  body.innerHTML = CHANGE_LOG.slice().reverse().map(entry => {
+    const diffs = (entry.diffs || []).map(d =>
+      '<div class="clog-diff">'
+        + '<span class="clog-field">' + esc(d.field) + '</span>：'
+        + '<span class="clog-before">' + esc(d.before || '(空欄)') + '</span>'
+        + ' → <span class="clog-after">' + esc(d.after || '(空欄)') + '</span>'
+      + '</div>'
+    ).join('');
+    return '<div class="clog-item">'
+      + '<div class="clog-head">'
+        + '<span class="clog-who">✏️ ' + esc(entry.byName || '不明') + '</span>'
+        + '<span class="clog-ts">' + esc(entry.ts || '') + '</span>'
+      + '</div>'
+      + '<div class="clog-reason"><b>変更理由：</b>' + esc(entry.reason || '(未記入)') + '</div>'
+      + diffs
+    + '</div>';
+  }).join('');
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
