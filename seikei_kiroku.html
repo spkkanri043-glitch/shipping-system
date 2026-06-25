@@ -1495,8 +1495,8 @@ function renderMstList() {
   const tabsEl = document.getElementById('mst-tabs');
   if (tabsEl) {
     const clientsMap = {};
-    PARTS.forEach(p => {
-      const c = (p.client || '').trim() || '__none__';
+   PARTS.forEach(p => {
+      const c = String(p.client || '').trim() || '__none__';
       clientsMap[c] = (clientsMap[c] || 0) + 1;
     });
     // 並び順：取引先名（未設定は最後）
@@ -1519,9 +1519,9 @@ function renderMstList() {
   }
 
   // タブで絞り込み
-  const filtered = PARTS.filter(p => {
+ const filtered = PARTS.filter(p => {
     if (MST_TAB === 'all') return true;
-    const c = (p.client || '').trim() || '__none__';
+    const c = String(p.client || '').trim() || '__none__';
     return c === MST_TAB;
   });
 
