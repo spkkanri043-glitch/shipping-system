@@ -169,11 +169,16 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 .ps-use-btn{padding:6px 16px;background:var(--g);color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:bold;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
 .ps-use-btn:hover{filter:brightness(1.1);}
 
+/* ── サイン確定ロック ── */
+#main-wrap.locked .card, #main-wrap.locked .two{ pointer-events:none; }
+#main-wrap.locked .card{ opacity:.97; }
+#lockBanner{ background:#fdecea; border:1px solid var(--r); color:#922; border-radius:6px; padding:8px 12px; margin-bottom:10px; display:none; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; }
+  
 /* ═══ 印刷スタイル ═══ */
 @media print {
   body { background: #fff !important; font-size: 10pt !important; color: #000 !important; }
   .topbar, .sbar, .tb-btns, .mo, .toast, .pn-add-btn, .add-r-btn, .mv, .db, .pm,
-  button:not(.no-print-hide), .btn { display: none !important; }
+  button:not(.no-print-hide), .btn #lockBanner { display: none !important; }
   .wrap { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
   .card { break-inside: avoid; border: 1px solid #aaa !important; margin-bottom: 8px !important; box-shadow: none !important; border-radius: 4px !important; overflow: visible !important; }
   .ch { background: #1a3a6b !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 4px 10px !important; font-size: 10pt !important; }
@@ -239,6 +244,9 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
     <span id="smsg">新規作成モード</span>
     <span id="sid"></span>
   </div>
+
+  <!-- 確定ロックバナー（JSで内容生成） -->
+  <div id="lockBanner"></div>
 
   <!-- 基本情報 -->
   <div class="card">
@@ -602,6 +610,7 @@ const SIGNS = {mgr:null, sup:null, agg:null};
 
 // 品番+依頼番号ペア [{no:'', req:''}]
 let PN_PAIRS = [{no:'', req:''}];
+  let LOCKED = false;  // 確定（集計確認サイン済み）ロック状態
 
 // ══════════════════════════════════════════════
 // デフォルト定義
@@ -1021,6 +1030,11 @@ function onM5ActionInput(i, inp) {
 function stamp(role, checked) {
   const labels={mgr:'管理者',sup:'監督者',agg:'集計確認'};
   if (checked) {
+    // 集計確認は「確定（ロック）」を伴うため確認を挟む
+    if (role === 'agg') {
+      const ok = confirm('「集計確認」を行うと、この記録は確定されて編集できなくなります。\n（ロック解除は admin／マスター管理者のみ可能）\n\n確定して保存しますか？');
+      if (!ok) { document.getElementById('cb-agg').checked = false; return; }
+    }
     const ts=new Date().toLocaleDateString('ja-JP')+' '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
     SIGNS[role]={name:CU.name,id:CU.id,loginId:CU.loginId,ts};
     document.getElementById(`s-${role}`).textContent=CU.name;
@@ -1042,12 +1056,62 @@ function stamp(role, checked) {
       };
       gasPost(notifyData).catch(e => console.warn('サイン通知失敗:', e));
     }
+
+    // 集計確認時：保存して確定（saveRecord内でSIGNS.aggを見てロック）
+    if (role === 'agg') { saveRecord(); }
   } else {
     SIGNS[role]=null;
     document.getElementById(`s-${role}`).textContent='-';
     document.getElementById(`ss-${role}`).textContent='';
     toast('確認を解除しました','warn');
   }
+}
+  // ══════════════════════════════════════════════
+// 確定ロック
+// ══════════════════════════════════════════════
+function isUnlockRole(){ return !!CU && (CU.role === 'admin' || CU.role === 'master'); }
+
+function applyLock(locked){
+  LOCKED = locked;
+  const wrap = document.getElementById('main-wrap');
+  wrap.classList.toggle('locked', locked);
+
+  // 保存ボタンを無効化
+  const saveBtn = document.querySelector('.btn-save');
+  if (saveBtn){
+    saveBtn.disabled = locked;
+    saveBtn.style.opacity = locked ? '.45' : '';
+    saveBtn.style.cursor  = locked ? 'not-allowed' : '';
+  }
+
+  // バナー表示
+  const banner = document.getElementById('lockBanner');
+  if (!banner) return;
+  if (locked){
+    const canUnlock = isUnlockRole();
+    banner.style.display = 'flex';
+    banner.innerHTML =
+        '🔒 <span style="font-weight:bold;">この記録は確定済みです（集計確認サイン済み）</span>'
+      + '<span style="color:var(--tx2);font-size:10px;">編集にはロック解除が必要です。印刷・閲覧は可能です。</span>'
+      + (canUnlock
+          ? '<button onclick="unlockRecord()" style="margin-left:auto;padding:5px 14px;font-size:11px;font-weight:bold;border:none;border-radius:4px;background:var(--acc);color:#fff;cursor:pointer;">🔓 ロック解除</button>'
+          : '<span style="margin-left:auto;font-size:10px;color:var(--tx2);">※解除は admin／マスター管理者のみ</span>');
+  } else {
+    banner.style.display = 'none';
+    banner.innerHTML = '';
+  }
+}
+
+function unlockRecord(){
+  if (!isUnlockRole()){ toast('ロック解除の権限がありません', 'err'); return; }
+  if (!confirm('ロックを解除して編集可能にします。\n「集計確認」サインは取り消され、修正後に再度確認が必要になります。\n\nよろしいですか？')) return;
+  // 集計確認サインを取消
+  SIGNS.agg = null;
+  document.getElementById('s-agg').textContent  = '-';
+  document.getElementById('ss-agg').textContent = '';
+  document.getElementById('cb-agg').checked = false;
+  applyLock(false);
+  toast('🔓 ロックを解除しました。修正後に保存してください。', 'warn');
 }
 
 // ══════════════════════════════════════════════
@@ -1155,6 +1219,7 @@ function usePartMaster(i) {
     document.getElementById(`cb-${role}`).checked = false;
   });
   document.getElementById('sid').textContent = '';
+  applyLock(false);
   setStatus('新規作成モード（品番: ' + (m.nos||[m.no]).join('/') + '）', 'ok');
   closeM('partSelectModal');
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -1528,6 +1593,7 @@ function fillForm(d) {
   }
   setStatus('読込済: '+(d.pnPairs?d.pnPairs.map(p=>p.no).join('/'):d.partNo||d.id), 'ok');
   document.getElementById('sid').textContent='ID: '+d.id;
+  applyLock(!!SIGNS.agg);   // 集計確認済みならロック表示
 }
 // ══════════════════════════════════════════════
 // バリデーション
@@ -1586,6 +1652,8 @@ function validateForm() {
 // 保存
 // ══════════════════════════════════════════════
 async function saveRecord() {
+  if (LOCKED) { toast('この記録は確定済みのため保存できません', 'warn'); return; }
+
   const hasReq = PN_PAIRS.some(p=>p.req.trim());
   if(!hasReq){toast('成形依頼番号を少なくとも1つ入力してください','err');return;}
 
@@ -1595,7 +1663,6 @@ async function saveRecord() {
   // 必須エラーがあれば保存不可
   if (errors.length > 0) {
     alert('【保存できません】\n\n' + errors.join('\n'));
-    // エラー箇所にスクロール
     const firstErrEl = document.querySelector('[style*="outline: 2px solid var(--r)"]');
     if (firstErrEl) firstErrEl.scrollIntoView({behavior:'smooth', block:'center'});
     return;
@@ -1605,7 +1672,6 @@ async function saveRecord() {
   if (warnings.length > 0) {
     const ok = confirm('【確認】\n\n' + warnings.join('\n') + '\n\nこのまま保存しますか？');
     if (!ok) {
-      // 警告箇所にスクロール
       const firstWarnEl = document.querySelector('[style*="outline: 2px solid var(--o)"]');
       if (firstWarnEl) firstWarnEl.scrollIntoView({behavior:'smooth', block:'center'});
       return;
@@ -1635,8 +1701,10 @@ async function saveRecord() {
     toast('💾 ローカルに保存しました（GAS URLが未設定）','warn');
     setStatus('⚠️ ローカル保存済み（GAS未設定）','warn');
   }
-}
 
+  // 集計確認サイン済みなら保存完了後に確定（ロック）
+  if (SIGNS.agg) applyLock(true);
+}
 // ══════════════════════════════════════════════
 // 新規
 // ══════════════════════════════════════════════
@@ -1662,6 +1730,7 @@ function newForm(){
   });
   document.getElementById('sid').textContent='';
   setStatus('新規作成モード','ok');
+  applyLock(false);
 }
 
 // ══════════════════════════════════════════════
@@ -1947,6 +2016,7 @@ function newFromMaster(partNoKey) {
   });
 
   document.getElementById('sid').textContent = '';
+  applyLock(false);
   setStatus('新規作成モード（品番: ' + partNoKey + '）', 'ok');
   closeM('histModal');
   // ページトップへスクロール
