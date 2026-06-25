@@ -1992,9 +1992,16 @@ function toast(msg,type){
 }
 function gv(id){const e=document.getElementById(id);return e?e.value:'';}
 function deep(o){return JSON.parse(JSON.stringify(o));}
+function countDataRows(d, regex){
+  let max=-1;
+  Object.keys(d||{}).forEach(k=>{
+    const m=k.match(regex);
+    if(m){ const n=parseInt(m[1],10); if(n>max) max=n; }
+  });
+  return max+1;
+}
+
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function ls(k){try{return localStorage.getItem(k);}catch(e){return null;}}
-function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 
 document.querySelectorAll('.mo').forEach(el=>{
   el.addEventListener('click',e=>{if(e.target===el)closeM(el.id);});
