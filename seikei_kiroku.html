@@ -678,6 +678,8 @@ let PN_PAIRS = [{no:'', req:''}];
 let LOCKED = false;   // 確定（集計確認サイン済み）ロック状態
 let MST_TAB = 'all';  // マスター一覧の取引先タブ
 let PS_TAB = 'all';   // 品番選択の取引先タブ
+  let LAST_SNAPSHOT = {};   // 前回保存時の data-k 値スナップショット（差分比較用）
+let CHANGE_LOG = [];      // 変更履歴 [{ts, byName, byId, field, before, after, reason}]
 
 // ══════════════════════════════════════════════
 // デフォルト定義
@@ -2297,6 +2299,92 @@ function countDataRows(d, regex){
     if(m){ const n=parseInt(m[1],10); if(n>max) max=n; }
   });
   return max+1;
+}
+
+  // data-k を日本語ラベルへ変換（変更履歴表示用）
+function labelOfKey(k) {
+  if (!k) return k;
+
+  // 成形条件: c_si_ri_(b1|b2|r|v|ok)
+  let m = k.match(/^c_(\d+)_(\d+)_(b1|b2|r|v|ok)$/);
+  if (m) {
+    const si = +m[1], ri = +m[2], sub = m[3];
+    const sec = COND_SECS[si];
+    const secName = sec ? sec.label : 'セクション' + si;
+    const rowName = (sec && sec.rows[ri] && sec.rows[ri].n) ? sec.rows[ri].n : '行' + (ri+1);
+    const subName = {b1:'基準値①', b2:'基準値②', r:'管理値', v:'記入欄', ok:'OK/NG'}[sub] || sub;
+    return `${secName} ${rowName} ${subName}`;
+  }
+
+  // 製品確認: pc{i}{f|l|sw|sp|m}_pcTb
+  m = k.match(/^pc(\d+)(sw|sp|f|l|m)_pcTb$/);
+  if (m) {
+    const i = +m[1], sub = m[2];
+    const item = PC_ITEMS[i];
+    const itemName = item ? item.c : '製品確認' + (i+1);
+    const subName = {sw:'目標', sp:'公差', f:'初物', l:'終物', m:'記入'}[sub] || sub;
+    return `製品確認 ${itemName} ${subName}`;
+  }
+
+  // 5M: m5_{i}{yn|ac}
+  m = k.match(/^m5_(\d+)(yn|ac)$/);
+  if (m) {
+    const i = +m[1], sub = m[2];
+    const name = M5[i] || ('5M' + (i+1));
+    const subName = sub === 'yn' ? '有無' : '対処方法';
+    return `5M変化点 ${name} ${subName}`;
+  }
+
+  // チョコ停: ch{ri}{c|d|t|s|p}
+  m = k.match(/^ch(\d+)(c|d|t|s|p)$/);
+  if (m) {
+    const ri = +m[1], sub = m[2];
+    const subName = {c:'停止内容', d:'日付', t:'時間', s:'捨てショット', p:'担当'}[sub] || sub;
+    return `チョコ停 ${ri+1}行目 ${subName}`;
+  }
+
+  // 注意事項: nt{ri}{c|s|ok}
+  m = k.match(/^nt(\d+)(c|s|ok)$/);
+  if (m) {
+    const ri = +m[1], sub = m[2];
+    const subName = {c:'内容', s:'基準値', ok:'判定'}[sub] || sub;
+    return `注意事項 ${ri+1}行目 ${subName}`;
+  }
+
+  // 金型安全確認
+  const safeMap = {
+    safe_cop:'金型安全 クランプ操作側', safe_cnop:'金型安全 クランプ反操作側',
+    safe_ej:'金型安全 E/J後退確認線', safe_lr:'金型安全 ロケートリング'
+  };
+  if (safeMap[k]) return safeMap[k];
+
+  return k;
+}
+
+  // 現在の data-k 値をすべて取得（差分比較用スナップショット）
+function takeSnapshot() {
+  const snap = {};
+  document.querySelectorAll('[data-k]').forEach(el => {
+    const k = el.getAttribute('data-k');
+    if (k.startsWith('m_')) return;  // マスター編集用は除外
+    snap[k] = el.value;
+  });
+  return snap;
+}
+
+// 前回スナップショットと現在値の差分を抽出
+function diffFromSnapshot() {
+  const now = takeSnapshot();
+  const diffs = [];
+  // 変更・追加
+  Object.keys(now).forEach(k => {
+    const before = LAST_SNAPSHOT[k] !== undefined ? LAST_SNAPSHOT[k] : '';
+    const after  = now[k];
+    if (String(before) !== String(after)) {
+      diffs.push({ field: labelOfKey(k), key: k, before: String(before), after: String(after) });
+    }
+  });
+  return diffs;
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
