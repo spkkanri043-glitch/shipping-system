@@ -154,6 +154,11 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 .hrec-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:16px;}
 .hist-empty{text-align:center;color:var(--tx3);padding:40px 20px;font-size:12px;}
 
+/* 履歴：3サイン揃った記録の色分け */
+.hrec-done{ border-color:var(--g); background:#f2fbf5; }
+.hrec-done:hover{ background:#e8f8ee; border-color:var(--g); }
+.hrec-done .hrec-req{ color:#1e8449; }
+
 /* loading spinner */
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -174,7 +179,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 #main-wrap.locked .card{ opacity:.97; }
 #lockBanner{ background:#fdecea; border:1px solid var(--r); color:#922; border-radius:6px; padding:8px 12px; margin-bottom:10px; display:none; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; }
 
-  /* ── 品番サジェスト ── */
+/* ── 品番サジェスト ── */
 .pn-suggest-wrap{ position:relative; }
 .pn-suggest{ position:absolute; left:0; right:0; top:100%; z-index:50; background:#fff; border:1px solid var(--blue2); border-top:none; border-radius:0 0 5px 5px; max-height:220px; overflow-y:auto; box-shadow:0 6px 16px rgba(0,0,0,.18); display:none; }
 .pn-suggest.show{ display:block; }
@@ -184,7 +189,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 .pn-sg-no{ font-weight:bold; color:var(--blue); }
 .pn-sg-name{ font-size:10px; color:var(--tx2); margin-top:1px; }
 .pn-sg-empty{ padding:9px 10px; font-size:11px; color:var(--tx3); }
-  
+
 /* ═══ 印刷スタイル ═══ */
 @media print {
   body { background: #fff !important; font-size: 10pt !important; color: #000 !important; }
@@ -445,6 +450,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
       <input type="text" id="psSearch" placeholder="品番・製品名で検索..."
         oninput="renderPartSelect()"
         style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:5px;font-size:12px;font-family:inherit;margin-bottom:12px;">
+      <div id="psTabs" style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--bd);margin-bottom:10px;scrollbar-width:none;"></div>
       <div id="psList"></div>
     </div>
     <div class="mf"><button class="btn btn-new" onclick="closeM('partSelectModal')">閉じる</button></div>
@@ -559,7 +565,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   </div>
 </div>
 
-<!-- ═══ 履歴モーダル（品番タブ付き） ═══ -->
+<!-- ═══ 履歴モーダル（取引先タブ付き） ═══ -->
 <div class="mo" id="histModal">
   <div class="md" style="max-width:860px;">
     <div class="mh">📂 成形記録 履歴<button class="mc-btn" onclick="closeM('histModal')">✕</button></div>
@@ -592,7 +598,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
         </div>
       </div>
 
-      <!-- 品番タブ -->
+      <!-- 取引先タブ -->
       <div style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--bd);margin-top:8px;padding:0 16px;scrollbar-width:none;" id="histTabs"></div>
 
       <!-- 記録リスト -->
@@ -669,8 +675,9 @@ const SIGNS = {mgr:null, sup:null, agg:null};
 
 // 品番+依頼番号ペア [{no:'', req:''}]
 let PN_PAIRS = [{no:'', req:''}];
-  let LOCKED = false;  // 確定（集計確認サイン済み）ロック状態
-  let MST_TAB = 'all';  // マスター一覧の取引先タブ
+let LOCKED = false;   // 確定（集計確認サイン済み）ロック状態
+let MST_TAB = 'all';  // マスター一覧の取引先タブ
+let PS_TAB = 'all';   // 品番選択の取引先タブ
 
 // ══════════════════════════════════════════════
 // デフォルト定義
@@ -717,7 +724,6 @@ const M5 = ['人','機械','材料','方法','金型'];
 // ══════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('recordDate').value = today();
-  // 新規作成時の担当者を設定
   STARTER = {name: CU.name, id: CU.id, loginId: CU.loginId};
   document.getElementById('operator').value = CU.name;
   COND_SECS  = deep(DEF_SECS);
@@ -773,14 +779,14 @@ function renderMstPns() {
     div.appendChild(row);
   });
 }
-  
+
 function addMstPn() { M_PNS.push(''); renderMstPns(); }
 function delMstPn(i) {
   if (M_PNS.length <= 1) { toast('品番は最低1つ必要です','warn'); return; }
   M_PNS.splice(i,1); renderMstPns();
 }
 
-  // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // 品番サジェスト（マスター登録画面）
 // ══════════════════════════════════════════════
 let PN_SG_ACTIVE = {};  // 各欄のキーボード選択中index
@@ -889,8 +895,6 @@ function hideMstSuggest(i) {
 
 // ══════════════════════════════════════════════
 // 成形条件テーブル描画
-// masterMode=true → 項目名編集可・公差編集可
-// masterMode=false → 項目名readonly・公差readonly
 // ══════════════════════════════════════════════
 function renderCondSecs(targetId, secs, masterMode, saved) {
   const body = document.getElementById(targetId);
@@ -944,13 +948,11 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
   const tr = document.createElement('tr');
   tr.id = `${prefix}tr-${si}-${ri}`;
 
-  // 項目名：マスターモードなら編集可
   const nameRo = masterMode ? '' : 'readonly';
-  // 管理値：マスターモードなら編集可（クラス変更）
   const rangeClass = masterMode ? 'master-range' : '';
 
   tr.innerHTML = `
-   <td style="width:130px;min-width:130px;"><input type="text" class="tx" value="${esc(row.n||'')}" ${nameRo}
+    <td style="width:130px;min-width:130px;"><input type="text" class="tx" value="${esc(row.n||'')}" ${nameRo}
       ${masterMode ? `oninput="${prefix==='m'?'M_COND_SECS':'COND_SECS'}[${si}].rows[${ri}].n=this.value"` : ''}
       ${!masterMode ? 'title="項目名はマスター管理から変更してください"' : ''}></td>
     <td><input type="number" value="${b1v}" data-k="${k}_b1"></td>
@@ -1030,7 +1032,6 @@ function toggleChip(i, checked) {
   const chip = document.getElementById('chip-'+i);
   chip.classList.toggle('on', checked);
   if (checked) {
-    // 末尾に追加
     const exists = M_COND_SECS.find(s=>s.key===DEF_SECS[i].key);
     if (!exists) M_COND_SECS.push(deep(DEF_SECS[i]));
   } else {
@@ -1135,11 +1136,9 @@ function addChocoRow(i){
   const tb=document.getElementById('chocoTb');
   const ri=i!==undefined?i:tb.rows.length;
   const tr=tb.insertRow();
-  // JST基準で初期日時を生成（PCのタイムゾーンに依存しない）
   const jstNow = new Date(Date.now() + 9*60*60*1000);
   const defDate = jstNow.toISOString().split('T')[0];
   const defTime = jstNow.toISOString().substring(11,16);
-  // 1行目 or 行追加ボタン（i===undefined）時は今の日時・ログイン名を自動入力
   const fillDef = (i===0 || i===undefined);
   tr.innerHTML=`
     <td><input type="text"   data-k="ch${ri}c" style="width:100%;border:none;font-size:11px;font-family:inherit;text-align:center;" placeholder="停止内容"></td>
@@ -1169,7 +1168,6 @@ function renderM5(){
   });
 }
 
-// 5M「有」選択時：対処方法欄をハイライト
 function onM5Change(i, sel) {
   const acEl = document.getElementById(`m5ac${i}`);
   if (!acEl) return;
@@ -1185,7 +1183,6 @@ function onM5Change(i, sel) {
   }
 }
 
-// 対処方法入力時：入力されたらハイライト解除
 function onM5ActionInput(i, inp) {
   const ynEl = document.querySelector(`[data-k="m5_${i}yn"]`);
   if (ynEl && ynEl.value === '有') {
@@ -1205,7 +1202,6 @@ function onM5ActionInput(i, inp) {
 function stamp(role, checked) {
   const labels={mgr:'管理者',sup:'監督者',agg:'集計確認'};
   if (checked) {
-    // 集計確認は「確定（ロック）」を伴うため確認を挟む
     if (role === 'agg') {
       const ok = confirm('「集計確認」を行うと、この記録は確定されて編集できなくなります。\n（ロック解除は admin／マスター管理者のみ可能）\n\n確定して保存しますか？');
       if (!ok) { document.getElementById('cb-agg').checked = false; return; }
@@ -1216,7 +1212,6 @@ function stamp(role, checked) {
     document.getElementById(`ss-${role}`).textContent=CU.name+' ✔';
     toast(CU.name+'が「'+labels[role]+'」で確認しました','ok');
 
-    // GASへサイン通知を送信
     if (GAS_URL) {
       const notifyData = {
         action:      'sendSign',
@@ -1232,7 +1227,6 @@ function stamp(role, checked) {
       gasPost(notifyData).catch(e => console.warn('サイン通知失敗:', e));
     }
 
-    // 集計確認時：保存して確定（saveRecord内でSIGNS.aggを見てロック）
     if (role === 'agg') { saveRecord(); }
   } else {
     SIGNS[role]=null;
@@ -1241,7 +1235,8 @@ function stamp(role, checked) {
     toast('確認を解除しました','warn');
   }
 }
-  // ══════════════════════════════════════════════
+
+// ══════════════════════════════════════════════
 // 確定ロック
 // ══════════════════════════════════════════════
 function isUnlockRole(){ return !!CU && (CU.role === 'admin' || CU.role === 'master'); }
@@ -1251,7 +1246,6 @@ function applyLock(locked){
   const wrap = document.getElementById('main-wrap');
   wrap.classList.toggle('locked', locked);
 
-  // 保存ボタンを無効化
   const saveBtn = document.querySelector('.btn-save');
   if (saveBtn){
     saveBtn.disabled = locked;
@@ -1259,7 +1253,6 @@ function applyLock(locked){
     saveBtn.style.cursor  = locked ? 'not-allowed' : '';
   }
 
-  // バナー表示
   const banner = document.getElementById('lockBanner');
   if (!banner) return;
   if (locked){
@@ -1280,7 +1273,6 @@ function applyLock(locked){
 function unlockRecord(){
   if (!isUnlockRole()){ toast('ロック解除の権限がありません', 'err'); return; }
   if (!confirm('ロックを解除して編集可能にします。\n「集計確認」サインは取り消され、修正後に再度確認が必要になります。\n\nよろしいですか？')) return;
-  // 集計確認サインを取消
   SIGNS.agg = null;
   document.getElementById('s-agg').textContent  = '-';
   document.getElementById('ss-agg').textContent = '';
@@ -1294,17 +1286,15 @@ function unlockRecord(){
 // ══════════════════════════════════════════════
 function goPortal() {
   window.close();
-  // window.close()が効かないブラウザ向けのフォールバック
   setTimeout(() => {
     alert('このタブを手動で閉じてください。\n（ポータルタブが隣にあります）');
   }, 300);
 }
 
 // ══════════════════════════════════════════════
-// 品番選択モーダル
+// 品番選択モーダル（取引先タブ付き）
 // ══════════════════════════════════════════════
 async function openPartSelect() {
-  // GASから最新のマスターを取得
   if (GAS_URL && PARTS.length === 0) {
     try {
       const r = await gasGet('listParts');
@@ -1316,24 +1306,58 @@ async function openPartSelect() {
     PARTS = JSON.parse(ls('seikei_part_masters') || '[]');
   }
   document.getElementById('psSearch').value = '';
+  PS_TAB = 'all';
   renderPartSelect();
   document.getElementById('partSelectModal').classList.add('show');
 }
 
 function renderPartSelect() {
   const q = document.getElementById('psSearch').value.toLowerCase();
-  const el = document.getElementById('psList');
-  const filtered = PARTS.filter(p => {
+
+  // 検索で母集合を絞る
+  const base = PARTS.filter(p => {
     const nos = (p.nos || [p.no || '']).join(' ');
     return !q || nos.toLowerCase().includes(q) || (p.name||'').toLowerCase().includes(q) || (p.mat||'').toLowerCase().includes(q);
   });
 
+  // 取引先タブ生成
+  const tabsEl = document.getElementById('psTabs');
+  if (tabsEl) {
+    const clientsMap = {};
+    base.forEach(p => {
+      const c = String(p.client || '').trim() || '__none__';
+      clientsMap[c] = (clientsMap[c] || 0) + 1;
+    });
+    const clientKeys = Object.keys(clientsMap).sort((a,b) => {
+      if (a === '__none__') return 1;
+      if (b === '__none__') return -1;
+      return a.localeCompare(b, 'ja');
+    });
+    if (PS_TAB !== 'all' && !clientKeys.includes(PS_TAB)) PS_TAB = 'all';
+
+    let th = `<button class="htab${PS_TAB==='all'?' on':''}" onclick="setPsTab('all')">すべて <span class="hbadge">${base.length}</span></button>`;
+    clientKeys.forEach(c => {
+      const label = c === '__none__' ? '未設定' : c;
+      const icon  = c === '__none__' ? '' : '🏢 ';
+      th += `<button class="htab${PS_TAB===c?' on':''}" onclick="setPsTab('${esc(c).replace(/'/g,"\\'")}')">${icon}${esc(label)} <span class="hbadge">${clientsMap[c]}</span></button>`;
+    });
+    tabsEl.innerHTML = th;
+  }
+
+  // タブで絞り込み
+  const filtered = base.filter(p => {
+    if (PS_TAB === 'all') return true;
+    const c = String(p.client || '').trim() || '__none__';
+    return c === PS_TAB;
+  });
+
+  const el = document.getElementById('psList');
   if (!filtered.length) {
-    el.innerHTML = '<div style="text-align:center;color:var(--tx3);padding:30px;font-size:12px;">📭 マスターが登録されていません<br><span style="font-size:10px;">⚙️ マスターボタンから品番を登録してください</span></div>';
+    el.innerHTML = '<div style="text-align:center;color:var(--tx3);padding:30px;font-size:12px;">📭 該当する品番がありません<br><span style="font-size:10px;">⚙️ マスターボタンから品番を登録してください</span></div>';
     return;
   }
 
-  el.innerHTML = filtered.map((p, i) => {
+  el.innerHTML = filtered.map((p) => {
     const nos   = (p.nos || [p.no || '']).join(' / ');
     const count = HIST.filter(r => {
       const rnos = (r.pnPairs ? r.pnPairs.map(x=>x.no) : [r.partNo||'']).join(' ');
@@ -1348,6 +1372,7 @@ function renderPartSelect() {
         <div class="ps-meta">
           ${p.mat ? '材料: '+esc(p.mat) : ''}
           ${p.machineNo ? ' ／ 号機: '+esc(p.machineNo) : ''}
+          ${p.client ? ' ／ 🏢 '+esc(p.client) : ''}
           ${count > 0 ? ' ／ 過去記録: <strong>'+count+'件</strong>' : ''}
         </div>
       </div>
@@ -1356,12 +1381,15 @@ function renderPartSelect() {
   }).join('');
 }
 
+function setPsTab(tab) {
+  PS_TAB = tab;
+  renderPartSelect();
+}
+
 function usePartMaster(i) {
   const m = PARTS[i];
   if (!m) { toast('マスターが見つかりません', 'err'); return; }
-  // 新規フォームにマスターを適用
   RID = null;
-  // 新規作成なので現在のユーザーがSTARTER
   STARTER = { name: CU.name, id: CU.id, loginId: CU.loginId };
   document.getElementById('operator').value = CU.name;
   PN_PAIRS = (m.nos || [m.no || '']).map(no => ({no, req:''}));
@@ -1405,7 +1433,6 @@ function usePartMaster(i) {
 // 印刷・PDF出力
 // ══════════════════════════════════════════════
 function printForm() {
-  // 印刷前に成形依頼番号確認
   const hasReq = PN_PAIRS.some(p => p.req.trim());
   if (!hasReq) {
     if (!confirm('成形依頼番号が未入力です。このまま印刷しますか？')) return;
@@ -1414,7 +1441,7 @@ function printForm() {
 }
 
 // ══════════════════════════════════════════════
-// 製品マスタ連携（品番 → 製品名・取引先の自動補完）
+// 製品マスタ連携
 // ══════════════════════════════════════════════
 let PRODUCT_CACHE = null;
 
@@ -1425,7 +1452,6 @@ async function fetchProductMasterAll() {
     return null;
   }
   try {
-    // 複数のaction名を試す
     for (const action of ['list', 'getProducts', 'listProducts']) {
       try {
         const r = await fetch(PRODUCT_GAS_URL + '?action=' + action);
@@ -1451,14 +1477,11 @@ async function fetchFromProductMaster() {
   const products = await fetchProductMasterAll();
   if (!products) { statusEl.textContent = '❌ 製品マスタに接続できません'; return; }
 
-  // 複数キー名に対応した値取得
   const get = (obj, ...keys) => {
     for (const k of keys) { if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim()) return String(obj[k]).trim(); }
     return '';
   };
 
-  // 品番で検索（完全一致優先、次に前方一致）
-  // found に「入力index・入力値・ヒット製品・完全品番」を保持
   const found = [];
   M_PNS.forEach((no, idx) => {
     const no_t = (no || '').trim();
@@ -1478,7 +1501,6 @@ async function fetchFromProductMaster() {
     return;
   }
 
-  // 品番欄を完全品番へ上書き
   let replaced = 0;
   found.forEach(f => {
     if (f.fullNo && f.fullNo !== M_PNS[f.idx]) {
@@ -1488,7 +1510,6 @@ async function fetchFromProductMaster() {
   });
   if (replaced > 0) renderMstPns();
 
-  // 製品名・取引先は先頭ヒットを採用（空欄の場合のみ）
   const first = found[0].product;
   const productName = get(first, 'productName','製品名','name','product_name','itemName');
   const client      = get(first, 'basicClient','基本取引先','client','customer','clientName','取引先');
@@ -1510,7 +1531,6 @@ async function openMasterModal() {
   M_COND_SECS = deep(DEF_SECS);
   M_PC_ITEMS  = deep(DEF_PC);
   M_PNS = [''];
-  // フォームリセット
   ['m-productName','m-material','m-mbName','m-mbRatio','m-client','m-machineNo','m-condNo','m-dryTemp','m-dryTime','m-moldMachine','m-takeMachine','m-boxMachine'].forEach(id=>{
     const e=document.getElementById(id); if(e) e.value='';
   });
@@ -1537,22 +1557,19 @@ async function loadMasters() {
 }
 
 function renderMstList() {
-  // 取引先ごとにタブを生成（空は「未設定」）
   const tabsEl = document.getElementById('mst-tabs');
   if (tabsEl) {
     const clientsMap = {};
-   PARTS.forEach(p => {
+    PARTS.forEach(p => {
       const c = String(p.client || '').trim() || '__none__';
       clientsMap[c] = (clientsMap[c] || 0) + 1;
     });
-    // 並び順：取引先名（未設定は最後）
     const clientKeys = Object.keys(clientsMap).sort((a, b) => {
       if (a === '__none__') return 1;
       if (b === '__none__') return -1;
       return a.localeCompare(b, 'ja');
     });
 
-    // 現在のタブが存在しなくなったら all に戻す
     if (MST_TAB !== 'all' && !clientKeys.includes(MST_TAB)) MST_TAB = 'all';
 
     let tabsHtml = `<button class="htab${MST_TAB==='all'?' on':''}" onclick="setMstTab('all')">すべて <span class="hbadge">${PARTS.length}</span></button>`;
@@ -1564,8 +1581,7 @@ function renderMstList() {
     tabsEl.innerHTML = tabsHtml;
   }
 
-  // タブで絞り込み
- const filtered = PARTS.filter(p => {
+  const filtered = PARTS.filter(p => {
     if (MST_TAB === 'all') return true;
     const c = String(p.client || '').trim() || '__none__';
     return c === MST_TAB;
@@ -1574,7 +1590,7 @@ function renderMstList() {
   const el = document.getElementById('mst-list');
   el.innerHTML = filtered.length
     ? filtered.map(p => {
-        const realIdx = PARTS.indexOf(p);  // 元配列のindexで読込・削除
+        const realIdx = PARTS.indexOf(p);
         return `<div style="display:flex;align-items:center;gap:8px;padding:5px 6px;border-bottom:1px solid var(--bd);">
           <div style="flex:1;"><div style="font-weight:bold;font-size:12px;">${esc(p.nos&&p.nos.join?p.nos.join(' / '):p.no||'')}</div><div style="font-size:10px;color:var(--tx2);">${esc(p.name)}${p.mat?' ／ '+esc(p.mat):''}${p.client?' ／ 🏢 '+esc(p.client):''}</div></div>
           <button onclick="loadMasterToModal(${realIdx})" style="padding:3px 8px;font-size:10px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;">読込</button>
@@ -1623,9 +1639,7 @@ async function savePartMaster() {
   const nos=M_PNS.filter(n=>n.trim());
   if(!name||!nos.length){toast('製品名と品番は必須です','err');return;}
 
-  // 成形条件の現在値を保存
   const condData=collectCondData('m');
-  // condData を各rowに反映（基準値・管理値）
   M_COND_SECS.forEach((sec,si)=>{
     sec.rows.forEach((row,ri)=>{
       const k=`m_${si}_${ri}`;
@@ -1635,7 +1649,6 @@ async function savePartMaster() {
       if(condData[k+'_n'] !==undefined) row.n =condData[k+'_n']||row.n;
     });
   });
-  // 項目名を直接DOMから取得
   M_COND_SECS.forEach((sec,si)=>{
     sec.rows.forEach((row,ri)=>{
       const tr=document.getElementById(`mtr-${si}-${ri}`);
@@ -1643,7 +1656,6 @@ async function savePartMaster() {
     });
   });
 
-  // 製品確認の管理値をDOMから取得
   M_PC_ITEMS.forEach((item,i)=>{
     const sw=document.querySelector(`[data-k="pc${i}sw_m-pcTb"]`);
     const sp=document.querySelector(`[data-k="pc${i}sp_m-pcTb"]`);
@@ -1663,13 +1675,11 @@ async function savePartMaster() {
     prodCheck:deep(M_PC_ITEMS),
   };
 
-  // ローカル保存
   const idx=PARTS.findIndex(p=>(p.nos?p.nos[0]:p.no)===nos[0]);
   if(idx>=0) PARTS[idx]=m; else PARTS.unshift(m);
   lsSet('seikei_part_masters', PARTS);
   renderMstList();
 
-  // GAS送信
   if(GAS_URL){
     try{
       const r=await gasPost({action:'savePart',data:m});
@@ -1692,12 +1702,8 @@ async function delMaster(no) {
   toast('削除しました','ok');
 }
 
-// ══════════════════════════════════════════════
-// マスター読込 → 日々フォームへ
-// ══════════════════════════════════════════════
 function loadMaster(i) {
   const m=PARTS[i];
-  // 品番+依頼番号ペアを生成（依頼番号は空）
   PN_PAIRS=(m.nos||[m.no||'']).map(no=>({no,req:''}));
   renderPnPairs();
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
@@ -1705,13 +1711,13 @@ function loadMaster(i) {
   sv('material',    m.mat);
   sv('mbName',      m.mb);
   sv('mbRatio',     m.mbRatio);
-  sv('machineNo',   m.machineNo);   // マスターから自動入力（readonly）
-  sv('condNo',      m.condNo);      // マスターから自動入力（readonly）
-  sv('dryTemp',     m.dryTemp);     // マスターから自動入力（readonly）
-  sv('dryTime',     m.dryTime);     // マスターから自動入力（readonly）
-  sv('moldMachine', m.moldMachine); // マスターから自動入力（readonly）
-  sv('takeMachine', m.takeMachine); // マスターから自動入力（readonly）
-  sv('boxMachine',  m.boxMachine);  // マスターから自動入力（readonly）
+  sv('machineNo',   m.machineNo);
+  sv('condNo',      m.condNo);
+  sv('dryTemp',     m.dryTemp);
+  sv('dryTime',     m.dryTime);
+  sv('moldMachine', m.moldMachine);
+  sv('takeMachine', m.takeMachine);
+  sv('boxMachine',  m.boxMachine);
   if(m.sections&&m.sections.length){COND_SECS=deep(m.sections);renderCondSecs('condBody',COND_SECS,false,null);}
   if(m.prodCheck&&m.prodCheck.length){PC_ITEMS=deep(m.prodCheck);renderPC('pcTb',PC_ITEMS,false);}
   closeM('masterModal');
@@ -1723,7 +1729,6 @@ function loadMaster(i) {
 // ══════════════════════════════════════════════
 function collectData() {
   const condData=collectCondData('c');
-  // condSecsにDOMの値を反映
   COND_SECS.forEach((sec,si)=>{
     sec.rows.forEach((row,ri)=>{
       const tr=document.getElementById(`ctr-${si}-${ri}`);
@@ -1733,16 +1738,14 @@ function collectData() {
   const data={
     id:RID||Date.now().toString(),
     savedAt: toJST(new Date()),
-    savedBy:CU.id, savedByName:CU.name,  // 最後に保存した人
+    savedBy:CU.id, savedByName:CU.name,
     productName:gv('productName'),
     pnPairs:deep(PN_PAIRS),
     partNo:PN_PAIRS[0]?.no||'',
     reqNo:PN_PAIRS[0]?.req||'',
     recordDate:gv('recordDate'), machineNo:gv('machineNo'), condNo:gv('condNo'),
-    // operatorは最初の作成者（STARTER）を維持
     operator:   STARTER ? STARTER.name    : CU.name,
     operatorId: STARTER ? STARTER.id      : CU.id,
-    // 取引先（マスターから取得）
     client: (() => { const m=PARTS.find(p=>(p.nos||[p.no]).some(n=>PN_PAIRS.some(pp=>pp.no===n))); return m?.client||''; })(),
     material:gv('material'), mbName:gv('mbName'), mbRatio:gv('mbRatio'),
     drying:gv('dryTemp')&&gv('dryTime')?gv('dryTemp')+'℃・'+gv('dryTime')+'H':'',
@@ -1765,13 +1768,11 @@ function fillForm(d) {
   const sv2=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
   ['productName','recordDate','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','takeMachine','boxMachine'].forEach(id=>sv2(id,d[id]));
 
-  // 担当者（最初の作成者）を復元 → 他の人が開いても上書きしない
   const origOperator = d.operator || d.operatorId || '';
   const origOperatorId = d.operatorId || '';
   STARTER = { name: origOperator, id: origOperatorId, loginId: origOperatorId };
-  sv2('operator', origOperator); // 保存済みの担当者名を表示
+  sv2('operator', origOperator);
 
-  // 成形スタートサインも最初の作成者を表示
   const startSign = d.signs && d.signs.start ? d.signs.start : null;
   document.getElementById('s-start').textContent  = startSign ? startSign.name : origOperator;
   document.getElementById('ss-start').textContent = startSign ? startSign.name + ' ✔' : origOperator + ' ✔';
@@ -1781,12 +1782,10 @@ function fillForm(d) {
   if(d.condSections){COND_SECS=deep(d.condSections);}
   renderCondSecs('condBody',COND_SECS,false,d);
 
-  // 動的テーブル（注意事項・チョコ停・5M）を保存件数で再描画
-  // → 前の記録の行が残る／行数超過分が復元漏れするのを防ぐ
   const nNotes = countDataRows(d, /^nt(\d+)(?:c|s|ok)$/);
   const nChoco = countDataRows(d, /^ch(\d+)(?:c|d|t|s|p)$/);
   renderNotes(nNotes > 0 ? nNotes : 3);
-  renderChocos(nChoco);            // 0件なら空（＋行追加で足せる）
+  renderChocos(nChoco);
   renderM5();
 
   setTimeout(()=>{
@@ -1794,7 +1793,6 @@ function fillForm(d) {
       const k=el.getAttribute('data-k');
       if(d[k]!==undefined){el.value=d[k];if(el.tagName==='SELECT')upOn(el);}
     });
-    // 5M「有」の行は対処方法欄をハイライト（フォーカスは移動しない）
     M5.forEach((label,i)=>{
       const ynEl=document.querySelector(`[data-k="m5_${i}yn"]`);
       const acEl=document.getElementById(`m5ac${i}`);
@@ -1807,7 +1805,6 @@ function fillForm(d) {
 
   if(d.prodCheckItems){PC_ITEMS=deep(d.prodCheckItems);renderPC('pcTb',PC_ITEMS,false);}
 
-  // サイン表示を一旦リセットしてから復元（前の記録の✔が残らないように）
   ['mgr','sup','agg'].forEach(role=>{
     SIGNS[role]=null;
     document.getElementById(`s-${role}`).textContent='-';
@@ -1827,16 +1824,16 @@ function fillForm(d) {
   }
   setStatus('読込済: '+(d.pnPairs?d.pnPairs.map(p=>p.no).join('/'):d.partNo||d.id), 'ok');
   document.getElementById('sid').textContent='ID: '+d.id;
-  applyLock(!!SIGNS.agg);   // 集計確認済みならロック表示
+  applyLock(!!SIGNS.agg);
 }
+
 // ══════════════════════════════════════════════
 // バリデーション
 // ══════════════════════════════════════════════
 function validateForm() {
-  const errors   = []; // 必須エラー（保存ブロック）
-  const warnings = []; // 警告（確認後に保存可）
+  const errors   = [];
+  const warnings = [];
 
-  // ① 5M変化点：「有」なのに対処方法が空
   const M5_LABELS = ['人','機械','材料','方法','金型'];
   M5_LABELS.forEach((label, i) => {
     const ynEl = document.querySelector(`[data-k="m5_${i}yn"]`);
@@ -1844,7 +1841,6 @@ function validateForm() {
     if (ynEl && acEl) {
       if (ynEl.value === '有' && !acEl.value.trim()) {
         errors.push(`5M変化点「${label}」が「有」になっていますが、対処方法が未記入です。`);
-        // 視覚的にハイライト
         acEl.style.outline = '2px solid var(--r)';
         acEl.style.background = '#fff5f5';
       } else {
@@ -1854,7 +1850,6 @@ function validateForm() {
     }
   });
 
-  // ② 成形条件の記入欄：マスターに基準値が設定されているのに記入欄が空
   let emptyCondCount = 0;
   COND_SECS.forEach((sec, si) => {
     sec.rows.forEach((row, ri) => {
@@ -1891,10 +1886,8 @@ async function saveRecord() {
   const hasReq = PN_PAIRS.some(p=>p.req.trim());
   if(!hasReq){toast('成形依頼番号を少なくとも1つ入力してください','err');return;}
 
-  // バリデーション
   const { errors, warnings } = validateForm();
 
-  // 必須エラーがあれば保存不可
   if (errors.length > 0) {
     alert('【保存できません】\n\n' + errors.join('\n'));
     const firstErrEl = document.querySelector('[style*="outline: 2px solid var(--r)"]');
@@ -1902,7 +1895,6 @@ async function saveRecord() {
     return;
   }
 
-  // 警告があれば確認ダイアログ
   if (warnings.length > 0) {
     const ok = confirm('【確認】\n\n' + warnings.join('\n') + '\n\nこのまま保存しますか？');
     if (!ok) {
@@ -1913,7 +1905,6 @@ async function saveRecord() {
   }
 
   const data=collectData(); RID=data.id;
-  // ローカル保存
   const list=JSON.parse(ls('seikei_records')||'[]');
   const idx=list.findIndex(r=>r.id===data.id);
   if(idx>=0)list[idx]=data;else list.unshift(data);
@@ -1936,9 +1927,9 @@ async function saveRecord() {
     setStatus('⚠️ ローカル保存済み（GAS未設定）','warn');
   }
 
-  // 集計確認サイン済みなら保存完了後に確定（ロック）
   if (SIGNS.agg) applyLock(true);
 }
+
 // ══════════════════════════════════════════════
 // 新規
 // ══════════════════════════════════════════════
@@ -1946,7 +1937,6 @@ function newForm(){
   if(!confirm('入力内容をクリアして新規作成しますか？'))return;
   RID=null;
   PN_PAIRS=[{no:'',req:''}]; renderPnPairs();
-  // 新規作成なので現在のユーザーがSTARTER
   STARTER = { name: CU.name, id: CU.id, loginId: CU.loginId };
   document.getElementById('operator').value = CU.name;
   document.getElementById('s-start').textContent  = CU.name;
@@ -1968,9 +1958,9 @@ function newForm(){
 }
 
 // ══════════════════════════════════════════════
-// 履歴（品番タブ・折りたたみ・フィルター）
+// 履歴（取引先タブ・品番グループ・色分け・フィルター）
 // ══════════════════════════════════════════════
-let HIST_TAB = 'all';
+let HIST_TAB = 'all';      // 取引先タブ
 let HIST_EXPANDED = {};
 
 function clearHistFilters() {
@@ -1997,7 +1987,6 @@ async function openHistory(){
   HIST.sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
   HIST_TAB='all';
   HIST_EXPANDED={};
-  // 取引先フィルターを動的生成
   const clients = [...new Set(PARTS.map(p=>p.client||'').filter(Boolean))];
   const clientSel = document.getElementById('histFilterClient');
   clientSel.innerHTML = '<option value="">取引先: すべて</option>'
@@ -2032,9 +2021,12 @@ function getHistFiltered() {
     } else if (sign && !r.signs) {
       matchSign = false;
     }
-    // 取引先フィルター
     const matchClient = !client || (r.client||'') === client;
-    const matchTab = HIST_TAB==='all' || nos.includes(HIST_TAB);
+    // 取引先タブで絞り込み（マスター経由で取引先を解決）
+    const rnos2  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']);
+    const masterT = PARTS.find(p => (p.nos||[p.no]).some(n => rnos2.includes(n)));
+    const rClientT = String(r.client || masterT?.client || '').trim() || '__none__';
+    const matchTab = HIST_TAB==='all' || rClientT === HIST_TAB;
     return matchQ && matchSign && matchClient && matchTab;
   });
 }
@@ -2053,29 +2045,45 @@ function groupByPartNo(records) {
   return groups;
 }
 
+// 取引先タブを生成
 function renderHistTabs() {
-  const groups = groupByPartNo(HIST.filter(r => {
-    const q = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
+  const q = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
+  const base = HIST.filter(r => {
     if (!q) return true;
     const nos  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
     const reqs = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
     return nos.toLowerCase().includes(q)||(r.productName||'').toLowerCase().includes(q)||reqs.toLowerCase().includes(q)||(r.machineNo||'').toLowerCase().includes(q)||(r.material||'').toLowerCase().includes(q);
-  }));
-  const tabsEl = document.getElementById('histTabs');
-  tabsEl.innerHTML = '';
-  const allBtn = document.createElement('button');
-  allBtn.className = 'htab' + (HIST_TAB==='all'?' on':'');
-  allBtn.innerHTML = `すべて <span class="hbadge">${HIST.length}</span>`;
-  allBtn.onclick = () => { HIST_TAB='all'; renderHistTabs(); };
-  tabsEl.appendChild(allBtn);
-  Object.entries(groups).sort((a,b)=>b[1].records.length-a[1].records.length).forEach(([key, g]) => {
-    const btn = document.createElement('button');
-    btn.className = 'htab' + (HIST_TAB===key?' on':'');
-    btn.innerHTML = `${esc(key)} <span class="hbadge">${g.records.length}</span>`;
-    btn.onclick = () => { HIST_TAB=key; renderHistTabs(); };
-    tabsEl.appendChild(btn);
   });
+
+  // 取引先ごとに件数集計（マスター経由で解決、空は未設定）
+  const clientsMap = {};
+  base.forEach(r => {
+    const rnos = (r.pnPairs?r.pnPairs.map(x=>x.no):[r.partNo||'']);
+    const master = PARTS.find(p => (p.nos||[p.no]).some(n => rnos.includes(n)));
+    const c = String(r.client || master?.client || '').trim() || '__none__';
+    clientsMap[c] = (clientsMap[c] || 0) + 1;
+  });
+  const clientKeys = Object.keys(clientsMap).sort((a,b) => {
+    if (a === '__none__') return 1;
+    if (b === '__none__') return -1;
+    return a.localeCompare(b, 'ja');
+  });
+  if (HIST_TAB !== 'all' && !clientKeys.includes(HIST_TAB)) HIST_TAB = 'all';
+
+  const tabsEl = document.getElementById('histTabs');
+  let html = `<button class="htab${HIST_TAB==='all'?' on':''}" onclick="setHistTab('all')">すべて <span class="hbadge">${base.length}</span></button>`;
+  clientKeys.forEach(c => {
+    const label = c === '__none__' ? '未設定' : c;
+    const icon  = c === '__none__' ? '' : '🏢 ';
+    html += `<button class="htab${HIST_TAB===c?' on':''}" onclick="setHistTab('${esc(c).replace(/'/g,"\\'")}')">${icon}${esc(label)} <span class="hbadge">${clientsMap[c]}</span></button>`;
+  });
+  tabsEl.innerHTML = html;
   renderHistList();
+}
+
+function setHistTab(tab) {
+  HIST_TAB = tab;
+  renderHistTabs();
 }
 
 function renderHistList(){
@@ -2086,52 +2094,37 @@ function renderHistList(){
     el.innerHTML = '<div class="hist-empty">📭 記録がありません</div>';
     return;
   }
-  if (HIST_TAB === 'all') {
-    const groups = groupByPartNo(filtered);
-    let html = '';
-    Object.entries(groups).forEach(([key, g]) => {
-      const isExp = !!HIST_EXPANDED[key];
-      const latest = g.records[0];
-      const safeKey = key.replace(/'/g, "\\'");
-      const mst = PARTS.find(p => (p.nos||[p.no]).some(n => key.split('/').includes(n)));
-      const client = mst ? (mst.client||'') : '';
-      const groupColors = ['#1a3a6b','#2955a0','#1a6896','#16537e'];
-      const groupIdx = Object.keys(groups).indexOf(key);
-      const hdrColor = groupColors[groupIdx % groupColors.length];
-      html += '<div style="margin-bottom:16px;border:2px solid ' + hdrColor + ';border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">'
-        + '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:' + hdrColor + ';">'
-          + '<div style="flex:1;min-width:0;">'
-            + '<div style="font-weight:bold;font-size:13px;color:#fff;">📦 ' + esc(key) + '</div>'
-            + '<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:1px;">' + esc(g.name) + (client ? ' ／ 🏢 ' + esc(client) : '') + '</div>'
-          + '</div>'
-          + '<span style="font-size:10px;color:rgba(255,255,255,.6);white-space:nowrap;">' + g.records.length + '件</span>'
-          + '<button onclick="newFromMaster(\'' + safeKey + '\')" style="padding:4px 10px;font-size:11px;border:none;border-radius:4px;background:#27ae60;color:#fff;cursor:pointer;font-weight:bold;white-space:nowrap;">＋ 新規作成</button>'
+  // 取引先タブで絞った中を、品番グループで表示
+  const groups = groupByPartNo(filtered);
+  let html = '';
+  Object.entries(groups).forEach(([key, g]) => {
+    const isExp = !!HIST_EXPANDED[key];
+    const latest = g.records[0];
+    const safeKey = key.replace(/'/g, "\\'");
+    const mst = PARTS.find(p => (p.nos||[p.no]).some(n => key.split('/').includes(n)));
+    const client = mst ? (mst.client||'') : '';
+    const groupColors = ['#1a3a6b','#2955a0','#1a6896','#16537e'];
+    const groupIdx = Object.keys(groups).indexOf(key);
+    const hdrColor = groupColors[groupIdx % groupColors.length];
+    html += '<div style="margin-bottom:16px;border:2px solid ' + hdrColor + ';border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">'
+      + '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:' + hdrColor + ';">'
+        + '<div style="flex:1;min-width:0;">'
+          + '<div style="font-weight:bold;font-size:13px;color:#fff;">📦 ' + esc(key) + '</div>'
+          + '<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:1px;">' + esc(g.name) + (client ? ' ／ 🏢 ' + esc(client) : '') + '</div>'
         + '</div>'
-        + '<div style="padding:8px 8px 0;">' + histRecordCard(latest) + '</div>'
-        + (g.records.length > 1
-          ? '<button onclick="toggleHistGroup(\'' + safeKey + '\')" style="width:100%;padding:7px;font-size:11px;background:' + (isExp?'#eef2f9':'#f8f9fc') + ';border:none;border-top:1px solid #dce4f0;cursor:pointer;color:#5a6a85;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;">'
-            + (isExp ? '▲ 閉じる' : '▽ 過去の記録を見る（あと' + (g.records.length-1) + '件）')
-            + '</button>'
-            + (isExp ? '<div style="padding:0 8px 8px;">' + g.records.slice(1).map(r => histRecordCard(r)).join('') + '</div>' : '')
-          : '<div style="height:8px;"></div>')
-        + '</div>';
-    });
-    el.innerHTML = html;
-  } else {
-    const master = PARTS.find(p => (p.nos||[p.no]).some(n => HIST_TAB.split('/').includes(n)));
-    const safeTab = HIST_TAB.replace(/'/g, "\'");
-    const masterName = master ? esc(master.name||'') : '';
-    const masterClient = master ? (master.client||'') : '';
-    const newBtn = '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--sec);border-radius:5px;margin-bottom:10px;border:1px solid var(--bd);">'
-      + '<div>'
-        + '<span style="font-weight:bold;font-size:12px;color:var(--blue);">📦 ' + esc(HIST_TAB) + '</span>'
-        + (masterName ? '<span style="font-size:11px;color:var(--tx2);margin-left:8px;">' + masterName + '</span>' : '')
-        + (masterClient ? '<span style="font-size:11px;color:var(--blue2);margin-left:6px;">🏢 ' + esc(masterClient) + '</span>' : '')
+        + '<span style="font-size:10px;color:rgba(255,255,255,.6);white-space:nowrap;">' + g.records.length + '件</span>'
+        + '<button onclick="newFromMaster(\'' + safeKey + '\')" style="padding:4px 10px;font-size:11px;border:none;border-radius:4px;background:#27ae60;color:#fff;cursor:pointer;font-weight:bold;white-space:nowrap;">＋ 新規作成</button>'
       + '</div>'
-      + '<button onclick="newFromMaster(\'' + safeTab + '\')" style="padding:5px 14px;font-size:11px;font-weight:bold;border:none;border-radius:4px;background:var(--g);color:#fff;cursor:pointer;">＋ この品番で新規作成</button>'
+      + '<div style="padding:8px 8px 0;">' + histRecordCard(latest) + '</div>'
+      + (g.records.length > 1
+        ? '<button onclick="toggleHistGroup(\'' + safeKey + '\')" style="width:100%;padding:7px;font-size:11px;background:' + (isExp?'#eef2f9':'#f8f9fc') + ';border:none;border-top:1px solid #dce4f0;cursor:pointer;color:#5a6a85;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;">'
+          + (isExp ? '▲ 閉じる' : '▽ 過去の記録を見る（あと' + (g.records.length-1) + '件）')
+          + '</button>'
+          + (isExp ? '<div style="padding:0 8px 8px;">' + g.records.slice(1).map(r => histRecordCard(r)).join('') + '</div>' : '')
+        : '<div style="height:8px;"></div>')
       + '</div>';
-    el.innerHTML = newBtn + filtered.map(r => histRecordCard(r)).join('');
-  }
+  });
+  el.innerHTML = html;
 }
 
 function toggleHistGroup(key) {
@@ -2148,7 +2141,6 @@ function histRecordCard(r) {
   };
   const nos    = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).filter(Boolean).join(' / ');
   const reqs   = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).filter(Boolean).join(' / ');
-  // savedAtをJST表示に変換
   const savedAtJST = (() => {
     try {
       const d = new Date(r.savedAt||'');
@@ -2158,10 +2150,15 @@ function histRecordCard(r) {
   })();
   const date   = savedAtJST.substring(0, 10);
   const time   = savedAtJST.substring(11, 16);
-  const safeId = String(r.id||'').replace(/'/g,"\'");
+  const safeId = String(r.id||'').replace(/'/g,"\\'");
   const master  = PARTS.find(p => (p.nos||[p.no]).some(n => nos.split(' / ').includes(n)));
   const client  = r.client || master?.client || '';
   const signs = r.signs || {};
+  // 3サイン揃ったら色分け＋完了バッジ
+  const allSigned = !!(signs.mgr && signs.sup && signs.agg);
+  const doneBadge = allSigned
+    ? '<span style="font-size:9px;background:#1e8449;color:#fff;border-radius:3px;padding:1px 6px;font-weight:bold;">✅ 確認完了</span>'
+    : '';
   const signBadges = [
     signs.mgr ? '<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">管理者✔</span>' : '',
     signs.sup ? '<span style="font-size:9px;background:#d5f5e3;color:#1e8449;border-radius:3px;padding:1px 5px;font-weight:bold;">監督者✔</span>' : '',
@@ -2171,14 +2168,14 @@ function histRecordCard(r) {
   const operator    = safeStr(r.operator || r.operatorId || r.savedByName);
   const machineNo   = safeStr(r.machineNo);
   const recordDate  = safeStr(r.recordDate);
-  return '<div class="hrec" onclick="loadRecord(\'' + safeId + '\')">'
+  return '<div class="hrec' + (allSigned ? ' hrec-done' : '') + '" onclick="loadRecord(\'' + safeId + '\')">'
     + '<div class="hrec-top">'
       + '<div style="flex:1;min-width:0;">'
         + '<div class="hrec-req">📋 ' + esc(reqs||'依頼番号なし')
           + '<span style="font-size:11px;font-weight:normal;color:var(--tx2);margin-left:6px;">' + esc(productName) + '</span>'
           + (client ? '<span style="font-size:10px;color:var(--blue2);margin-left:6px;">🏢 ' + esc(client) + '</span>' : '')
         + '</div>'
-        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;">' + signBadges + '</div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;">' + doneBadge + signBadges + '</div>'
       + '</div>'
       + '<div class="hrec-date" style="flex-shrink:0;">' + esc(date) + '<br>' + esc(time) + '</div>'
     + '</div>'
@@ -2192,9 +2189,7 @@ function histRecordCard(r) {
     + '</div>';
 }
 
-
 function loadRecord(id){
-  // IDを文字列・数値両方で検索
   const sid = String(id);
   const r = HIST.find(x => String(x.id) === sid);
   if(!r){
@@ -2206,15 +2201,12 @@ function loadRecord(id){
   toast('📂 記録を読み込みました','ok');
 }
 
-// 品番マスターから新規記録書を作成
 function newFromMaster(partNoKey) {
   const nos = partNoKey.split('/');
   const master = PARTS.find(p => (p.nos||[p.no]).some(n => nos.includes(n)));
   if (!master) { toast('マスターデータが見つかりません', 'err'); return; }
 
-  // 新規フォームをクリア
   RID = null;
-  // 品番+依頼番号ペアを生成（依頼番号は空）
   PN_PAIRS = (master.nos||[master.no||'']).map(no => ({no, req:''}));
   renderPnPairs();
 
@@ -2241,7 +2233,6 @@ function newFromMaster(partNoKey) {
     renderPC('pcTb', PC_ITEMS, false);
   }
 
-  // サインリセット
   ['mgr','sup','agg'].forEach(role => {
     SIGNS[role] = null;
     document.getElementById(`s-${role}`).textContent = '-';
@@ -2253,7 +2244,6 @@ function newFromMaster(partNoKey) {
   applyLock(false);
   setStatus('新規作成モード（品番: ' + partNoKey + '）', 'ok');
   closeM('histModal');
-  // ページトップへスクロール
   window.scrollTo({top:0, behavior:'smooth'});
   toast('📦 品番「' + partNoKey + '」で新規作成します。依頼番号を入力してください。', 'ok');
 }
@@ -2274,12 +2264,10 @@ async function gasPost(body){
 // UI HELPERS
 // ══════════════════════════════════════════════
 function today(){
-  // JST基準の当日（UTC変換による前日ズレを防ぐ）
   const jst = new Date(Date.now() + 9*60*60*1000);
   return jst.toISOString().split('T')[0];
 }
 
-  // 日本時間（JST）でISO形式文字列を生成（savedAt用）
 function toJST(date) {
   const jst = new Date(date.getTime() + 9*60*60*1000);
   return jst.toISOString().replace('Z', '+09:00');
