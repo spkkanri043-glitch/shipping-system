@@ -243,6 +243,9 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 
   /* 乾燥（℃×H）が窮屈なので縦に */
   .fld .wc{ flex-wrap:wrap; }
+  /* 乾燥（℃×H）の横並びがはみ出すので折り返し許可＋最小幅を下げる */
+  #dryTemp, #dryTime{ min-width:0; }
+  .fld > div[style*="display:flex"]{ flex-wrap:wrap; }
 
   /* ── テーブルはみ出し対策：横スクロール枠にする ── */
   /* 成形条件（.dsec内の .dt） */
