@@ -2045,6 +2045,12 @@ function today(){
   return jst.toISOString().split('T')[0];
 }
 
+  // 日本時間（JST）でISO形式文字列を生成（savedAt用）
+function toJST(date) {
+  const jst = new Date(date.getTime() + 9*60*60*1000);
+  return jst.toISOString().replace('Z', '+09:00');
+}
+
 function upOn(sel){
   sel.className='on';
   if(sel.value==='OK'||sel.value==='○')sel.classList.add('ok');
