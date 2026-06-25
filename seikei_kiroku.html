@@ -173,6 +173,17 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 #main-wrap.locked .card, #main-wrap.locked .two{ pointer-events:none; }
 #main-wrap.locked .card{ opacity:.97; }
 #lockBanner{ background:#fdecea; border:1px solid var(--r); color:#922; border-radius:6px; padding:8px 12px; margin-bottom:10px; display:none; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; }
+
+  /* ── 品番サジェスト ── */
+.pn-suggest-wrap{ position:relative; }
+.pn-suggest{ position:absolute; left:0; right:0; top:100%; z-index:50; background:#fff; border:1px solid var(--blue2); border-top:none; border-radius:0 0 5px 5px; max-height:220px; overflow-y:auto; box-shadow:0 6px 16px rgba(0,0,0,.18); display:none; }
+.pn-suggest.show{ display:block; }
+.pn-sg-item{ padding:7px 10px; font-size:12px; cursor:pointer; border-bottom:1px solid var(--sec); }
+.pn-sg-item:last-child{ border-bottom:none; }
+.pn-sg-item:hover, .pn-sg-item.active{ background:var(--sec); }
+.pn-sg-no{ font-weight:bold; color:var(--blue); }
+.pn-sg-name{ font-size:10px; color:var(--tx2); margin-top:1px; }
+.pn-sg-empty{ padding:9px 10px; font-size:11px; color:var(--tx3); }
   
 /* ═══ 印刷スタイル ═══ */
 @media print {
@@ -693,7 +704,7 @@ function delPn(i)     {
   PN_PAIRS.splice(i, 1); renderPnPairs();
 }
 
-// マスター用品番（依頼番号なし）
+// マスター用品番（依頼番号なし）＋サジェスト
 function renderMstPns() {
   const div = document.getElementById('m-pnArea'); div.innerHTML = '';
   M_PNS.forEach((v, i) => {
@@ -701,11 +712,19 @@ function renderMstPns() {
     row.className = 'pn-pair master-mode';
     row.style.gridTemplateColumns = '1fr auto';
     row.innerHTML = `
-      <input type="text" value="${esc(v)}" placeholder="品番${M_PNS.length>1?' '+(i+1):''}" oninput="M_PNS[${i}]=this.value">
+      <div class="pn-suggest-wrap">
+        <input type="text" value="${esc(v)}" placeholder="品番${M_PNS.length>1?' '+(i+1):''}（入力すると候補表示）" autocomplete="off"
+          oninput="onMstPnInput(${i}, this)"
+          onkeydown="onMstPnKey(${i}, this, event)"
+          onfocus="onMstPnInput(${i}, this)"
+          onblur="setTimeout(()=>hideMstSuggest(${i}), 150)">
+        <div class="pn-suggest" id="pn-sg-${i}"></div>
+      </div>
       ${M_PNS.length>1 ? `<button class="pn-del" onclick="delMstPn(${i})">✕</button>` : ''}`;
     div.appendChild(row);
   });
 }
+  
 function addMstPn() { M_PNS.push(''); renderMstPns(); }
 function delMstPn(i) {
   if (M_PNS.length <= 1) { toast('品番は最低1つ必要です','warn'); return; }
