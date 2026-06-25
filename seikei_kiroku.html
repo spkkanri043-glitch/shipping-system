@@ -731,6 +731,113 @@ function delMstPn(i) {
   M_PNS.splice(i,1); renderMstPns();
 }
 
+  // ══════════════════════════════════════════════
+// 品番サジェスト（マスター登録画面）
+// ══════════════════════════════════════════════
+let PN_SG_ACTIVE = {};  // 各欄のキーボード選択中index
+
+async function onMstPnInput(i, inp) {
+  M_PNS[i] = inp.value;
+  const q = inp.value.trim().toLowerCase();
+  const box = document.getElementById('pn-sg-' + i);
+  if (!box) return;
+
+  if (!q) { hideMstSuggest(i); return; }
+
+  const products = await fetchProductMasterAll();
+  if (!products) {
+    box.innerHTML = '<div class="pn-sg-empty">製品マスタに接続できません</div>';
+    box.classList.add('show');
+    return;
+  }
+
+  const get = (obj, ...keys) => {
+    for (const k of keys) { if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim()) return String(obj[k]).trim(); }
+    return '';
+  };
+
+  // 品番で前方一致→部分一致、最大20件
+  const matches = products
+    .map(p => ({
+      no:   get(p,'partNo','品番','itemNo','item_no'),
+      name: get(p,'productName','製品名','name','product_name','itemName'),
+      p
+    }))
+    .filter(x => x.no && x.no.toLowerCase().includes(q))
+    .sort((a,b) => {
+      const aw = a.no.toLowerCase().startsWith(q) ? 0 : 1;
+      const bw = b.no.toLowerCase().startsWith(q) ? 0 : 1;
+      return aw - bw || a.no.localeCompare(b.no);
+    })
+    .slice(0, 20);
+
+  if (!matches.length) {
+    box.innerHTML = '<div class="pn-sg-empty">該当する品番がありません</div>';
+    box.classList.add('show');
+    return;
+  }
+
+  PN_SG_ACTIVE[i] = -1;
+  box.innerHTML = matches.map((m, mi) =>
+    `<div class="pn-sg-item" data-mi="${mi}"
+       onmousedown="pickMstPn(${i}, '${esc(m.no).replace(/'/g,"\\'")}')">
+       <div class="pn-sg-no">${esc(m.no)}</div>
+       ${m.name ? `<div class="pn-sg-name">${esc(m.name)}</div>` : ''}
+     </div>`
+  ).join('');
+  box.classList.add('show');
+}
+
+// キーボード操作（↑↓Enter Esc）
+function onMstPnKey(i, inp, ev) {
+  const box = document.getElementById('pn-sg-' + i);
+  if (!box || !box.classList.contains('show')) return;
+  const items = Array.from(box.querySelectorAll('.pn-sg-item'));
+  if (!items.length) return;
+  let idx = PN_SG_ACTIVE[i] ?? -1;
+
+  if (ev.key === 'ArrowDown') { ev.preventDefault(); idx = (idx + 1) % items.length; }
+  else if (ev.key === 'ArrowUp') { ev.preventDefault(); idx = (idx - 1 + items.length) % items.length; }
+  else if (ev.key === 'Enter') {
+    if (idx >= 0 && items[idx]) { ev.preventDefault(); items[idx].dispatchEvent(new MouseEvent('mousedown')); }
+    return;
+  }
+  else if (ev.key === 'Escape') { hideMstSuggest(i); return; }
+  else return;
+
+  PN_SG_ACTIVE[i] = idx;
+  items.forEach((el, ei) => el.classList.toggle('active', ei === idx));
+  items[idx].scrollIntoView({ block: 'nearest' });
+}
+
+// 候補を選択 → 完全品番に置換＋製品名・取引先を補完
+function pickMstPn(i, fullNo) {
+  M_PNS[i] = fullNo;
+  renderMstPns();
+
+  fetchProductMasterAll().then(products => {
+    if (!products) return;
+    const get = (obj, ...keys) => {
+      for (const k of keys) { if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim()) return String(obj[k]).trim(); }
+      return '';
+    };
+    const match = products.find(p => get(p,'partNo','品番','itemNo','item_no') === fullNo);
+    if (!match) return;
+    const productName = get(match, 'productName','製品名','name','product_name','itemName');
+    const client      = get(match, 'basicClient','基本取引先','client','customer','clientName','取引先');
+    const nameEl   = document.getElementById('m-productName');
+    const clientEl = document.getElementById('m-client');
+    if (nameEl   && !nameEl.value.trim()   && productName) nameEl.value   = productName;
+    if (clientEl && !clientEl.value.trim() && client)      clientEl.value = client;
+    toast('品番「' + fullNo + '」を選択しました', 'ok');
+  });
+}
+
+function hideMstSuggest(i) {
+  const box = document.getElementById('pn-sg-' + i);
+  if (box) box.classList.remove('show');
+}
+
 // ══════════════════════════════════════════════
 // 成形条件テーブル描画
 // masterMode=true → 項目名編集可・公差編集可
