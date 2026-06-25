@@ -947,7 +947,7 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
   const rangeClass = masterMode ? 'master-range' : '';
 
   tr.innerHTML = `
-    <td><input type="text" class="tx" value="${esc(row.n||'')}" ${nameRo}
+   <td style="width:130px;min-width:130px;"><input type="text" class="tx" value="${esc(row.n||'')}" ${nameRo}
       ${masterMode ? `oninput="${prefix==='m'?'M_COND_SECS':'COND_SECS'}[${si}].rows[${ri}].n=this.value"` : ''}
       ${!masterMode ? 'title="項目名はマスター管理から変更してください"' : ''}></td>
     <td><input type="number" value="${b1v}" data-k="${k}_b1"></td>
