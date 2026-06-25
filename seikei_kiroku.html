@@ -244,14 +244,6 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   /* 乾燥（℃×H）が窮屈なので縦に */
   .fld .wc{ flex-wrap:wrap; }
 
-  /* 成形条件テーブルは横スクロールで全列を保持 */
-  .dsec{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  .dsec .dt{ min-width:560px; }
-
-  /* 製品確認・5M・チョコ停などの横長テーブルも横スクロール */
-  .card .cb > .st{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; }
-}
-
 /* さらに狭い画面（〜420px）：ボタンを2〜3列に、フォームを1列に */
 @media(max-width:430px){
   .fg4{grid-template-columns:1fr 1fr;}
@@ -259,6 +251,56 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   .tb-btns .btn{ flex:1 1 28%; min-width:0; font-size:10px; padding:7px 4px; }
   .tb-title{ font-size:13px; }
   .tb-sub{ display:none; }
+
+/* ── テーブルを 1行=1カード の縦積みに ── */
+  /* 横スクロール指定が残っていれば打ち消す */
+  .dsec{ overflow-x:visible; }
+  .card .cb > .st{ display:table; overflow:visible; white-space:normal; }
+
+  /* 見出し行は隠す（各セルに項目名を出すため） */
+  .dt thead, .st thead { display:none; }
+
+  .dt, .st { display:block; width:100%; }
+  .dt tbody, .st tbody { display:block; width:100%; }
+
+  /* 1行を枠付きカードに */
+  .dt tr, .st tr {
+    display:block; width:100%;
+    border:1px solid var(--bd); border-radius:6px;
+    margin-bottom:8px; padding:4px 6px; background:var(--wh);
+  }
+  /* 各セルを縦に並べ、左に項目名ラベルを付与 */
+  .dt td, .st td {
+    display:flex; align-items:center; justify-content:space-between;
+    gap:8px; width:100%; border:none;
+    border-bottom:1px dashed var(--bd); padding:6px 2px; text-align:right;
+  }
+  .dt tr td:last-child, .st tr td:last-child { border-bottom:none; }
+
+  /* th から見出しを生成して各セル左に表示 */
+  .dt td::before, .st td::before {
+    content: attr(data-l);
+    flex:0 0 38%; text-align:left;
+    font-size:10px; font-weight:bold; color:var(--tx2);
+    white-space:normal;
+  }
+  /* 項目名セル（先頭・左寄せセル）は見出し不要・強調 */
+  .dt td.L, .st td.L { background:transparent; font-weight:bold; }
+  .dt td.L::before, .st td.L::before { content:""; flex:0 0 0; }
+
+  /* 入力欄を右側いっぱいに */
+  .dt td input, .st td input, .st td select { width:auto; flex:1 1 auto; min-width:0; }
+  .dt input{ text-align:right; }
+  .wc{ flex:1 1 auto; justify-content:flex-end; }
+
+  /* 単位セル（空ヘッダ列）や操作列は見出しを出さない */
+  .dt td.rc::before { content:""; flex:0 0 0; }
+  .dt td.rc { justify-content:flex-end; color:var(--acc); border-bottom:1px dashed var(--bd); }
+
+  /* 行操作（▲▼🗑）セルは右寄せ＆見出しなし */
+  .dt td:last-child::before { content:""; flex:0 0 0; }
+  .dt td:last-child { justify-content:flex-end; gap:4px; }
+  
 }
 </style>
 </head>
@@ -360,7 +402,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
       <div class="ch">🔒 金型交換後 安全確認</div>
       <div class="cb">
         <table class="st"><tbody>
-          <tr><td class="L">クランプ 操作側</td>   <td><select class="on" data-k="safe_cop"  onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td></tr>
+         <tr><td class="L">クランプ 操作側</td>   <td><select class="on" data-k="safe_cop"  onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td></tr>
           <tr><td class="L">クランプ 反操作側</td> <td><select class="on" data-k="safe_cnop" onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td></tr>
           <tr><td class="L">E/J後退確認線</td>     <td><select class="on" data-k="safe_ej"   onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td></tr>
           <tr><td class="L">ロケートリング</td>    <td><select class="on" data-k="safe_lr"   onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td></tr>
@@ -942,17 +984,17 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
   const rangeClass = masterMode ? 'master-range' : '';
 
   tr.innerHTML = `
-    <td><input type="text" class="tx" value="${esc(row.n||'')}" ${nameRo}
+    <td class="L" data-l="項目名"><input type="text" class="tx" value="${esc(row.n||'')}" ${nameRo}
       ${masterMode ? `oninput="${prefix==='m'?'M_COND_SECS':'COND_SECS'}[${si}].rows[${ri}].n=this.value"` : ''}
       ${!masterMode ? 'title="項目名はマスター管理から変更してください"' : ''}></td>
-    <td><input type="number" value="${b1v}" data-k="${k}_b1"></td>
-    <td class="rc">${esc(u1)}</td>
-    <td><input type="number" value="${b2v}" data-k="${k}_b2"></td>
-    <td class="rc">${esc(u2)}</td>
-    <td><input type="text" value="${sv.r !== undefined ? sv.r : r}" data-k="${k}_r" class="${rangeClass}" ${masterMode?'':'readonly'} style="text-align:center;font-size:10px;color:${masterMode?'var(--tx)':'var(--acc)'};font-weight:bold;"></td>
-    <td><input type="number" value="${sv.v||''}" data-k="${k}_v"></td>
-    ${isTA ? `<td><select class="on" data-k="${k}_ok" onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td>` : ''}
-    <td style="white-space:nowrap;">
+    <td data-l="基準値①"><input type="number" value="${b1v}" data-k="${k}_b1"></td>
+    <td class="rc" data-l="${esc(u1||'単位')}">${esc(u1)}</td>
+    <td data-l="基準値②"><input type="number" value="${b2v}" data-k="${k}_b2"></td>
+    <td class="rc" data-l="${esc(u2||'')}">${esc(u2)}</td>
+    <td data-l="管理値"><input type="text" value="${sv.r !== undefined ? sv.r : r}" data-k="${k}_r" class="${rangeClass}" ${masterMode?'':'readonly'} style="text-align:center;font-size:10px;color:${masterMode?'var(--tx)':'var(--acc)'};font-weight:bold;"></td>
+    <td data-l="記入欄"><input type="number" value="${sv.v||''}" data-k="${k}_v"></td>
+    ${isTA ? `<td data-l="OK/NG"><select class="on" data-k="${k}_ok" onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td>` : ''}
+    <td data-l="操作" style="white-space:nowrap;">
       <button class="mv" onclick="moveRow('${targetId}','${prefix}',${si},${ri},-1)">▲</button>
       <button class="mv" onclick="moveRow('${targetId}','${prefix}',${si},${ri},1)">▼</button>
       <button class="db" onclick="delRow('${targetId}','${prefix}',${si},${ri},this)">🗑</button>
@@ -964,7 +1006,6 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
     if (s) { s.value=sv.ok||row.ok||''; upOn(s); }
   }
 }
-
 function moveRow(targetId, prefix, si, ri, dir) {
   const secs = prefix==='c' ? COND_SECS : M_COND_SECS;
   const newRi = ri + dir;
@@ -1040,25 +1081,25 @@ function renderPC(tbId, items, masterMode) {
     const tr = tb.insertRow();
     if (item.t === 'weight') {
       tr.innerHTML = `
-        <td class="L">${esc(item.c)}</td>
-        <td><div class="wc">
+        <td class="L" data-l="内容">${esc(item.c)}</td>
+        <td data-l="管理値"><div class="wc">
           <input type="number" data-k="pc${i}sw_${tbId}" value="${esc(item.sw||'')}" placeholder="目標">
           <span>g ±</span>
           <input type="number" data-k="pc${i}sp_${tbId}" value="${esc(item.sp||'')}" placeholder="公差">
           <span>g</span>
         </div></td>
-        <td><div class="wc"><input type="number" data-k="pc${i}f_${tbId}" placeholder="測定値"><span>g</span></div></td>
-        <td><div class="wc"><input type="number" data-k="pc${i}l_${tbId}" placeholder="測定値"><span>g</span></div></td>`;
+        <td data-l="初物"><div class="wc"><input type="number" data-k="pc${i}f_${tbId}" placeholder="測定値"><span>g</span></div></td>
+        <td data-l="終物"><div class="wc"><input type="number" data-k="pc${i}l_${tbId}" placeholder="測定値"><span>g</span></div></td>`;
     } else if (item.t === 'okng') {
       tr.innerHTML = `
-        <td class="L">${esc(item.c)}</td>
-        <td style="font-size:10px;">${esc(item.s)}</td>
-        <td><select class="on" data-k="pc${i}f_${tbId}" onchange="upOn(this)"><option value="">-</option><option>○</option><option>✕</option></select></td>
-        <td><select class="on" data-k="pc${i}l_${tbId}" onchange="upOn(this)"><option value="">-</option><option>○</option><option>✕</option></select></td>`;
+        <td class="L" data-l="内容">${esc(item.c)}</td>
+        <td data-l="管理値" style="font-size:10px;">${esc(item.s)}</td>
+        <td data-l="初物"><select class="on" data-k="pc${i}f_${tbId}" onchange="upOn(this)"><option value="">-</option><option>○</option><option>✕</option></select></td>
+        <td data-l="終物"><select class="on" data-k="pc${i}l_${tbId}" onchange="upOn(this)"><option value="">-</option><option>○</option><option>✕</option></select></td>`;
     } else {
       tr.innerHTML = `
-        <td class="L">${esc(item.c)}</td>
-        <td colspan="3"><input type="text" class="tx" data-k="pc${i}m_${tbId}" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"></td>`;
+        <td class="L" data-l="内容">${esc(item.c)}</td>
+        <td colspan="3" data-l="記入"><input type="text" class="tx" data-k="pc${i}m_${tbId}" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"></td>`;
     }
   });
 }
@@ -1118,9 +1159,9 @@ function addNoteRow(i){
   const ri=i!==undefined?i:tb.rows.length;
   const tr=tb.insertRow();
   tr.innerHTML=`
-    <td><input type="text" class="tx" data-k="nt${ri}c" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"></td>
-    <td><input type="text" data-k="nt${ri}s" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;text-align:right;"></td>
-    <td><select class="on" data-k="nt${ri}ok" onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td>`;
+    <td class="L" data-l="内容"><input type="text" class="tx" data-k="nt${ri}c" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"></td>
+    <td data-l="基準値"><input type="text" data-k="nt${ri}s" style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;text-align:right;"></td>
+    <td data-l="判定"><select class="on" data-k="nt${ri}ok" onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td>`;
 }
 function renderChocos(n){const tb=document.getElementById('chocoTb');tb.innerHTML='';for(let i=0;i<n;i++)addChocoRow(i);}
 function addChocoRow(i){
@@ -1134,11 +1175,11 @@ function addChocoRow(i){
   // 1行目 or 行追加ボタン（i===undefined）時は今の日時・ログイン名を自動入力
   const fillDef = (i===0 || i===undefined);
   tr.innerHTML=`
-    <td><input type="text"   data-k="ch${ri}c" style="width:100%;border:none;font-size:11px;font-family:inherit;text-align:center;" placeholder="停止内容"></td>
-    <td><input type="date"   data-k="ch${ri}d" value="${fillDef?defDate:''}" style="width:110px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
-    <td><input type="time"   data-k="ch${ri}t" value="${fillDef?defTime:''}" style="width:85px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
-    <td><input type="number" data-k="ch${ri}s" style="width:50px;border:none;font-size:11px;font-family:inherit;text-align:center;" min="0"></td>
-    <td>
+    <td class="L" data-l="停止内容"><input type="text"   data-k="ch${ri}c" style="width:100%;border:none;font-size:11px;font-family:inherit;text-align:center;" placeholder="停止内容"></td>
+    <td data-l="日付"><input type="date"   data-k="ch${ri}d" value="${fillDef?defDate:''}" style="width:110px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
+    <td data-l="時間"><input type="time"   data-k="ch${ri}t" value="${fillDef?defTime:''}" style="width:85px;border:none;font-size:11px;font-family:inherit;text-align:center;"></td>
+    <td data-l="捨てショット"><input type="number" data-k="ch${ri}s" style="width:50px;border:none;font-size:11px;font-family:inherit;text-align:center;" min="0"></td>
+    <td data-l="担当">
       <input type="text" data-k="ch${ri}p" value="${fillDef?esc(CU.name||''):''}"
         style="width:70px;border:none;font-size:11px;font-family:inherit;text-align:center;"
         placeholder="担当者">
@@ -1149,12 +1190,12 @@ function renderM5(){
   M5.forEach((item,i)=>{
     const tr=tb.insertRow();
     tr.innerHTML=`
-      <td class="L">${esc(item)}</td>
-      <td><select data-k="m5_${i}yn" onchange="onM5Change(${i},this)"
+      <td class="L" data-l="項目">${esc(item)}</td>
+      <td data-l="有・無"><select data-k="m5_${i}yn" onchange="onM5Change(${i},this)"
         style="width:100%;font-size:11px;border:1px solid var(--bd);border-radius:3px;padding:2px;font-family:inherit;">
         <option>-</option><option>有</option><option>無</option>
       </select></td>
-      <td><input type="text" class="tx" data-k="m5_${i}ac" id="m5ac${i}"
+      <td data-l="対処方法"><input type="text" class="tx" data-k="m5_${i}ac" id="m5ac${i}"
         style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"
         placeholder="対処方法を記入してください"
         oninput="onM5ActionInput(${i},this)"></td>`;
