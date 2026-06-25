@@ -244,15 +244,20 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   /* 乾燥（℃×H）が窮屈なので縦に */
   .fld .wc{ flex-wrap:wrap; }
 
-  /* 成形条件テーブルは横スクロールで全列を保持 */
+  /* ── テーブルはみ出し対策：横スクロール枠にする ── */
+  /* 成形条件（.dsec内の .dt） */
   .dsec{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
   .dsec .dt{ min-width:560px; }
 
-  /* 製品確認・5M・チョコ停などの横長テーブルも横スクロール */
-  .card .cb > .st{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; }
+  /* 製品確認・5M・チョコ停・注意事項・安全確認（.st） */
+  .card .cb{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .card .cb > .st{ min-width:520px; }
+
+  /* 金型安全・注意事項など列が少ない表は最低幅を抑える */
+  .two .card .cb > .st{ min-width:300px; }
 }
 
-/* さらに狭い画面（〜420px）：ボタンを2〜3列に、フォームを1列に */
+/* さらに狭い画面（〜430px）：ボタンを3列に */
 @media(max-width:430px){
   .fg4{grid-template-columns:1fr 1fr;}
   .sg{grid-template-columns:1fr;}
