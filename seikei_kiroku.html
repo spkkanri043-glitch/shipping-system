@@ -2002,6 +2002,8 @@ function countDataRows(d, regex){
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function ls(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 
 document.querySelectorAll('.mo').forEach(el=>{
   el.addEventListener('click',e=>{if(e.target===el)closeM(el.id);});
