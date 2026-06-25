@@ -1282,13 +1282,19 @@ async function fetchFromProductMaster() {
     return '';
   };
 
-  // 品番で検索（完全一致優先、次に部分一致）
+  // 品番で検索（完全一致優先、次に前方一致）
+  // found に「入力index・入力値・ヒット製品・完全品番」を保持
   const found = [];
-  nos.forEach(no => {
-    const no_t = no.trim();
+  M_PNS.forEach((no, idx) => {
+    const no_t = (no || '').trim();
+    if (!no_t) return;
     let match = products.find(p => get(p,'partNo','品番','itemNo','item_no') === no_t);
+    if (!match) match = products.find(p => get(p,'partNo','品番','itemNo','item_no').startsWith(no_t));
     if (!match) match = products.find(p => get(p,'partNo','品番','itemNo','item_no').includes(no_t));
-    if (match) found.push({ no, product: match });
+    if (match) {
+      const fullNo = get(match,'partNo','品番','itemNo','item_no');
+      found.push({ idx, input: no_t, fullNo, product: match });
+    }
   });
 
   if (!found.length) {
@@ -1297,19 +1303,30 @@ async function fetchFromProductMaster() {
     return;
   }
 
+  // 品番欄を完全品番へ上書き
+  let replaced = 0;
+  found.forEach(f => {
+    if (f.fullNo && f.fullNo !== M_PNS[f.idx]) {
+      M_PNS[f.idx] = f.fullNo;
+      replaced++;
+    }
+  });
+  if (replaced > 0) renderMstPns();
+
+  // 製品名・取引先は先頭ヒットを採用（空欄の場合のみ）
   const first = found[0].product;
   const productName = get(first, 'productName','製品名','name','product_name','itemName');
   const client      = get(first, 'basicClient','基本取引先','client','customer','clientName','取引先');
 
-  // 空欄の場合のみ自動入力
   const nameEl   = document.getElementById('m-productName');
   const clientEl = document.getElementById('m-client');
   if (nameEl   && !nameEl.value.trim()   && productName) nameEl.value   = productName;
   if (clientEl && !clientEl.value.trim() && client)      clientEl.value = client;
 
   const updates = [];
-  if (productName) updates.push('製品名: ' + productName);
-  if (client)      updates.push('取引先: ' + client);
+  if (replaced > 0)  updates.push('品番' + replaced + '件を完全品番に補完');
+  if (productName)   updates.push('製品名: ' + productName);
+  if (client)        updates.push('取引先: ' + client);
   statusEl.textContent = '✅ ' + found.length + '件の品番が見つかりました';
   toast('製品マスタから自動入力しました（' + updates.join(' / ') + '）', 'ok');
 }
