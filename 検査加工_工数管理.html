@@ -254,10 +254,12 @@ svg text{font-variant-numeric:tabular-nums}
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn pri" onclick="saveToSheets()">Sheetsへ保存</button>
           <button class="btn" onclick="loadFromSheets()">Sheetsから読込</button>
+          <button class="btn" onclick="testGas()">接続テスト</button>
+          <button class="btn" onclick="openGasUrl()">URLを直接開く</button>
           <button class="btn" onclick="toggleGasCode()">GASコードを表示</button>
         </div>
         <pre id="gasCode" style="display:none;margin-top:14px;background:#1c2128;color:#d7dde3;padding:14px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.5;max-height:340px"></pre>
-        <p class="hint" style="margin-top:12px">本番運用はこちら。新規スプレッドシートの拡張機能→Apps Scriptに上のGASコードを貼り、「ウェブアプリ」としてデプロイ（アクセス：全員）→発行URLを上に貼り付け。以後この画面から保存／読込できます。まずは同梱の <b>gas_工数管理.gs</b> を使ってください。</p>
+        <p class="hint" style="margin-top:12px">手順：①保存先スプレッドシートを開き <b>拡張機能→Apps Script</b> に同梱の <b>gas_工数管理.gs</b> を貼る（こうするとシートに紐づきます）。別に作ったスクリプトの場合はコード冒頭の <b>SHEET_ID</b> に保存先シートのID（URLの /d/ と /edit の間）を貼る。②デプロイ→<b>新しいデプロイ</b>→ウェブアプリ→<b>アクセス：全員</b>→末尾 <b>/exec</b> のURLを上に貼付。③「接続テスト」→「Sheetsへ保存」。<br>つまずき時：getActive()がnull＝スクリプトがシートに未紐づけ → SHEET_ID を設定。他に①アクセス権「全員」②変更後は新バージョンで再デプロイ③URL /exec を確認。</p>
       </div>
     </div>
   </section>
@@ -557,23 +559,75 @@ function restoreJSON(input){const f=input.files[0];if(!f)return;const rd=new Fil
 function renderSave(){const ck=document.getElementById('autosaveCk');if(ck)ck.checked=autosave;const u=document.getElementById('gasUrl');if(u&&!u.value){try{u.value=localStorage.getItem(LS_URL)||'';}catch(e){}}setSaveStatus(_lastSaved!=='');}
 function getGasUrl(){return (document.getElementById('gasUrl')?.value||'').trim();}
 function saveGasUrl(){try{localStorage.setItem(LS_URL,getGasUrl());}catch(e){}}
-function saveToSheets(){const url=getGasUrl();if(!url){alert('GAS WebアプリURLを入力してください。');return;}saveGasUrl();fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'save',data:snapshot()})}).then(()=>toast('Sheetsへ送信しました')).catch(e=>alert('送信エラー: '+e.message));}
+function saveToSheets(){
+  const url=getGasUrl();if(!url){alert('GAS WebアプリURLを入力してください。');return;}
+  saveGasUrl();toast('Sheetsへ保存中…');
+  const nonce=String(Date.now());
+  const payload=JSON.stringify({action:'save',nonce:nonce,data:snapshot()});
+  let ifr=document.getElementById('gas_ifr');
+  if(!ifr){ifr=document.createElement('iframe');ifr.id='gas_ifr';ifr.name='gas_ifr';ifr.style.display='none';document.body.appendChild(ifr);}
+  const f=document.createElement('form');f.method='POST';f.action=url;f.target='gas_ifr';f.style.display='none';
+  const inp=document.createElement('input');inp.type='hidden';inp.name='payload';inp.value=payload;f.appendChild(inp);
+  document.body.appendChild(f);f.submit();
+  setTimeout(()=>{try{f.remove();}catch(_){}},15000);
+  setTimeout(()=>verifyByLoad(url,nonce,1),1600);
+}
+function verifyByLoad(url,nonce,attempt){
+  attempt=attempt||1;
+  const cb='__gas_vb_'+Date.now(),s=document.createElement('script');
+  window[cb]=res=>{delete window[cb];s.remove();
+    if(res&&res.nonce!=null&&String(res.nonce)===String(nonce)){toast('Sheetsへ保存しました（確認済み'+(res.ts?' '+res.ts:'')+'）');return;}
+    if(attempt<5){setTimeout(()=>verifyByLoad(url,nonce,attempt+1),1500);return;}
+    alert('保存が確認できませんでした。\n数十秒おいて「接続テスト」を押し「保存データあり」に変われば、保存は成功しています（確認が間に合わなかっただけ）。\nそれでもダメなら：アクセス権「全員」／v3で再デプロイ／URL末尾 /exec を確認。');};
+  s.onerror=()=>{delete window[cb];s.remove();
+    if(attempt<5){setTimeout(()=>verifyByLoad(url,nonce,attempt+1),1500);return;}
+    alert('保存後の確認に失敗しました。URL／デプロイ設定をご確認ください。');};
+  s.src=url+(url.includes('?')?'&':'?')+'action=ping&callback='+cb;document.body.appendChild(s);
+}
+function testGas(){
+  const url=getGasUrl();if(!url){alert('GAS WebアプリURLを入力してください。');return;}saveGasUrl();
+  const cb='__gas_pg_'+Date.now(),s=document.createElement('script');
+  window[cb]=res=>{delete window[cb];s.remove();
+    if(res&&res.ok)toast('接続OK'+(res.ver?(' v'+res.ver):'')+' '+(res.hasData?('／ 保存データあり'+(res.ts?'（'+res.ts+'）':'')):'／ データ未保存'));
+    else alert('応答が不正です。GASコード／デプロイをご確認ください。');};
+  s.onerror=()=>{delete window[cb];s.remove();alert('接続できません。\n・URLは末尾が /exec か\n・デプロイのアクセス権は「全員」か\nをご確認ください。');};
+  s.src=url+(url.includes('?')?'&':'?')+'action=ping&callback='+cb;document.body.appendChild(s);
+}
 function loadFromSheets(){const url=getGasUrl();if(!url){alert('GAS WebアプリURLを入力してください。');return;}saveGasUrl();const cb='__gas_cb_'+Date.now();const s=document.createElement('script');window[cb]=res=>{try{if(res&&res.data){applySnapshot(res.data);fillPeriodSel();renderAll();saveLocal(true);toast('Sheetsから読み込みました');}else toast('Sheets側にデータがありません');}catch(e){alert('読込エラー: '+e.message);}delete window[cb];s.remove();};s.onerror=()=>{alert('読込に失敗しました。URL/デプロイ設定をご確認ください。');delete window[cb];s.remove();};s.src=url+(url.includes('?')?'&':'?')+'action=load&callback='+cb;document.body.appendChild(s);}
-const GASCODE=`function doGet(e){
-  var cb=(e&&e.parameter&&e.parameter.callback)||'callback';
-  var out={data:null};
-  try{var sh=SpreadsheetApp.getActive().getSheetByName('data');
-    if(sh){var v=sh.getRange('A1').getValue();if(v)out.data=JSON.parse(v);}}catch(err){out.error=String(err);}
-  return ContentService.createTextOutput(cb+'('+JSON.stringify(out)+')').setMimeType(ContentService.MimeType.JAVASCRIPT);
+function openGasUrl(){const url=getGasUrl();if(!url){alert('GAS WebアプリURLを入力してください。');return;}saveGasUrl();window.open(url+(url.includes('?')?'&':'?')+'action=ping','_blank');}
+const GASCODE=`// ▼ 保存先シートのURL全体（またはID）を貼り付け（URLならIDを自動抽出）。
+// スプレッドシートの「拡張機能→Apps Script」から作った場合は空のままでOK。
+var SHEET_ID = '';
+
+function ssId_(){ var s=String(SHEET_ID||'').trim(); var i=s.indexOf('/d/'); if(i>=0){ s=s.substring(i+3); var j=s.indexOf('/'); if(j>=0) s=s.substring(0,j); } return s; }
+function ss_(){ var id=ssId_(); return id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActive(); }
+function sheet_(){ var ss=ss_(); return ss.getSheetByName('data')||ss.insertSheet('data'); }
+
+function doGet(e){
+  var p=(e&&e.parameter)||{}; var cb=p.callback||'callback';
+  var sh=sheet_();
+  var a1=sh.getRange('A1').getValue(), ts=sh.getRange('B1').getValue(), nonce=sh.getRange('C1').getValue();
+  var out;
+  if(p.action==='ping'){ out={ok:true,ver:'3',hasData:!!a1,ts:ts?String(ts):'',nonce:nonce}; }
+  else{ var data=null; try{ if(a1) data=JSON.parse(a1); }catch(err){} out={data:data,ts:ts?String(ts):'',nonce:nonce}; }
+  return ContentService.createTextOutput(cb+'('+JSON.stringify(out)+')')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 function doPost(e){
-  try{var body=JSON.parse(e.postData.contents);
-    if(body.action==='save'){var ss=SpreadsheetApp.getActive();
-      var sh=ss.getSheetByName('data')||ss.insertSheet('data');
+  var res={ok:false};
+  try{
+    var raw=(e&&e.parameter&&e.parameter.payload)?e.parameter.payload:(e&&e.postData?e.postData.contents:'{}');
+    var body=JSON.parse(raw);
+    if(body.action==='save'){
+      var sh=sheet_(); var now=new Date();
       sh.getRange('A1').setValue(JSON.stringify(body.data));
-      sh.getRange('B1').setValue(new Date());}
-  }catch(err){}
-  return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+      sh.getRange('B1').setValue(now);
+      sh.getRange('C1').setValue(body.nonce||'');
+      res={ok:true,ts:Utilities.formatDate(now,Session.getScriptTimeZone(),'MM/dd HH:mm')};
+    }
+  }catch(err){res.error=String(err);}
+  return ContentService.createTextOutput(JSON.stringify(res))
+    .setMimeType(ContentService.MimeType.JSON);
 }`;
 function toggleGasCode(){const el=document.getElementById('gasCode');if(el.style.display==='none'){el.textContent=GASCODE;el.style.display='block';}else el.style.display='none';}
 function setupDropzone(){const dz=document.getElementById('dz');
