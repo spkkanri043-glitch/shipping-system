@@ -534,7 +534,8 @@ function showRecordDetail(id) {
     if (!res || !res.ok) { panel.innerHTML = `<div class="card detail-card" style="color:var(--r)">取得エラー: ${(res && res.message) || '不明'}</div>`; return; }
     const d = res.data;
     const sectionsHtml = Object.keys(SECTION_TITLES).map(key => {
-      const items = (d[key] && d[key].items) || [];
+      const allItems = (d[key] && d[key].items) || [];
+      const items = allItems.filter(it => it.eval || (it.result && it.result.trim()));
       if (!items.length) return '';
       return `<div class="detail-section-title">${SECTION_TITLES[key]}</div>` +
         items.map(it => `
