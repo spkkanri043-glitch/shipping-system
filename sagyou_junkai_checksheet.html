@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>作業巡回チェックシート | 関ケ原プラ工業(株)</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --pr: #1a3a5c; --prl: #2a5a8c; --ac: #e8a020;
+  --bg: #edf1f6; --sf: #fff; --sf2: #f2f6fb; --sf3: #e8edf4;
+  --tx: #1a2332; --tx2: #5a6a7a; --tx3: #9aabb8;
+  --bd: #cfd9e6; --bd2: #adbace;
+  --g: #0b7a3d; --gbg: #e3f6ed;
+  --a: #b07000; --abg: #fff7db;
+  --r: #b53030; --rbg: #fce8e8;
+  --b: #1655b0; --bbg: #e5effe;
+  --rad: 10px; --rads: 7px;
+}
+html { -webkit-text-size-adjust: 100%; }
+body { font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif; background: var(--bg); color: var(--tx); font-size: 14px; -webkit-font-smoothing: antialiased; padding-bottom: 40px; }
+
+/* topbar */
+.topbar { background: var(--pr); padding: 0 14px; height: 48px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,.28); position: sticky; top: 0; z-index: 100; }
+.tbl { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tbic { width: 30px; height: 30px; border-radius: 50%; background: rgba(232,160,32,.2); border: 1px solid rgba(232,160,32,.4); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.tbco { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tbmd { font-size: 10px; color: rgba(255,255,255,.5); }
+.tbr { display: flex; align-items: center; gap: 8px; }
+.user-name { font-size: 11px; color: rgba(255,255,255,.85); white-space: nowrap; }
+.badge-role { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.22); white-space: nowrap; }
+
+.content { padding: 14px; max-width: 980px; margin: 0 auto; }
+
+.notice-card { background: var(--abg); border: 1px solid rgba(176,112,0,.25); border-radius: var(--rad); padding: 12px 14px; margin-bottom: 14px; font-size: 12px; color: var(--tx2); line-height: 1.7; }
+.notice-card b { color: var(--a); }
+
+.toolbar-top { display: flex; gap: 8px; margin-bottom: 14px; }
+
+.card { background: var(--sf); border: 1px solid var(--bd); border-radius: var(--rad); padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.card-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--bd); color: var(--pr); }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+.form-grid.full { grid-template-columns: 1fr; }
+.fg { margin-bottom: 2px; }
+.fl { font-size: 12px; color: var(--tx2); display: block; margin-bottom: 4px; font-weight: 500; }
+.fi { width: 100%; padding: 10px 12px; font-size: 15px; border: 1px solid var(--bd2); border-radius: var(--rads); background: #f8fafc; color: var(--tx); outline: none; font-family: inherit; -webkit-appearance: none; appearance: none; }
+.fi:focus { border-color: var(--pr); }
+textarea.fi { resize: vertical; min-height: 70px; }
+select.fi { cursor: pointer; }
+.row-inline { display: flex; gap: 8px; align-items: center; }
+.link-btn { font-size: 12px; color: var(--b); cursor: pointer; white-space: nowrap; user-select: none; }
+.link-btn:hover { text-decoration: underline; }
+
+.btn { padding: 9px 16px; font-size: 13px; font-weight: 600; border-radius: var(--rads); cursor: pointer; border: 1px solid var(--bd2); background: var(--sf2); color: var(--tx); font-family: inherit; -webkit-appearance: none; }
+.btn.pri { background: var(--pr); color: #fff; border-color: transparent; }
+.btn.pri:active { background: var(--prl); }
+.btn.danger { background: var(--r); color: #fff; border-color: transparent; }
+.btn.sm { padding: 6px 12px; font-size: 12px; }
+.btn.xs { padding: 4px 9px; font-size: 11px; }
+
+/* section (accordion) */
+.section { border: 1px solid var(--bd); border-radius: var(--rad); margin-bottom: 12px; overflow: hidden; background: var(--sf); }
+.section-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; background: var(--sf2); user-select: none; }
+.section-head:active { background: var(--sf3); }
+.section-head-l { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--pr); }
+.section-caret { transition: transform .18s; color: var(--tx3); font-size: 11px; }
+.section.open .section-caret { transform: rotate(90deg); }
+.section-badge { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px; background: var(--gbg); color: var(--g); }
+.section-badge.warn { background: var(--rbg); color: var(--r); }
+.section-body { display: none; padding: 14px 16px; border-top: 1px solid var(--bd); }
+.section.open .section-body { display: block; }
+
+.chk-table-wrap { overflow-x: auto; border-radius: var(--rads); border: 1px solid var(--bd); }
+.chk-table { width: 100%; border-collapse: collapse; font-size: 12px; background: #fff; min-width: 720px; }
+.chk-table th { padding: 8px 10px; background: var(--sf2); border-bottom: 2px solid var(--bd); font-weight: 600; color: var(--tx2); text-align: left; white-space: nowrap; }
+.chk-table td { padding: 8px 10px; border-bottom: 1px solid var(--bd); vertical-align: top; }
+.chk-table tr:last-child td { border-bottom: none; }
+.chk-no { width: 28px; text-align: center; font-weight: 700; color: var(--tx3); }
+.chk-label { width: 150px; font-weight: 600; }
+.chk-detail { color: var(--tx2); font-size: 11.5px; line-height: 1.6; min-width: 220px; }
+.chk-eval { width: 90px; }
+.chk-eval select { width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid var(--bd2); border-radius: var(--rads); background: #f8fafc; font-family: inherit; text-align: center; font-weight: 700; }
+.chk-eval select.v-ok { color: var(--g); }
+.chk-eval select.v-ng { color: var(--r); background: var(--rbg); }
+.chk-result { min-width: 160px; }
+.chk-result input { width: 100%; padding: 6px 8px; font-size: 12px; border: 1px solid var(--bd2); border-radius: var(--rads); background: #f8fafc; font-family: inherit; }
+.chk-del { width: 30px; text-align: center; }
+.chk-del span { cursor: pointer; color: var(--tx3); font-size: 14px; }
+.chk-del span:hover { color: var(--r); }
+textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding: 10px 12px; font-size: 13px; border: 1px solid var(--bd2); border-radius: var(--rads); background: #f8fafc; font-family: inherit; resize: vertical; }
+.add-item-row { margin-top: 10px; }
+
+.action-bar { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+
+/* history */
+.hist-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.hist-table th { padding: 7px 9px; background: var(--sf2); border-bottom: 1px solid var(--bd); color: var(--tx2); font-weight: 600; text-align: left; }
+.hist-table td { padding: 7px 9px; border-bottom: 1px solid var(--bd); }
+.hist-empty { text-align: center; color: var(--tx3); padding: 18px; font-size: 12px; }
+
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120px); background: #1a2332; color: #fff; padding: 11px 22px; border-radius: 30px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.3); z-index: 999; transition: transform .3s; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { background: var(--g); }
+.toast.error { background: var(--r); }
+
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .chk-label { width: 110px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tbl">
+    <div class="tbic">&#x1F3ED;</div>
+    <div style="min-width:0"><div class="tbco">作業巡回チェックシート</div><div class="tbmd">関ケ原プラ工業(株)</div></div>
+  </div>
+  <div class="tbr">
+    <span class="user-name" id="disp-name">未ログイン</span>
+    <span class="badge-role" id="disp-role"></span>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="notice-card">
+    日々巡回を行うことで、工場内の変化や作業環境の変化に気付くことができ、品質不具合の軽減が可能です。<br>
+    <b>~注意点~</b><br>
+    ・作業巡回者が、作業者にヒアリングする際は、声掛けのタイミングに注意しましょう。<br>
+    ・作業巡回者は、公平な目線で評価するようにしましょう。<br>
+    ・作業巡回時に、大きなトラブルを発見した場合は、巡回後現場管理者に報告しましょう。
+  </div>
+
+  <div class="card">
+    <div class="card-title">&#x1F4CB; 巡回基本情報</div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">巡回日時 *</label><input class="fi" type="date" id="f-date"></div>
+      <div class="fg"><label class="fl">時間</label><input class="fi" type="time" id="f-time"></div>
+      <div class="fg"><label class="fl">各取引先名</label>
+        <select class="fi" id="f-client">
+          <option value="">-----</option>
+          <option>カナモリ</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">品番</label><input class="fi" type="text" id="f-product" placeholder="品番を入力"></div>
+      <div class="fg"><label class="fl">巡回担当者</label>
+        <select class="fi" id="f-inspector"><option value="">-----</option></select>
+      </div>
+      <div class="fg">
+        <label class="fl">作業者名</label>
+        <div class="row-inline">
+          <input class="fi" type="text" id="f-worker" placeholder="作業者名">
+        </div>
+        <div class="row-inline" style="margin-top:4px">
+          <span class="link-btn" onclick="fetchWorkerName()">取得</span>
+          <span class="link-btn" onclick="document.getElementById('f-worker').value=''">クリア</span>
+        </div>
+      </div>
+      <div class="fg full" style="grid-column:1/-1"><label class="fl">作業評価コメント(管理者)</label><textarea class="fi" id="f-eval-comment" placeholder="管理者による評価コメント"></textarea></div>
+      <div class="fg full" style="grid-column:1/-1"><label class="fl">作業者コメント</label><textarea class="fi" id="f-worker-comment" placeholder="作業者からのコメント"></textarea></div>
+    </div>
+  </div>
+
+  <div id="sections-wrap"></div>
+
+  <div class="action-bar">
+    <button class="btn" onclick="clearForm()">キャンセル</button>
+    <button class="btn pri" onclick="saveRecord()">&#x1F4BE; 保存</button>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="card-title">&#x1F4DC; 巡回履歴(このセッション内)</div>
+    <div style="overflow-x:auto">
+      <table class="hist-table">
+        <thead><tr><th>日時</th><th>取引先</th><th>品番</th><th>巡回担当者</th><th>×件数</th><th>操作</th></tr></thead>
+        <tbody id="hist-tbody"><tr><td colspan="6" class="hist-empty">まだ保存された記録はありません</td></tr></tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px"><button class="btn sm" onclick="exportCsv()">&#x1F4C4; CSV出力</button></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==============================================================
+// 点検セクション定義
+// 現行kintoneアプリからそのまま移植した項目(成形工程/検査・加工)
+// 成形段取り・出荷は現行アプリで未展開だったため空欄。
+// 「+項目追加」で自由に追加できます。実際の項目が決まったら
+// SECTIONS 配列の items に直接追記してください。
+// ==============================================================
+const SEIKEI_ITEMS = [
+  { label: '標準類は最新版が管理されているか', detail: '現場内で最新版の帳票が管理できているか。(PC内も可)\n(成形記録票、製造仕様書、作業受領書等)' },
+  { label: '赤箱・チョイ置き品', detail: '・明示無し ×・製品があふれている ×\n・製品以外の物が入っている ×・チョイ置き品がある' },
+  { label: '作業レイアウト', detail: '・識別がわからない ×・製品に影響が出るレイアウト(キズ等) ×\n・安全が確保できていない ×' },
+  { label: 'QA機始業点検表', detail: '・始業点検無し ×・記録なし ×・管理者の確認無 ×\n・数値管理の項目がNG ×' },
+  { label: 'QA機ダミーサンプル', detail: '・ダミーサンプル無し ×・明示無し ×・使用していない ×' },
+  { label: 'QA機異常発生時', detail: '・決め事なし ×・管理者の対処確認できる ×\n・本来あるべきヒアリング(該非判断)のサイクルルールを守ること' },
+  { label: 'ショートショットの確認', detail: '・作業観察で明らかに確認できている場合のみOK\n(目視と手抜/併矛し/呼称/検知器etc.)' },
+  { label: '作業確認', detail: '・作業受領書通りの作業が出来ている ○\n・作業手順が違う ×\n・作業タクトの確認 秒数OK ／ NGX' },
+  { label: '頼合作業(混合)', detail: '・1篇完了時に順位の向きを確認していない ×\n・1篇内に混合作業をしていない ×・頼位の決め事が守られていない ×' },
+  { label: '作業台の3S', detail: '・治具に不要な物が置かれている ×・周囲の人が寄、ゴミ等が落ちている ×\n・工具他、装置類他、油汚れ、油漏れなどに置かれている ×' },
+  { label: '部品管理', detail: '・部品が決められた位置で管理できていない ×\n・部品を通剰に持ち出している ×・部品が破損している ×' },
+];
+
+const DANTORI_ITEMS = [
+  { label: '標準類は最新版が管理されているか', detail: '現場内で最新版の帳票が管理できているか。(PC内も可)\n(段取り替え手順書、材料投入手順書など)' },
+  { label: '赤箱・チョイ置き品', detail: '・前製品が作業台、コンベア、赤箱の中に残っている ×\n(社内現品票を含む)' },
+  { label: '金型交換時の作業姿', detail: '・ヘルメットを被らない ×・手袋をしない ×\n・確認項目が確認できていない ×' },
+  { label: '色替え作業', detail: '・色替え作業が正しく行えているか' },
+  { label: '製品外観', detail: '・外観不良 ×・ロット刻印が正しくない ×' },
+  { label: 'ショートショットの確認', detail: '・作業観察で明らかに確認できている場合のみOK\n(目視と手感/指差し呼称/検知器etc..)' },
+  { label: '成形記録類', detail: '・チョコ停記録記録なし ×・変化点の記録なし ×\n・成形ロット毎に記録がされていない ×' },
+  { label: '成形機周りの3S', detail: '・混雑に不要な物が置かれている ×・材料ペレット、ゴミ等が散乱している ×\n・タンゴが片付けられていない ×・段取り替え台車が放置されている ×' },
+  { label: '材料投入', detail: '・決め事なし ×・材料投入記録なし ×\n・材料缶の蓋が閉まっていない ×' },
+  { label: '生産タブレットの入力', detail: '・前製品の履歴のまま、段取りを開始している ×・材料ロットを記憶作業で入力している ×\n・生産タブレットの意味が理解できているか？(確認して答えられない ×)' },
+];
+
+const SHUKKA_ITEMS = [
+  { label: '標準類が最新版で管理されているか', detail: '現場内で最新の帳票が管理できているか。(PC内も可)\n(照合ルールEtc..)' },
+  { label: '出荷レイアウトは明確か', detail: '・出荷レーンが正しい状態で使用できているか\n・他社様と混合になっていないか・出荷品以外の製品と一目でわかるようになっているか' },
+  { label: '置場管理', detail: '・レイアウト図等でわかりやすくなっている' },
+  { label: '照合作業', detail: '・照合ルールを守っている(縦読み照合や、バーコード等)' },
+  { label: '出荷管理', detail: '・出荷指示書等がない ×・出荷指示書と出荷部品の整合記録がない ×\n・記録内容を管理者が確認している ○' },
+  { label: '端数管理', detail: '・決め事なし ×・記録類がない ×' },
+  { label: 'トレース', detail: '・ロット番号から製造記録のトレースが取れる ○' },
+  { label: '出荷作業台の3S', detail: '・作業場に不要な物が置かれている ×・指示書が適切に管理されていない ×\n・フォークリフトの日常点検ができていない ×' },
+  { label: '作業スペースは暗くないか', detail: '・暗くて照合が読み取れない ×' },
+];
+
+const SECTIONS = [
+  { id: 'dantori',  title: '成形段取り', items: DANTORI_ITEMS.slice() },
+  { id: 'koutei',   title: '成形工程',   items: SEIKEI_ITEMS.slice() },
+  { id: 'kensa',    title: '検査/加工',  items: SEIKEI_ITEMS.slice() },
+  { id: 'shukka',   title: '出荷',       items: SHUKKA_ITEMS.slice() },
+];
+
+// SSOトークン(ポータルから開かれた場合)・従業員リストの取得
+let currentUser = null, employees = [];
+(function initFromPortal() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const sso = params.get('sso');
+    if (sso) {
+      const b64 = sso.split('').reverse().join('');
+      const payload = JSON.parse(decodeURIComponent(escape(atob(b64))));
+      currentUser = payload;
+    }
+    const empsParam = params.get('emps');
+    if (empsParam) employees = JSON.parse(decodeURIComponent(empsParam));
+  } catch (e) { /* SSOなしでも単独動作可 */ }
+})();
+
+function renderTopbar() {
+  document.getElementById('disp-name').textContent = currentUser ? currentUser.name : '未ログイン(単独プレビュー)';
+  document.getElementById('disp-role').textContent = currentUser ? currentUser.role : '';
+}
+
+function populateInspectorSelect() {
+  const sel = document.getElementById('f-inspector');
+  employees.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e.id; opt.textContent = e.name;
+    sel.appendChild(opt);
+  });
+  if (currentUser) sel.value = currentUser.id;
+}
+
+function fetchWorkerName() {
+  document.getElementById('f-worker').value = currentUser ? currentUser.name : '';
+}
+
+function renderSections() {
+  const wrap = document.getElementById('sections-wrap');
+  wrap.innerHTML = SECTIONS.map((sec, si) => `
+    <div class="section" id="sec-${sec.id}">
+      <div class="section-head" onclick="toggleSection('${sec.id}')">
+        <div class="section-head-l"><span class="section-caret">&#x25B6;</span> ${sec.title}</div>
+        <span class="section-badge" id="badge-${sec.id}">0件</span>
+      </div>
+      <div class="section-body">
+        <div class="chk-table-wrap">
+          <table class="chk-table" id="tbl-${sec.id}">
+            <thead>
+              <tr>
+                <th class="chk-no">No</th>
+                <th class="chk-label">点検項目</th>
+                <th class="chk-detail">具体的な確認内容</th>
+                <th class="chk-eval">評価(○/×)</th>
+                <th class="chk-result">確認結果</th>
+                <th class="chk-del"></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="add-item-row"><button class="btn xs" onclick="addItem('${sec.id}')">&#xFF0B; 項目追加</button></div>
+        <label class="fl" style="margin-top:12px">改善してほしい点(改善内容)</label>
+        <textarea class="improve-note" id="note-${sec.id}" placeholder="改善内容を入力"></textarea>
+      </div>
+    </div>`).join('');
+  SECTIONS.forEach(sec => sec.items.forEach(it => appendItemRow(sec.id, it.label, it.detail)));
+}
+
+function toggleSection(id) {
+  document.getElementById('sec-' + id).classList.toggle('open');
+}
+
+function appendItemRow(sectionId, label = '', detail = '') {
+  const tbody = document.querySelector('#tbl-' + sectionId + ' tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td class="chk-no">${tbody.children.length + 1}</td>
+    <td class="chk-label"><input class="fi" style="padding:6px 8px;font-size:12px" value="${escapeAttr(label)}"></td>
+    <td class="chk-detail"><textarea class="fi" style="padding:6px 8px;font-size:11.5px;min-height:40px" rows="2">${escapeHtml(detail)}</textarea></td>
+    <td class="chk-eval"><select onchange="markEval(this)">
+      <option value="">-----</option>
+      <option value="○">○</option>
+      <option value="×">×</option>
+    </select></td>
+    <td class="chk-result"><input type="text" placeholder="確認結果"></td>
+    <td class="chk-del"><span onclick="removeRow(this,'${sectionId}')">&#x2715;</span></td>`;
+  tbody.appendChild(row);
+  renumber(sectionId);
+}
+
+function addItem(sectionId) { appendItemRow(sectionId, '', ''); }
+
+function removeRow(el, sectionId) {
+  el.closest('tr').remove();
+  renumber(sectionId);
+  updateBadge(sectionId);
+}
+
+function renumber(sectionId) {
+  const tbody = document.querySelector('#tbl-' + sectionId + ' tbody');
+  [...tbody.children].forEach((tr, i) => tr.querySelector('.chk-no').textContent = i + 1);
+}
+
+function markEval(sel) {
+  sel.classList.remove('v-ok', 'v-ng');
+  if (sel.value === '○') sel.classList.add('v-ok');
+  if (sel.value === '×') sel.classList.add('v-ng');
+  const sectionId = sel.closest('table').id.replace('tbl-', '');
+  updateBadge(sectionId);
+}
+
+function updateBadge(sectionId) {
+  const tbody = document.querySelector('#tbl-' + sectionId + ' tbody');
+  const ngCount = [...tbody.querySelectorAll('.chk-eval select')].filter(s => s.value === '×').length;
+  const badge = document.getElementById('badge-' + sectionId);
+  badge.textContent = ngCount + '件 ×';
+  badge.classList.toggle('warn', ngCount > 0);
+}
+
+// ==============================================================
+// 保存・履歴(このプロトタイプではブラウザのメモリ内に保持)
+// 実運用では GAS の doPost / スプレッドシート保存に置き換える
+// ==============================================================
+let history = [];
+
+function collectSectionData(sectionId) {
+  const tbody = document.querySelector('#tbl-' + sectionId + ' tbody');
+  return [...tbody.children].map(tr => ({
+    label: tr.querySelector('.chk-label input').value,
+    detail: tr.querySelector('.chk-detail textarea').value,
+    eval: tr.querySelector('.chk-eval select').value,
+    result: tr.querySelector('.chk-result input').value,
+  }));
+}
+
+function saveRecord() {
+  if (!document.getElementById('f-date').value) {
+    showToast('巡回日時を入力してください', 'error'); return;
+  }
+  const record = {
+    date: document.getElementById('f-date').value,
+    time: document.getElementById('f-time').value,
+    client: document.getElementById('f-client').value,
+    product: document.getElementById('f-product').value,
+    inspector: document.getElementById('f-inspector').selectedOptions[0]?.textContent || '',
+    worker: document.getElementById('f-worker').value,
+    evalComment: document.getElementById('f-eval-comment').value,
+    workerComment: document.getElementById('f-worker-comment').value,
+    sections: {}
+  };
+  let ngTotal = 0;
+  SECTIONS.forEach(sec => {
+    const data = collectSectionData(sec.id);
+    record.sections[sec.id] = { items: data, note: document.getElementById('note-' + sec.id).value };
+    ngTotal += data.filter(d => d.eval === '×').length;
+  });
+  record.ngTotal = ngTotal;
+  history.unshift(record);
+  renderHistory();
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(() => showToast('保存しました', 'success'))
+      .withFailureHandler(err => showToast('保存エラー: ' + (err.message || err), 'error'))
+      .saveJunkaiRecord(record);
+  } else {
+    // 単独プレビュー時(GAS未接続)はブラウザ内メモリのみに保存
+    showToast('保存しました(プレビューモード:サーバー未接続)', 'success');
+  }
+}
+
+function renderHistory() {
+  const tbody = document.getElementById('hist-tbody');
+  if (!history.length) { tbody.innerHTML = '<tr><td colspan="6" class="hist-empty">まだ保存された記録はありません</td></tr>'; return; }
+  tbody.innerHTML = history.map((r, i) => `
+    <tr>
+      <td>${r.date}${r.time ? ' ' + r.time : ''}</td>
+      <td>${r.client || '-'}</td>
+      <td>${r.product || '-'}</td>
+      <td>${r.inspector || '-'}</td>
+      <td style="color:${r.ngTotal > 0 ? 'var(--r)' : 'var(--g)'};font-weight:700">${r.ngTotal}</td>
+      <td><span class="link-btn" onclick="removeHistory(${i})">削除</span></td>
+    </tr>`).join('');
+}
+
+function removeHistory(i) { history.splice(i, 1); renderHistory(); }
+
+function clearForm() {
+  document.querySelectorAll('.card input, .card textarea, .card select').forEach(el => {
+    if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
+  });
+  renderSections();
+  showToast('フォームをクリアしました', '');
+}
+
+function exportCsv() {
+  if (!history.length) { showToast('出力する履歴がありません', 'error'); return; }
+  const rows = [['巡回日時', '時間', '取引先', '品番', '巡回担当者', '作業者名', '×件数']];
+  history.forEach(r => rows.push([r.date, r.time, r.client, r.product, r.inspector, r.worker, r.ngTotal]));
+  const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '作業巡回チェックシート_' + (new Date().toISOString().slice(0, 10)) + '.csv';
+  a.click();
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast' + (type ? ' ' + type : '');
+  t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function escapeHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function escapeAttr(s) { return (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+
+function loadHistoryFromServer() {
+  if (!(typeof google !== 'undefined' && google.script && google.script.run)) return;
+  google.script.run
+    .withSuccessHandler(res => {
+      if (res && res.ok && res.data) { history = res.data; renderHistory(); }
+    })
+    .withFailureHandler(() => {})
+    .getJunkaiRecords();
+}
+
+// init
+renderTopbar();
+populateInspectorSelect();
+renderSections();
+document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+document.getElementById('sec-koutei').classList.add('open');
+loadHistoryFromServer();
+</script>
+</body>
+</html>
