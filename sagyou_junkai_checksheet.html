@@ -18,6 +18,7 @@
   --rad: 10px; --rads: 7px;
 }
 html { -webkit-text-size-adjust: 100%; }
+.hid { display: none !important; }
 body { font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif; background: var(--bg); color: var(--tx); font-size: 14px; -webkit-font-smoothing: antialiased; padding-bottom: 40px; }
 
 /* topbar */
@@ -126,6 +127,7 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
   <div class="tbr">
     <span class="user-name" id="disp-name">未ログイン</span>
     <span class="badge-role" id="disp-role"></span>
+    <button class="btn xs hid" id="btn-close-tab" onclick="closeTab()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);color:#fff">&#x2715; タブを閉じる</button>
   </div>
 </div>
 
@@ -266,7 +268,18 @@ let currentUser = null, employees = [];
 function renderTopbar() {
   document.getElementById('disp-name').textContent = currentUser ? currentUser.name : '未ログイン(単独プレビュー)';
   document.getElementById('disp-role').textContent = currentUser ? currentUser.role : '';
-  if (currentUser) document.getElementById('f-inspector').value = currentUser.name;
+  if (currentUser) {
+    document.getElementById('f-inspector').value = currentUser.name;
+    document.getElementById('btn-close-tab').classList.remove('hid');
+  }
+}
+
+function closeTab() {
+  try { window.close(); } catch (e) {}
+  // ブラウザの仕様でスクリプトから閉じられない場合の案内
+  setTimeout(() => {
+    showToast('このタブは手動で閉じてください', '');
+  }, 300);
 }
 
 // 従業員マスター(ポータルの employees シート)から巡回担当者・作業者名の候補を取得
@@ -333,15 +346,15 @@ function toggleSection(id) {
   document.getElementById('sec-' + id).classList.toggle('open');
 }
 
-function appendItemRow(sectionId, label = '', detail = '') {
+function appendItemRow(sectionId, label = '', detail = '', editable = false) {
   const container = document.getElementById('cards-' + sectionId);
   const card = document.createElement('div');
   card.className = 'chk-card';
   card.innerHTML = `
     <div class="chk-card-top">
       <div class="chk-no-badge">${container.children.length + 1}</div>
-      <input class="chk-label-input" value="${escapeAttr(label)}" placeholder="点検項目">
-      <div class="chk-del-btn" onclick="removeRow(this,'${sectionId}')">&#x2715;</div>
+      <input class="chk-label-input" value="${escapeAttr(label)}" placeholder="点検項目" ${editable ? '' : 'readonly style="background:#f2f6fb;color:var(--tx)"'}>
+      ${editable ? `<div class="chk-del-btn" onclick="removeRow(this,'${sectionId}')">&#x2715;</div>` : '<div style="width:30px"></div>'}
     </div>
     ${detail ? `<div class="chk-detail-text">${escapeHtml(detail)}</div>` : ''}
     <div class="chk-bottom-row">
@@ -362,7 +375,7 @@ function appendItemRow(sectionId, label = '', detail = '') {
   renumber(sectionId);
 }
 
-function addItem(sectionId) { appendItemRow(sectionId, '', ''); }
+function addItem(sectionId) { appendItemRow(sectionId, '', '', true); }
 
 function removeRow(el, sectionId) {
   el.closest('.chk-card').remove();
