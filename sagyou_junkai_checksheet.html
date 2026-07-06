@@ -352,22 +352,29 @@ function loadEmployeeMaster() {
 }
 
 // 製品マスタ(製品マスタ管理アプリ)から品番の候補を取得
+// 製品マスタ(製品マスタ管理アプリ)から品番の候補を取得
+// 作業報告書アプリと同じ方式: ブラウザから直接、製品マスタのGASにfetchする
+// (自分のGAS経由にすると UrlFetchApp の権限承認が必要になるため)
+const PRODUCT_MASTER_GAS_URL = 'https://script.google.com/macros/s/AKfycbww1lPYGVf7FLmIbjwxODbFMKSn8Q6yxFL9OpPnYmh9AnkAWVf9BgrRgk0Wc8GvK2XN/exec';
 let productMaster = [];
 function loadProductMaster() {
-  gasGet('getProductMaster').then(res => {
-    if (res && res.ok) {
-      productMaster = res.data || [];
-      document.getElementById('dl-products').innerHTML =
-        productMaster.map(p => `<option value="${escapeAttr(p.code)}">`).join('');
-      if (!productMaster.length) showToast('製品マスタが0件でした', '');
-    } else {
-      showToast('製品マスタ取得エラー: ' + ((res && res.message) || '不明'), 'error');
-      console.error('製品マスタ取得エラー:', res);
-    }
-  }).catch(err => {
-    showToast('製品マスタ取得エラー: ' + err.message, 'error');
-    console.error('製品マスタ取得エラー:', err);
-  });
+  fetch(PRODUCT_MASTER_GAS_URL + '?action=getProducts')
+    .then(res => res.json())
+    .then(res => {
+      if (res && res.ok) {
+        productMaster = (res.data || []).map(p => ({ code: p['品番'], client: p['基本取引先'] })).filter(p => p.code);
+        document.getElementById('dl-products').innerHTML =
+          productMaster.map(p => `<option value="${escapeAttr(p.code)}">`).join('');
+        if (!productMaster.length) showToast('製品マスタが0件でした', '');
+      } else {
+        showToast('製品マスタ取得エラー: ' + ((res && res.message) || '不明'), 'error');
+        console.error('製品マスタ取得エラー:', res);
+      }
+    })
+    .catch(err => {
+      showToast('製品マスタ取得エラー: ' + err.message, 'error');
+      console.error('製品マスタ取得エラー:', err);
+    });
 }
 
 function onProductInput(code) {
