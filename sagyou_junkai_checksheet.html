@@ -378,7 +378,7 @@ function loadProductMaster() {
 }
 
 function onProductInput(code) {
-  const match = productMaster.find(p => p.code === code);
+  const match = productMaster.find(p => String(p.code) === String(code));
   document.getElementById('f-client').value = match ? (match.client || '') : '';
 }
 
@@ -615,8 +615,8 @@ function showToast(msg, type) {
   t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-function escapeHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function escapeAttr(s) { return (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function escapeAttr(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
 
 function loadHistoryFromServer() {
   if (!JUNKAI_GAS_URL) return;
