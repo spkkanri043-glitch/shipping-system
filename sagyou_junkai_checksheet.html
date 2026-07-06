@@ -117,7 +117,7 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
 }
 </style>
 </head>
-<body>
+<body data-sso="<?= ssoParam ?>" data-emps="<?= empsParam ?>">
 
 <div class="topbar">
   <div class="tbl">
@@ -250,19 +250,35 @@ const SECTIONS = [
 ];
 
 // SSOトークン(ポータルから開かれた場合)・従業員リストの取得
+// Apps Script の Webアプリはサンドボックス化されたiframe内で動くため、
+// window.location.search からクエリパラメータを読み取れないことがある。
+// そのためサーバー側(doGet)で確実に受け取った値をテンプレート経由で埋め込み、
+// それを優先的に使う(URLからの直接取得は単独プレビュー用のフォールバック)。
 let currentUser = null, employees = [];
 (function initFromPortal() {
   try {
-    const params = new URLSearchParams(window.location.search);
-    const sso = params.get('sso');
+    let sso = document.body.dataset.sso || '';
+    let empsParam = document.body.dataset.emps || '';
+
+    // scriptletが未評価(単独プレビュー)の場合、テンプレートタグがそのまま
+    // 文字列として入るため、その場合は空扱いにする
+    if (sso.indexOf('<?') === 0) sso = '';
+    if (empsParam.indexOf('<?') === 0) empsParam = '';
+
+    if (!sso) {
+      // フォールバック: URLから直接取得を試みる(単独プレビュー用)
+      const params = new URLSearchParams(window.location.search);
+      sso = params.get('sso') || '';
+      empsParam = params.get('emps') || '';
+    }
+
     if (sso) {
       const b64 = sso.split('').reverse().join('');
       const payload = JSON.parse(decodeURIComponent(escape(atob(b64))));
       currentUser = payload;
     }
-    const empsParam = params.get('emps');
     if (empsParam) employees = JSON.parse(decodeURIComponent(empsParam));
-  } catch (e) { /* SSOなしでも単独動作可 */ }
+  } catch (e) { console.error('SSO解析エラー:', e); }
 })();
 
 function renderTopbar() {
