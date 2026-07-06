@@ -117,7 +117,7 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
 }
 </style>
 </head>
-<body data-sso="<?= ssoParam ?>" data-emps="<?= empsParam ?>">
+<body>
 
 <div class="topbar">
   <div class="tbl">
@@ -249,35 +249,22 @@ const SECTIONS = [
   { id: 'shukka',   title: '出荷',       items: SHUKKA_ITEMS.slice() },
 ];
 
-// SSOトークン(ポータルから開かれた場合)・従業員リストの取得
-// Apps Script の Webアプリはサンドボックス化されたiframe内で動くため、
-// window.location.search からクエリパラメータを読み取れないことがある。
-// そのためサーバー側(doGet)で確実に受け取った値をテンプレート経由で埋め込み、
-// それを優先的に使う(URLからの直接取得は単独プレビュー用のフォールバック)。
+// SSOトークン(ポータルから開かれた場合)・GASバックエンドURLの取得
+// GitHub Pages上の静的ページとして動くため、window.location.search から
+// クエリパラメータを直接読み取れる(他アプリと同じ方式)。
 let currentUser = null, employees = [];
+let JUNKAI_GAS_URL = '';
 (function initFromPortal() {
   try {
-    let sso = document.body.dataset.sso || '';
-    let empsParam = document.body.dataset.emps || '';
-
-    // scriptletが未評価(単独プレビュー)の場合、テンプレートタグがそのまま
-    // 文字列として入るため、その場合は空扱いにする
-    if (sso.indexOf('<?') === 0) sso = '';
-    if (empsParam.indexOf('<?') === 0) empsParam = '';
-
-    if (!sso) {
-      // フォールバック: URLから直接取得を試みる(単独プレビュー用)
-      const params = new URLSearchParams(window.location.search);
-      sso = params.get('sso') || '';
-      empsParam = params.get('emps') || '';
-    }
+    const params = new URLSearchParams(window.location.search);
+    const sso = params.get('sso') || '';
+    JUNKAI_GAS_URL = params.get('junkai_gas_url') || '';
 
     if (sso) {
       const b64 = sso.split('').reverse().join('');
       const payload = JSON.parse(decodeURIComponent(escape(atob(b64))));
       currentUser = payload;
     }
-    if (empsParam) employees = JSON.parse(decodeURIComponent(empsParam));
   } catch (e) { console.error('SSO解析エラー:', e); }
 })();
 
@@ -292,43 +279,50 @@ function renderTopbar() {
 
 function closeTab() {
   try { window.close(); } catch (e) {}
-  // ブラウザの仕様でスクリプトから閉じられない場合の案内
-  setTimeout(() => {
-    showToast('このタブは手動で閉じてください', '');
-  }, 300);
+  setTimeout(() => { showToast('このタブは手動で閉じてください', ''); }, 300);
+}
+
+// ==============================================================
+// GASバックエンド呼び出し(fetch経由。他アプリと同じAPI方式)
+// ==============================================================
+async function gasGet(action, extraParams) {
+  if (!JUNKAI_GAS_URL) return null;
+  const qs = new URLSearchParams({ action, ...(extraParams || {}) });
+  const res = await fetch(JUNKAI_GAS_URL + '?' + qs.toString());
+  return res.json();
+}
+
+async function gasPost(action, payload) {
+  if (!JUNKAI_GAS_URL) return null;
+  const res = await fetch(JUNKAI_GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // GAS doPostはtext/plainでもJSONとして受け取れる
+    body: JSON.stringify({ action, ...(payload || {}) })
+  });
+  return res.json();
 }
 
 // 従業員マスター(ポータルの employees シート)から巡回担当者・作業者名の候補を取得
 function loadEmployeeMaster() {
   const dl = document.getElementById('dl-employees');
-  const fillDatalist = (list) => {
-    employees = list;
-    dl.innerHTML = list.map(e => `<option value="${escapeAttr(e.name)}">`).join('');
-  };
-  if (typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler(res => { if (res && res.ok) fillDatalist(res.data); })
-      .withFailureHandler(() => {})
-      .getEmployeeMaster();
-  } else if (employees.length) {
-    fillDatalist(employees); // SSO経由で emps が渡っていた場合
-  }
+  gasGet('getEmployeeMaster').then(res => {
+    if (res && res.ok) {
+      employees = res.data;
+      dl.innerHTML = employees.map(e => `<option value="${escapeAttr(e.name)}">`).join('');
+    }
+  }).catch(err => console.error('従業員マスター取得エラー:', err));
 }
 
 // 製品マスタ(製品マスタ管理アプリ)から品番の候補を取得
 let productMaster = [];
 function loadProductMaster() {
-  if (!(typeof google !== 'undefined' && google.script && google.script.run)) return;
-  google.script.run
-    .withSuccessHandler(res => {
-      if (res && res.ok) {
-        productMaster = res.data || [];
-        document.getElementById('dl-products').innerHTML =
-          productMaster.map(p => `<option value="${escapeAttr(p.code)}">`).join('');
-      }
-    })
-    .withFailureHandler(() => {})
-    .getProductMaster();
+  gasGet('getProductMaster').then(res => {
+    if (res && res.ok) {
+      productMaster = res.data || [];
+      document.getElementById('dl-products').innerHTML =
+        productMaster.map(p => `<option value="${escapeAttr(p.code)}">`).join('');
+    }
+  }).catch(err => console.error('製品マスタ取得エラー:', err));
 }
 
 function onProductInput(code) {
@@ -461,11 +455,13 @@ function saveRecord() {
   history.unshift(record);
   renderHistory();
 
-  if (typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler(() => showToast('保存しました', 'success'))
-      .withFailureHandler(err => showToast('保存エラー: ' + (err.message || err), 'error'))
-      .saveJunkaiRecord(record);
+  if (JUNKAI_GAS_URL) {
+    gasPost('saveJunkaiRecord', { record })
+      .then(res => {
+        if (res && res.ok) showToast('保存しました', 'success');
+        else showToast('保存エラー: ' + (res && res.message || '不明なエラー'), 'error');
+      })
+      .catch(err => showToast('保存エラー: ' + err.message, 'error'));
   } else {
     // 単独プレビュー時(GAS未接続)はブラウザ内メモリのみに保存
     showToast('保存しました(プレビューモード:サーバー未接続)', 'success');
@@ -518,13 +514,10 @@ function escapeHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '
 function escapeAttr(s) { return (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
 
 function loadHistoryFromServer() {
-  if (!(typeof google !== 'undefined' && google.script && google.script.run)) return;
-  google.script.run
-    .withSuccessHandler(res => {
-      if (res && res.ok && res.data) { history = res.data; renderHistory(); }
-    })
-    .withFailureHandler(() => {})
-    .getJunkaiRecords();
+  if (!JUNKAI_GAS_URL) return;
+  gasGet('getJunkaiRecords')
+    .then(res => { if (res && res.ok && res.data) { history = res.data; renderHistory(); } })
+    .catch(err => console.error('履歴取得エラー:', err));
 }
 
 // init
