@@ -359,8 +359,15 @@ function loadProductMaster() {
       productMaster = res.data || [];
       document.getElementById('dl-products').innerHTML =
         productMaster.map(p => `<option value="${escapeAttr(p.code)}">`).join('');
+      if (!productMaster.length) showToast('製品マスタが0件でした', '');
+    } else {
+      showToast('製品マスタ取得エラー: ' + ((res && res.message) || '不明'), 'error');
+      console.error('製品マスタ取得エラー:', res);
     }
-  }).catch(err => console.error('製品マスタ取得エラー:', err));
+  }).catch(err => {
+    showToast('製品マスタ取得エラー: ' + err.message, 'error');
+    console.error('製品マスタ取得エラー:', err);
+  });
 }
 
 function onProductInput(code) {
@@ -553,12 +560,26 @@ function showRecordDetail(id) {
           巡回日時: ${d.date || ''} ${d.time || ''}<br>
           取引先: ${d.client || '-'} / 品番: ${d.product || '-'}<br>
           巡回担当者: ${d.inspector || '-'} / 作業者名: ${d.worker || '-'}<br>
-          ${d.evalComment ? '評価コメント: ' + escapeHtml(d.evalComment) + '<br>' : ''}
-          ${d.workerComment ? '作業者コメント: ' + escapeHtml(d.workerComment) : ''}
+          ${d.evalComment ? '評価コメント: ' + escapeHtml(d.evalComment) : ''}
         </div>
         ${sectionsHtml}
+        <label class="fl" style="margin-top:14px">作業者コメント</label>
+        <textarea class="fi" id="detail-worker-comment" placeholder="作業者コメントを入力">${escapeHtml(d.workerComment || '')}</textarea>
+        <div style="margin-top:8px">
+          <button class="btn pri sm" onclick="saveWorkerComment('${id}')">&#x1F4BE; コメントを保存</button>
+        </div>
       </div>`;
   }).catch(err => { panel.innerHTML = `<div class="card detail-card" style="color:var(--r)">取得エラー: ${err.message}</div>`; });
+}
+
+function saveWorkerComment(id) {
+  const comment = document.getElementById('detail-worker-comment').value;
+  gasPost('updateWorkerComment', { id, comment })
+    .then(res => {
+      if (res && res.ok) showToast('作業者コメントを保存しました', 'success');
+      else showToast('保存エラー: ' + ((res && res.message) || '不明'), 'error');
+    })
+    .catch(err => showToast('保存エラー: ' + err.message, 'error'));
 }
 
 function clearForm() {
