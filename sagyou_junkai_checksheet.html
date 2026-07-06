@@ -104,7 +104,22 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
 .toast.success { background: var(--g); }
 .toast.error { background: var(--r); }
 
-@media (max-width: 640px) {
+.tab-bar { display: flex; gap: 6px; margin-bottom: 14px; border-bottom: 2px solid var(--bd); }
+.tab-item { padding: 10px 16px; font-size: 13px; font-weight: 700; color: var(--tx2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; user-select: none; }
+.tab-item.on { color: var(--pr); border-bottom-color: var(--pr); }
+.tab-page { display: none; }
+.tab-page.on { display: block; }
+.hist-row { cursor: pointer; }
+.hist-row:hover { background: var(--sf2); }
+.detail-card { margin-top: 12px; }
+.detail-section-title { font-size: 13px; font-weight: 700; color: var(--pr); margin: 14px 0 8px; }
+.detail-item { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--bd); font-size: 12.5px; align-items: flex-start; }
+.detail-item:last-child { border-bottom: none; }
+.detail-item .di-label { flex-shrink: 0; width: 140px; font-weight: 600; }
+.detail-item .di-eval { flex-shrink: 0; width: 28px; font-weight: 700; text-align: center; }
+.detail-item .di-eval.ng { color: var(--r); }
+.detail-item .di-eval.ok { color: var(--g); }
+.detail-item .di-result { flex: 1; color: var(--tx2); }
   .form-grid { grid-template-columns: 1fr; }
   .content { padding: 10px; }
   .card { padding: 12px; }
@@ -132,6 +147,13 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
 </div>
 
 <div class="content">
+
+  <div class="tab-bar">
+    <div class="tab-item on" id="tab-btn-input" onclick="switchTab('input')">&#x1F4CB; 点検入力</div>
+    <div class="tab-item" id="tab-btn-history" onclick="switchTab('history')">&#x1F4DC; 巡回記録の確認</div>
+  </div>
+
+  <div id="tab-input" class="tab-page on">
 
   <div class="notice-card">
     日々巡回を行うことで、工場内の変化や作業環境の変化に気付くことができ、品質不具合の軽減が可能です。<br>
@@ -164,7 +186,7 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
           <datalist id="dl-employees"></datalist>
         </div>
         <div class="row-inline" style="margin-top:4px">
-          <span class="link-btn" onclick="fetchWorkerName()">自分の名前を入力</span>
+          <span class="link-btn" onclick="fetchWorkerName()">作業者名を登録</span>
           <span class="link-btn" onclick="document.getElementById('f-worker').value=''">クリア</span>
         </div>
       </div>
@@ -180,15 +202,23 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
     <button class="btn pri" onclick="saveRecord()">&#x1F4BE; 保存</button>
   </div>
 
-  <div class="card" style="margin-top:20px">
-    <div class="card-title">&#x1F4DC; 巡回履歴(このセッション内)</div>
-    <div style="overflow-x:auto">
-      <table class="hist-table">
-        <thead><tr><th>日時</th><th>取引先</th><th>品番</th><th>巡回担当者</th><th>×件数</th><th>操作</th></tr></thead>
-        <tbody id="hist-tbody"><tr><td colspan="6" class="hist-empty">まだ保存された記録はありません</td></tr></tbody>
-      </table>
+  </div>
+
+  <div id="tab-history" class="tab-page">
+    <div class="card">
+      <div class="card-title">&#x1F4DC; 巡回記録の確認(スプレッドシートの内容)</div>
+      <div style="overflow-x:auto">
+        <table class="hist-table">
+          <thead><tr><th>日時</th><th>取引先</th><th>品番</th><th>巡回担当者</th><th>作業者名</th><th>×件数</th><th></th></tr></thead>
+          <tbody id="hist-tbody"><tr><td colspan="7" class="hist-empty">読み込み中...</td></tr></tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn sm" onclick="loadHistoryFromServer()">&#x1F504; 更新</button>
+        <button class="btn sm" onclick="exportCsv()">&#x1F4C4; CSV出力</button>
+      </div>
     </div>
-    <div style="margin-top:10px"><button class="btn sm" onclick="exportCsv()">&#x1F4C4; CSV出力</button></div>
+    <div id="detail-panel"></div>
   </div>
 
 </div>
@@ -280,6 +310,14 @@ function renderTopbar() {
 function closeTab() {
   try { window.close(); } catch (e) {}
   setTimeout(() => { showToast('このタブは手動で閉じてください', ''); }, 300);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('on'));
+  document.getElementById('tab-btn-' + tab).classList.add('on');
+  document.getElementById('tab-' + tab).classList.add('on');
+  if (tab === 'history') { loadHistoryFromServer(); document.getElementById('detail-panel').innerHTML = ''; }
 }
 
 // ==============================================================
@@ -452,37 +490,75 @@ function saveRecord() {
     ngTotal += data.filter(d => d.eval === '×').length;
   });
   record.ngTotal = ngTotal;
-  history.unshift(record);
-  renderHistory();
 
   if (JUNKAI_GAS_URL) {
     gasPost('saveJunkaiRecord', { record })
       .then(res => {
-        if (res && res.ok) showToast('保存しました', 'success');
-        else showToast('保存エラー: ' + (res && res.message || '不明なエラー'), 'error');
+        if (res && res.ok) {
+          showToast('保存しました', 'success');
+          loadHistoryFromServer();
+        } else {
+          showToast('保存エラー: ' + (res && res.message || '不明なエラー'), 'error');
+        }
       })
       .catch(err => showToast('保存エラー: ' + err.message, 'error'));
   } else {
     // 単独プレビュー時(GAS未接続)はブラウザ内メモリのみに保存
+    history.unshift(record);
+    renderHistory();
     showToast('保存しました(プレビューモード:サーバー未接続)', 'success');
   }
 }
 
 function renderHistory() {
   const tbody = document.getElementById('hist-tbody');
-  if (!history.length) { tbody.innerHTML = '<tr><td colspan="6" class="hist-empty">まだ保存された記録はありません</td></tr>'; return; }
+  if (!history.length) { tbody.innerHTML = '<tr><td colspan="7" class="hist-empty">まだ保存された記録はありません</td></tr>'; return; }
   tbody.innerHTML = history.map((r, i) => `
-    <tr>
-      <td>${r.date}${r.time ? ' ' + r.time : ''}</td>
+    <tr class="hist-row" onclick="${r.id ? `showRecordDetail('${r.id}')` : ''}">
+      <td>${r.date || ''}${r.time ? ' ' + r.time : ''}</td>
       <td>${r.client || '-'}</td>
       <td>${r.product || '-'}</td>
       <td>${r.inspector || '-'}</td>
+      <td>${r.worker || '-'}</td>
       <td style="color:${r.ngTotal > 0 ? 'var(--r)' : 'var(--g)'};font-weight:700">${r.ngTotal}</td>
-      <td><span class="link-btn" onclick="removeHistory(${i})">削除</span></td>
+      <td>${r.id ? '<span class="link-btn">詳細を見る</span>' : ''}</td>
     </tr>`).join('');
 }
 
-function removeHistory(i) { history.splice(i, 1); renderHistory(); }
+const SECTION_TITLES = { dantori: '成形段取り', koutei: '成形工程', kensa: '検査/加工', shukka: '出荷' };
+
+function showRecordDetail(id) {
+  const panel = document.getElementById('detail-panel');
+  panel.innerHTML = '<div class="card detail-card">読み込み中...</div>';
+  gasGet('getJunkaiRecordDetail', { id }).then(res => {
+    if (!res || !res.ok) { panel.innerHTML = `<div class="card detail-card" style="color:var(--r)">取得エラー: ${(res && res.message) || '不明'}</div>`; return; }
+    const d = res.data;
+    const sectionsHtml = Object.keys(SECTION_TITLES).map(key => {
+      const items = (d[key] && d[key].items) || [];
+      if (!items.length) return '';
+      return `<div class="detail-section-title">${SECTION_TITLES[key]}</div>` +
+        items.map(it => `
+          <div class="detail-item">
+            <div class="di-label">${escapeHtml(it.label || '')}</div>
+            <div class="di-eval ${it.eval === '×' ? 'ng' : it.eval === '○' ? 'ok' : ''}">${it.eval || '-'}</div>
+            <div class="di-result">${escapeHtml(it.result || '')}</div>
+          </div>`).join('') +
+        (d[key] && d[key].note ? `<div style="font-size:12px;color:var(--tx2);margin-top:6px">改善点: ${escapeHtml(d[key].note)}</div>` : '');
+    }).join('');
+    panel.innerHTML = `
+      <div class="card detail-card">
+        <div class="card-title">&#x1F4C4; 巡回記録の詳細</div>
+        <div style="font-size:12.5px;color:var(--tx2);margin-bottom:10px;line-height:1.8">
+          巡回日時: ${d.date || ''} ${d.time || ''}<br>
+          取引先: ${d.client || '-'} / 品番: ${d.product || '-'}<br>
+          巡回担当者: ${d.inspector || '-'} / 作業者名: ${d.worker || '-'}<br>
+          ${d.evalComment ? '評価コメント: ' + escapeHtml(d.evalComment) + '<br>' : ''}
+          ${d.workerComment ? '作業者コメント: ' + escapeHtml(d.workerComment) : ''}
+        </div>
+        ${sectionsHtml}
+      </div>`;
+  }).catch(err => { panel.innerHTML = `<div class="card detail-card" style="color:var(--r)">取得エラー: ${err.message}</div>`; });
+}
 
 function clearForm() {
   document.querySelectorAll('.card input, .card textarea, .card select').forEach(el => {
