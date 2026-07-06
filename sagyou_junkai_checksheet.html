@@ -571,20 +571,30 @@ function showRecordDetail(id) {
         </div>
         ${sectionsHtml}
         <label class="fl" style="margin-top:14px">作業者コメント</label>
-        <textarea class="fi" id="detail-worker-comment" placeholder="作業者コメントを入力">${escapeHtml(d.workerComment || '')}</textarea>
+        <textarea class="fi" id="detail-worker-comment" placeholder="作業者コメントを入力"
+          ${d.workerComment ? 'readonly style="background:var(--sf3);color:var(--tx2)"' : ''}>${escapeHtml(d.workerComment || '')}</textarea>
         <div style="margin-top:8px">
-          <button class="btn pri sm" onclick="saveWorkerComment('${id}')">&#x1F4BE; コメントを保存</button>
+          <button class="btn pri sm${d.workerComment ? ' hid' : ''}" id="btn-save-worker-comment" onclick="saveWorkerComment('${id}')">&#x1F4BE; コメントを保存</button>
         </div>
       </div>`;
   }).catch(err => { panel.innerHTML = `<div class="card detail-card" style="color:var(--r)">取得エラー: ${err.message}</div>`; });
 }
 
 function saveWorkerComment(id) {
-  const comment = document.getElementById('detail-worker-comment').value;
+  const textarea = document.getElementById('detail-worker-comment');
+  const comment = textarea.value;
   gasPost('updateWorkerComment', { id, comment })
     .then(res => {
-      if (res && res.ok) showToast('作業者コメントを保存しました', 'success');
-      else showToast('保存エラー: ' + ((res && res.message) || '不明'), 'error');
+      if (res && res.ok) {
+        showToast('作業者コメントを保存しました', 'success');
+        textarea.readOnly = true;
+        textarea.style.background = 'var(--sf3)';
+        textarea.style.color = 'var(--tx2)';
+        const btn = document.getElementById('btn-save-worker-comment');
+        if (btn) btn.classList.add('hid');
+      } else {
+        showToast('保存エラー: ' + ((res && res.message) || '不明'), 'error');
+      }
     })
     .catch(err => showToast('保存エラー: ' + err.message, 'error'));
 }
@@ -631,7 +641,6 @@ loadEmployeeMaster();
 loadProductMaster();
 renderSections();
 document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
-document.getElementById('sec-koutei').classList.add('open');
 loadHistoryFromServer();
 </script>
 </body>
