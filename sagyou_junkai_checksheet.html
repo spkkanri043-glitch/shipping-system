@@ -71,23 +71,22 @@ select.fi { cursor: pointer; }
 .section-body { display: none; padding: 14px 16px; border-top: 1px solid var(--bd); }
 .section.open .section-body { display: block; }
 
-.chk-table-wrap { overflow-x: auto; border-radius: var(--rads); border: 1px solid var(--bd); }
-.chk-table { width: 100%; border-collapse: collapse; font-size: 12px; background: #fff; min-width: 720px; }
-.chk-table th { padding: 8px 10px; background: var(--sf2); border-bottom: 2px solid var(--bd); font-weight: 600; color: var(--tx2); text-align: left; white-space: nowrap; }
-.chk-table td { padding: 8px 10px; border-bottom: 1px solid var(--bd); vertical-align: top; }
-.chk-table tr:last-child td { border-bottom: none; }
-.chk-no { width: 28px; text-align: center; font-weight: 700; color: var(--tx3); }
-.chk-label { width: 150px; font-weight: 600; }
-.chk-detail { color: var(--tx2); font-size: 11.5px; line-height: 1.6; min-width: 220px; }
-.chk-eval { width: 90px; }
-.chk-eval select { width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid var(--bd2); border-radius: var(--rads); background: #f8fafc; font-family: inherit; text-align: center; font-weight: 700; }
-.chk-eval select.v-ok { color: var(--g); }
-.chk-eval select.v-ng { color: var(--r); background: var(--rbg); }
-.chk-result { min-width: 160px; }
-.chk-result input { width: 100%; padding: 6px 8px; font-size: 12px; border: 1px solid var(--bd2); border-radius: var(--rads); background: #f8fafc; font-family: inherit; }
-.chk-del { width: 30px; text-align: center; }
-.chk-del span { cursor: pointer; color: var(--tx3); font-size: 14px; }
-.chk-del span:hover { color: var(--r); }
+.chk-card { border: 1px solid var(--bd); border-radius: var(--rads); padding: 12px; margin-bottom: 10px; background: #fafcfe; }
+.chk-card-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+.chk-no-badge { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--pr); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 6px; }
+.chk-label-input { flex: 1; min-width: 0; font-weight: 700; font-size: 14px; padding: 8px 10px; border: 1px solid var(--bd2); border-radius: var(--rads); background: #fff; font-family: inherit; }
+.chk-del-btn { flex-shrink: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--tx3); cursor: pointer; font-size: 15px; border-radius: 50%; }
+.chk-del-btn:active { background: var(--rbg); color: var(--r); }
+.chk-detail-text { color: var(--tx2); font-size: 12.5px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; padding: 8px 10px; background: var(--sf2); border-radius: var(--rads); margin-bottom: 10px; }
+.chk-detail-text:empty { display: none; }
+.chk-bottom-row { display: flex; gap: 10px; }
+.chk-eval-wrap { flex-shrink: 0; width: 96px; }
+.chk-eval-wrap select { width: 100%; padding: 9px 8px; font-size: 14px; border: 1px solid var(--bd2); border-radius: var(--rads); background: #fff; font-family: inherit; text-align: center; font-weight: 700; }
+.chk-eval-wrap select.v-ok { color: var(--g); background: var(--gbg); border-color: var(--g); }
+.chk-eval-wrap select.v-ng { color: var(--r); background: var(--rbg); border-color: var(--r); }
+.chk-result-wrap { flex: 1; min-width: 0; }
+.chk-result-wrap input { width: 100%; padding: 9px 10px; font-size: 13px; border: 1px solid var(--bd2); border-radius: var(--rads); background: #fff; font-family: inherit; }
+.chk-field-tag { font-size: 10px; color: var(--tx3); margin-bottom: 3px; display: block; }
 textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding: 10px 12px; font-size: 13px; border: 1px solid var(--bd2); border-radius: var(--rads); background: #f8fafc; font-family: inherit; resize: vertical; }
 .add-item-row { margin-top: 10px; }
 
@@ -106,7 +105,14 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
 
 @media (max-width: 640px) {
   .form-grid { grid-template-columns: 1fr; }
-  .chk-label { width: 110px; }
+  .content { padding: 10px; }
+  .card { padding: 12px; }
+  .chk-bottom-row { flex-wrap: wrap; }
+  .chk-eval-wrap { width: 100%; }
+  .chk-result-wrap { width: 100%; }
+}
+@media (min-width: 700px) {
+  .chk-eval-wrap { width: 110px; }
 }
 </style>
 </head>
@@ -139,23 +145,24 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
       <div class="fg"><label class="fl">巡回日時 *</label><input class="fi" type="date" id="f-date"></div>
       <div class="fg"><label class="fl">時間</label><input class="fi" type="time" id="f-time"></div>
       <div class="fg"><label class="fl">各取引先名</label>
-        <select class="fi" id="f-client">
-          <option value="">-----</option>
-          <option>カナモリ</option>
-          <option>その他</option>
-        </select>
+        <input class="fi" type="text" id="f-client" placeholder="品番を選択すると自動入力されます" readonly>
       </div>
-      <div class="fg"><label class="fl">品番</label><input class="fi" type="text" id="f-product" placeholder="品番を入力"></div>
+      <div class="fg">
+        <label class="fl">品番</label>
+        <input class="fi" type="text" id="f-product" list="dl-products" placeholder="品番を入力(候補から選択)" autocomplete="off" oninput="onProductInput(this.value)">
+        <datalist id="dl-products"></datalist>
+      </div>
       <div class="fg"><label class="fl">巡回担当者</label>
-        <select class="fi" id="f-inspector"><option value="">-----</option></select>
+        <input class="fi" type="text" id="f-inspector" placeholder="ログイン後に自動入力されます" readonly>
       </div>
       <div class="fg">
         <label class="fl">作業者名</label>
         <div class="row-inline">
-          <input class="fi" type="text" id="f-worker" placeholder="作業者名">
+          <input class="fi" type="text" id="f-worker" list="dl-employees" placeholder="氏名を入力(候補から選択)" autocomplete="off">
+          <datalist id="dl-employees"></datalist>
         </div>
         <div class="row-inline" style="margin-top:4px">
-          <span class="link-btn" onclick="fetchWorkerName()">取得</span>
+          <span class="link-btn" onclick="fetchWorkerName()">自分の名前を入力</span>
           <span class="link-btn" onclick="document.getElementById('f-worker').value=''">クリア</span>
         </div>
       </div>
@@ -259,16 +266,45 @@ let currentUser = null, employees = [];
 function renderTopbar() {
   document.getElementById('disp-name').textContent = currentUser ? currentUser.name : '未ログイン(単独プレビュー)';
   document.getElementById('disp-role').textContent = currentUser ? currentUser.role : '';
+  if (currentUser) document.getElementById('f-inspector').value = currentUser.name;
 }
 
-function populateInspectorSelect() {
-  const sel = document.getElementById('f-inspector');
-  employees.forEach(e => {
-    const opt = document.createElement('option');
-    opt.value = e.id; opt.textContent = e.name;
-    sel.appendChild(opt);
-  });
-  if (currentUser) sel.value = currentUser.id;
+// 従業員マスター(ポータルの employees シート)から巡回担当者・作業者名の候補を取得
+function loadEmployeeMaster() {
+  const dl = document.getElementById('dl-employees');
+  const fillDatalist = (list) => {
+    employees = list;
+    dl.innerHTML = list.map(e => `<option value="${escapeAttr(e.name)}">`).join('');
+  };
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => { if (res && res.ok) fillDatalist(res.data); })
+      .withFailureHandler(() => {})
+      .getEmployeeMaster();
+  } else if (employees.length) {
+    fillDatalist(employees); // SSO経由で emps が渡っていた場合
+  }
+}
+
+// 製品マスタ(製品マスタ管理アプリ)から品番の候補を取得
+let productMaster = [];
+function loadProductMaster() {
+  if (!(typeof google !== 'undefined' && google.script && google.script.run)) return;
+  google.script.run
+    .withSuccessHandler(res => {
+      if (res && res.ok) {
+        productMaster = res.data || [];
+        document.getElementById('dl-products').innerHTML =
+          productMaster.map(p => `<option value="${escapeAttr(p.code)}">`).join('');
+      }
+    })
+    .withFailureHandler(() => {})
+    .getProductMaster();
+}
+
+function onProductInput(code) {
+  const match = productMaster.find(p => p.code === code);
+  document.getElementById('f-client').value = match ? (match.client || '') : '';
 }
 
 function fetchWorkerName() {
@@ -284,21 +320,7 @@ function renderSections() {
         <span class="section-badge" id="badge-${sec.id}">0件</span>
       </div>
       <div class="section-body">
-        <div class="chk-table-wrap">
-          <table class="chk-table" id="tbl-${sec.id}">
-            <thead>
-              <tr>
-                <th class="chk-no">No</th>
-                <th class="chk-label">点検項目</th>
-                <th class="chk-detail">具体的な確認内容</th>
-                <th class="chk-eval">評価(○/×)</th>
-                <th class="chk-result">確認結果</th>
-                <th class="chk-del"></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+        <div id="cards-${sec.id}"></div>
         <div class="add-item-row"><button class="btn xs" onclick="addItem('${sec.id}')">&#xFF0B; 項目追加</button></div>
         <label class="fl" style="margin-top:12px">改善してほしい点(改善内容)</label>
         <textarea class="improve-note" id="note-${sec.id}" placeholder="改善内容を入力"></textarea>
@@ -312,47 +334,58 @@ function toggleSection(id) {
 }
 
 function appendItemRow(sectionId, label = '', detail = '') {
-  const tbody = document.querySelector('#tbl-' + sectionId + ' tbody');
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td class="chk-no">${tbody.children.length + 1}</td>
-    <td class="chk-label"><input class="fi" style="padding:6px 8px;font-size:12px" value="${escapeAttr(label)}"></td>
-    <td class="chk-detail"><textarea class="fi" style="padding:6px 8px;font-size:11.5px;min-height:40px" rows="2">${escapeHtml(detail)}</textarea></td>
-    <td class="chk-eval"><select onchange="markEval(this)">
-      <option value="">-----</option>
-      <option value="○">○</option>
-      <option value="×">×</option>
-    </select></td>
-    <td class="chk-result"><input type="text" placeholder="確認結果"></td>
-    <td class="chk-del"><span onclick="removeRow(this,'${sectionId}')">&#x2715;</span></td>`;
-  tbody.appendChild(row);
+  const container = document.getElementById('cards-' + sectionId);
+  const card = document.createElement('div');
+  card.className = 'chk-card';
+  card.innerHTML = `
+    <div class="chk-card-top">
+      <div class="chk-no-badge">${container.children.length + 1}</div>
+      <input class="chk-label-input" value="${escapeAttr(label)}" placeholder="点検項目">
+      <div class="chk-del-btn" onclick="removeRow(this,'${sectionId}')">&#x2715;</div>
+    </div>
+    ${detail ? `<div class="chk-detail-text">${escapeHtml(detail)}</div>` : ''}
+    <div class="chk-bottom-row">
+      <div class="chk-eval-wrap">
+        <span class="chk-field-tag">評価(○/×)</span>
+        <select onchange="markEval(this)">
+          <option value="">-----</option>
+          <option value="○">○</option>
+          <option value="×">×</option>
+        </select>
+      </div>
+      <div class="chk-result-wrap">
+        <span class="chk-field-tag">確認結果</span>
+        <input type="text" placeholder="確認結果">
+      </div>
+    </div>`;
+  container.appendChild(card);
   renumber(sectionId);
 }
 
 function addItem(sectionId) { appendItemRow(sectionId, '', ''); }
 
 function removeRow(el, sectionId) {
-  el.closest('tr').remove();
+  el.closest('.chk-card').remove();
   renumber(sectionId);
   updateBadge(sectionId);
 }
 
 function renumber(sectionId) {
-  const tbody = document.querySelector('#tbl-' + sectionId + ' tbody');
-  [...tbody.children].forEach((tr, i) => tr.querySelector('.chk-no').textContent = i + 1);
+  const container = document.getElementById('cards-' + sectionId);
+  [...container.children].forEach((card, i) => card.querySelector('.chk-no-badge').textContent = i + 1);
 }
 
 function markEval(sel) {
   sel.classList.remove('v-ok', 'v-ng');
   if (sel.value === '○') sel.classList.add('v-ok');
   if (sel.value === '×') sel.classList.add('v-ng');
-  const sectionId = sel.closest('table').id.replace('tbl-', '');
+  const sectionId = sel.closest('[id^="cards-"]').id.replace('cards-', '');
   updateBadge(sectionId);
 }
 
 function updateBadge(sectionId) {
-  const tbody = document.querySelector('#tbl-' + sectionId + ' tbody');
-  const ngCount = [...tbody.querySelectorAll('.chk-eval select')].filter(s => s.value === '×').length;
+  const container = document.getElementById('cards-' + sectionId);
+  const ngCount = [...container.querySelectorAll('.chk-eval-wrap select')].filter(s => s.value === '×').length;
   const badge = document.getElementById('badge-' + sectionId);
   badge.textContent = ngCount + '件 ×';
   badge.classList.toggle('warn', ngCount > 0);
@@ -365,12 +398,12 @@ function updateBadge(sectionId) {
 let history = [];
 
 function collectSectionData(sectionId) {
-  const tbody = document.querySelector('#tbl-' + sectionId + ' tbody');
-  return [...tbody.children].map(tr => ({
-    label: tr.querySelector('.chk-label input').value,
-    detail: tr.querySelector('.chk-detail textarea').value,
-    eval: tr.querySelector('.chk-eval select').value,
-    result: tr.querySelector('.chk-result input').value,
+  const container = document.getElementById('cards-' + sectionId);
+  return [...container.children].map(card => ({
+    label: card.querySelector('.chk-label-input').value,
+    detail: card.querySelector('.chk-detail-text')?.textContent || '',
+    eval: card.querySelector('.chk-eval-wrap select').value,
+    result: card.querySelector('.chk-result-wrap input').value,
   }));
 }
 
@@ -383,7 +416,7 @@ function saveRecord() {
     time: document.getElementById('f-time').value,
     client: document.getElementById('f-client').value,
     product: document.getElementById('f-product').value,
-    inspector: document.getElementById('f-inspector').selectedOptions[0]?.textContent || '',
+    inspector: document.getElementById('f-inspector').value,
     worker: document.getElementById('f-worker').value,
     evalComment: document.getElementById('f-eval-comment').value,
     workerComment: document.getElementById('f-worker-comment').value,
@@ -467,7 +500,8 @@ function loadHistoryFromServer() {
 
 // init
 renderTopbar();
-populateInspectorSelect();
+loadEmployeeMaster();
+loadProductMaster();
 renderSections();
 document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
 document.getElementById('sec-koutei').classList.add('open');
