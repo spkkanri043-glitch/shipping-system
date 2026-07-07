@@ -290,10 +290,15 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
       <div id="cov-chart" style="margin-bottom:16px"></div>
       <div style="overflow-x:auto">
         <table class="hist-table">
-          <thead><tr><th>氏名</th><th>部署</th><th>巡回回数</th><th>最終巡回日</th></tr></thead>
-          <tbody id="coverage-tbody"><tr><td colspan="4" class="hist-empty">読み込み中...</td></tr></tbody>
+          <thead><tr><th>氏名</th><th>部署</th><th>巡回回数</th><th>最終巡回日</th><th></th></tr></thead>
+          <tbody id="coverage-tbody"><tr><td colspan="5" class="hist-empty">読み込み中...</td></tr></tbody>
         </table>
       </div>
+    </div>
+
+    <div class="card" id="excluded-card" style="display:none">
+      <div class="card-title" style="cursor:pointer" onclick="toggleExcludedSection()">&#x1F6AB; 対象外の従業員(<span id="excluded-count">0</span>人) <span id="excluded-caret">&#x25B6;</span></div>
+      <div id="excluded-list" class="hid"></div>
     </div>
 
     <div id="worker-history-panel" class="hid"></div>
@@ -481,24 +486,27 @@ function goToRecordDetail(id) {
 
 function loadCoverageStats() {
   const tbody = document.getElementById('coverage-tbody');
-  tbody.innerHTML = '<tr><td colspan="4" class="hist-empty">読み込み中...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="5" class="hist-empty">読み込み中...</td></tr>';
   document.getElementById('inspector-summary').innerHTML = '<div class="hist-empty">読み込み中...</div>';
 
-  gasGet('getWorkerCoverageStats').then(res => {
+  Promise.all([gasGet('getWorkerCoverageStats'), gasGet('getExcludedWorkers')]).then(([res, exRes]) => {
     if (!res || !res.ok) {
-      tbody.innerHTML = `<tr><td colspan="4" style="color:var(--r);text-align:center;padding:14px">取得エラー: ${(res && res.message) || '不明'}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="color:var(--r);text-align:center;padding:14px">取得エラー: ${(res && res.message) || '不明'}</td></tr>`;
       return;
     }
     const { workerStats, inspectorStats, totalRecords, dateRange } = res.data;
+    const excludedIds = new Set((exRes && exRes.ok ? exRes.data : []).map(String));
 
     // 従業員マスターに載っている全員を対象に、記録がなければ0件として表示
-    const rows = employees.map(e => {
+    const allRows = employees.map(e => {
       const s = workerStats[e.name] || { count: 0, lastDate: '' };
-      return { name: e.name, dept: e.dept || '-', count: s.count, lastDate: s.lastDate || '' };
+      return { id: e.id, name: e.name, dept: e.dept || '-', count: s.count, lastDate: s.lastDate || '' };
     });
+    const rows = allRows.filter(r => !excludedIds.has(String(r.id)));
+    const excludedRows = allRows.filter(r => excludedIds.has(String(r.id)));
     rows.sort((a, b) => (a.count - b.count) || String(a.lastDate).localeCompare(String(b.lastDate)));
 
-    // --- 全体サマリー ---
+    // --- 全体サマリー(対象外を除いて集計) ---
     const coveredCount = rows.filter(r => r.count > 0).length;
     document.getElementById('cov-total-records').textContent = totalRecords;
     document.getElementById('cov-covered').textContent = coveredCount + ' / ' + rows.length;
@@ -506,7 +514,7 @@ function loadCoverageStats() {
     document.getElementById('cov-daterange').textContent = dateRange.first
       ? (dateRange.first + ' 〜 ' + dateRange.last) : '記録なし';
 
-    // --- 棒グラフ ---
+    // --- 棒グラフ(対象外を除く) ---
     const chartEl = document.getElementById('cov-chart');
     const maxCount = Math.max(1, ...rows.map(r => r.count));
     chartEl.innerHTML = rows.map(r => {
@@ -519,8 +527,8 @@ function loadCoverageStats() {
         </div>`;
     }).join('');
 
-    // --- テーブル ---
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="hist-empty">従業員データがありません</td></tr>'; }
+    // --- テーブル(対象者) ---
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="hist-empty">対象の従業員がいません</td></tr>'; }
     else {
       tbody.innerHTML = rows.map(r => `
         <tr>
@@ -528,7 +536,27 @@ function loadCoverageStats() {
           <td>${escapeHtml(r.dept)}</td>
           <td style="font-weight:700;color:${r.count === 0 ? 'var(--r)' : r.count <= 2 ? 'var(--a)' : 'var(--g)'}">${r.count}回</td>
           <td>${r.lastDate || '(未巡回)'}</td>
+          <td><span class="link-btn" onclick="toggleExcluded('${escapeAttr(r.id)}','${escapeAttr(r.name)}',true)">対象外にする</span></td>
         </tr>`).join('');
+    }
+
+    // --- 対象外セクション ---
+    const excCard = document.getElementById('excluded-card');
+    document.getElementById('excluded-count').textContent = excludedRows.length;
+    if (excludedRows.length) {
+      excCard.style.display = '';
+      document.getElementById('excluded-list').innerHTML = `
+        <table class="hist-table" style="margin-top:10px">
+          <thead><tr><th>氏名</th><th>部署</th><th></th></tr></thead>
+          <tbody>${excludedRows.map(r => `
+            <tr>
+              <td>${escapeHtml(r.name)}</td>
+              <td>${escapeHtml(r.dept)}</td>
+              <td><span class="link-btn" onclick="toggleExcluded('${escapeAttr(r.id)}','${escapeAttr(r.name)}',false)">対象に戻す</span></td>
+            </tr>`).join('')}</tbody>
+        </table>`;
+    } else {
+      excCard.style.display = 'none';
     }
 
     // --- 巡回担当者別サマリー ---
@@ -552,9 +580,28 @@ function loadCoverageStats() {
       }).join('');
     }
   }).catch(err => {
-    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--r);text-align:center;padding:14px">取得エラー: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--r);text-align:center;padding:14px">取得エラー: ${err.message}</td></tr>`;
     document.getElementById('inspector-summary').innerHTML = `<div style="color:var(--r)">取得エラー: ${err.message}</div>`;
   });
+}
+
+function toggleExcluded(id, name, excluded) {
+  gasPost('setWorkerExcluded', { id, name, excluded })
+    .then(res => {
+      if (res && res.ok) {
+        showToast(excluded ? '対象外にしました' : '対象に戻しました', 'success');
+        loadCoverageStats();
+      } else {
+        showToast('更新エラー: ' + ((res && res.message) || '不明'), 'error');
+      }
+    })
+    .catch(err => showToast('更新エラー: ' + err.message, 'error'));
+}
+
+function toggleExcludedSection() {
+  document.getElementById('excluded-list').classList.toggle('hid');
+  const caret = document.getElementById('excluded-caret');
+  caret.style.transform = caret.style.transform === 'rotate(90deg)' ? '' : 'rotate(90deg)';
 }
 
 // ==============================================================
