@@ -24,14 +24,16 @@ html { -webkit-text-size-adjust: 100%; }
 body { font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif; background: var(--bg); color: var(--tx); font-size: 14px; -webkit-font-smoothing: antialiased; padding-bottom: 40px; }
 
 /* topbar */
-.topbar { background: var(--pr); padding: 0 14px; height: 48px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,.28); position: sticky; top: 0; z-index: 100; }
-.tbl { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.topbar { background: var(--pr); padding: 0 14px; height: 48px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,.28); position: sticky; top: 0; z-index: 100; gap: 8px; }
+.tbl { display: flex; align-items: center; gap: 8px; min-width: 0; flex-shrink: 1; }
 .tbic { width: 30px; height: 30px; border-radius: 50%; background: rgba(232,160,32,.2); border: 1px solid rgba(232,160,32,.4); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
 .tbco { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tbmd { font-size: 10px; color: rgba(255,255,255,.5); }
-.tbr { display: flex; align-items: center; gap: 8px; }
+.tbmd { font-size: 10px; color: rgba(255,255,255,.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tbr { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .user-name { font-size: 11px; color: rgba(255,255,255,.85); white-space: nowrap; }
-.badge-role { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.22); white-space: nowrap; }
+.badge-role { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.22); white-space: nowrap; flex-shrink: 0; }
+#btn-close-tab { white-space: nowrap; flex-shrink: 0; }
+#lang-select { flex-shrink: 0; max-width: 92px; }
 
 .content { padding: 14px; max-width: 980px; margin: 0 auto; }
 
@@ -122,12 +124,19 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
 .detail-item .di-eval.ng { color: var(--r); }
 .detail-item .di-eval.ok { color: var(--g); }
 .detail-item .di-result { flex: 1; color: var(--tx2); }
+@media (max-width: 640px) {
   .form-grid { grid-template-columns: 1fr; }
   .content { padding: 10px; }
   .card { padding: 12px; }
   .chk-bottom-row { flex-wrap: wrap; }
   .chk-eval-wrap { width: 100%; }
   .chk-result-wrap { width: 100%; }
+  .topbar { flex-wrap: wrap; height: auto; min-height: 48px; padding: 8px 10px; row-gap: 6px; }
+  .tbmd { display: none; }
+  .user-name { display: none; }
+  #lang-select { font-size: 10px; padding: 3px 4px; max-width: 78px; }
+  .badge-role { font-size: 9px; padding: 2px 6px; }
+  #btn-close-tab { font-size: 10px; padding: 4px 8px; }
 }
 @media (min-width: 700px) {
   .chk-eval-wrap { width: 110px; }
@@ -668,12 +677,18 @@ function showRecordDetail(id) {
     panel.innerHTML = `
       <div class="card detail-card">
         <div class="card-title">&#x1F4C4; 巡回記録の詳細</div>
-        <div style="font-size:12.5px;color:var(--tx2);margin-bottom:10px;line-height:1.8">
+        <div style="font-size:12.5px;color:var(--tx2);margin-bottom:4px;line-height:1.8">
           巡回日時: ${d.date || ''} ${d.time || ''}<br>
           取引先: ${d.client || '-'} / 品番: ${d.product || '-'}<br>
-          巡回担当者: ${d.inspector || '-'} / 作業者名: ${d.worker || '-'}<br>
-          ${d.evalComment ? '評価コメント: ' + escapeHtml(d.evalComment) : ''}
+          巡回担当者: ${d.inspector || '-'} / 作業者名: ${d.worker || '-'}
         </div>
+        ${d.evalComment ? `
+        <div style="font-size:12.5px;color:var(--tx2);margin-bottom:10px">
+          評価コメント: <span id="detail-eval-comment">${escapeHtml(d.evalComment)}</span>
+          <span class="link-btn" onclick="translateField('detail-eval-comment','trans-eval-comment-detail')" style="margin-left:8px">&#x1F310; 翻訳を見る</span>
+          <span class="link-btn" onclick="translateField('detail-eval-comment','trans-eval-comment-detail','ja')" style="margin-left:8px">&#x1F1EF;&#x1F1F5; 日本語に翻訳</span>
+          <div class="translate-box hid" id="trans-eval-comment-detail"></div>
+        </div>` : ''}
         ${sectionsHtml}
         <label class="fl" style="margin-top:14px">作業者コメント</label>
         <textarea class="fi" id="detail-worker-comment" placeholder="作業者コメントを入力"
