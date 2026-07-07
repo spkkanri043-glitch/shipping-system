@@ -296,6 +296,8 @@ textarea.improve-note { width: 100%; min-height: 70px; margin-top: 10px; padding
       </div>
     </div>
 
+    <div id="worker-history-panel" class="hid"></div>
+
     <div class="card">
       <div class="card-title">&#x1F4CB; 巡回担当者別サマリー(取引先・品番の内訳)</div>
       <div id="inspector-summary"><div class="hist-empty">読み込み中...</div></div>
@@ -435,6 +437,48 @@ function switchTab(tab) {
   if (tab === 'coverage') loadCoverageStats();
 }
 
+function showWorkerHistory(name) {
+  const panel = document.getElementById('worker-history-panel');
+  panel.classList.remove('hid');
+  panel.innerHTML = '<div class="card">読み込み中...</div>';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  gasGet('getJunkaiRecords').then(res => {
+    if (!res || !res.ok) { panel.innerHTML = `<div class="card" style="color:var(--r)">取得エラー: ${(res && res.message) || '不明'}</div>`; return; }
+    const list = (res.data || []).filter(r => r.worker === name);
+    if (!list.length) {
+      panel.innerHTML = `<div class="card"><div class="card-title">&#x1F4CB; ${escapeHtml(name)}さんの巡回記録</div><div class="hist-empty">記録がありません</div></div>`;
+      return;
+    }
+    panel.innerHTML = `
+      <div class="card">
+        <div class="card-title">&#x1F4CB; ${escapeHtml(name)}さんの巡回記録(${list.length}件)</div>
+        <div style="overflow-x:auto">
+          <table class="hist-table">
+            <thead><tr><th>日時</th><th>取引先</th><th>品番</th><th>巡回担当者</th><th>×件数</th><th></th></tr></thead>
+            <tbody>${list.map(r => `
+              <tr class="hist-row" onclick="goToRecordDetail('${r.id}')">
+                <td>${r.date || ''}${r.time ? ' ' + r.time : ''}</td>
+                <td>${r.client || '-'}</td>
+                <td>${r.product || '-'}</td>
+                <td>${r.inspector || '-'}</td>
+                <td style="color:${r.ngTotal > 0 ? 'var(--r)' : 'var(--g)'};font-weight:700">${r.ngTotal}</td>
+                <td><span class="link-btn">詳細を見る</span></td>
+              </tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }).catch(err => { panel.innerHTML = `<div class="card" style="color:var(--r)">取得エラー: ${err.message}</div>`; });
+}
+
+function goToRecordDetail(id) {
+  switchTab('history');
+  showRecordDetail(id);
+  setTimeout(() => {
+    const el = document.getElementById('detail-panel');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }, 250);
+}
+
 function loadCoverageStats() {
   const tbody = document.getElementById('coverage-tbody');
   tbody.innerHTML = '<tr><td colspan="4" class="hist-empty">読み込み中...</td></tr>';
@@ -480,7 +524,7 @@ function loadCoverageStats() {
     else {
       tbody.innerHTML = rows.map(r => `
         <tr>
-          <td>${escapeHtml(r.name)}</td>
+          <td><span class="link-btn" onclick="showWorkerHistory('${escapeAttr(r.name)}')">${escapeHtml(r.name)}</span></td>
           <td>${escapeHtml(r.dept)}</td>
           <td style="font-weight:700;color:${r.count === 0 ? 'var(--r)' : r.count <= 2 ? 'var(--a)' : 'var(--g)'}">${r.count}回</td>
           <td>${r.lastDate || '(未巡回)'}</td>
