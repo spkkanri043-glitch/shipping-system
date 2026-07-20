@@ -941,8 +941,8 @@ function renderCondSecs(targetId, secs, masterMode, saved) {
       <table class="dt">
         <thead><tr>
           <th style="width:130px">項目名</th>
-         <th>基準値①</th><th style="width:72px">${esc(sec.u1||'単位')}</th>
-          ${sec.u2 ? `<th>基準値②</th><th style="width:72px">${esc(sec.u2)}</th>` : '<th colspan="2" style="width:80px"></th>'}
+         <th>基準値①</th><th style="width:72px">単位</th>
+          ${sec.u2 ? `<th>基準値②</th><th style="width:72px">単位</th>` : '<th colspan="2" style="width:80px"></th>'}
           <th style="width:70px">管理値</th>
           <th>記入欄</th>
           ${isTA ? '<th style="width:70px">OK/NG</th>' : ''}
