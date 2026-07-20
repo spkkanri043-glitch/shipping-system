@@ -289,7 +289,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 @media print{ #changeLogCard{ break-inside:avoid; } .clog-item{ background:#f7f7f7 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } }  
 
 /* 成形条件 単位プルダウン（マスター編集） */
-.unit-sel{ width:100%; border:1px solid var(--bd); border-radius:3px; padding:1px 2px; font-size:10px; font-family:inherit; background:var(--wh); color:var(--tx); text-align:center; }
+.unit-sel{ width:100%; min-width:56px; border:1px solid var(--bd); border-radius:3px; padding:2px 1px; font-size:10px; font-family:inherit; background:var(--wh); color:var(--tx); text-align:center; }
 .unit-sel:focus{ outline:1px solid var(--blue2); }
 
 </style>
@@ -941,8 +941,8 @@ function renderCondSecs(targetId, secs, masterMode, saved) {
       <table class="dt">
         <thead><tr>
           <th style="width:130px">項目名</th>
-          <th>基準値①</th><th style="width:50px">${esc(sec.u1||'単位')}</th>
-          ${sec.u2 ? `<th>基準値②</th><th style="width:55px">${esc(sec.u2)}</th>` : '<th colspan="2" style="width:80px"></th>'}
+         <th>基準値①</th><th style="width:72px">${esc(sec.u1||'単位')}</th>
+          ${sec.u2 ? `<th>基準値②</th><th style="width:72px">${esc(sec.u2)}</th>` : '<th colspan="2" style="width:80px"></th>'}
           <th style="width:70px">管理値</th>
           <th>記入欄</th>
           ${isTA ? '<th style="width:70px">OK/NG</th>' : ''}
