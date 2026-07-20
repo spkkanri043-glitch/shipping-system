@@ -287,7 +287,11 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 .clog-before{ color:var(--tx3); text-decoration:line-through; }
 .clog-after{ color:var(--g); font-weight:bold; }
 @media print{ #changeLogCard{ break-inside:avoid; } .clog-item{ background:#f7f7f7 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } }  
-  
+
+/* 成形条件 単位プルダウン（マスター編集） */
+.unit-sel{ width:100%; border:1px solid var(--bd); border-radius:3px; padding:1px 2px; font-size:10px; font-family:inherit; background:var(--wh); color:var(--tx); text-align:center; }
+.unit-sel:focus{ outline:1px solid var(--blue2); }
+
 </style>
 </head>
 <body>
@@ -741,6 +745,8 @@ const DEF_PC = [
 ];
 
 const M5 = ['人','機械','材料','方法','金型'];
+  // 成形条件の単位プルダウン選択肢（マスター編集用）
+const UNIT_OPTIONS = ['', 'S', 'min⁻¹', 'mm', 'mm/s', 'ton', 'kN', 'Mpa', 'kgf/㎠', '℃', '%', '回路数', '冷水'];
 
 // ══════════════════════════════════════════════
 // INIT
@@ -974,16 +980,29 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
   const nameRo = masterMode ? '' : 'readonly';
   const rangeClass = masterMode ? 'master-range' : '';
 
+  // 単位セル：マスター編集時はプルダウン、日々の記録では固定テキスト
+  const unitCell = (curVal, which) => {
+    if (masterMode) {
+      const opts = UNIT_OPTIONS.slice();
+      if (curVal && !opts.includes(curVal)) opts.unshift(curVal);
+      const options = opts.map(u =>
+        `<option value="${esc(u)}" ${u===curVal?'selected':''}>${u===''?'-':esc(u)}</option>`
+      ).join('');
+      return `<select class="unit-sel" onchange="onUnitChange('${prefix}',${si},${ri},'${which}',this.value)">${options}</select>`;
+    }
+    return `<span class="rc">${esc(curVal)}</span>`;
+  };
+
   tr.innerHTML = `
     <td style="width:130px;min-width:130px;"><input type="text" class="tx" value="${esc(row.n||'')}" ${nameRo}
       ${masterMode ? `oninput="${prefix==='m'?'M_COND_SECS':'COND_SECS'}[${si}].rows[${ri}].n=this.value"` : ''}
       ${!masterMode ? 'title="項目名はマスター管理から変更してください"' : ''}></td>
-    <td><input type="number" value="${b1v}" data-k="${k}_b1"></td>
-    <td class="rc">${esc(u1)}</td>
-    <td><input type="number" value="${b2v}" data-k="${k}_b2"></td>
-    <td class="rc">${esc(u2)}</td>
+    <td><input type="text" inputmode="decimal" value="${esc(b1v)}" data-k="${k}_b1" style="text-align:right;"></td>
+    <td>${unitCell(u1, 'u1')}</td>
+    <td><input type="text" inputmode="decimal" value="${esc(b2v)}" data-k="${k}_b2" style="text-align:right;"></td>
+   <td>${unitCell(u2, 'u2')}</td>
     <td><input type="text" value="${sv.r !== undefined ? sv.r : r}" data-k="${k}_r" class="${rangeClass}" ${masterMode?'':'readonly'} style="text-align:center;font-size:10px;color:${masterMode?'var(--tx)':'var(--acc)'};font-weight:bold;"></td>
-    <td><input type="number" value="${sv.v||''}" data-k="${k}_v"></td>
+    <td><input type="text" inputmode="decimal" value="${esc(sv.v||'')}" data-k="${k}_v" style="text-align:right;"></td>
     ${isTA ? `<td><select class="on" data-k="${k}_ok" onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td>` : ''}
     <td style="white-space:nowrap;">
       <button class="mv" onclick="moveRow('${targetId}','${prefix}',${si},${ri},-1)">▲</button>
@@ -996,6 +1015,13 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
     const s = tr.querySelector(`[data-k="${k}_ok"]`);
     if (s) { s.value=sv.ok||row.ok||''; upOn(s); }
   }
+}
+
+  // 単位プルダウンの変更を行データに反映
+function onUnitChange(prefix, si, ri, which, value) {
+  const secs = prefix==='c' ? COND_SECS : M_COND_SECS;
+  if (!secs[si] || !secs[si].rows[ri]) return;
+  secs[si].rows[ri][which] = value;   // which は 'u1' または 'u2'
 }
 
 function moveRow(targetId, prefix, si, ri, dir) {
