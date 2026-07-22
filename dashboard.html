@@ -200,6 +200,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .rank-table tr.rank-empty td{color:var(--tx3);font-size:12px;}
 .rank-table tr.rank-extra{display:none;}
 .rank-table tr.rank-extra.shown{display:table-row;}
+.type-pie-legend-row:hover{background:var(--sf2);border-radius:6px;}
 .rank-more-row td{padding:0 !important;border:none !important;}
 .btn-rank-more{width:100%;padding:8px;font-size:12px;font-weight:600;color:var(--pr);background:var(--sf2);border:none;border-top:1px solid var(--bd);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;border-radius:0 0 var(--rads) var(--rads);}
 .btn-rank-more:hover{background:var(--sf3);}
@@ -319,6 +320,9 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
   <!-- 不具合事象別 割合（円グラフ） -->
   <div class="sec">
     <div class="sec-title">🥧 不具合事象別 割合</div>
+    <div style="font-size:11px;color:var(--tx3);margin-bottom:5px;text-align:right">
+      💡 グラフまたは項目をクリックすると詳細集計を表示
+    </div>
     <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
       <div class="chart-wrap" style="height:260px; flex:1 1 260px; max-width:320px;">
         <canvas id="type-pie-chart" role="img" aria-label="不具合事象別割合円グラフ">不具合事象別割合</canvas>
@@ -1038,6 +1042,12 @@ function renderTypePie() {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
+      onHover: (evt, els) => { evt.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+      onClick: (evt, els) => {
+        if (!els.length) return;
+        const idx = els[0].index;
+        rankDrilldown('defectType', labels[idx]);
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -1055,7 +1065,10 @@ function renderTypePie() {
 
   legendEl.innerHTML = rows.map((r,i) => {
     const pct = (r.v/total*100).toFixed(1);
-    return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #eef0f3;">
+    const rawKey = r.k.replace(/'/g, "\\'");
+    return `<div class="type-pie-legend-row" title="クリックしてこの項目を集計"
+        onclick="rankDrilldown('defectType','${rawKey}')"
+        style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #eef0f3;cursor:pointer;">
       <span style="width:11px;height:11px;border-radius:3px;background:${colors[i]};flex:none;"></span>
       <span style="flex:1;">${r.k}</span>
       <span style="color:#5a5f6a;">${r.v}件</span>
