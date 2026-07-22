@@ -451,7 +451,13 @@ async function loadData() {
   try {
     const res = await fetch(`${defectUrl}?action=getDefects`);
     const d = await res.json();
-    allRecords = d.records || [];
+    // 担当者（報告者）と不具合作業者のデータが入れ替わって届くため、ここでスワップして正しい項目に割り当てる
+    allRecords = (d.records || []).map(r => ({
+      ...r,
+      worker: r.defectWorker || r.workerId || '',
+      defectWorker: r.worker || '',
+      workerId: ''
+    }));
     buildFilterOptions();
     applyFilter();
   } catch(e) {
