@@ -858,7 +858,13 @@ function rankDrilldown(filterKey, keyVal) {
     const cmax = crows[0][1].cnt || 1;
     return `<div style="margin-bottom:14px">
       <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:6px">${crossLabels[ck]}別</div>
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px">
+        <colgroup>
+          <col style="width:46%">
+          <col style="width:16%">
+          <col style="width:16%">
+          <col style="width:22%">
+        </colgroup>
         <thead><tr>
           <th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--bd);color:var(--tx2);font-size:11px">${crossLabels[ck]}</th>
           <th style="text-align:center;padding:4px 6px;border-bottom:1px solid var(--bd);color:var(--tx2);font-size:11px">件数</th>
@@ -867,10 +873,10 @@ function rankDrilldown(filterKey, keyVal) {
         </tr></thead>
         <tbody>
           ${crows.map(([v,d]) => `<tr>
-            <td style="padding:5px 6px;border-bottom:1px solid var(--bd);font-size:12px">${v}</td>
+            <td style="padding:5px 6px;border-bottom:1px solid var(--bd);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${v}">${v}</td>
             <td style="text-align:center;padding:5px 6px;border-bottom:1px solid var(--bd)"><span class="badge badge-r">${d.cnt}</span></td>
             <td style="text-align:center;padding:5px 6px;border-bottom:1px solid var(--bd)">${d.count}</td>
-            <td style="padding:5px 6px;border-bottom:1px solid var(--bd);width:80px">
+            <td style="padding:5px 6px;border-bottom:1px solid var(--bd)">
               <div class="bar-bg"><div class="bar-fill bar-b" style="width:${Math.round(d.cnt/cmax*100)}%"></div></div>
             </td>
           </tr>`).join('')}
