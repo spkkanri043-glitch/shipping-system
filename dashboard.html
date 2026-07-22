@@ -863,8 +863,8 @@ function rankDrilldown(filterKey, keyVal) {
     const crows = Object.entries(cm).sort((a,b)=>b[1].cnt-a[1].cnt).slice(0,5);
     if (!crows.length) return '';
     const cmax = crows[0][1].cnt || 1;
-    return `<div style="margin-bottom:14px">
-      <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:6px">${crossTitles[ck]}</div>
+    return `<div style="margin-bottom:20px">
+      <div style="font-size:13px;font-weight:700;color:var(--pr);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--pr);display:flex;align-items:center;gap:6px;">${crossTitles[ck]}</div>
       <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px">
         <colgroup>
           <col style="width:46%">
