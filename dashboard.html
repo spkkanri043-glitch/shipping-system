@@ -838,12 +838,19 @@ function rankDrilldown(filterKey, keyVal) {
 
   const labelMap = {
     defectType:'不具合種類', part:'品番', customer:'取引先',
-    worker:'担当者', defectWorker:'不具合作業者'
+    worker:'担当者（報告者）', defectWorker:'不具合作業者'
   };
 
   // クロス集計（他軸でグルーピング）
   const crossKeys = Object.keys(keyFnMap).filter(k => k !== filterKey);
   const crossLabels = {defectType:'不具合種類', part:'品番', customer:'取引先', worker:'担当者', defectWorker:'作業者'};
+  const crossTitles = {
+    defectType: '⚠️ 不具合種類別',
+    part:       '📦 品番別',
+    customer:   '🏭 取引先別',
+    worker:     '👤 担当者別（報告者）',
+    defectWorker: '🔧 不具合作業者別'
+  };
 
   const crossHtml = crossKeys.map(ck => {
     const cm = {};
@@ -857,7 +864,7 @@ function rankDrilldown(filterKey, keyVal) {
     if (!crows.length) return '';
     const cmax = crows[0][1].cnt || 1;
     return `<div style="margin-bottom:14px">
-      <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:6px">${crossLabels[ck]}別</div>
+      <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:6px">${crossTitles[ck]}</div>
       <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px">
         <colgroup>
           <col style="width:46%">
