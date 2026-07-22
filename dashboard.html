@@ -316,6 +316,17 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
     </div>
   </div>
 
+  <!-- 不具合事象別 割合（円グラフ） -->
+  <div class="sec">
+    <div class="sec-title">🥧 不具合事象別 割合</div>
+    <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+      <div class="chart-wrap" style="height:260px; flex:1 1 260px; max-width:320px;">
+        <canvas id="type-pie-chart" role="img" aria-label="不具合事象別割合円グラフ">不具合事象別割合</canvas>
+      </div>
+      <div id="type-pie-legend" style="flex:1 1 240px; font-size:13px;"></div>
+    </div>
+  </div>
+
   <!-- ランキング 上段 -->
   <div class="sec-3col">
     <div class="sec">
@@ -427,6 +438,7 @@ let trendMode = 'cnt';
 let aggMode = 'week';
 let trendChart = null;
 let aggChart = null;
+let typePieChart = null;
 
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('defect-url').value = defectUrl;
@@ -466,7 +478,7 @@ async function loadData() {
 }
 
 function showLoadingAll() {
-  ['type-area','part-area','customer-area','worker-area','defect-worker-area','record-area'].forEach(id => {
+  ['type-area','part-area','customer-area','worker-area','defect-worker-area','record-area','type-pie-legend'].forEach(id => {
     document.getElementById(id).innerHTML = '<div class="loading"><div class="spinner"></div>読み込み中</div>';
   });
 }
@@ -556,6 +568,7 @@ function applyFilter() {
   renderTrend();
   renderAgg();
   renderTypeRank();
+  renderTypePie();
   renderPartRank();
   renderCustomerRank();
   renderWorkerRank();
@@ -994,6 +1007,61 @@ function groupBy(records, keyFn) {
 function renderTypeRank() {
   const rows = groupBy(filtered, r => r.defectType);
   document.getElementById('type-area').innerHTML = buildRankHtml(rows, r=>r.k, '件数', 'bar-r', 'defectType');
+}
+
+const PIE_COLORS = ['#1a3a5c','#b53030','#d99a2b','#3a8a5c','#6a4c93','#2b8ba3','#c46a1a','#8a8f99','#a35c8f','#4c7ab5'];
+
+function renderTypePie() {
+  const rows = groupBy(filtered, r => r.defectType || '不明');
+  const total = rows.reduce((s,r) => s + r.v, 0);
+
+  const canvas = document.getElementById('type-pie-chart');
+  const legendEl = document.getElementById('type-pie-legend');
+
+  if (!total) {
+    if (typePieChart) { typePieChart.destroy(); typePieChart = null; }
+    legendEl.innerHTML = '<div style="color:#8a8f99;padding:8px;">データがありません</div>';
+    return;
+  }
+
+  const labels = rows.map(r => r.k);
+  const values = rows.map(r => r.v);
+  const colors = labels.map((_,i) => PIE_COLORS[i % PIE_COLORS.length]);
+
+  if (typePieChart) typePieChart.destroy();
+  const ctx = canvas.getContext('2d');
+  typePieChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: colors, borderColor:'#fff', borderWidth:1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const v = ctx.parsed;
+              const pct = total ? (v/total*100).toFixed(1) : '0.0';
+              return `${ctx.label}: ${v}件 (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  legendEl.innerHTML = rows.map((r,i) => {
+    const pct = (r.v/total*100).toFixed(1);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #eef0f3;">
+      <span style="width:11px;height:11px;border-radius:3px;background:${colors[i]};flex:none;"></span>
+      <span style="flex:1;">${r.k}</span>
+      <span style="color:#5a5f6a;">${r.v}件</span>
+      <span style="font-weight:600;min-width:48px;text-align:right;">${pct}%</span>
+    </div>`;
+  }).join('');
 }
 function renderPartRank() {
   const rows = groupBy(filtered, r => r.part);
