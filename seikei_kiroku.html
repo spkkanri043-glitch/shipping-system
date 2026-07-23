@@ -718,6 +718,7 @@ let M_PC_ITEMS = [];    // 製品確認項目（マスター編集用）
 let COND_SECS = [];     // 成形条件セクション（日々）
 let M_COND_SECS = [];   // 成形条件セクション（マスター編集用）
 let M_PNS = [''];       // マスター品番リスト
+let M_SEC_CACHE = {};   // マスター編集：チップで外したセクションの退避（key → セクション）
 const SIGNS = {mgr:null, sup:null, agg:null};
 
 // 品番+依頼番号ペア [{no:'', req:''}]
@@ -1025,7 +1026,7 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
     <td><input type="text" inputmode="decimal" value="${esc(b2v)}" data-k="${k}_b2" style="text-align:right;"></td>
     <td>${unitCell(u2, 'u2')}</td>
     <td><input type="text" value="${sv.r !== undefined ? sv.r : r}" data-k="${k}_r" class="${rangeClass}" ${masterMode?'':'readonly'} style="text-align:center;font-size:10px;color:${masterMode?'var(--tx)':'var(--acc)'};font-weight:bold;"></td>
-    <td><input type="text" inputmode="decimal" value="${esc(sv.v||'')}" data-k="${k}_v" style="text-align:right;"></td>
+    <td><input type="text" inputmode="decimal" value="${esc(sv.v !== undefined ? sv.v : (row.v !== undefined ? row.v : ''))}" data-k="${k}_v" style="text-align:right;"></td>
     ${isTA ? `<td><select class="on" data-k="${k}_ok" onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td>` : ''}
     <td style="white-space:nowrap;">
       <button class="mv" onclick="moveRow('${targetId}','${prefix}',${si},${ri},-1)">▲</button>
@@ -1100,15 +1101,59 @@ function renderMstChips() {
   }).join('');
 }
 
+// 画面の入力値を M_COND_SECS に書き戻す（再描画で消えないようにする）
+function commitMstCondInputs() {
+  M_COND_SECS.forEach((sec, si) => {
+    sec.rows.forEach((row, ri) => {
+      const k = `m_${si}_${ri}`;
+      const val = (suf) => {
+        const el = document.querySelector(`[data-k="${k}_${suf}"]`);
+        return el ? el.value : undefined;
+      };
+      const tr = document.getElementById(`mtr-${si}-${ri}`);
+      if (tr) {
+        const nameInp = tr.querySelector('input.tx');
+        if (nameInp) row.n = nameInp.value;
+      }
+      const b1 = val('b1'); if (b1 !== undefined) row.b1 = b1;
+      const b2 = val('b2'); if (b2 !== undefined) row.b2 = b2;
+      const rr = val('r');  if (rr !== undefined) row.r  = rr;
+      const vv = val('v');  if (vv !== undefined) row.v  = vv;
+      const ok = val('ok'); if (ok !== undefined) row.ok = ok;
+    });
+  });
+}
+
+// セクションを DEF_SECS の並び順に整える
+function sortMstSecs() {
+  const order = DEF_SECS.map(s => s.key);
+  M_COND_SECS.sort((a, b) => {
+    const ia = order.indexOf(a.key), ib = order.indexOf(b.key);
+    return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+  });
+}
+
 function toggleChip(i, checked) {
   const chip = document.getElementById('chip-'+i);
   chip.classList.toggle('on', checked);
+
+  // 先に現在の入力値をデータへ退避（これをしないと再描画で消える）
+  commitMstCondInputs();
+
+  const key = DEF_SECS[i].key;
   if (checked) {
-    const exists = M_COND_SECS.find(s=>s.key===DEF_SECS[i].key);
-    if (!exists) M_COND_SECS.push(deep(DEF_SECS[i]));
+    if (!M_COND_SECS.some(s => s.key === key)) {
+      // 一度外したものは入力値ごと復元、初回はデフォルトから
+      M_COND_SECS.push(M_SEC_CACHE[key] ? deep(M_SEC_CACHE[key]) : deep(DEF_SECS[i]));
+      delete M_SEC_CACHE[key];
+    }
   } else {
-    M_COND_SECS = M_COND_SECS.filter(s=>s.key!==DEF_SECS[i].key);
+    const removed = M_COND_SECS.find(s => s.key === key);
+    if (removed) M_SEC_CACHE[key] = deep(removed);   // 入力値ごと退避
+    M_COND_SECS = M_COND_SECS.filter(s => s.key !== key);
   }
+
+  sortMstSecs();   // 元の並び位置に戻す
   renderCondSecs('m-condBody', M_COND_SECS, true, null);
 }
 
@@ -1628,6 +1673,7 @@ async function fetchFromProductMaster() {
 }
 
 async function openMasterModal() {
+  M_SEC_CACHE = {};
   M_COND_SECS = deep(DEF_SECS);
   M_PC_ITEMS  = deep(DEF_PC);
   M_PNS = [''];
@@ -1707,6 +1753,7 @@ function setMstTab(tab) {
 
 function loadMasterToModal(i) {
   const m=PARTS[i];
+  M_SEC_CACHE = {};
   M_PNS = m.nos && m.nos.length ? [...m.nos] : [m.no||''];
   renderMstPns();
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
@@ -1724,6 +1771,7 @@ function loadMasterToModal(i) {
   sv('m-boxMachine',  m.boxMachine);
   if(m.sections&&m.sections.length) {
     M_COND_SECS=deep(m.sections);
+    sortMstSecs();
     renderMstChips();
     renderCondSecs('m-condBody', M_COND_SECS, true, null);
   }
@@ -1732,6 +1780,13 @@ function loadMasterToModal(i) {
     renderPC('m-pcTb', M_PC_ITEMS, true);
   }
   toast('品番マスターを読み込みました','ok');
+}
+
+// 数値なら数値、「冷水」など文字ならそのまま保持する
+function numOrText(s) {
+  if (s === '' || s === undefined || s === null) return undefined;
+  const n = Number(s);
+  return isNaN(n) ? s : n;
 }
 
 async function savePartMaster() {
@@ -1743,8 +1798,8 @@ async function savePartMaster() {
   M_COND_SECS.forEach((sec,si)=>{
     sec.rows.forEach((row,ri)=>{
       const k=`m_${si}_${ri}`;
-      if(condData[k+'_b1']!==undefined) row.b1=condData[k+'_b1']!==''?Number(condData[k+'_b1']):undefined;
-      if(condData[k+'_b2']!==undefined) row.b2=condData[k+'_b2']!==''?Number(condData[k+'_b2']):undefined;
+      if(condData[k+'_b1']!==undefined) row.b1=numOrText(condData[k+'_b1']);
+      if(condData[k+'_b2']!==undefined) row.b2=numOrText(condData[k+'_b2']);
       if(condData[k+'_r'] !==undefined) row.r =condData[k+'_r'];
       if(condData[k+'_n'] !==undefined) row.n =condData[k+'_n']||row.n;
     });
