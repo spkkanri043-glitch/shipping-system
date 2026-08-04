@@ -1332,6 +1332,50 @@ function driveEmbedUrl(url) {
   return u;   // 通常の画像URLはそのまま
 }
 
+// ── 写真の名前をドライブ側にも反映 ──
+// URLからドライブのファイルIDを取り出す
+function photoFileId(p) {
+  if (p && p.fileId) return p.fileId;
+  const u = String((p && p.url) || '');
+  if (!u.includes('drive.google.com')) return '';
+  const m = u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)
+         || u.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+         || u.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : '';
+}
+
+// 名前欄の確定時（フォーカスを外す・Enter）に呼ばれる
+async function onPhotoNameChange(i, isMaster) {
+  const list = isMaster ? M_PHOTOS : PHOTOS;
+  const p = list[i];
+  if (!p) return;
+
+  const fileId = photoFileId(p);
+  if (!GAS_URL || !fileId) return;          // ドライブ以外／GAS未接続はアプリ内の名前だけ
+  if (!String(p.name || '').trim()) return; // 空名は変更しない
+
+  const status = document.getElementById(isMaster ? 'mCamStatus' : 'camStatus');
+  const setStat = (t) => { if (status) status.textContent = t; };
+  setStat('ドライブの名前を変更中...');
+
+  const partNo = (isMaster ? (M_PNS[0] || '') : (PN_PAIRS[0] ? PN_PAIRS[0].no : '')) || '';
+  try {
+    const r = await gasPost({
+      action: 'renamePhoto',
+      fileId: fileId,
+      name: p.name,
+      partNo: partNo
+    });
+    if (!r || !r.ok) throw new Error((r && r.error) || '変更失敗');
+    p.fileId = fileId;
+    setStat('✅ ドライブの名前も変更しました');
+    setTimeout(() => setStat(''), 4000);
+  } catch (e) {
+    setStat('⚠️ ドライブ側の名前は変更できませんでした');
+    toast('ドライブの名前変更に失敗: ' + e.message, 'warn');
+  }
+}
+
 // ── 端末で撮影／選択した写真をアップロード ──
 function pickPhotoFile(isMaster) {
   if (!GAS_URL) {
@@ -1395,7 +1439,7 @@ async function onPhotoFile(inp, isMaster) {
 
     if (!r || !r.ok) throw new Error((r && r.error) || 'アップロード失敗');
 
-    const item = { name: defName, url: r.url };
+    const item = { name: defName, url: r.url, fileId: r.fileId || '' };
     if (isMaster) { M_PHOTOS.push(item); renderMstPhotos(); }
     else          { PHOTOS.push(item);   renderPhotos(); }
 
@@ -1437,7 +1481,8 @@ function renderPhotos() {
   ed.innerHTML = PHOTOS.map((p, i) => `
     <div class="ph-edit">
       <input type="text" value="${esc(p.name||'')}" placeholder="写真の名前"
-        oninput="PHOTOS[${i}].name=this.value; refreshPhotoView()">
+        oninput="PHOTOS[${i}].name=this.value; refreshPhotoView()"
+        onchange="onPhotoNameChange(${i}, false)">
       <input type="text" value="${esc(p.url||'')}" placeholder="Googleドライブの共有リンク"
         oninput="PHOTOS[${i}].url=this.value" onchange="refreshPhotoView()">
       <button class="db" onclick="delPhoto(${i})" title="削除">🗑</button>
@@ -1471,7 +1516,8 @@ function renderMstPhotos() {
   ed.innerHTML = M_PHOTOS.map((p, i) => `
     <div class="ph-edit">
       <input type="text" value="${esc(p.name||'')}" placeholder="写真の名前"
-        oninput="M_PHOTOS[${i}].name=this.value; refreshMstPhotoView()">
+        oninput="M_PHOTOS[${i}].name=this.value; refreshMstPhotoView()"
+        onchange="onPhotoNameChange(${i}, true)">
       <input type="text" value="${esc(p.url||'')}" placeholder="Googleドライブの共有リンク"
         oninput="M_PHOTOS[${i}].url=this.value" onchange="refreshMstPhotoView()">
       <button class="db" onclick="delMstPhoto(${i})" title="削除">🗑</button>
