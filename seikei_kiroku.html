@@ -303,6 +303,19 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 .tl-sub:empty{ display:none; }
 .ch .tl-sub{ color:rgba(255,255,255,.75); margin-left:6px; display:inline; }
 @media print{ .tr-btn, #lang-select, #btn-tl-toggle{ display:none !important; } }
+
+/* ── 写真展開 ── */
+.ph-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+.ph-item{ margin:0; width:100%; max-width:280px; }
+.ph-frame{ width:100%; height:200px; border-radius:8px; overflow:hidden; border:1px solid var(--bd); background:#f4f6fa; }
+.ph-img{ width:100%; max-width:280px; height:200px; object-fit:cover; border-radius:8px; border:1px solid var(--bd); display:block; }
+.ph-cap{ font-size:11px; color:var(--blue); font-weight:bold; margin-top:3px; text-align:center; word-break:break-word; }
+.ph-empty{ width:100%; padding:18px; border-radius:8px; border:2px dashed var(--bd); text-align:center; color:var(--tx3); font-size:12px; }
+.ph-edit{ display:grid; grid-template-columns:150px 1fr auto; gap:6px; align-items:center; margin-bottom:5px; background:var(--sec); border-radius:4px; padding:5px 8px; }
+.ph-edit input{ border:1px solid var(--bd); border-radius:3px; padding:4px 7px; font-size:11px; font-family:inherit; background:#fff; width:100%; }
+.ph-sub{ font-size:10px; color:var(--tx3); margin-bottom:4px; }
+@media(max-width:700px){ .ph-edit{ grid-template-columns:1fr auto; } }
+@media print{ .ph-frame, .ph-edit, .ph-add-btn{ display:none !important; } .ph-img{ max-width:220px; height:auto; } }
 </style>
 </head>
 <body>
@@ -467,6 +480,19 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
     </div>
   </div>
 
+  <!-- 写真 -->
+  <div class="card">
+    <div class="ch">📷 写真</div>
+    <div class="cb">
+      <div id="refPhotoArea"></div>
+      <div style="font-size:11px;font-weight:bold;color:var(--blue);margin:8px 0 2px;">この記録の写真</div>
+      <div class="ph-sub">Googleドライブの共有リンクを貼り付けてください（「リンクを知っている全員」に共有が必要です）</div>
+      <div id="photoEdit"></div>
+      <button class="ph-add-btn" onclick="addPhoto()" style="margin-top:4px;padding:4px 12px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;font-family:inherit;">＋ 写真追加</button>
+      <div id="photoView"></div>
+    </div>
+  </div>
+
   <!-- 変更履歴 -->
   <div class="card" id="changeLogCard" style="display:none;">
     <div class="ch">📝 条件変更の履歴<span id="clogCount" style="font-size:10px;opacity:.7;margin-left:8px;"></span></div>
@@ -592,6 +618,18 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
         <div class="cb" id="m-condBody"></div>
       </div>
 
+      <!-- 製品特有の注意事項（マスター） -->
+      <div class="card" style="margin-bottom:10px;">
+        <div class="ch">📌 製品特有の注意事項（マスター設定）<span style="font-size:10px;opacity:.7;margin-left:8px;">※内容・基準値を設定してください（記録書のひな形になります）</span></div>
+        <div class="cb">
+          <table class="st">
+            <thead><tr><th>内容</th><th style="width:170px;">基準値</th><th style="width:34px;"></th></tr></thead>
+            <tbody id="m-notesTb"></tbody>
+          </table>
+          <button onclick="addMstNoteRow()" style="margin-top:6px;padding:3px 10px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;font-family:inherit;">＋ 行追加</button>
+        </div>
+      </div>
+
       <!-- 製品確認項目 -->
       <div class="card" style="margin-bottom:10px;">
         <div class="ch">
@@ -603,6 +641,17 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
             <thead><tr><th>内容</th><th>管理値</th><th>初物</th><th>終物</th></tr></thead>
             <tbody id="m-pcTb"></tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- 参考写真（マスター） -->
+      <div class="card" style="margin-bottom:10px;">
+        <div class="ch">📷 参考写真（マスター設定）<span style="font-size:10px;opacity:.7;margin-left:8px;">※品番ごとの見本・注意箇所など</span></div>
+        <div class="cb">
+          <div class="ph-sub">Googleドライブの共有リンクを貼り付けてください（「リンクを知っている全員」に共有が必要です）</div>
+          <div id="m-photoEdit"></div>
+          <button onclick="addMstPhoto()" style="margin-top:4px;padding:4px 12px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;font-family:inherit;">＋ 写真追加</button>
+          <div id="m-photoView"></div>
         </div>
       </div>
 
@@ -715,6 +764,10 @@ let HIST = [];          // 履歴リスト
 let PARTS = [];         // 品番マスターリスト
 let PC_ITEMS = [];      // 製品確認項目（日々）
 let M_PC_ITEMS = [];    // 製品確認項目（マスター編集用）
+let M_NOTES = [];       // 製品特有の注意事項（マスター編集用）
+let M_PHOTOS = [];      // 参考写真（マスター編集用）[{name,url}]
+let PHOTOS = [];        // この記録の写真（日々）[{name,url}]
+let REF_PHOTOS = [];    // マスター由来の参考写真（日々・閲覧のみ）
 let COND_SECS = [];     // 成形条件セクション（日々）
 let M_COND_SECS = [];   // 成形条件セクション（マスター編集用）
 let M_PNS = [''];       // マスター品番リスト
@@ -785,6 +838,8 @@ window.addEventListener('DOMContentLoaded', () => {
   renderCondSecs('condBody', COND_SECS, false, null);
   renderPC('pcTb', PC_ITEMS, false);
   renderNotes(3); renderChocos(1); renderM5();
+  PHOTOS = []; REF_PHOTOS = [];
+  renderPhotos(); renderRefPhotos();
   setStatus('新規作成モード', 'ok');
   PARTS = JSON.parse(ls('seikei_part_masters') || '[]');
 });
@@ -1245,6 +1300,160 @@ function applyProdEdit() {
 // ══════════════════════════════════════════════
 // 注意事項 / チョコ停 / 5M
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// 写真展開（Googleドライブ）
+// ══════════════════════════════════════════════
+// 共有リンク等から埋め込み用URLへ変換（/preview 形式に統一）
+function driveEmbedUrl(url) {
+  const u = String(url || '').trim();
+  if (!u) return '';
+  if (u.includes('drive.google.com')) {
+    if (u.includes('/preview')) return u;
+    const m = u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)
+           || u.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+           || u.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
+  }
+  return u;   // 通常の画像URLはそのまま
+}
+
+// 写真1枚分の表示HTML（/preview はiframe、それ以外はimg）
+function photoItemHtml(p) {
+  const url = driveEmbedUrl(p && p.url);
+  if (!url) return '';
+  const name = (p && p.name) ? p.name : '写真';
+  const media = url.includes('/preview')
+    ? `<div class="ph-frame"><iframe src="${esc(url)}" frameborder="0" allowfullscreen style="border:none;width:100%;height:100%"></iframe></div>`
+    : `<a href="${esc(url)}" target="_blank"><img class="ph-img" src="${esc(url)}" alt="${esc(name)}" onerror="this.style.display='none'"></a>`;
+  return `<figure class="ph-item">${media}<figcaption class="ph-cap">${esc(name)}</figcaption></figure>`;
+}
+
+// 写真ギャラリー（複数枚）
+function photoGalleryHtml(list, emptyMsg) {
+  const items = (list || []).map(photoItemHtml).filter(Boolean).join('');
+  return items ? `<div class="ph-row">${items}</div>`
+               : `<div class="ph-row"><div class="ph-empty">📷 ${esc(emptyMsg || '写真なし')}</div></div>`;
+}
+
+// ── 日々の記録：写真の編集と表示 ──
+function renderPhotos() {
+  const ed = document.getElementById('photoEdit');
+  const vw = document.getElementById('photoView');
+  if (!ed || !vw) return;
+  ed.innerHTML = PHOTOS.map((p, i) => `
+    <div class="ph-edit">
+      <input type="text" value="${esc(p.name||'')}" placeholder="写真の名前"
+        oninput="PHOTOS[${i}].name=this.value; refreshPhotoView()">
+      <input type="text" value="${esc(p.url||'')}" placeholder="Googleドライブの共有リンク"
+        oninput="PHOTOS[${i}].url=this.value" onchange="refreshPhotoView()">
+      <button class="db" onclick="delPhoto(${i})" title="削除">🗑</button>
+    </div>`).join('');
+  refreshPhotoView();
+}
+
+function refreshPhotoView() {
+  const vw = document.getElementById('photoView');
+  if (vw) vw.innerHTML = photoGalleryHtml(PHOTOS, 'この記録の写真はまだありません');
+  const cap = document.querySelectorAll('#photoView .ph-cap');
+  if (cap.length) refreshLabelTl();
+}
+
+function addPhoto() { PHOTOS.push({name:'', url:''}); renderPhotos(); }
+function delPhoto(i) { PHOTOS.splice(i,1); renderPhotos(); }
+
+// マスター由来の参考写真（閲覧のみ）
+function renderRefPhotos() {
+  const el = document.getElementById('refPhotoArea');
+  if (!el) return;
+  if (!REF_PHOTOS || !REF_PHOTOS.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div style="font-size:11px;font-weight:bold;color:var(--blue);margin-bottom:2px;">参考写真（マスター登録）</div>'
+    + photoGalleryHtml(REF_PHOTOS, '参考写真なし');
+}
+
+// ── マスター：参考写真の編集と表示 ──
+function renderMstPhotos() {
+  const ed = document.getElementById('m-photoEdit');
+  if (!ed) return;
+  ed.innerHTML = M_PHOTOS.map((p, i) => `
+    <div class="ph-edit">
+      <input type="text" value="${esc(p.name||'')}" placeholder="写真の名前"
+        oninput="M_PHOTOS[${i}].name=this.value; refreshMstPhotoView()">
+      <input type="text" value="${esc(p.url||'')}" placeholder="Googleドライブの共有リンク"
+        oninput="M_PHOTOS[${i}].url=this.value" onchange="refreshMstPhotoView()">
+      <button class="db" onclick="delMstPhoto(${i})" title="削除">🗑</button>
+    </div>`).join('');
+  refreshMstPhotoView();
+}
+
+function refreshMstPhotoView() {
+  const vw = document.getElementById('m-photoView');
+  if (vw) vw.innerHTML = photoGalleryHtml(M_PHOTOS, '参考写真はまだありません');
+}
+
+function addMstPhoto() { M_PHOTOS.push({name:'', url:''}); renderMstPhotos(); }
+function delMstPhoto(i) { M_PHOTOS.splice(i,1); renderMstPhotos(); }
+
+// ══════════════════════════════════════════════
+// 製品特有の注意事項（マスター設定）
+// ══════════════════════════════════════════════
+function renderMstNotes() {
+  const tb = document.getElementById('m-notesTb');
+  if (!tb) return;
+  tb.innerHTML = '';
+  M_NOTES.forEach((item, i) => {
+    const tr = tb.insertRow();
+    tr.innerHTML = `
+      <td><input type="text" class="tx" value="${esc(item.c||'')}" placeholder="注意事項の内容"
+        style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;"
+        oninput="M_NOTES[${i}].c=this.value"></td>
+      <td><input type="text" value="${esc(item.s||'')}" placeholder="基準値"
+        style="width:100%;border:none;font-size:11px;font-family:inherit;padding:2px;text-align:right;"
+        oninput="M_NOTES[${i}].s=this.value"></td>
+      <td style="text-align:center;">
+        <button class="db" onclick="delMstNoteRow(${i})" title="削除">🗑</button>
+      </td>`;
+  });
+}
+
+function addMstNoteRow() {
+  commitMstNotes();
+  M_NOTES.push({c:'', s:''});
+  renderMstNotes();
+}
+
+function delMstNoteRow(i) {
+  commitMstNotes();
+  M_NOTES.splice(i, 1);
+  if (!M_NOTES.length) M_NOTES.push({c:'', s:''});
+  renderMstNotes();
+}
+
+// 画面の入力値を M_NOTES に書き戻す（再描画で消えないように）
+function commitMstNotes() {
+  const tb = document.getElementById('m-notesTb');
+  if (!tb) return;
+  Array.from(tb.rows).forEach((tr, i) => {
+    if (!M_NOTES[i]) return;
+    const ins = tr.querySelectorAll('input');
+    if (ins[0]) M_NOTES[i].c = ins[0].value;
+    if (ins[1]) M_NOTES[i].s = ins[1].value;
+  });
+}
+
+// マスターの注意事項を日々の記録書に展開
+function renderNotesFrom(items) {
+  const tb = document.getElementById('notesTb');
+  tb.innerHTML = '';
+  const list = (items && items.length) ? items : [{c:'',s:''},{c:'',s:''},{c:'',s:''}];
+  list.forEach((item, i) => {
+    addNoteRow(i);
+    const cEl = document.querySelector(`[data-k="nt${i}c"]`);
+    const sEl = document.querySelector(`[data-k="nt${i}s"]`);
+    if (cEl) cEl.value = item.c || '';
+    if (sEl) sEl.value = item.s || '';
+  });
+}
+
 function renderNotes(n){const tb=document.getElementById('notesTb');tb.innerHTML='';for(let i=0;i<n;i++)addNoteRow(i);}
 function addNoteRow(i){
   const tb=document.getElementById('notesTb');
@@ -1558,6 +1767,10 @@ function usePartMaster(i) {
     PC_ITEMS = deep(m.prodCheck);
     renderPC('pcTb', PC_ITEMS, false);
   }
+  renderNotesFrom(m.notes);
+  REF_PHOTOS = (m.photos && m.photos.length) ? deep(m.photos) : [];
+  PHOTOS = [];
+  renderRefPhotos(); renderPhotos();
   ['mgr','sup','agg'].forEach(role => {
     SIGNS[role] = null;
     document.getElementById(`s-${role}`).textContent = '-';
@@ -1676,6 +1889,8 @@ async function openMasterModal() {
   M_SEC_CACHE = {};
   M_COND_SECS = deep(DEF_SECS);
   M_PC_ITEMS  = deep(DEF_PC);
+  M_NOTES     = [{c:'',s:''},{c:'',s:''},{c:'',s:''}];
+  M_PHOTOS    = [];
   M_PNS = [''];
   ['m-productName','m-material','m-mbName','m-mbRatio','m-client','m-machineNo','m-condNo','m-dryTemp','m-dryTime','m-moldMachine','m-takeMachine','m-boxMachine'].forEach(id=>{
     const e=document.getElementById(id); if(e) e.value='';
@@ -1683,6 +1898,8 @@ async function openMasterModal() {
   renderMstPns();
   renderMstChips();
   renderCondSecs('m-condBody', M_COND_SECS, true, null);
+  renderMstNotes();
+  renderMstPhotos();
   renderPC('m-pcTb', M_PC_ITEMS, true);
   document.getElementById('masterModal').classList.add('show');
   await loadMasters();
@@ -1779,6 +1996,10 @@ function loadMasterToModal(i) {
     M_PC_ITEMS=deep(m.prodCheck);
     renderPC('m-pcTb', M_PC_ITEMS, true);
   }
+  M_NOTES = (m.notes && m.notes.length) ? deep(m.notes) : [{c:'',s:''},{c:'',s:''},{c:'',s:''}];
+  renderMstNotes();
+  M_PHOTOS = (m.photos && m.photos.length) ? deep(m.photos) : [];
+  renderMstPhotos();
   toast('品番マスターを読み込みました','ok');
 }
 
@@ -1811,6 +2032,8 @@ async function savePartMaster() {
     });
   });
 
+  commitMstNotes();
+
   M_PC_ITEMS.forEach((item,i)=>{
     const sw=document.querySelector(`[data-k="pc${i}sw_m-pcTb"]`);
     const sp=document.querySelector(`[data-k="pc${i}sp_m-pcTb"]`);
@@ -1828,6 +2051,8 @@ async function savePartMaster() {
     moldMachine:gv('m-moldMachine'), takeMachine:gv('m-takeMachine'), boxMachine:gv('m-boxMachine'),
     sections:deep(M_COND_SECS),
     prodCheck:deep(M_PC_ITEMS),
+    notes:deep(M_NOTES.filter(n => (n.c||'').trim() || (n.s||'').trim())),
+    photos:deep(M_PHOTOS.filter(p => (p.url||'').trim())),
   };
 
   const idx=PARTS.findIndex(p=>(p.nos?p.nos[0]:p.no)===nos[0]);
@@ -1911,6 +2136,8 @@ function collectData() {
            mgr:SIGNS.mgr, sup:SIGNS.sup, agg:SIGNS.agg},
    prodCheckItems:deep(PC_ITEMS),
     changeLog: deep(CHANGE_LOG),
+    photos: deep(PHOTOS.filter(p => (p.url||'').trim())),
+    refPhotos: deep(REF_PHOTOS),
   };
   document.querySelectorAll('[data-k]').forEach(el=>{
     const k=el.getAttribute('data-k');
@@ -1981,6 +2208,11 @@ function fillForm(d) {
   setStatus('読込済: '+(d.pnPairs?d.pnPairs.map(p=>p.no).join('/'):d.partNo||d.id), 'ok');
   document.getElementById('sid').textContent='ID: '+d.id;
  applyLock(!!SIGNS.agg);
+
+  // 写真を復元
+  PHOTOS     = d.photos    ? deep(d.photos)    : [];
+  REF_PHOTOS = d.refPhotos ? deep(d.refPhotos) : [];
+  renderPhotos(); renderRefPhotos();
 
   // 変更履歴を復元
   CHANGE_LOG = d.changeLog ? deep(d.changeLog) : [];
@@ -2155,6 +2387,8 @@ function newForm(){
     document.getElementById(`cb-${role}`).checked=false;
   });
   document.getElementById('sid').textContent='';
+  PHOTOS = []; REF_PHOTOS = [];
+  renderPhotos(); renderRefPhotos();
   CHANGE_LOG = [];
   renderChangeLog();
   setStatus('新規作成モード','ok');
@@ -2436,6 +2670,10 @@ function newFromMaster(partNoKey) {
     PC_ITEMS = deep(master.prodCheck);
     renderPC('pcTb', PC_ITEMS, false);
   }
+  renderNotesFrom(master.notes);
+  REF_PHOTOS = (master.photos && master.photos.length) ? deep(master.photos) : [];
+  PHOTOS = [];
+  renderRefPhotos(); renderPhotos();
 
   ['mgr','sup','agg'].forEach(role => {
     SIGNS[role] = null;
