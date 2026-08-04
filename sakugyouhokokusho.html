@@ -641,7 +641,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     <div class="cam-status" id="cam-status">スキャン中...</div>
   </div>
   <div class="cam-footer">
-    <button class="btn-cam-cancel" onclick="stopCamera()">キャンセル</button>
+    <button class="btn-cam-cancel" onclick="stopCamera(true)">キャンセル</button>
   </div>
 </div>
 
@@ -760,8 +760,8 @@ let jsQRReady   = false;
 // 起動時 — SSOトークンの解析
 // ============================================================
 // ページ離脱時はカメラを確実に解放する（保持し続けるとブラウザ/端末に負荷が残るため）
-window.addEventListener('pagehide', () => stopCamera(true));
-window.addEventListener('beforeunload', () => stopCamera(true));
+window.addEventListener('pagehide', () => { autoSave(); stopCamera(true); });
+window.addEventListener('beforeunload', () => { autoSave(); stopCamera(true); });
 
 window.addEventListener('load', function() {
   loadJsQR();
@@ -880,6 +880,7 @@ async function doLogin() {
 function doLogout() {
   openConfirm('ログアウトしますか？\n保存していない作業データは失われます。', '確認', () => {
     stopTimer(); stopCamera(true); hideBreakOverlay();
+    clearAutoSave(); // ログアウト → バックアップ破棄
     sessionStorage.removeItem('kpk_report_user');
     currentUser = null;
     // タブを閉じてポータルに戻る
@@ -920,6 +921,19 @@ function enterMain() {
   startTimer();
   loadProducts();
   loadReportEmployeesFromPortal();
+  // リロード復元: 前回の未保存データがあれば確認ダイアログを出す
+  checkAndRestoreBackup();
+  // 30秒ごとに自動バックアップ
+  setInterval(autoSave, 30 * 1000);
+  // 主要フォーム項目の変更時にも即バックアップ
+  ['f-sakugyo','f-hinban','f-hakoiri','f-hasuu','f-fuguai'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el._autoSaveBound) {
+      el.addEventListener('change', autoSave);
+      el.addEventListener('input',  autoSave);
+      el._autoSaveBound = true;
+    }
+  });
 }
 
 // ============================================================
@@ -1025,6 +1039,7 @@ function countChange(d) {
   document.getElementById('count-disp').textContent = count;
   document.getElementById('btn-minus').disabled = (count === 0);
   calcTotal();
+  autoSave();
 }
 function calcTotal() {
   const h = parseInt(document.getElementById('f-hakoiri').value) || 0;
@@ -1157,13 +1172,14 @@ function startScanLoop(video) {
 }
 
 function onScanned(raw, type) {
-  stopCamera(); // キャンセルと同様、ストリームは保持して次回の起動を高速化
+  stopCamera(true); // スキャン完了 → カメラを完全停止（電池消費を抑える）
   const data = raw.split('|')[0].replace(/[\s\-]/g, '');
   document.getElementById('f-hinban').value = data;
   document.getElementById('f-hinban').classList.add('filled');
   showScanTag(data);
   searchProduct(data);
   showToast(type + 'スキャン: ' + data, 'success');
+  autoSave();
 }
 
 // stopCamera(forceStop): 通常はストリームを保持したまま解析ループだけ止める（次回起動を高速化）
@@ -1294,14 +1310,16 @@ function resetPhotos() {
 function addDefect() {
   defects.push({ id: Date.now(), type:'', count:'', detail:'', worker:'' });
   renderDefects();
+  autoSave();
 }
 function removeDefect(id) {
   defects = defects.filter(d => d.id !== id);
   renderDefects();
+  autoSave();
 }
 function updateDefect(id, key, val) {
   const d = defects.find(x => x.id === id);
-  if (d) d[key] = val;
+  if (d) { d[key] = val; autoSave(); }
 }
 function renderDefects() {
   const el = document.getElementById('defect-list');
@@ -1443,6 +1461,7 @@ const totalCount = count * hakoiri + hasuu;
   }
 
   hideLoading();
+  clearAutoSave(); // 正常保存完了 → バックアップ破棄
   if (isFinal) showComplete(report);
 }
 
@@ -1467,6 +1486,7 @@ function startNew() {
   document.getElementById('s-complete').classList.remove('on');
   document.getElementById('s-main').classList.add('on');
   hideBreakOverlay();
+  clearAutoSave(); // 新しい作業を開始 → 前のバックアップ破棄
   resetForm();
   count   = 0;
   defects = [];
@@ -1515,21 +1535,130 @@ function showToast(msg, type) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-function openConfirm(msg, title, cb, danger = false) {
+let cancelCb = null;
+function openConfirm(msg, title, cb, cancelOrDanger = false) {
   confirmCb = cb;
+  // 第4引数が関数ならキャンセル時コールバック、boolならdangerフラグ（後方互換）
+  if (typeof cancelOrDanger === 'function') {
+    cancelCb = cancelOrDanger;
+    document.getElementById('cf-ok').className = 'btn-cf-ok';
+  } else {
+    cancelCb = null;
+    document.getElementById('cf-ok').className = 'btn-cf-ok' + (cancelOrDanger ? ' danger' : '');
+  }
   document.getElementById('cf-title').textContent = title || '確認';
   document.getElementById('cf-msg').textContent   = msg;
-  document.getElementById('cf-ok').className = 'btn-cf-ok' + (danger ? ' danger' : '');
   document.getElementById('confirm-overlay').classList.remove('hid');
 }
 function closeConfirm() {
   document.getElementById('confirm-overlay').classList.add('hid');
+  const cb = cancelCb;
   confirmCb = null;
+  cancelCb  = null;
+  if (cb) cb();
 }
 function execConfirm() {
-  const cb = confirmCb;  // 先にコールバックを保存
-  closeConfirm();        // confirmCb = null になる
-  if (cb) cb();          // 保存したcbを実行
+  const cb = confirmCb;
+  document.getElementById('confirm-overlay').classList.add('hid');
+  confirmCb = null;
+  cancelCb  = null;
+  if (cb) cb();
+}
+
+// ============================================================
+// 自動バックアップ（リロード対策）
+// ============================================================
+const BACKUP_KEY = 'sakugyo_wip_backup';
+
+// 作業中データを localStorage に保存
+function autoSave() {
+  if (!currentUser || workState.status === 'ended') return;
+  try {
+    const data = {
+      savedAt: new Date().toISOString(),
+      user:    currentUser,
+      workState: {
+        status:      workState.status,
+        startTime:   workState.startTime ? workState.startTime.toISOString() : null,
+        pausedTotal: workState.pausedTotal,
+        pauseLog:    workState.pauseLog,
+      },
+      form: {
+        sakugyo:  document.getElementById('f-sakugyo')?.value  || '',
+        hinban:   document.getElementById('f-hinban')?.value   || '',
+        torihiki: document.getElementById('f-torihiki')?.value || '',
+        hakoiri:  document.getElementById('f-hakoiri')?.value  || '',
+        hasuu:    document.getElementById('f-hasuu')?.value    || '0',
+        fuguai:   document.getElementById('f-fuguai')?.value   || '',
+        date:     document.getElementById('f-date')?.value     || '',
+      },
+      count:   count,
+      defects: defects,
+    };
+    localStorage.setItem(BACKUP_KEY, JSON.stringify(data));
+  } catch(e) {}
+}
+
+// バックアップをクリア（正常保存・ログアウト時）
+function clearAutoSave() {
+  try { localStorage.removeItem(BACKUP_KEY); } catch(e) {}
+}
+
+// 起動時にバックアップがあれば復元確認
+function checkAndRestoreBackup() {
+  try {
+    const raw = localStorage.getItem(BACKUP_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data.user || !currentUser || data.user.id !== currentUser.id) { clearAutoSave(); return; }
+    // 24時間以上古いバックアップは無視
+    if (Date.now() - new Date(data.savedAt).getTime() > 24 * 60 * 60 * 1000) { clearAutoSave(); return; }
+    // 中身が空（何も入力していない状態）なら復元不要
+    if (!data.form.hinban && !data.count && (!data.defects || !data.defects.length)) { clearAutoSave(); return; }
+
+    const savedAt = new Date(data.savedAt);
+    const timeStr = pad(savedAt.getHours()) + ':' + pad(savedAt.getMinutes());
+    openConfirm(
+      `前回の作業データが残っています（${timeStr} 時点）\n\n` +
+      `品番: ${data.form.hinban || '未入力'}\n` +
+      `カウント: ${data.count} 箱\n\n` +
+      `続きから再開しますか？`,
+      '💾 作業データの復元',
+      () => restoreBackup(data),
+      () => clearAutoSave()   // 「キャンセル」＝破棄して新規作業
+    );
+  } catch(e) { clearAutoSave(); }
+}
+
+// バックアップデータを復元してフォームに反映
+function restoreBackup(data) {
+  workState = {
+    status:      'working',
+    startTime:   data.workState.startTime ? new Date(data.workState.startTime) : new Date(),
+    pauseTime:   null,
+    pausedTotal: data.workState.pausedTotal || 0,
+    pauseLog:    data.workState.pauseLog    || [],
+  };
+
+  const f = data.form;
+  if (f.date)     document.getElementById('f-date').value     = f.date;
+  if (f.sakugyo)  document.getElementById('f-sakugyo').value  = f.sakugyo;
+  if (f.hinban)   { document.getElementById('f-hinban').value = f.hinban; document.getElementById('f-hinban').classList.add('filled'); showScanTag(f.hinban); }
+  if (f.torihiki) document.getElementById('f-torihiki').value = f.torihiki;
+  if (f.hakoiri)  document.getElementById('f-hakoiri').value  = f.hakoiri;
+  if (f.hasuu)    document.getElementById('f-hasuu').value    = f.hasuu;
+  if (f.fuguai)   document.getElementById('f-fuguai').value   = f.fuguai;
+
+  count   = data.count   || 0;
+  defects = data.defects || [];
+  document.getElementById('count-disp').textContent = count;
+  document.getElementById('btn-minus').disabled = (count === 0);
+  calcTotal();
+  renderDefects();
+
+  updateStatusBar();
+  startTimer();
+  showToast('作業データを復元しました', 'success');
 }
 </script>
 </body>
