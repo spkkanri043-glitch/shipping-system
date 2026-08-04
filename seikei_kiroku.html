@@ -316,6 +316,11 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 .ph-sub{ font-size:10px; color:var(--tx3); margin-bottom:4px; }
 @media(max-width:700px){ .ph-edit{ grid-template-columns:1fr auto; } }
 @media print{ .ph-frame, .ph-edit, .ph-add-btn{ display:none !important; } .ph-img{ max-width:220px; height:auto; } }
+
+.ph-cam-btn{ padding:6px 14px; font-size:11px; font-weight:bold; border:none; border-radius:4px; background:var(--blue2); color:#fff; cursor:pointer; font-family:inherit; }
+.ph-cam-btn:disabled{ opacity:.5; cursor:wait; }
+.ph-tools{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:4px; }
+@media print{ .ph-cam-btn, .ph-tools{ display:none !important; } }
 </style>
 </head>
 <body>
@@ -488,7 +493,12 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
       <div style="font-size:11px;font-weight:bold;color:var(--blue);margin:8px 0 2px;">この記録の写真</div>
       <div class="ph-sub">Googleドライブの共有リンクを貼り付けてください（「リンクを知っている全員」に共有が必要です）</div>
       <div id="photoEdit"></div>
-      <button class="ph-add-btn" onclick="addPhoto()" style="margin-top:4px;padding:4px 12px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;font-family:inherit;">＋ 写真追加</button>
+      <div class="ph-tools">
+        <button class="ph-cam-btn" id="camBtn" onclick="pickPhotoFile(false)">📷 撮影・写真を選ぶ</button>
+        <button class="ph-add-btn" onclick="addPhoto()" style="padding:4px 12px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;font-family:inherit;">＋ URLで追加</button>
+        <span id="camStatus" style="font-size:10px;color:var(--tx3);"></span>
+      </div>
+      <input type="file" id="photoFile" accept="image/*" capture="environment" style="display:none;" onchange="onPhotoFile(this,false)">
       <div id="photoView"></div>
     </div>
   </div>
@@ -650,7 +660,12 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
         <div class="cb">
           <div class="ph-sub">Googleドライブの共有リンクを貼り付けてください（「リンクを知っている全員」に共有が必要です）</div>
           <div id="m-photoEdit"></div>
-          <button onclick="addMstPhoto()" style="margin-top:4px;padding:4px 12px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;font-family:inherit;">＋ 写真追加</button>
+          <div class="ph-tools">
+            <button class="ph-cam-btn" id="mCamBtn" onclick="pickPhotoFile(true)">📷 撮影・写真を選ぶ</button>
+            <button onclick="addMstPhoto()" style="padding:4px 12px;font-size:11px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;font-family:inherit;">＋ URLで追加</button>
+            <span id="mCamStatus" style="font-size:10px;color:var(--tx3);"></span>
+          </div>
+          <input type="file" id="mPhotoFile" accept="image/*" capture="environment" style="display:none;" onchange="onPhotoFile(this,true)">
           <div id="m-photoView"></div>
         </div>
       </div>
@@ -1315,6 +1330,85 @@ function driveEmbedUrl(url) {
     if (m) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
   }
   return u;   // 通常の画像URLはそのまま
+}
+
+// ── 端末で撮影／選択した写真をアップロード ──
+function pickPhotoFile(isMaster) {
+  if (!GAS_URL) {
+    toast('写真アップロードにはGAS接続が必要です。URLで追加してください', 'warn');
+    return;
+  }
+  const inp = document.getElementById(isMaster ? 'mPhotoFile' : 'photoFile');
+  if (inp) { inp.value = ''; inp.click(); }
+}
+
+// 画像を縮小してJPEGのデータURLに変換（アップロード量を抑える）
+function shrinkImage(file, maxSide, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('ファイルを読み込めません'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('画像を解釈できません'));
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        const scale = Math.min(1, maxSide / Math.max(w, h));
+        w = Math.round(w * scale); h = Math.round(h * scale);
+        const cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(cv.toDataURL('image/jpeg', quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function onPhotoFile(inp, isMaster) {
+  const file = inp.files && inp.files[0];
+  if (!file) return;
+
+  const btn    = document.getElementById(isMaster ? 'mCamBtn' : 'camBtn');
+  const status = document.getElementById(isMaster ? 'mCamStatus' : 'camStatus');
+  const setStat = (t) => { if (status) status.textContent = t; };
+
+  if (btn) btn.disabled = true;
+  setStat('画像を準備中...');
+
+  try {
+    const dataUrl = await shrinkImage(file, 1600, 0.8);
+    const kb = Math.round(dataUrl.length * 0.75 / 1024);
+    setStat('アップロード中... (' + kb + 'KB)');
+
+    // 名前の初期値：入力された名前がなければファイル名
+    const defName = (file.name || '写真').replace(/\.[^.]+$/, '');
+    const partNo  = (isMaster ? (M_PNS[0] || '') : (PN_PAIRS[0] ? PN_PAIRS[0].no : '')) || '';
+
+    const r = await gasPost({
+      action: 'uploadPhoto',
+      dataUrl: dataUrl,
+      name: defName,
+      partNo: partNo,
+      recordId: RID || ''
+    });
+
+    if (!r || !r.ok) throw new Error((r && r.error) || 'アップロード失敗');
+
+    const item = { name: defName, url: r.url };
+    if (isMaster) { M_PHOTOS.push(item); renderMstPhotos(); }
+    else          { PHOTOS.push(item);   renderPhotos(); }
+
+    setStat('✅ 追加しました');
+    toast('📷 写真をドライブへ保存しました', 'ok');
+    setTimeout(() => setStat(''), 4000);
+  } catch (e) {
+    setStat('❌ ' + e.message);
+    toast('写真アップロード失敗: ' + e.message, 'err');
+  } finally {
+    if (btn) btn.disabled = false;
+    inp.value = '';
+  }
 }
 
 // 写真1枚分の表示HTML（/preview はiframe、それ以外はimg）
