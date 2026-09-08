@@ -1038,7 +1038,8 @@ function renderCondSecs(targetId, secs, masterMode, saved) {
           <th>基準値①</th><th style="width:72px">単位</th>
           ${sec.u2 ? `<th>基準値②</th><th style="width:72px">単位</th>` : '<th colspan="2" style="width:80px"></th>'}
           <th style="width:70px">管理値</th>
-          <th>記入欄</th>
+          <th>記入欄①</th>
+          <th>記入欄②</th>
           ${isTA ? '<th style="width:70px">OK/NG</th>' : ''}
           <th style="width:54px"></th>
         </tr></thead>
@@ -1097,6 +1098,7 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
     <td>${unitCell(u2, 'u2')}</td>
     <td><input type="text" value="${sv.r !== undefined ? sv.r : r}" data-k="${k}_r" class="${rangeClass}" ${masterMode?'':'readonly'} style="text-align:center;font-size:10px;color:${masterMode?'var(--tx)':'var(--acc)'};font-weight:bold;"></td>
     <td><input type="text" inputmode="decimal" value="${esc(sv.v !== undefined ? sv.v : (row.v !== undefined ? row.v : ''))}" data-k="${k}_v" style="text-align:right;"></td>
+    <td><input type="text" inputmode="decimal" value="${esc(sv.v2 !== undefined ? sv.v2 : (row.v2 !== undefined ? row.v2 : ''))}" data-k="${k}_v2" style="text-align:right;"></td>
     ${isTA ? `<td><select class="on" data-k="${k}_ok" onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td>` : ''}
     <td style="white-space:nowrap;">
       <button class="mv" onclick="moveRow('${targetId}','${prefix}',${si},${ri},-1)">▲</button>
@@ -1189,6 +1191,7 @@ function commitMstCondInputs() {
       const b2 = val('b2'); if (b2 !== undefined) row.b2 = b2;
       const rr = val('r');  if (rr !== undefined) row.r  = rr;
       const vv = val('v');  if (vv !== undefined) row.v  = vv;
+      const v2 = val('v2'); if (v2 !== undefined) row.v2 = v2;
       const ok = val('ok'); if (ok !== undefined) row.ok = ok;
     });
   });
@@ -2888,13 +2891,13 @@ function labelOfKey(k) {
   if (!k) return k;
 
   // 成形条件: c_si_ri_(b1|b2|r|v|ok)
-  let m = k.match(/^c_(\d+)_(\d+)_(b1|b2|r|v|ok)$/);
+  let m = k.match(/^c_(\d+)_(\d+)_(b1|b2|r|v2|v|ok)$/);
   if (m) {
     const si = +m[1], ri = +m[2], sub = m[3];
     const sec = COND_SECS[si];
     const secName = sec ? sec.label : 'セクション' + si;
     const rowName = (sec && sec.rows[ri] && sec.rows[ri].n) ? sec.rows[ri].n : '行' + (ri+1);
-    const subName = {b1:'基準値①', b2:'基準値②', r:'管理値', v:'記入欄', ok:'OK/NG'}[sub] || sub;
+    const subName = {b1:'基準値①', b2:'基準値②', r:'管理値', v:'記入欄①', v2:'記入欄②', ok:'OK/NG'}[sub] || sub;
     return `${secName} ${rowName} ${subName}`;
   }
 
