@@ -207,9 +207,9 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
       <button class="period-btn"    id="p-30"     onclick="setPeriod(30)">直近30日</button>
       <button class="period-btn"    id="p-0"      onclick="setPeriod(0)">全期間</button>
       <div class="date-inputs">
-        <input class="date-input" type="date" id="date-from" onchange="clearPeriodBtn();applyFilter()">
+        <input class="date-input" type="date" id="date-from" onchange="clearPeriodBtn();loadData()">
         <span style="color:var(--tx3);font-size:12px">〜</span>
-        <input class="date-input" type="date" id="date-to" onchange="clearPeriodBtn();applyFilter()">
+        <input class="date-input" type="date" id="date-to" onchange="clearPeriodBtn();loadData()">
       </div>
     </div>
     <div class="filter-selects">
@@ -371,7 +371,14 @@ async function loadData() {
   if (!gasUrl) { showToast('GAS URLを設定してください', 'err'); return; }
   document.getElementById('table-area').innerHTML = '<div class="loading"><div class="spinner"></div>読み込み中...</div>';
   try {
-    const res = await fetch(`${gasUrl}?action=getReports`);
+    // 選択中の期間をGAS側に渡して該当範囲のデータを取得する
+    // (GAS側の件数上限で「1ヶ月以上前が表示されない」問題が起きていたための対応)
+    const from = document.getElementById('date-from').value;
+    const to   = document.getElementById('date-to').value;
+    const qs = new URLSearchParams();
+    if (from) qs.set('dateFrom', from);
+    if (to)   qs.set('dateTo', to);
+    const res = await fetch(`${gasUrl}?action=getReports&${qs.toString()}`);
     const d = await res.json();
     allReports = (d.data || []).filter(r => r['完了フラグ'] === '完了');
     buildFilterOptions();
@@ -408,7 +415,7 @@ function fillSelect(id, opts) {
 function setPeriod(key) {
   ['today','7','30','0'].forEach(k => document.getElementById('p-'+k)?.classList.toggle('on', String(k)===String(key)));
   setPeriodDates(key);
-  applyFilter();
+  loadData();
 }
 
 function clearPeriodBtn() {
