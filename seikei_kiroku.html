@@ -58,7 +58,7 @@ body{font-family:'Meiryo','MS Gothic',sans-serif;font-size:12px;background:var(-
 .dsec{margin-bottom:12px;}
 .dsh{background:var(--sec);border:1px solid var(--bd);border-radius:4px 4px 0 0;padding:5px 10px;font-weight:bold;font-size:11px;color:var(--blue);display:flex;align-items:center;justify-content:space-between;}
 .add-r-btn{background:var(--blue2);color:#fff;border:none;border-radius:3px;padding:2px 8px;font-size:11px;cursor:pointer;font-family:inherit;}
-.dt{width:100%;border-collapse:collapse;font-size:11px;}
+.dt{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed;}
 .dt th{background:var(--head);border:1px solid var(--bd);padding:4px 6px;text-align:center;color:var(--blue);font-weight:bold;white-space:nowrap;}
 .dt td{border:1px solid var(--bd);padding:2px 4px;text-align:center;vertical-align:middle;}
 .dt td.L{background:var(--sec);text-align:left;}
@@ -255,7 +255,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   /* ── テーブルはみ出し対策：横スクロール枠にする ── */
   /* 成形条件（.dsec内の .dt） */
   .dsec{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  .dsec .dt{ min-width:560px; }
+  .dsec .dt{ min-width:820px; }
 
   /* 製品確認・5M・チョコ停・注意事項・安全確認（.st） */
   .card .cb{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
@@ -1079,6 +1079,18 @@ function renderCondSecs(targetId, secs, masterMode, saved) {
         <button class="add-r-btn" onclick="addCondRow('${targetId}','${prefix}',${si})">＋ 行追加</button>
       </div>
       <table class="dt">
+        <colgroup>
+          <col style="width:130px">
+          <col style="width:15%">
+          <col style="width:72px">
+          <col style="width:15%">
+          <col style="width:72px">
+          <col style="width:64px">
+          <col>
+          <col>
+          ${isTA ? '<col style="width:64px">' : ''}
+          <col style="width:56px">
+        </colgroup>
         <thead>
           ${masterMode ? '' : `<tr>
             <th class="g-band-x"></th>
@@ -1088,14 +1100,14 @@ function renderCondSecs(targetId, secs, masterMode, saved) {
             <th class="g-band-x"></th>
           </tr>`}
           <tr>
-          <th style="width:130px">項目名</th>
-          <th class="${masterMode?'':'g-mst'}">基準値①</th><th class="${masterMode?'':'g-mst'}" style="width:72px">単位</th>
-          ${sec.u2 ? `<th class="${masterMode?'':'g-mst'}">基準値②</th><th class="${masterMode?'':'g-mst'}" style="width:72px">単位</th>` : `<th class="${masterMode?'':'g-mst'}" colspan="2" style="width:80px"></th>`}
-          <th class="${masterMode?'':'g-mst'}" style="width:70px">管理値</th>
+          <th>項目名</th>
+          <th class="${masterMode?'':'g-mst'}">基準値①</th><th class="${masterMode?'':'g-mst'}">単位</th>
+          ${sec.u2 ? `<th class="${masterMode?'':'g-mst'}">基準値②</th><th class="${masterMode?'':'g-mst'}">単位</th>` : `<th class="${masterMode?'':'g-mst'}" colspan="2"></th>`}
+          <th class="${masterMode?'':'g-mst'}">管理値</th>
           <th class="${masterMode?'':'g-inp divL'}">記入欄①</th>
           <th class="${masterMode?'':'g-inp'}">記入欄②</th>
-          ${isTA ? '<th style="width:70px">OK/NG</th>' : ''}
-          <th style="width:54px"></th>
+          ${isTA ? '<th>OK/NG</th>' : ''}
+          <th></th>
         </tr></thead>
         <tbody id="${prefix}tb-${si}"></tbody>
       </table>`;
@@ -1159,7 +1171,7 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
       class="${editable?'':'fixv'}" ${editable?'':'readonly'} style="text-align:right;">`;
 
   tr.innerHTML = `
-    <td style="width:130px;min-width:130px;"><input type="text" class="tx" value="${esc(row.n||'')}" ${editable?'':'readonly'}
+    <td><input type="text" class="tx" value="${esc(row.n||'')}" ${editable?'':'readonly'}
       ${editable ? `oninput="${prefix==='m'?'M_COND_SECS':'COND_SECS'}[${si}].rows[${ri}].n=this.value"` : ''}
       ${editable ? '' : 'title="項目名はマスター管理から変更してください"'}>${(!masterMode && row.adhoc) ? '<span class="rowtag">当日追加</span>' : ''}<div class="tl-sub" data-tl="${esc(row.n||'')}"></div></td>
     <td${mstTd}>${baseCell(b1v, k+'_b1')}</td>
