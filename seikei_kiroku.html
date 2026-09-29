@@ -353,6 +353,19 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   .dt th.g-band-m, .dt th.g-band-i{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   .rowtag{ display:none!important; }
 }
+
+/* ── 記録の削除（論理削除） ── */
+.hrec-deleted{ background:#f7f8fa; border-color:#d5dbe4; opacity:.85; }
+.hrec-deleted:hover{ background:#eef1f5; border-color:#c2cad6; }
+.hrec-deleted .hrec-req{ color:var(--tx3); text-decoration:line-through; }
+.hrec-del-badge{ display:inline-block; font-size:9px; background:#8894a6; color:#fff; border-radius:3px; padding:1px 6px; font-weight:bold; }
+.hrec-btn{ flex-shrink:0; border-radius:4px; font-size:10.5px; padding:3px 9px; cursor:pointer; font-family:inherit; font-weight:bold; white-space:nowrap; background:var(--wh); }
+.hrec-btn.del{ border:1px solid var(--r); color:var(--r); }
+.hrec-btn.del:hover{ background:#fff5f5; }
+.hrec-btn.rst{ border:1px solid var(--g); color:#1e7a45; }
+.hrec-btn.rst:hover{ background:#f2fbf5; }
+#delBanner{ background:#f2f4f7; border:1px solid #c2cad6; color:#5a6a85; border-radius:6px; padding:8px 12px; margin-bottom:10px; display:none; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; }
+@media print{ #delBanner{ display:none !important; } .hrec-btn{ display:none !important; } }
 </style>
 </head>
 <body>
@@ -400,6 +413,9 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 
   <!-- 確定ロックバナー（JSで内容生成） -->
   <div id="lockBanner"></div>
+
+  <!-- 削除済みバナー（JSで内容生成） -->
+  <div id="delBanner"></div>
 
   <!-- 基本情報 -->
   <div class="card">
@@ -752,6 +768,10 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
             style="font-size:10px;padding:3px 9px;border:1px solid var(--bd);border-radius:12px;background:var(--wh);cursor:pointer;color:var(--tx2);">
             🗑 フィルター解除
           </button>
+          <label id="histDelWrap" style="display:none;align-items:center;gap:4px;font-size:10.5px;color:var(--tx2);cursor:pointer;border:1px solid var(--bd);border-radius:12px;padding:2px 10px;background:var(--wh);">
+            <input type="checkbox" id="histShowDeleted" onchange="onToggleDeleted()" style="cursor:pointer;">
+            🗑 削除済みを表示
+          </label>
         </div>
       </div>
 
@@ -840,6 +860,8 @@ let PN_PAIRS = [{no:'', req:''}];
 let LOCKED = false;   // 確定（集計確認サイン済み）ロック状態
 let MST_TAB = 'all';  // マスター一覧の取引先タブ
 let PS_TAB = 'all';   // 品番選択の取引先タブ
+let HIST_SHOW_DELETED = false;  // 履歴で削除済みも表示するか
+let CUR_DEL = null;             // 開いている記録の削除情報（保存時に引き継ぐ）
   let LAST_SNAPSHOT = {};   // 前回保存時の data-k 値スナップショット（差分比較用）
 let CHANGE_LOG = [];      // 変更履歴 [{ts, byName, byId, field, before, after, reason}]
 
@@ -901,6 +923,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderNotes(3); renderChocos(1); renderM5();
   PHOTOS = []; REF_PHOTOS = [];
   renderPhotos(); renderRefPhotos();
+  CUR_DEL = null; applyDelBanner();
   setStatus('新規作成モード', 'ok');
   PARTS = JSON.parse(ls('seikei_part_masters') || '[]');
 });
@@ -2041,6 +2064,7 @@ function usePartMaster(i) {
     renderPC('pcTb', PC_ITEMS, false);
   }
   renderNotesFrom(m.notes);
+  CUR_DEL = null; applyDelBanner();
   REF_PHOTOS = (m.photos && m.photos.length) ? deep(m.photos) : [];
   PHOTOS = [];
   renderRefPhotos(); renderPhotos();
@@ -2411,6 +2435,7 @@ function collectData() {
     changeLog: deep(CHANGE_LOG),
     photos: deep(PHOTOS.filter(p => (p.url||'').trim())),
     refPhotos: deep(REF_PHOTOS),
+    ...(CUR_DEL || {}),
   };
   document.querySelectorAll('[data-k]').forEach(el=>{
     const k=el.getAttribute('data-k');
@@ -2482,6 +2507,12 @@ function fillForm(d) {
   setStatus('読込済: '+(d.pnPairs?d.pnPairs.map(p=>p.no).join('/'):d.partNo||d.id), 'ok');
   document.getElementById('sid').textContent='ID: '+d.id;
  applyLock(!!SIGNS.agg);
+
+  // 削除情報を引き継ぐ（このまま保存しても復活しないように）
+  CUR_DEL = d.deleted
+    ? { deleted:true, deletedBy:d.deletedBy, deletedByName:d.deletedByName, deletedAt:d.deletedAt }
+    : null;
+  applyDelBanner();
 
   // 写真を復元
   PHOTOS     = d.photos    ? deep(d.photos)    : [];
@@ -2661,6 +2692,7 @@ function newForm(){
     document.getElementById(`cb-${role}`).checked=false;
   });
   document.getElementById('sid').textContent='';
+  CUR_DEL = null; applyDelBanner();
   PHOTOS = []; REF_PHOTOS = [];
   renderPhotos(); renderRefPhotos();
   CHANGE_LOG = [];
@@ -2680,6 +2712,7 @@ function clearHistFilters() {
   document.getElementById('histFilterSign').value = '';
   document.getElementById('histFilterClient').value = '';
   const mc = document.getElementById('histFilterMachine'); if (mc) mc.value = '';
+  const dc = document.getElementById('histShowDeleted'); if (dc) { dc.checked = false; HIST_SHOW_DELETED = false; }
   const hf = document.getElementById('histFrom');          if (hf) hf.value = '';
   const ht = document.getElementById('histTo');            if (ht) ht.value = '';
   renderHistTabs();
@@ -2702,6 +2735,12 @@ async function openHistory(){
   HIST.sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
   HIST_TAB='all';
   HIST_EXPANDED={};
+  // 削除済みの切替は管理者・マスターにだけ見せる
+  HIST_SHOW_DELETED = false;
+  const delWrap = document.getElementById('histDelWrap');
+  const delCb   = document.getElementById('histShowDeleted');
+  if (delCb)   delCb.checked = false;
+  if (delWrap) delWrap.style.display = isUnlockRole() ? 'inline-flex' : 'none';
   const clients = [...new Set(PARTS.map(p=>p.client||'').filter(Boolean))];
   const clientSel = document.getElementById('histFilterClient');
   clientSel.innerHTML = '<option value="">取引先: すべて</option>'
@@ -2726,6 +2765,8 @@ function getHistFiltered() {
   const dFrom   = document.getElementById('histFrom')?.value || '';
   const dTo     = document.getElementById('histTo')?.value || '';
   return HIST.filter(r => {
+    // 削除済みは、切替がONのときだけ表示
+    if (r.deleted && !HIST_SHOW_DELETED) return false;
     const nos  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
     const reqs = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
     const matchQ = !q ||
@@ -2791,6 +2832,8 @@ function renderHistTabs() {
   const dFrom   = document.getElementById('histFrom')?.value || '';
   const dTo     = document.getElementById('histTo')?.value || '';
   const base = HIST.filter(r => {
+    // 削除済みは、切替がONのときだけ数える
+    if (r.deleted && !HIST_SHOW_DELETED) return false;
     // 号機
     if (machine && String(r.machineNo||'').trim() !== machine) return false;
     // 記入日の範囲
@@ -2919,16 +2962,29 @@ function histRecordCard(r) {
   const operator    = safeStr(r.operator || r.operatorId || r.savedByName);
   const machineNo   = safeStr(r.machineNo);
   const recordDate  = safeStr(r.recordDate);
-  return '<div class="hrec' + (allSigned ? ' hrec-done' : '') + '" onclick="loadRecord(\'' + safeId + '\')">'
+  // 削除済み表示と、管理者向けの削除／復元ボタン
+  const isDel = !!r.deleted;
+  const canDel = isUnlockRole();
+  const delBadge = isDel
+    ? '<span class="hrec-del-badge">🗑 削除済み'
+      + (r.deletedByName ? '（' + esc(r.deletedByName) + '）' : '') + '</span>'
+    : '';
+  const actBtn = !canDel ? ''
+    : (isDel
+        ? '<button class="hrec-btn rst" onclick="event.stopPropagation();restoreRecord(\'' + safeId + '\')">↩ 復元</button>'
+        : '<button class="hrec-btn del" onclick="event.stopPropagation();deleteRecord(\'' + safeId + '\')">🗑 削除</button>');
+
+  return '<div class="hrec' + (allSigned ? ' hrec-done' : '') + (isDel ? ' hrec-deleted' : '') + '" onclick="loadRecord(\'' + safeId + '\')">'
     + '<div class="hrec-top">'
       + '<div style="flex:1;min-width:0;">'
         + '<div class="hrec-req">📋 ' + esc(reqs||'依頼番号なし')
           + '<span style="font-size:11px;font-weight:normal;color:var(--tx2);margin-left:6px;">' + esc(productName) + '</span>'
           + (client ? '<span style="font-size:10px;color:var(--blue2);margin-left:6px;">🏢 ' + esc(client) + '</span>' : '')
         + '</div>'
-        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;">' + doneBadge + signBadges + '</div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;">' + delBadge + doneBadge + signBadges + '</div>'
       + '</div>'
       + '<div class="hrec-date" style="flex-shrink:0;">' + esc(date) + '<br>' + esc(time) + '</div>'
+      + actBtn
     + '</div>'
     + '<div class="hrec-sub">'
       + '<div class="hrec-tag"><span>品番</span> <strong>' + esc(nos||'-') + '</strong></div>'
@@ -2938,6 +2994,124 @@ function histRecordCard(r) {
     + '</div>'
     + '<span class="hrec-arrow">›</span>'
     + '</div>';
+}
+
+// ══════════════════════════════════════════════
+// 記録の削除／復元（管理者・マスターのみ・論理削除）
+// ══════════════════════════════════════════════
+
+// 削除フラグだけ書き換えて保存する（GAS側の saveSeikei をそのまま使う）
+async function saveDeletedFlag(rec) {
+  const list = JSON.parse(ls('seikei_records') || '[]');
+  const i = list.findIndex(x => String(x.id) === String(rec.id));
+  if (i >= 0) list[i] = rec; else list.unshift(rec);
+  lsSet('seikei_records', list.slice(0, 300));
+
+  if (!GAS_URL) return true;
+  const r = await gasPost({ action: 'saveSeikei', data: rec });
+  if (!r || !r.ok) throw new Error((r && r.error) || '保存に失敗しました');
+  return true;
+}
+
+async function deleteRecord(id) {
+  if (!isUnlockRole()) { toast('削除の権限がありません', 'err'); return; }
+  const rec = HIST.find(x => String(x.id) === String(id));
+  if (!rec) { toast('記録が見つかりません', 'err'); return; }
+
+  // 確定済み（集計確認サイン済み）は削除できない
+  if (rec.signs && rec.signs.agg) {
+    alert('この記録は「集計確認」サイン済みのため削除できません。\n\n'
+        + '削除する場合は、記録を開いてロックを解除し、\n集計確認サインを外してから削除してください。');
+    return;
+  }
+
+  const nos  = (rec.pnPairs ? rec.pnPairs.map(p=>p.no)  : [rec.partNo||'']).filter(Boolean).join(' / ');
+  const reqs = (rec.pnPairs ? rec.pnPairs.map(p=>p.req) : [rec.reqNo||'']).filter(Boolean).join(' / ');
+  const ok = confirm(
+    '【この記録を削除します】\n\n'
+    + '依頼番号: ' + (reqs || '-') + '\n'
+    + '品番: ' + (nos || '-') + '\n'
+    + '製品名: ' + (rec.productName || '-') + '\n'
+    + '記入日: ' + (rec.recordDate || '-') + '\n'
+    + '担当者: ' + (rec.operator || '-') + '\n\n'
+    + '履歴から見えなくなります。\n'
+    + '（データは残るので、あとで復元できます）\n\nよろしいですか？'
+  );
+  if (!ok) return;
+
+  rec.deleted       = true;
+  rec.deletedBy     = CU.id;
+  rec.deletedByName = CU.name;
+  rec.deletedAt     = toJST(new Date());
+
+  try {
+    await saveDeletedFlag(rec);
+    toast('🗑 記録を削除しました', 'ok');
+  } catch (e) {
+    rec.deleted = false;   // 失敗したら元に戻す
+    delete rec.deletedBy; delete rec.deletedByName; delete rec.deletedAt;
+    toast('削除に失敗しました: ' + e.message, 'err');
+    renderHistTabs();
+    return;
+  }
+
+  // 開いている記録を削除した場合は、そのまま保存しても復活しないようにする
+  if (String(RID) === String(id)) {
+    CUR_DEL = { deleted:true, deletedBy:rec.deletedBy, deletedByName:rec.deletedByName, deletedAt:rec.deletedAt };
+    applyDelBanner();
+  }
+  renderHistTabs();
+}
+
+async function restoreRecord(id) {
+  if (!isUnlockRole()) { toast('復元の権限がありません', 'err'); return; }
+  const rec = HIST.find(x => String(x.id) === String(id));
+  if (!rec) { toast('記録が見つかりません', 'err'); return; }
+  if (!confirm('この記録を元に戻しますか？\n（履歴に再び表示されます）')) return;
+
+  const keep = { deletedBy: rec.deletedBy, deletedByName: rec.deletedByName, deletedAt: rec.deletedAt };
+  rec.deleted = false;
+  delete rec.deletedBy; delete rec.deletedByName; delete rec.deletedAt;
+
+  try {
+    await saveDeletedFlag(rec);
+    toast('↩ 記録を復元しました', 'ok');
+  } catch (e) {
+    rec.deleted = true;                 // 失敗したら元に戻す
+    Object.assign(rec, keep);
+    toast('復元に失敗しました: ' + e.message, 'err');
+    renderHistTabs();
+    return;
+  }
+
+  if (String(RID) === String(id)) { CUR_DEL = null; applyDelBanner(); }
+  renderHistTabs();
+}
+
+function onToggleDeleted() {
+  const cb = document.getElementById('histShowDeleted');
+  HIST_SHOW_DELETED = !!(cb && cb.checked);
+  renderHistTabs();
+}
+
+// 開いている記録が削除済みのときに出す帯
+function applyDelBanner() {
+  const b = document.getElementById('delBanner');
+  if (!b) return;
+  if (CUR_DEL && CUR_DEL.deleted) {
+    b.style.display = 'flex';
+    b.innerHTML = '🗑 <span style="font-weight:bold;">この記録は削除済みです</span>'
+      + '<span style="font-size:10px;">'
+      + (CUR_DEL.deletedByName ? esc(CUR_DEL.deletedByName) + ' が削除' : '')
+      + (CUR_DEL.deletedAt ? '（' + esc(String(CUR_DEL.deletedAt).substring(0,16).replace('T',' ')) + '）' : '')
+      + '</span>'
+      + (isUnlockRole()
+          ? '<button onclick="restoreRecord(\'' + String(RID).replace(/'/g,"\\'") + '\')" style="margin-left:auto;padding:5px 14px;font-size:11px;font-weight:bold;border:none;border-radius:4px;background:var(--g);color:#fff;cursor:pointer;">↩ 復元する</button>'
+          : '');
+  } else {
+    b.style.display = 'none';
+    b.innerHTML = '';
+  }
 }
 
 function loadRecord(id){
@@ -2984,6 +3158,7 @@ function newFromMaster(partNoKey) {
     renderPC('pcTb', PC_ITEMS, false);
   }
   renderNotesFrom(master.notes);
+  CUR_DEL = null; applyDelBanner();
   REF_PHOTOS = (master.photos && master.photos.length) ? deep(master.photos) : [];
   PHOTOS = [];
   renderRefPhotos(); renderPhotos();
