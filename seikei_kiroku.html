@@ -321,6 +321,38 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 .ph-cam-btn:disabled{ opacity:.5; cursor:wait; }
 .ph-tools{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:4px; }
 @media print{ .ph-cam-btn, .ph-tools{ display:none !important; } }
+
+/* ── 成形条件テーブル：マスター設定／記入欄の視覚分離 ── */
+.dt th.g-band-m{ background:var(--blue2); color:#fff; font-size:10px; letter-spacing:1px; border:1px solid var(--blue2); font-weight:bold; }
+.dt th.g-band-i{ background:var(--g); color:#fff; font-size:10px; letter-spacing:1px; border:1px solid var(--g); font-weight:bold; }
+.dt th.g-band-x{ background:var(--head); border:1px solid var(--bd); }
+.dt th.g-mst{ background:#d3ddec; color:#24476f; }
+.dt th.g-inp{ background:#cfe6d8; color:#166a3b; }
+.dt td.g-mst{ background:#f2f5fa; }
+.dt td.g-inp{ background:#fff; }
+.dt .divL{ border-left:3px solid var(--blue2)!important; }
+/* マスター設定の確定値：入力枠を消して"見るだけ"に */
+.dt input.fixv, .dt input.fixv[readonly]{ background:transparent!important; border:none!important; color:#42536b!important; font-weight:bold; cursor:default; padding:3px 5px; }
+.dt input.fixv.mng, .dt input.fixv.mng[readonly]{ color:var(--acc)!important; font-size:10px; }
+/* 記入欄：はっきり枠で囲う */
+.dt input.ent{ width:100%; border:1px solid #9fbfae; border-radius:3px; background:#fff; font-size:11px; font-family:inherit; padding:3px 5px; text-align:right; }
+.dt input.ent:focus{ outline:2px solid var(--g); border-color:var(--g); background:#fff; }
+.dt input.ent.blank{ background:#fff8e6; border:1px dashed var(--o); }
+.dt input.ent.blank::placeholder{ color:#d79a4a; font-size:10px; }
+/* 当日追加した行 */
+.dt tr.addrow td{ background:#fffdf5; }
+.dt tr.addrow input.ent{ border-color:#d9b877; }
+.dt tr.addrow input.tx{ background:#fff; border:1px solid #d9b877; border-radius:3px; }
+.rowtag{ display:inline-block; font-size:9px; background:var(--o); color:#fff; border-radius:3px; padding:0 5px; margin-left:3px; vertical-align:1px; white-space:nowrap; }
+/* 削除できない行のゴミ箱 */
+.db.locked{ color:#c9d2de; cursor:not-allowed; }
+.db.locked:hover{ color:#aab6c4; }
+@media print{
+  .dt input.ent{ border:1px solid #888!important; background:#fff!important; }
+  .dt input.ent.blank{ background:#fff!important; border:1px solid #888!important; }
+  .dt th.g-band-m, .dt th.g-band-i{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .rowtag{ display:none!important; }
+}
 </style>
 </head>
 <body>
@@ -702,6 +734,20 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
             style="font-size:11px;padding:3px 7px;border:1px solid var(--bd);border-radius:12px;background:var(--wh);font-family:inherit;cursor:pointer;">
             <option value="">取引先: すべて</option>
           </select>
+          <select id="histFilterMachine" onchange="renderHistTabs()"
+            style="font-size:11px;padding:3px 7px;border:1px solid var(--bd);border-radius:12px;background:var(--wh);font-family:inherit;cursor:pointer;">
+            <option value="">号機: すべて</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;align-items:center;">
+          <span style="font-size:10px;color:var(--tx3);white-space:nowrap;">記入日:</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;background:var(--sec);border:1px solid var(--bd);border-radius:14px;padding:2px 8px;">
+            <input type="date" id="histFrom" onchange="renderHistTabs()"
+              style="font-size:11px;padding:2px 5px;border:1px solid var(--bd);border-radius:10px;background:var(--wh);font-family:inherit;">
+            <span style="font-size:10px;color:var(--blue);font-weight:bold;">～</span>
+            <input type="date" id="histTo" onchange="renderHistTabs()"
+              style="font-size:11px;padding:2px 5px;border:1px solid var(--bd);border-radius:10px;background:var(--wh);font-family:inherit;">
+          </span>
           <button onclick="clearHistFilters()"
             style="font-size:10px;padding:3px 9px;border:1px solid var(--bd);border-radius:12px;background:var(--wh);cursor:pointer;color:var(--tx2);">
             🗑 フィルター解除
@@ -1033,13 +1079,21 @@ function renderCondSecs(targetId, secs, masterMode, saved) {
         <button class="add-r-btn" onclick="addCondRow('${targetId}','${prefix}',${si})">＋ 行追加</button>
       </div>
       <table class="dt">
-        <thead><tr>
+        <thead>
+          ${masterMode ? '' : `<tr>
+            <th class="g-band-x"></th>
+            <th class="g-band-m" colspan="5">マスター設定（変更不可）</th>
+            <th class="g-band-i" colspan="2">記入欄（ここに入力）</th>
+            ${isTA ? '<th class="g-band-x"></th>' : ''}
+            <th class="g-band-x"></th>
+          </tr>`}
+          <tr>
           <th style="width:130px">項目名</th>
-          <th>基準値①</th><th style="width:72px">単位</th>
-          ${sec.u2 ? `<th>基準値②</th><th style="width:72px">単位</th>` : '<th colspan="2" style="width:80px"></th>'}
-          <th style="width:70px">管理値</th>
-          <th>記入欄①</th>
-          <th>記入欄②</th>
+          <th class="${masterMode?'':'g-mst'}">基準値①</th><th class="${masterMode?'':'g-mst'}" style="width:72px">単位</th>
+          ${sec.u2 ? `<th class="${masterMode?'':'g-mst'}">基準値②</th><th class="${masterMode?'':'g-mst'}" style="width:72px">単位</th>` : `<th class="${masterMode?'':'g-mst'}" colspan="2" style="width:80px"></th>`}
+          <th class="${masterMode?'':'g-mst'}" style="width:70px">管理値</th>
+          <th class="${masterMode?'':'g-inp divL'}">記入欄①</th>
+          <th class="${masterMode?'':'g-inp'}">記入欄②</th>
           ${isTA ? '<th style="width:70px">OK/NG</th>' : ''}
           <th style="width:54px"></th>
         </tr></thead>
@@ -1049,12 +1103,15 @@ function renderCondSecs(targetId, secs, masterMode, saved) {
     sec.rows.forEach((row, ri) => addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved));
   });
   refreshLabelTl();
+  refreshEntBlank();
 }
 
 function addCondRow(targetId, prefix, si) {
   const secs = prefix==='c' ? COND_SECS : M_COND_SECS;
-  secs[si].rows.push({n:''});
-  addCondRowEl(targetId, prefix, si, secs[si].rows.length-1, {n:''}, prefix==='m', null);
+  // 日々の記録で追加した行は adhoc 印を付ける（基準値なども入力できる／削除できる）
+  const newRow = (prefix==='c') ? {n:'', adhoc:true} : {n:''};
+  secs[si].rows.push(newRow);
+  addCondRowEl(targetId, prefix, si, secs[si].rows.length-1, newRow, prefix==='m', null);
 }
 
 function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
@@ -1070,14 +1127,22 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
   const b1v  = sv.b1 !== undefined ? sv.b1 : (row.b1 !== undefined ? row.b1 : '');
   const b2v  = sv.b2 !== undefined ? sv.b2 : (row.b2 !== undefined ? row.b2 : '');
 
+  // マスター編集中、または「当日追加した行」は基準値・単位・管理値・項目名を編集できる
+  const editable = masterMode || !!row.adhoc;
+  // 基準値が入っている行は削除できない（描画時点の判定：見た目用）
+  const hasBase  = String(b1v).trim() !== '' || String(b2v).trim() !== '';
+
   const tr = document.createElement('tr');
   tr.id = `${prefix}tr-${si}-${ri}`;
+  if (!masterMode && row.adhoc) tr.className = 'addrow';
 
-  const nameRo = masterMode ? '' : 'readonly';
-  const rangeClass = masterMode ? 'master-range' : '';
+  const mstTd = masterMode ? '' : ' class="g-mst"';
+  const inpTd = masterMode ? '' : ' class="g-inp"';
+  const inpTdL = masterMode ? '' : ' class="g-inp divL"';
 
+  // 単位セル：編集できるときはプルダウン、それ以外は固定表示
   const unitCell = (curVal, which) => {
-    if (masterMode) {
+    if (editable) {
       const opts = UNIT_OPTIONS.slice();
       if (curVal && !opts.includes(curVal)) opts.unshift(curVal);
       const options = opts.map(u =>
@@ -1088,22 +1153,27 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
     return `<span class="rc">${esc(curVal)}</span>`;
   };
 
+  // 基準値セル：編集不可のときは入力枠を消した"見るだけ"の表示にする（data-kは保持）
+  const baseCell = (val, key) =>
+    `<input type="text" inputmode="decimal" value="${esc(val)}" data-k="${key}"
+      class="${editable?'':'fixv'}" ${editable?'':'readonly'} style="text-align:right;">`;
+
   tr.innerHTML = `
-    <td style="width:130px;min-width:130px;"><input type="text" class="tx" value="${esc(row.n||'')}" ${nameRo}
-      ${masterMode ? `oninput="${prefix==='m'?'M_COND_SECS':'COND_SECS'}[${si}].rows[${ri}].n=this.value"` : ''}
-      ${!masterMode ? 'title="項目名はマスター管理から変更してください"' : ''}><div class="tl-sub" data-tl="${esc(row.n||'')}"></div></td>
-    <td><input type="text" inputmode="decimal" value="${esc(b1v)}" data-k="${k}_b1" style="text-align:right;"></td>
-    <td>${unitCell(u1, 'u1')}</td>
-    <td><input type="text" inputmode="decimal" value="${esc(b2v)}" data-k="${k}_b2" style="text-align:right;"></td>
-    <td>${unitCell(u2, 'u2')}</td>
-    <td><input type="text" value="${sv.r !== undefined ? sv.r : r}" data-k="${k}_r" class="${rangeClass}" ${masterMode?'':'readonly'} style="text-align:center;font-size:10px;color:${masterMode?'var(--tx)':'var(--acc)'};font-weight:bold;"></td>
-    <td><input type="text" inputmode="decimal" value="${esc(sv.v !== undefined ? sv.v : (row.v !== undefined ? row.v : ''))}" data-k="${k}_v" style="text-align:right;"></td>
-    <td><input type="text" inputmode="decimal" value="${esc(sv.v2 !== undefined ? sv.v2 : (row.v2 !== undefined ? row.v2 : ''))}" data-k="${k}_v2" style="text-align:right;"></td>
+    <td style="width:130px;min-width:130px;"><input type="text" class="tx" value="${esc(row.n||'')}" ${editable?'':'readonly'}
+      ${editable ? `oninput="${prefix==='m'?'M_COND_SECS':'COND_SECS'}[${si}].rows[${ri}].n=this.value"` : ''}
+      ${editable ? '' : 'title="項目名はマスター管理から変更してください"'}>${(!masterMode && row.adhoc) ? '<span class="rowtag">当日追加</span>' : ''}<div class="tl-sub" data-tl="${esc(row.n||'')}"></div></td>
+    <td${mstTd}>${baseCell(b1v, k+'_b1')}</td>
+    <td${mstTd}>${unitCell(u1, 'u1')}</td>
+    <td${mstTd}>${baseCell(b2v, k+'_b2')}</td>
+    <td${mstTd}>${unitCell(u2, 'u2')}</td>
+    <td${mstTd}><input type="text" value="${sv.r !== undefined ? sv.r : r}" data-k="${k}_r" class="${editable?'master-range':'fixv mng'}" ${editable?'':'readonly'} style="text-align:center;font-size:10px;font-weight:bold;"></td>
+    <td${inpTdL}><input type="text" inputmode="decimal" class="ent" placeholder="未記入" value="${esc(sv.v !== undefined ? sv.v : (row.v !== undefined ? row.v : ''))}" data-k="${k}_v" oninput="mkEnt(this)"></td>
+    <td${inpTd}><input type="text" inputmode="decimal" class="ent" placeholder="未記入" value="${esc(sv.v2 !== undefined ? sv.v2 : (row.v2 !== undefined ? row.v2 : ''))}" data-k="${k}_v2" oninput="mkEnt(this)"></td>
     ${isTA ? `<td><select class="on" data-k="${k}_ok" onchange="upOn(this)"><option value="">-</option><option>OK</option><option>NG</option></select></td>` : ''}
     <td style="white-space:nowrap;">
       <button class="mv" onclick="moveRow('${targetId}','${prefix}',${si},${ri},-1)">▲</button>
       <button class="mv" onclick="moveRow('${targetId}','${prefix}',${si},${ri},1)">▼</button>
-      <button class="db" onclick="delRow('${targetId}','${prefix}',${si},${ri},this)">🗑</button>
+      <button class="db${(!masterMode && hasBase) ? ' locked' : ''}" onclick="delRow('${targetId}','${prefix}',${si},${ri},this)" title="${(!masterMode && hasBase) ? '基準値のある行は削除できません' : 'この行を削除'}">🗑</button>
     </td>`;
   tb.appendChild(tr);
 
@@ -1111,27 +1181,75 @@ function addCondRowEl(targetId, prefix, si, ri, row, masterMode, saved) {
     const s = tr.querySelector(`[data-k="${k}_ok"]`);
     if (s) { s.value=sv.ok||row.ok||''; upOn(s); }
   }
+  tr.querySelectorAll('input.ent').forEach(mkEnt);
   refreshLabelTl();
 }
 
+// 単位プルダウンの変更を行データに反映
 function onUnitChange(prefix, si, ri, which, value) {
   const secs = prefix==='c' ? COND_SECS : M_COND_SECS;
   if (!secs[si] || !secs[si].rows[ri]) return;
   secs[si].rows[ri][which] = value;
 }
 
+// 記入欄の未記入マーク
+function mkEnt(el) {
+  if (!el) return;
+  if (String(el.value||'').trim()) el.classList.remove('blank');
+  else el.classList.add('blank');
+}
+function refreshEntBlank() {
+  document.querySelectorAll('input.ent').forEach(mkEnt);
+}
+
+// 画面の入力値を行データへ書き戻す（再描画で消えないように）
+function commitCondInputs(prefix) {
+  const secs = prefix==='c' ? COND_SECS : M_COND_SECS;
+  secs.forEach((sec, si) => {
+    sec.rows.forEach((row, ri) => {
+      const k = `${prefix}_${si}_${ri}`;
+      const val = (suf) => {
+        const el = document.querySelector(`[data-k="${k}_${suf}"]`);
+        return el ? el.value : undefined;
+      };
+      const tr = document.getElementById(`${prefix}tr-${si}-${ri}`);
+      if (tr) { const n = tr.querySelector('input.tx'); if (n) row.n = n.value; }
+      const b1 = val('b1'); if (b1 !== undefined) row.b1 = b1;
+      const b2 = val('b2'); if (b2 !== undefined) row.b2 = b2;
+      const rr = val('r');  if (rr !== undefined) row.r  = rr;
+      const vv = val('v');  if (vv !== undefined) row.v  = vv;
+      const v2 = val('v2'); if (v2 !== undefined) row.v2 = v2;
+      const ok = val('ok'); if (ok !== undefined) row.ok = ok;
+    });
+  });
+}
+
 function moveRow(targetId, prefix, si, ri, dir) {
   const secs = prefix==='c' ? COND_SECS : M_COND_SECS;
   const newRi = ri + dir;
   if (newRi<0 || newRi>=secs[si].rows.length) return;
-  const saved = collectCondData(prefix);
+  commitCondInputs(prefix);
   [secs[si].rows[ri], secs[si].rows[newRi]] = [secs[si].rows[newRi], secs[si].rows[ri]];
   const master = prefix==='m';
-  renderCondSecs(targetId, secs, master, saved);
+  renderCondSecs(targetId, secs, master, null);
 }
 
 function delRow(targetId, prefix, si, ri, btn) {
   const secs = prefix==='c' ? COND_SECS : M_COND_SECS;
+
+  // 日々の記録：基準値が入っている行は削除できない
+  if (prefix === 'c') {
+    const gv2 = (suf) => {
+      const el = document.querySelector(`[data-k="c_${si}_${ri}_${suf}"]`);
+      return el ? String(el.value||'').trim() : '';
+    };
+    if (gv2('b1') || gv2('b2')) {
+      toast('基準値のある行は削除できません（基準値を空にすると削除できます）', 'warn');
+      return;
+    }
+  }
+
+  commitCondInputs(prefix);
   secs[si].rows.splice(ri,1);
   document.getElementById(`${prefix}tb-${si}`).removeChild(btn.closest('tr'));
   reindexTb(prefix, si);
@@ -2319,6 +2437,7 @@ function fillForm(d) {
       const k=el.getAttribute('data-k');
       if(d[k]!==undefined){el.value=d[k];if(el.tagName==='SELECT')upOn(el);}
     });
+    refreshEntBlank();
     M5.forEach((label,i)=>{
       const ynEl=document.querySelector(`[data-k="m5_${i}yn"]`);
       const acEl=document.getElementById(`m5ac${i}`);
@@ -2548,6 +2667,9 @@ function clearHistFilters() {
   document.getElementById('histSearch').value = '';
   document.getElementById('histFilterSign').value = '';
   document.getElementById('histFilterClient').value = '';
+  const mc = document.getElementById('histFilterMachine'); if (mc) mc.value = '';
+  const hf = document.getElementById('histFrom');          if (hf) hf.value = '';
+  const ht = document.getElementById('histTo');            if (ht) ht.value = '';
   renderHistTabs();
 }
 
@@ -2572,6 +2694,15 @@ async function openHistory(){
   const clientSel = document.getElementById('histFilterClient');
   clientSel.innerHTML = '<option value="">取引先: すべて</option>'
     + clients.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+
+  // 号機の選択肢を記録から自動生成
+  const machines = [...new Set(HIST.map(r => String(r.machineNo||'').trim()).filter(Boolean))]
+    .sort((a,b) => a.localeCompare(b, 'ja', {numeric:true}));
+  const macSel = document.getElementById('histFilterMachine');
+  if (macSel) {
+    macSel.innerHTML = '<option value="">号機: すべて</option>'
+      + machines.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+  }
   renderHistTabs();
 }
 
@@ -2579,6 +2710,9 @@ function getHistFiltered() {
   const q      = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
   const sign   = document.getElementById('histFilterSign')?.value || '';
   const client = document.getElementById('histFilterClient')?.value || '';
+  const machine = document.getElementById('histFilterMachine')?.value || '';
+  const dFrom   = document.getElementById('histFrom')?.value || '';
+  const dTo     = document.getElementById('histTo')?.value || '';
   return HIST.filter(r => {
     const nos  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
     const reqs = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
@@ -2603,12 +2737,24 @@ function getHistFiltered() {
       matchSign = false;
     }
     const matchClient = !client || (r.client||'') === client;
+    // 号機
+    const matchMachine = !machine || String(r.machineNo||'').trim() === machine;
+    // 記入日の範囲（片側だけの指定も可）
+    const rd = String(r.recordDate||'').trim();
+    let matchDate = true;
+    if (dFrom || dTo) {
+      if (!rd) matchDate = false;
+      else {
+        if (dFrom && rd < dFrom) matchDate = false;
+        if (dTo   && rd > dTo)   matchDate = false;
+      }
+    }
     // 取引先タブで絞り込み（マスター経由で取引先を解決）
     const rnos2  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']);
     const masterT = PARTS.find(p => (p.nos||[p.no]).some(n => rnos2.includes(n)));
     const rClientT = String(r.client || masterT?.client || '').trim() || '__none__';
     const matchTab = HIST_TAB==='all' || rClientT === HIST_TAB;
-    return matchQ && matchSign && matchClient && matchTab;
+    return matchQ && matchSign && matchClient && matchMachine && matchDate && matchTab;
   });
 }
 
@@ -2629,7 +2775,19 @@ function groupByPartNo(records) {
 // 取引先タブを生成
 function renderHistTabs() {
   const q = (document.getElementById('histSearch')?.value||'').toLowerCase().trim();
+  const machine = document.getElementById('histFilterMachine')?.value || '';
+  const dFrom   = document.getElementById('histFrom')?.value || '';
+  const dTo     = document.getElementById('histTo')?.value || '';
   const base = HIST.filter(r => {
+    // 号機
+    if (machine && String(r.machineNo||'').trim() !== machine) return false;
+    // 記入日の範囲
+    if (dFrom || dTo) {
+      const rd = String(r.recordDate||'').trim();
+      if (!rd) return false;
+      if (dFrom && rd < dFrom) return false;
+      if (dTo   && rd > dTo)   return false;
+    }
     if (!q) return true;
     const nos  = (r.pnPairs?r.pnPairs.map(p=>p.no):[r.partNo||'']).join(' ');
     const reqs = (r.pnPairs?r.pnPairs.map(p=>p.req):[r.reqNo||'']).join(' ');
