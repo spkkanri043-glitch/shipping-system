@@ -366,6 +366,11 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 .hrec-btn.rst:hover{ background:#f2fbf5; }
 #delBanner{ background:#f2f4f7; border:1px solid #c2cad6; color:#5a6a85; border-radius:6px; padding:8px 12px; margin-bottom:10px; display:none; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; }
 @media print{ #delBanner{ display:none !important; } .hrec-btn{ display:none !important; } }
+
+/* ── 閲覧モード（通知リンクから開いたとき） ── */
+#viewBanner{ background:#eaf2fb; border:1px solid var(--blue2); color:#1d3f70; border-radius:6px; padding:9px 13px; margin-bottom:10px; display:none; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; }
+#viewBanner .vb-sub{ font-size:10.5px; color:var(--tx2); }
+@media print{ #viewBanner{ display:none !important; } }
 </style>
 </head>
 <body>
@@ -416,6 +421,9 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 
   <!-- 削除済みバナー（JSで内容生成） -->
   <div id="delBanner"></div>
+
+  <!-- 閲覧モードバナー（通知リンクから開いたとき） -->
+  <div id="viewBanner"></div>
 
   <!-- 基本情報 -->
   <div class="card">
@@ -861,6 +869,9 @@ let LOCKED = false;   // 確定（集計確認サイン済み）ロック状態
 let MST_TAB = 'all';  // マスター一覧の取引先タブ
 let PS_TAB = 'all';   // 品番選択の取引先タブ
 let HIST_SHOW_DELETED = false;  // 履歴で削除済みも表示するか
+// 通知リンクから開いたときの閲覧モード
+const RID_PARAM  = new URLSearchParams(window.location.search).get('rid') || '';
+const VIEW_ONLY  = (new URLSearchParams(window.location.search).get('from') || '') === 'notify';
 let CUR_DEL = null;             // 開いている記録の削除情報（保存時に引き継ぐ）
   let LAST_SNAPSHOT = {};   // 前回保存時の data-k 値スナップショット（差分比較用）
 let CHANGE_LOG = [];      // 変更履歴 [{ts, byName, byId, field, before, after, reason}]
@@ -926,6 +937,10 @@ window.addEventListener('DOMContentLoaded', () => {
   CUR_DEL = null; applyDelBanner();
   setStatus('新規作成モード', 'ok');
   PARTS = JSON.parse(ls('seikei_part_masters') || '[]');
+
+  // 通知リンクから開いた場合
+  applyViewOnly();
+  if (RID_PARAM) openRecordById(RID_PARAM);
 });
 
 // ══════════════════════════════════════════════
@@ -1848,6 +1863,12 @@ function onM5ActionInput(i, inp) {
 // サイン
 // ══════════════════════════════════════════════
 function stamp(role, checked) {
+  if (VIEW_ONLY) {
+    const cb = document.getElementById('cb-' + role);
+    if (cb) cb.checked = false;
+    toast('閲覧モードです。サインはポータルからログインして開いてください', 'warn');
+    return;
+  }
   const labels={mgr:'管理者',sup:'監督者',agg:'集計確認'};
   if (checked) {
     if (role === 'agg') {
@@ -1887,18 +1908,80 @@ function stamp(role, checked) {
 // ══════════════════════════════════════════════
 // 確定ロック
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// 閲覧モード（LINE WORKS通知のリンクから開いたとき）
+//  記録は見られるが、記入・サイン・保存はできない
+// ══════════════════════════════════════════════
+function applyViewOnly() {
+  if (!VIEW_ONLY) return;
+
+  const wrap = document.getElementById('main-wrap');
+  if (wrap) wrap.classList.add('locked');
+
+  // 保存ボタンを止める
+  const saveBtn = document.querySelector('.btn-save');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.style.opacity = '.45'; saveBtn.style.cursor = 'not-allowed'; }
+
+  // 書き換え系のボタンは隠す（新規・マスター登録）
+  document.querySelectorAll('.tb-btns .btn').forEach(b => {
+    const oc = b.getAttribute('onclick') || '';
+    if (oc.indexOf('newForm') === 0 || oc.indexOf('openMasterModal') === 0) b.style.display = 'none';
+  });
+
+  const b = document.getElementById('viewBanner');
+  if (b) {
+    b.style.display = 'flex';
+    b.innerHTML = '👁 <span style="font-weight:bold;">閲覧モード</span>'
+      + '<span class="vb-sub">通知のリンクから開いたため、記入・サイン・保存はできません。'
+      + '記入やサインを行う場合は、ポータルからログインして開いてください。</span>';
+  }
+}
+
+// 通知リンクで指定された記録を開く
+async function openRecordById(id) {
+  setStatus('<span class="spinner"></span>記録を読み込み中...', 'loading');
+  try {
+    HIST = JSON.parse(ls('seikei_records') || '[]');
+    if (GAS_URL) {
+      try {
+        const r = await gasGet('listSeikei&limit=300');
+        if (r.ok && r.records) {
+          const ids = r.records.map(x => String(x.id));
+          HIST = [...r.records, ...HIST.filter(x => !ids.includes(String(x.id)))];
+        }
+      } catch(e) {}
+      try {
+        const p = await gasGet('listParts');
+        if (p.ok && p.parts) PARTS = p.parts;
+      } catch(e) {}
+    }
+    const rec = HIST.find(x => String(x.id) === String(id));
+    if (!rec) {
+      setStatus('⚠️ 指定された記録が見つかりません', 'warn');
+      toast('記録が見つかりません（ID: ' + id + '）', 'err');
+      return;
+    }
+    fillForm(rec);
+    applyViewOnly();   // fillForm が applyLock を呼ぶので、そのあとに掛け直す
+  } catch(e) {
+    setStatus('⚠️ 記録の読み込みに失敗しました', 'warn');
+    toast('読み込みに失敗しました: ' + e.message, 'err');
+  }
+}
+
 function isUnlockRole(){ return !!CU && (CU.role === 'admin' || CU.role === 'master'); }
 
 function applyLock(locked){
   LOCKED = locked;
   const wrap = document.getElementById('main-wrap');
-  wrap.classList.toggle('locked', locked);
+  wrap.classList.toggle('locked', locked || VIEW_ONLY);
 
   const saveBtn = document.querySelector('.btn-save');
   if (saveBtn){
-    saveBtn.disabled = locked;
-    saveBtn.style.opacity = locked ? '.45' : '';
-    saveBtn.style.cursor  = locked ? 'not-allowed' : '';
+    const off = locked || VIEW_ONLY;
+    saveBtn.disabled = off;
+    saveBtn.style.opacity = off ? '.45' : '';
+    saveBtn.style.cursor  = off ? 'not-allowed' : '';
   }
 
   const banner = document.getElementById('lockBanner');
@@ -2581,6 +2664,7 @@ function validateForm() {
 // 保存
 // ══════════════════════════════════════════════
 async function saveRecord() {
+  if (VIEW_ONLY) { toast('閲覧モードです。ポータルからログインして開いてください', 'warn'); return; }
   if (LOCKED) { toast('この記録は確定済みのため保存できません', 'warn'); return; }
 
   const hasReq = PN_PAIRS.some(p=>p.req.trim());
