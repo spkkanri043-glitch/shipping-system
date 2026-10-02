@@ -485,6 +485,12 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
           <input type="text" id="productName" placeholder="製品名">
         </div>
       </div>
+      <div class="fg fg2" style="margin-bottom:6px;">
+        <div class="fld">
+          <label>整番 <span style="font-size:9px;color:var(--tx3);">（マスターから自動）</span></label>
+          <input type="text" id="seibanNo" readonly title="整番はマスター管理から設定してください">
+        </div>
+      </div>
       <!-- 品番+依頼番号ペア -->
       <div style="margin-bottom:6px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;">
@@ -669,6 +675,11 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
           <div class="fg fg4" style="margin-bottom:6px;">
             <div class="fld" style="grid-column:span 2;">
               <label>製品名 *</label><input type="text" id="m-productName" placeholder="製品名">
+            </div>
+          </div>
+          <div class="fg fg4" style="margin-bottom:6px;">
+            <div class="fld" style="grid-column:span 2;">
+              <label>整番</label><input type="text" id="m-seibanNo" placeholder="整番">
             </div>
           </div>
           <!-- 品番のみ（依頼番号なし） -->
@@ -2178,6 +2189,7 @@ function usePartMaster(i) {
   renderPnPairs();
   const sv = (id, v) => { const e=document.getElementById(id); if(e) e.value=v||''; };
   sv('productName', m.name);
+  sv('seibanNo',    m.seibanNo);
   sv('material',    m.mat);
   sv('mbName',      m.mb);
   sv('mbRatio',     m.mbRatio);
@@ -2323,7 +2335,7 @@ async function openMasterModal() {
   M_NOTES     = [{c:'',s:''},{c:'',s:''},{c:'',s:''}];
   M_PHOTOS    = [];
   M_PNS = [''];
-  ['m-productName','m-material','m-mbName','m-mbRatio','m-client','m-machineNo','m-condNo','m-dryTemp','m-dryTime','m-moldMachine','m-takeMachine','m-boxMachine'].forEach(id=>{
+  ['m-productName','m-seibanNo','m-material','m-mbName','m-mbRatio','m-client','m-machineNo','m-condNo','m-dryTemp','m-dryTime','m-moldMachine','m-takeMachine','m-boxMachine'].forEach(id=>{
     const e=document.getElementById(id); if(e) e.value='';
   });
   renderMstPns();
@@ -2386,7 +2398,7 @@ function renderMstList() {
     ? filtered.map(p => {
         const realIdx = PARTS.indexOf(p);
         return `<div style="display:flex;align-items:center;gap:8px;padding:5px 6px;border-bottom:1px solid var(--bd);">
-          <div style="flex:1;"><div style="font-weight:bold;font-size:12px;">${esc(p.nos&&p.nos.join?p.nos.join(' / '):p.no||'')}</div><div style="font-size:10px;color:var(--tx2);">${esc(p.name)}${p.mat?' ／ '+esc(p.mat):''}${p.client?' ／ 🏢 '+esc(p.client):''}</div></div>
+          <div style="flex:1;"><div style="font-weight:bold;font-size:12px;">${esc(p.nos&&p.nos.join?p.nos.join(' / '):p.no||'')}</div><div style="font-size:10px;color:var(--tx2);">${esc(p.name)}${p.seibanNo?' ／ 整番 '+esc(p.seibanNo):''}${p.mat?' ／ '+esc(p.mat):''}${p.client?' ／ 🏢 '+esc(p.client):''}</div></div>
           <button onclick="loadMasterToModal(${realIdx})" style="padding:3px 8px;font-size:10px;border:1px solid var(--blue2);border-radius:3px;background:var(--sec);color:var(--blue);cursor:pointer;">読込</button>
           <button onclick="delMaster('${esc(p.nos?p.nos[0]:p.no)}')" style="padding:3px 8px;font-size:10px;border:1px solid var(--r);border-radius:3px;background:#fff5f5;color:var(--r);cursor:pointer;">削除</button>
         </div>`;
@@ -2406,6 +2418,7 @@ function loadMasterToModal(i) {
   renderMstPns();
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
   sv('m-productName', m.name);
+  sv('m-seibanNo',    m.seibanNo);
   sv('m-material',    m.mat);
   sv('m-mbName',      m.mb);
   sv('m-mbRatio',     m.mbRatio);
@@ -2474,7 +2487,7 @@ async function savePartMaster() {
 
   const m={
     nos, no:nos[0],
-    name, mat:gv('m-material'), mb:gv('m-mbName'),
+    name, seibanNo:gv('m-seibanNo'), mat:gv('m-material'), mb:gv('m-mbName'),
     mbRatio:gv('m-mbRatio'),
     client:gv('m-client'),
     machineNo:gv('m-machineNo'), condNo:gv('m-condNo'),
@@ -2551,6 +2564,7 @@ function collectData() {
     savedAt: toJST(new Date()),
     savedBy:CU.id, savedByName:CU.name,
     productName:gv('productName'),
+    seibanNo:gv('seibanNo'),
     pnPairs:deep(PN_PAIRS),
     partNo:PN_PAIRS[0]?.no||'',
     reqNo:PN_PAIRS[0]?.req||'',
@@ -2581,7 +2595,7 @@ function collectData() {
 function fillForm(d) {
   RID=d.id;
   const sv2=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
-  ['productName','recordDate','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','takeMachine','boxMachine'].forEach(id=>sv2(id,d[id]));
+  ['productName','seibanNo','recordDate','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','takeMachine','boxMachine'].forEach(id=>sv2(id,d[id]));
 
   const origOperator = d.operator || d.operatorId || '';
   const origOperatorId = d.operatorId || '';
@@ -2815,7 +2829,7 @@ function newForm(){
   document.getElementById('operator').value = CU.name;
   document.getElementById('s-start').textContent  = CU.name;
   document.getElementById('ss-start').textContent = CU.name + ' ✔';
-  ['productName','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','takeMachine','boxMachine'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['productName','seibanNo','machineNo','condNo','material','mbName','mbRatio','dryTemp','dryTime','moldMachine','takeMachine','boxMachine'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('recordDate').value=today();
   COND_SECS=deep(DEF_SECS); renderCondSecs('condBody',COND_SECS,false,null);
   PC_ITEMS=deep(DEF_PC); renderPC('pcTb',PC_ITEMS,false);
@@ -3272,6 +3286,7 @@ function newFromMaster(partNoKey) {
 
   const sv = (id, v) => { const e=document.getElementById(id); if(e) e.value=v||''; };
   sv('productName', master.name);
+  sv('seibanNo',    master.seibanNo);
   sv('material',    master.mat);
   sv('mbName',      master.mb);
   sv('mbRatio',     master.mbRatio);
