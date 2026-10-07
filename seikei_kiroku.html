@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>成形記録書</title>
-<meta name="app-version" content="2026-10-02a">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<meta name="app-version" content="2026-10-02b">
 <style>
 :root{
   --blue:#1a3a6b;--blue2:#2955a0;--acc:#c8392b;
@@ -222,6 +223,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   .on.ng { background: #fadbd8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .pn-pair { border: 1px solid #aaa !important; }
   .pn-pair input { border: 1px solid #c8392b !important; background: #fff8f8 !important; }
+  .rq-pick { display: none !important; }
   .sg .sb { border: 1px solid #aaa !important; }
   .sl { background: #dce4f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   /* 印刷時に品番追加ボタン・行操作ボタン等を非表示 */
@@ -420,6 +422,51 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   /* 製品確認なども画面内に収める */
   #main-wrap.view-only .card .cb > .st{ min-width:0; }
 }
+
+/* 整番の欄（品番とペア） */
+.pn-pair input.sb{ border-color:var(--blue2)!important; background:#f6f9ff!important; }
+.pn-pair input.sb[readonly]{ color:var(--blue); font-weight:bold; }
+.pn-pair input.nm{ border-color:#9aa5b1!important; background:#fafbfc!important; }
+/* 画面が狭いときは2列に折り返す（見出しは消して、各欄の文字で判別） */
+@media(max-width:760px){
+  #pnHead{ display:none!important; }
+  #pnPairs .pn-pair, #m-pnArea .pn-pair{ grid-template-columns:1fr 1fr!important; }
+}
+.pn-pair input.rqfill{ border-color:var(--g)!important; background:#f4fcf7!important; }
+.rq-wrap{ position:relative; display:flex; }
+.rq-wrap input{ flex:1; min-width:0; }
+.rq-pick{ flex:0 0 auto; margin-left:4px; width:30px; border:1px solid var(--blue2); background:var(--sec); color:var(--blue); border-radius:4px; cursor:pointer; font-size:13px; font-family:inherit; }
+.rq-pick:hover{ background:var(--blue2); color:#fff; }
+
+/* ── 成形依頼リスト（取込・一覧） ── */
+.imp-box{ border:2px dashed var(--bd); border-radius:8px; padding:18px 14px; text-align:center; background:var(--cell); transition:.15s; }
+.imp-box.over{ border-color:var(--g); background:#eefaf2; box-shadow:0 0 0 3px rgba(39,174,96,.18) inset; }
+.imp-btn{ padding:8px 18px; background:var(--blue2); color:#fff; border:none; border-radius:5px; font-size:12.5px; font-weight:bold; cursor:pointer; font-family:inherit; }
+.imp-btn:disabled{ opacity:.5; cursor:wait; }
+.imp-res{ margin-top:10px; border:1px solid var(--g); background:#f2fbf5; border-radius:6px; padding:9px 12px; font-size:11.5px; color:#1e7a45; line-height:1.9; text-align:left; }
+.imp-res.err{ border-color:var(--r); background:#fdecea; color:#922; }
+.imp-res b{ font-size:14px; }
+.imp-tbl{ width:100%; border-collapse:collapse; font-size:11px; margin-top:8px; }
+.imp-tbl th{ background:var(--head); border:1px solid var(--bd); padding:5px 7px; color:var(--blue); white-space:nowrap; }
+.imp-tbl td{ border:1px solid var(--bd); padding:5px 7px; text-align:center; }
+.delw{ background:none; border:1px solid var(--r); color:var(--r); border-radius:4px; font-size:10.5px; padding:3px 9px; cursor:pointer; font-family:inherit; white-space:nowrap; }
+.daygrp{ font-size:11px; font-weight:bold; color:#fff; background:var(--blue2); border-radius:4px; padding:3px 10px; margin:10px 0 6px; display:inline-block; }
+.rqc{ border:1px solid var(--bd); border-left:4px solid var(--blue2); border-radius:5px; padding:8px 11px; margin-bottom:6px; display:flex; align-items:center; gap:10px; transition:.15s; }
+.rqc:hover{ background:var(--sec); }
+.rqc-main{ flex:1; min-width:0; }
+.rqc-sb{ font-weight:bold; font-size:12.5px; color:var(--blue); }
+.rqc-no{ font-size:10.5px; color:var(--tx2); margin-top:2px; }
+.rqc-meta{ font-size:10px; color:var(--tx3); margin-top:2px; display:flex; gap:10px; flex-wrap:wrap; }
+.rqc-use{ padding:5px 13px; background:var(--g); color:#fff; border:none; border-radius:5px; font-size:11.5px; font-weight:bold; cursor:pointer; font-family:inherit; white-space:nowrap; }
+.rqc-del{ background:none; border:1px solid var(--r); color:var(--r); border-radius:4px; font-size:10.5px; padding:3px 8px; cursor:pointer; font-family:inherit; }
+.rqc.done{ border-left-color:var(--g); background:#f7fbf8; opacity:.75; }
+.rqc.done .rqc-sb{ color:#1e7a45; }
+.rqc.nomst{ border-left-color:var(--o); background:#fffdf5; }
+.rtag{ display:inline-block; font-size:9px; border-radius:3px; padding:1px 6px; font-weight:bold; margin-left:5px; vertical-align:1px; }
+.rtag-done{ background:var(--g); color:#fff; }
+.rtag-nomst{ background:var(--o); color:#fff; }
+.rtag-dup{ background:var(--blue2); color:#fff; }
+.chk{ display:inline-flex; align-items:center; gap:4px; font-size:10.5px; color:var(--tx2); border:1px solid var(--bd); border-radius:12px; padding:3px 10px; background:var(--wh); cursor:pointer; }
 </style>
 </head>
 <body>
@@ -448,6 +495,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
     <button class="btn btn-hist" onclick="openHistory()">📂 履歴</button>
     <button class="btn btn-mst"  onclick="openPartSelect()">📦 品番選択</button>
     <button class="btn btn-mst"  onclick="openMasterModal()" style="background:#1a6896;">⚙️ マスター</button>
+    <button class="btn" id="btn-imp" onclick="openImport()" style="background:#0f7b5f;color:#fff;display:none;">📥 成形依頼取込</button>
     <button class="btn" onclick="printForm()" style="background:#8e44ad;color:#fff;">🖨️ 印刷</button>
     <button class="btn btn-save" onclick="saveRecord()">💾 保存</button>
   </div>
@@ -478,23 +526,13 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   <div class="card">
     <div class="ch">📝 基本情報</div>
     <div class="cb">
-      <!-- 製品名 -->
-      <div class="fg fg2" style="margin-bottom:6px;">
-        <div class="fld" style="grid-column:span 2;">
-          <label>製品名</label>
-          <input type="text" id="productName" placeholder="製品名">
-        </div>
-      </div>
-      <div class="fg fg2" style="margin-bottom:6px;">
-        <div class="fld">
-          <label>整番 <span style="font-size:9px;color:var(--tx3);">（マスターから自動）</span></label>
-          <input type="text" id="seibanNo" readonly title="整番はマスター管理から設定してください">
-        </div>
-      </div>
-      <!-- 品番+依頼番号ペア -->
+      <input type="hidden" id="productName">
+      <!-- 品番・整番・製品名・依頼番号は1組（品番①＝整番①＝製品名①） -->
       <div style="margin-bottom:6px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;">
+        <div id="pnHead" style="display:grid;grid-template-columns:1fr .9fr 1.2fr 1fr;gap:6px;margin-bottom:4px;">
           <label style="font-size:10px;color:var(--tx2);font-weight:bold;">⭐ 品番</label>
+          <label style="font-size:10px;color:var(--tx2);font-weight:bold;">整番 <span style="font-weight:normal;color:var(--tx3);">（マスターから）</span></label>
+          <label style="font-size:10px;color:var(--tx2);font-weight:bold;">製品名 <span style="font-weight:normal;color:var(--tx3);">（マスターから）</span></label>
           <label style="font-size:10px;color:var(--tx2);font-weight:bold;">⭐ 成形依頼番号</label>
         </div>
         <div id="pnPairs"></div>
@@ -639,13 +677,36 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 <!-- ═══ 品番選択モーダル ═══ -->
 <div class="mo" id="partSelectModal">
   <div class="md" style="max-width:560px;">
-    <div class="mh">📦 品番を選んで記録書を作成<button class="mc-btn" onclick="closeM('partSelectModal')">✕</button></div>
+    <div class="mh">📦 記録書の作成<button class="mc-btn" onclick="closeM('partSelectModal')">✕</button></div>
+    <div style="display:flex;overflow-x:auto;border-bottom:2px solid var(--bd);padding:0 14px;background:var(--wh);">
+      <button class="htab on" id="mkTab1" onclick="setMakeTab(1)">📋 成形依頼から <span class="hbadge" id="mkB1">0</span></button>
+      <button class="htab" id="mkTab2" onclick="setMakeTab(2)">📦 品番から <span class="hbadge" id="mkB2">0</span></button>
+    </div>
     <div class="mb">
-      <input type="text" id="psSearch" placeholder="品番・製品名で検索..."
-        oninput="renderPartSelect()"
-        style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:5px;font-size:12px;font-family:inherit;margin-bottom:12px;">
-      <div id="psTabs" style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--bd);margin-bottom:10px;scrollbar-width:none;"></div>
-      <div id="psList"></div>
+
+      <!-- 成形依頼から -->
+      <div id="mkPane1">
+        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:9px;">
+          <input type="text" id="rqSearch" placeholder="整番・依頼番号で検索..." oninput="renderReqList()"
+            style="flex:1;min-width:150px;padding:7px 11px;border:1px solid var(--bd);border-radius:5px;font-size:12px;font-family:inherit;">
+          <select id="rqDay" onchange="renderReqList()"
+            style="font-size:11px;padding:4px 8px;border:1px solid var(--bd);border-radius:12px;background:var(--wh);font-family:inherit;cursor:pointer;">
+            <option value="">希望日: すべて</option>
+          </select>
+          <label class="chk"><input type="checkbox" id="rqShowDone" onchange="renderReqList()"> 作成済みも表示</label>
+        </div>
+        <div id="rqList" style="max-height:56vh;overflow-y:auto;"></div>
+      </div>
+
+      <!-- 品番から -->
+      <div id="mkPane2" style="display:none;">
+        <input type="text" id="psSearch" placeholder="品番・製品名で検索..."
+          oninput="renderPartSelect()"
+          style="width:100%;padding:8px 12px;border:1px solid var(--bd);border-radius:5px;font-size:12px;font-family:inherit;margin-bottom:12px;">
+        <div id="psTabs" style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--bd);margin-bottom:10px;scrollbar-width:none;"></div>
+        <div id="psList"></div>
+      </div>
+
     </div>
     <div class="mf"><button class="btn btn-new" onclick="closeM('partSelectModal')">閉じる</button></div>
   </div>
@@ -672,20 +733,17 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
       <div class="card" style="margin-bottom:10px;">
         <div class="ch">📝 基本情報（マスター）</div>
         <div class="cb">
-          <div class="fg fg4" style="margin-bottom:6px;">
-            <div class="fld" style="grid-column:span 2;">
-              <label>製品名 *</label><input type="text" id="m-productName" placeholder="製品名">
-            </div>
-          </div>
-          <div class="fg fg4" style="margin-bottom:6px;">
-            <div class="fld" style="grid-column:span 2;">
-              <label>整番</label><input type="text" id="m-seibanNo" placeholder="整番">
-            </div>
-          </div>
-          <!-- 品番のみ（依頼番号なし） -->
+          <!-- 品番・整番・製品名は1組（品番①＝整番①＝製品名①） -->
           <div style="margin-bottom:6px;">
             <label style="font-size:10px;color:var(--tx2);font-weight:bold;">⭐ 品番（マスター）</label>
-            <div style="font-size:10px;color:var(--tx3);margin-bottom:3px;">品番を入力すると製品マスタから製品名・取引先を自動取得できます</div>
+            <div style="font-size:10px;color:var(--tx3);margin-bottom:3px;">品番・整番・製品名は<b>同じ番号どうしが1組</b>です（品番①＝整番①＝製品名①）。品番を入力すると製品マスタから製品名・取引先を自動取得できます</div>
+            <div style="display:grid;grid-template-columns:1fr .9fr 1.2fr auto;gap:6px;margin:4px 0 2px;">
+              <label style="font-size:10px;color:var(--tx2);font-weight:bold;">品番</label>
+              <label style="font-size:10px;color:var(--tx2);font-weight:bold;">整番</label>
+              <label style="font-size:10px;color:var(--tx2);font-weight:bold;">製品名 *</label>
+              <span style="width:22px;"></span>
+            </div>
+            <input type="hidden" id="m-productName">
             <div id="m-pnArea" style="margin-top:4px;"></div>
             <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap;">
               <button class="pn-add-btn" onclick="addMstPn()">＋ 品番追加</button>
@@ -792,6 +850,72 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
   </div>
 </div>
 
+<!-- ═══ 成形依頼リスト 専用画面（管理者・マスター） ═══ -->
+<div class="mo" id="reqModal">
+  <div class="md" style="max-width:860px;">
+    <div class="mh">📥 成形依頼リスト<button class="mc-btn" onclick="closeM('reqModal')">✕</button></div>
+    <div style="display:flex;overflow-x:auto;border-bottom:2px solid var(--bd);padding:0 14px;background:var(--wh);">
+      <button class="htab on" id="rqTab1" onclick="setReqTab(1)">📥 取込</button>
+      <button class="htab" id="rqTab2" onclick="setReqTab(2)">📋 依頼一覧 <span class="hbadge" id="rqB2">0</span></button>
+      <button class="htab" id="rqTab3" onclick="setReqTab(3)">🗂 取込履歴 <span class="hbadge" id="rqB3">0</span></button>
+    </div>
+    <div class="mb">
+
+      <!-- 取込 -->
+      <div id="rqPane1">
+        <div class="imp-box" id="impZone"
+          ondragenter="impDrag(event,true)" ondragover="impDrag(event,true)"
+          ondragleave="impDrag(event,false)" ondrop="onImpDrop(event)">
+          <div style="font-size:22px;line-height:1;margin-bottom:6px;">📄</div>
+          <div style="font-size:12.5px;font-weight:bold;color:var(--blue);margin-bottom:3px;">ここにファイルをドラッグ＆ドロップ</div>
+          <div style="font-size:11px;color:var(--tx2);margin-bottom:9px;">基幹システムから出力した成形依頼リスト（.xlsx / .csv）</div>
+          <button class="imp-btn" id="impBtn" onclick="pickImportFile()">📁 ファイルを選ぶ</button>
+          <input type="file" id="impFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="onImportFile(this)">
+          <div style="font-size:10px;color:var(--tx3);margin-top:7px;">一度取り込んだ成形依頼番号は上書きしません。新しい依頼だけが増えます</div>
+          <div class="imp-res" id="impRes" style="display:none;"></div>
+        </div>
+        <div style="font-size:10.5px;color:var(--tx3);line-height:1.9;margin-top:12px;border-top:1px solid var(--bd);padding-top:10px;">
+          ・毎週この画面から取り込んでください。同じファイルを2回選んでも増えません<br>
+          ・一度取り込んだ依頼番号は、元データが変わっても<b>上書きしません</b>（新しい依頼番号だけ追加）<br>
+          ・取り込んだ依頼は「📦 品番選択」→「📋 成形依頼から」で記録書の作成に使えます<br>
+          ・キャンセルになった依頼は「📋 依頼一覧」から削除できます
+        </div>
+      </div>
+
+      <!-- 依頼一覧 -->
+      <div id="rqPane2" style="display:none;">
+        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:9px;">
+          <input type="text" id="raSearch" placeholder="整番・依頼番号で検索..." oninput="renderReqAdmin()"
+            style="flex:1;min-width:150px;padding:7px 11px;border:1px solid var(--bd);border-radius:5px;font-size:12px;font-family:inherit;">
+          <select id="raDay" onchange="renderReqAdmin()"
+            style="font-size:11px;padding:4px 8px;border:1px solid var(--bd);border-radius:12px;background:var(--wh);font-family:inherit;cursor:pointer;">
+            <option value="">希望日: すべて</option>
+          </select>
+          <label class="chk"><input type="checkbox" id="raShowDone" checked onchange="renderReqAdmin()"> 作成済みも表示</label>
+        </div>
+        <div id="raList" style="max-height:58vh;overflow-y:auto;"></div>
+      </div>
+
+      <!-- 取込履歴 -->
+      <div id="rqPane3" style="display:none;">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:6px;">取り込んだ回ごとにまとめて削除できます（間違えて取り込んだ時に使ってください）</div>
+        <div id="impHist"></div>
+      </div>
+
+    </div>
+    <div class="mf"><button class="btn btn-new" onclick="closeM('reqModal')">閉じる</button></div>
+  </div>
+</div>
+
+<!-- ═══ 依頼番号の候補選択 ═══ -->
+<div class="mo" id="reqPickModal">
+  <div class="md" style="max-width:520px;">
+    <div class="mh">📋 成形依頼番号を選ぶ<button class="mc-btn" onclick="closeM('reqPickModal')">✕</button></div>
+    <div class="mb"><div id="rpBody"></div></div>
+    <div class="mf"><button class="btn btn-new" onclick="closeM('reqPickModal')">閉じる</button></div>
+  </div>
+</div>
+
 <!-- ═══ 履歴モーダル（取引先タブ付き） ═══ -->
 <div class="mo" id="histModal">
   <div class="md" style="max-width:860px;">
@@ -891,6 +1015,7 @@ const PRODUCT_GAS_URL = (() => {
 })();
 
 let CU = null; // currentUser
+let LOCAL_TEST = false; // file:// で開いたローカル確認モード
 let STARTER = null; // 記録書の最初の作成者（上書きしない）
 
 (function initUser() {
@@ -898,8 +1023,23 @@ let STARTER = null; // 記録書の最初の作成者（上書きしない）
     const t = new URLSearchParams(window.location.search).get('sso');
     if (t) CU = JSON.parse(decodeURIComponent(escape(atob(t.split('').reverse().join('')))));
   } catch(e) {}
+  // ローカル確認モード：パソコンでファイルを直接開いた時だけマスター権限にする
+  // （file:// のときだけ。GitHub Pages(https) では絶対に有効になりません）
+  if (!CU && location.protocol === 'file:') {
+    CU = {id:'local', name:'ローカル確認', role:'master', loginId:'local'};
+    LOCAL_TEST = true;
+  }
   if (!CU) CU = {id:'guest', name:'ゲスト', role:'staff', loginId:'guest'};
+  if (LOCAL_TEST) {
+    const b = document.createElement('div');
+    b.style.cssText = 'background:#fff3cd;border-bottom:2px solid #e0a800;color:#7a5c00;'
+      + 'font-size:11.5px;font-weight:bold;padding:6px 10px;text-align:center;';
+    b.textContent = '🖥 ローカル確認モード（マスター権限・データはこのパソコン内にのみ保存されます）';
+    document.body.insertBefore(b, document.body.firstChild);
+  }
   document.getElementById('user-badge').textContent = CU.name + '（' + CU.role + '）';
+  const bi = document.getElementById('btn-imp');
+  if (bi) bi.style.display = isUnlockRole() ? '' : 'none';
   // operator欄は新規作成時のみ設定（fillFormで上書きされる）
   document.getElementById('s-start').textContent = CU.name;
   document.getElementById('ss-start').textContent = CU.name + ' ✔';
@@ -919,16 +1059,17 @@ let PHOTOS = [];        // この記録の写真（日々）[{name,url}]
 let REF_PHOTOS = [];    // マスター由来の参考写真（日々・閲覧のみ）
 let COND_SECS = [];     // 成形条件セクション（日々）
 let M_COND_SECS = [];   // 成形条件セクション（マスター編集用）
-let M_PNS = [''];       // マスター品番リスト
+let M_PNS = [{no:'', seiban:''}];   // マスターの品番リスト（品番と整番のペア）
 let M_SEC_CACHE = {};   // マスター編集：チップで外したセクションの退避（key → セクション）
 const SIGNS = {mgr:null, sup:null, agg:null};
 
 // 品番+依頼番号ペア [{no:'', req:''}]
-let PN_PAIRS = [{no:'', req:''}];
+let PN_PAIRS = [{no:'', seiban:'', name:'', req:''}];
 let LOCKED = false;   // 確定（集計確認サイン済み）ロック状態
 let MST_TAB = 'all';  // マスター一覧の取引先タブ
 let PS_TAB = 'all';   // 品番選択の取引先タブ
 let HIST_SHOW_DELETED = false;  // 履歴で削除済みも表示するか
+let CUR_REQ = null;             // この記録書のもとになった成形依頼
 // 通知リンクから開いたときの閲覧モード
 const RID_PARAM  = new URLSearchParams(window.location.search).get('rid') || '';
 const VIEW_ONLY  = (new URLSearchParams(window.location.search).get('from') || '') === 'notify';
@@ -994,9 +1135,10 @@ window.addEventListener('DOMContentLoaded', () => {
   renderNotes(3); renderChocos(1); renderM5();
   PHOTOS = []; REF_PHOTOS = [];
   renderPhotos(); renderRefPhotos();
-  CUR_DEL = null; applyDelBanner();
+  CUR_REQ = null; CUR_DEL = null; applyDelBanner();
   setStatus('新規作成モード', 'ok');
   PARTS = JSON.parse(ls('seikei_part_masters') || '[]');
+  reqsLoadLocal();
 
   // 通知リンクから開いた場合
   applyViewOnly();
@@ -1012,15 +1154,51 @@ function renderPnPairs() {
   PN_PAIRS.forEach((pair, i) => {
     const row = document.createElement('div');
     row.className = 'pn-pair';
+    row.style.gridTemplateColumns = PN_PAIRS.length>1 ? '1fr .9fr 1.2fr 1fr auto' : '1fr .9fr 1.2fr 1fr';
+    const nCand = pair.seiban ? liveReqs().filter(r => String(r.seiban||'').trim() === String(pair.seiban).trim()).length : 0;
     row.innerHTML = `
       <input type="text" value="${esc(pair.no)}"  placeholder="品番${PN_PAIRS.length>1?' '+(i+1):''}"  oninput="PN_PAIRS[${i}].no=this.value">
-      <input type="text" value="${esc(pair.req)}" placeholder="成形依頼番号（10桁）" maxlength="10" oninput="PN_PAIRS[${i}].req=this.value">
+      <input type="text" class="sb" value="${esc(pair.seiban||'')}" placeholder="整番" readonly title="整番はマスター管理から設定してください">
+      <input type="text" class="nm" value="${esc(pair.name||'')}" placeholder="製品名${PN_PAIRS.length>1?' '+(i+1):''}" oninput="PN_PAIRS[${i}].name=this.value; syncProductName();">
+      <div class="rq-wrap">
+        <input type="text" class="rqno" value="${esc(pair.req)}" placeholder="成形依頼番号（10桁）" maxlength="10" oninput="PN_PAIRS[${i}].req=this.value">
+        ${nCand ? `<button class="rq-pick" onclick="openReqPick(${i})" title="取り込んだ依頼から選ぶ（${nCand}件）">📋</button>` : ''}
+      </div>
       ${PN_PAIRS.length>1 ? `<button class="pn-del" onclick="delPn(${i})">✕</button>` : ''}`;
     div.appendChild(row);
   });
+  const hd = document.getElementById('pnHead');
+  if (hd) hd.style.gridTemplateColumns = PN_PAIRS.length>1 ? '1fr .9fr 1.2fr 1fr 22px' : '1fr .9fr 1.2fr 1fr';
+  syncProductName();
 }
 
-function addPnPair()  { PN_PAIRS.push({no:'', req:''}); renderPnPairs(); }
+// 旧データ・通知・履歴の互換用に、製品名をまとめて productName に入れておく
+function syncProductName() {
+  const e = document.getElementById('productName');
+  if (e) e.value = PN_PAIRS.map(p => (p.name||'').trim()).filter(Boolean).join(' / ');
+}
+
+// 品番に対応する整番をマスターから補う
+function fillSeibanFromMaster() {
+  PN_PAIRS.forEach(p => {
+    if (p.seiban && p.name) return;
+    const no = (p.no||'').trim();
+    if (!no) return;
+    for (const m of PARTS) {
+      const nos = m.nos || [m.no || ''];
+      const idx = nos.indexOf(no);
+      if (idx < 0) continue;
+      if (!p.seiban && m.seibans && m.seibans[idx]) p.seiban = m.seibans[idx];
+      if (!p.name) {
+        const nm = (m.names && m.names[idx]) ? m.names[idx] : (idx === 0 ? (m.name||'') : '');
+        if (nm) p.name = nm;
+      }
+      return;
+    }
+  });
+}
+
+function addPnPair()  { PN_PAIRS.push({no:'', seiban:'', name:'', req:''}); renderPnPairs(); }
 function delPn(i)     {
   if (PN_PAIRS.length <= 1) { toast('品番は最低1つ必要です', 'warn'); return; }
   PN_PAIRS.splice(i, 1); renderPnPairs();
@@ -1029,27 +1207,52 @@ function delPn(i)     {
 // マスター用品番（依頼番号なし）＋サジェスト
 function renderMstPns() {
   const div = document.getElementById('m-pnArea'); div.innerHTML = '';
-  M_PNS.forEach((v, i) => {
+  M_PNS.forEach((p, i) => {
     const row = document.createElement('div');
     row.className = 'pn-pair master-mode';
-    row.style.gridTemplateColumns = '1fr auto';
+    row.style.gridTemplateColumns = M_PNS.length>1 ? '1fr .9fr 1.2fr auto' : '1fr .9fr 1.2fr';
     row.innerHTML = `
       <div class="pn-suggest-wrap">
-        <input type="text" value="${esc(v)}" placeholder="品番${M_PNS.length>1?' '+(i+1):''}（入力すると候補表示）" autocomplete="off"
+        <input type="text" value="${esc(p.no)}" placeholder="品番${M_PNS.length>1?' '+(i+1):''}（入力すると候補表示）" autocomplete="off"
           oninput="onMstPnInput(${i}, this)"
           onkeydown="onMstPnKey(${i}, this, event)"
           onfocus="onMstPnInput(${i}, this)"
           onblur="setTimeout(()=>hideMstSuggest(${i}), 150)">
         <div class="pn-suggest" id="pn-sg-${i}"></div>
       </div>
+      <input type="text" class="sb" value="${esc(p.seiban)}" placeholder="整番${M_PNS.length>1?' '+(i+1):''}"
+        oninput="M_PNS[${i}].seiban=this.value">
+      <input type="text" class="nm" value="${esc(p.name||'')}" placeholder="製品名${M_PNS.length>1?' '+(i+1):''}"
+        oninput="M_PNS[${i}].name=this.value; syncMstName();">
       ${M_PNS.length>1 ? `<button class="pn-del" onclick="delMstPn(${i})">✕</button>` : ''}`;
     div.appendChild(row);
   });
 }
 
-function addMstPn() { M_PNS.push(''); renderMstPns(); }
+function addMstPn() { commitMstPns(); M_PNS.push({no:'', seiban:'', name:''}); renderMstPns(); }
+
+// 画面の品番・整番を M_PNS に書き戻す（再描画で消えないように）
+function commitMstPns() {
+  const div = document.getElementById('m-pnArea');
+  if (!div) return;
+  Array.from(div.children).forEach((row, i) => {
+    if (!M_PNS[i]) return;
+    const ins = row.querySelectorAll('input');
+    if (ins[0]) M_PNS[i].no     = ins[0].value;
+    if (ins[1]) M_PNS[i].seiban = ins[1].value;
+    if (ins[2]) M_PNS[i].name   = ins[2].value;
+  });
+  syncMstName();
+}
+
+// 旧データ互換：製品名①を m-productName（非表示）に入れておく
+function syncMstName() {
+  const e = document.getElementById('m-productName');
+  if (e) e.value = (M_PNS.find(p => (p.name||'').trim()) || {}).name || '';
+}
 function delMstPn(i) {
   if (M_PNS.length <= 1) { toast('品番は最低1つ必要です','warn'); return; }
+  commitMstPns();
   M_PNS.splice(i,1); renderMstPns();
 }
 
@@ -1059,7 +1262,7 @@ function delMstPn(i) {
 let PN_SG_ACTIVE = {};  // 各欄のキーボード選択中index
 
 async function onMstPnInput(i, inp) {
-  M_PNS[i] = inp.value;
+  M_PNS[i].no = inp.value;
   const q = inp.value.trim().toLowerCase();
   const box = document.getElementById('pn-sg-' + i);
   if (!box) return;
@@ -1134,7 +1337,8 @@ function onMstPnKey(i, inp, ev) {
 
 // 候補を選択 → 完全品番に置換＋製品名・取引先を補完
 function pickMstPn(i, fullNo) {
-  M_PNS[i] = fullNo;
+  commitMstPns();
+  M_PNS[i].no = fullNo;
   renderMstPns();
 
   fetchProductMasterAll().then(products => {
@@ -1147,10 +1351,9 @@ function pickMstPn(i, fullNo) {
     if (!match) return;
     const productName = get(match, 'productName','製品名','name','product_name','itemName');
     const client      = get(match, 'basicClient','基本取引先','client','customer','clientName','取引先');
-    const nameEl   = document.getElementById('m-productName');
     const clientEl = document.getElementById('m-client');
-    if (nameEl   && !nameEl.value.trim()   && productName) nameEl.value   = productName;
-    if (clientEl && !clientEl.value.trim() && client)      clientEl.value = client;
+    if (productName && !(M_PNS[i].name||'').trim()) { M_PNS[i].name = productName; renderMstPns(); }
+    if (clientEl && !clientEl.value.trim() && client) clientEl.value = client;
     toast('品番「' + fullNo + '」を選択しました', 'ok');
   });
 }
@@ -1591,7 +1794,7 @@ async function onPhotoNameChange(i, isMaster) {
   const setStat = (t) => { if (status) status.textContent = t; };
   setStat('ドライブの名前を変更中...');
 
-  const partNo = (isMaster ? (M_PNS[0] || '') : (PN_PAIRS[0] ? PN_PAIRS[0].no : '')) || '';
+  const partNo = (isMaster ? (M_PNS[0] ? M_PNS[0].no : '') : (PN_PAIRS[0] ? PN_PAIRS[0].no : '')) || '';
   try {
     const r = await gasPost({
       action: 'renamePhoto',
@@ -1660,7 +1863,7 @@ async function onPhotoFile(inp, isMaster) {
 
     // 名前の初期値：入力された名前がなければファイル名
     const defName = (file.name || '写真').replace(/\.[^.]+$/, '');
-    const partNo  = (isMaster ? (M_PNS[0] || '') : (PN_PAIRS[0] ? PN_PAIRS[0].no : '')) || '';
+    const partNo  = (isMaster ? (M_PNS[0] ? M_PNS[0].no : '') : (PN_PAIRS[0] ? PN_PAIRS[0].no : '')) || '';
 
     const r = await gasPost({
       action: 'uploadPhoto',
@@ -2101,6 +2304,12 @@ async function openPartSelect() {
   document.getElementById('psSearch').value = '';
   PS_TAB = 'all';
   renderPartSelect();
+  await loadRequests();
+  const rs = document.getElementById('rqSearch'); if (rs) rs.value = '';
+  const rd = document.getElementById('rqDay');    if (rd) rd.value = '';
+  const rc = document.getElementById('rqShowDone'); if (rc) rc.checked = false;
+  // 取り込んだ依頼があれば「成形依頼から」、無ければ「品番から」を開く
+  setMakeTab(liveReqs().length ? 1 : 2);
   document.getElementById('partSelectModal').classList.add('show');
 }
 
@@ -2174,6 +2383,286 @@ function renderPartSelect() {
   }).join('');
 }
 
+// ── 「成形依頼から」タブ ──
+function setMakeTab(n) {
+  document.getElementById('mkTab1').classList.toggle('on', n===1);
+  document.getElementById('mkTab2').classList.toggle('on', n===2);
+  document.getElementById('mkPane1').style.display = n===1 ? '' : 'none';
+  document.getElementById('mkPane2').style.display = n===2 ? '' : 'none';
+  if (n===1) renderReqList(); else renderPartSelect();
+}
+
+// 有効な依頼（削除済みを除く）
+function liveReqs() { return REQS.filter(r => !r.deleted); }
+
+// 希望日プルダウンを作り直す
+function fillDaySelect(selId) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  const days = [...new Set(liveReqs().map(r => r.hope).filter(Boolean))].sort();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">希望日: すべて</option>'
+    + days.map(d => `<option value="${esc(d)}"${d===cur?' selected':''}>${esc(d.replace(/-/g,'/'))}</option>`).join('');
+}
+
+// 絞り込み（共通）
+function filterReqs(q, day, showDone) {
+  let rows = liveReqs();
+  if (q)   rows = rows.filter(r => String(r.seiban||'').includes(q) || String(r.no||'').includes(q));
+  if (day) rows = rows.filter(r => r.hope === day);
+  if (!showDone) rows = rows.filter(r => !r.usedBy);
+  rows.sort((a,b) => String(a.hope||'').localeCompare(String(b.hope||'')) || String(a.no).localeCompare(String(b.no)));
+  return rows;
+}
+
+// 希望日の見出し
+function dayHead(hope) {
+  let lbl = hope ? hope.replace(/-/g,'/') : '希望日なし';
+  if (hope) {
+    const d = new Date(hope + 'T00:00:00');
+    if (!isNaN(d)) lbl += '（' + ['日','月','火','水','木','金','土'][d.getDay()] + '）';
+  }
+  return '<div class="daygrp">📅 希望日 ' + esc(lbl) + '</div>';
+}
+
+// 依頼1件のカード（一覧・専用画面で共通）
+function reqCardHtml(r, cnt, opt) {
+  const hit = findMasterBySeiban(r.seiban);
+  const mstName = hit ? (hit.master.name || '') : '';
+  const safeNo = String(r.no).replace(/'/g,"\\'");
+  return '<div class="rqc' + (r.usedBy ? ' done' : '') + (hit ? '' : ' nomst') + '">'
+    + '<div class="rqc-main">'
+      + '<div class="rqc-sb">' + esc(r.seiban || '(整番なし)')
+        + (r.usedBy ? '<span class="rtag rtag-done">✅ 作成済み</span>' : '')
+        + (hit ? '' : '<span class="rtag rtag-nomst">⚠ マスター未登録</span>')
+        + ((cnt[r.seiban]||0) > 1 ? '<span class="rtag rtag-dup">同じ整番で複数</span>' : '')
+      + '</div>'
+      + '<div class="rqc-no">依頼番号 <b>' + esc(r.no) + '</b>　'
+        + (hit ? '→ ' + esc(mstName) : '→ 品番が特定できません') + '</div>'
+      + '<div class="rqc-meta">'
+        + '<span>数量 ' + esc(String(r.qty||0)) + '</span>'
+        + (r.plan ? '<span>予定 ' + esc(r.plan) + '</span>' : '')
+        + (r.mat ? '<span>材料 ' + esc(r.mat) + '</span>' : '')
+        + (r.usedByName ? '<span>作成者 ' + esc(r.usedByName) + '</span>' : '')
+      + '</div>'
+    + '</div>'
+    + (opt.use
+        ? (r.usedBy
+            ? '<span style="font-size:10.5px;color:var(--g);font-weight:bold;white-space:nowrap;">記録書あり</span>'
+            : '<button class="rqc-use"' + (hit ? '' : ' style="background:var(--o);"')
+              + ' onclick="useRequest(\'' + safeNo + '\')">'
+              + (hit ? 'この依頼で作成' : '品番を選んで作成') + '</button>')
+        : '')
+    + (opt.del ? '<button class="rqc-del" onclick="deleteRequest(\'' + safeNo + '\')">🗑</button>' : '')
+  + '</div>';
+}
+
+// ── 品番選択モーダルの「成形依頼から」 ──
+function renderReqList() {
+  fillDaySelect('rqDay');
+  const rows = filterReqs(
+    (document.getElementById('rqSearch')?.value || '').trim(),
+    document.getElementById('rqDay')?.value || '',
+    !!document.getElementById('rqShowDone')?.checked
+  );
+  const b1 = document.getElementById('mkB1'); if (b1) b1.textContent = rows.length;
+  const b2 = document.getElementById('mkB2'); if (b2) b2.textContent = PARTS.length;
+
+  const el = document.getElementById('rqList');
+  if (!el) return;
+  if (!rows.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--tx3);padding:34px;font-size:12px;">📭 該当する依頼がありません'
+      + (liveReqs().length ? '' : '<br><span style="font-size:10.5px;">📥 成形依頼取込から取り込んでください</span>')
+      + '</div>';
+    return;
+  }
+  const cnt = {};
+  liveReqs().forEach(r => { cnt[r.seiban] = (cnt[r.seiban]||0) + 1; });
+
+  let html = '', cur = null;
+  rows.forEach(r => {
+    if (r.hope !== cur) { cur = r.hope; html += dayHead(cur); }
+    html += reqCardHtml(r, cnt, { use:true, del:isUnlockRole() });
+  });
+  el.innerHTML = html;
+}
+
+// ── 専用画面の「依頼一覧」（削除のみ） ──
+function renderReqAdmin() {
+  updReqBadges();
+  fillDaySelect('raDay');
+  const rows = filterReqs(
+    (document.getElementById('raSearch')?.value || '').trim(),
+    document.getElementById('raDay')?.value || '',
+    !!document.getElementById('raShowDone')?.checked
+  );
+  const el = document.getElementById('raList');
+  if (!el) return;
+  if (!rows.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--tx3);padding:34px;font-size:12px;">📭 該当する依頼がありません'
+      + (liveReqs().length ? '' : '<br><span style="font-size:10.5px;">「📥 取込」タブからファイルを選んでください</span>')
+      + '</div>';
+    return;
+  }
+  const cnt = {};
+  liveReqs().forEach(r => { cnt[r.seiban] = (cnt[r.seiban]||0) + 1; });
+
+  let html = '', cur = null;
+  rows.forEach(r => {
+    if (r.hope !== cur) { cur = r.hope; html += dayHead(cur); }
+    html += reqCardHtml(r, cnt, { use:false, del:isUnlockRole() });
+  });
+  el.innerHTML = html;
+}
+
+// 依頼から記録書を作る
+function useRequest(no) {
+  const r = liveReqs().find(x => String(x.no) === String(no));
+  if (!r) { toast('依頼が見つかりません', 'err'); return; }
+
+  const hit = findMasterBySeiban(r.seiban);
+  if (!hit) {
+    toast('整番「' + r.seiban + '」はマスター未登録です。品番から選んでください', 'warn');
+    setMakeTab(2);
+    const s = document.getElementById('psSearch'); if (s) { s.value = ''; renderPartSelect(); }
+    return;
+  }
+
+  // マスターを展開してから、一致した品番の行に依頼番号を入れる
+  const idx = PARTS.indexOf(hit.master);
+  usePartMaster(idx);
+  if (PN_PAIRS[hit.idx]) PN_PAIRS[hit.idx].req = r.no;
+  CUR_REQ = { no:r.no, seiban:r.seiban, hope:r.hope, qty:r.qty };
+
+  // 他の品番にも、その整番の依頼を一緒に入れる（同じ回に成形する分）
+  const also = autoFillOtherPairs(hit.idx, r);
+
+  renderPnPairs();
+  setTimeout(() => {
+    [hit.idx].concat(also.map(a => a.i)).forEach(i => {
+      const el = document.querySelectorAll('#pnPairs .pn-pair')[i];
+      const inp = el ? el.querySelector('.rqno') : null;
+      if (inp) inp.classList.add('rqfill');
+    });
+  }, 30);
+
+  setStatus('新規作成モード（依頼 ' + r.no + ' / 希望日 ' + (r.hope||'-') + '）', 'ok');
+  closeM('partSelectModal');
+  window.scrollTo({top:0, behavior:'smooth'});
+  let msg = '📋 依頼 ' + r.no + '（整番 ' + r.seiban + '）で作成します';
+  if (also.length) msg += '\n品番' + also.map(a => (a.i+1) + '：' + a.no).join('／') + ' も入れました';
+  toast(msg, 'ok');
+}
+
+// 選んだ依頼と「同じ回」に当たる依頼を、他の品番の行にも入れる
+//  判定のしかた：整番が一致 → その中で 依頼数量・予定時間・希望日 が近いものを選ぶ
+function autoFillOtherPairs(baseIdx, base) {
+  const done = [];
+  PN_PAIRS.forEach((p, i) => {
+    if (i === baseIdx) return;
+    if (String(p.req || '').trim()) return;      // すでに入っていれば触らない
+    const sb = String(p.seiban || '').trim();
+    if (!sb) return;
+    const cands = candidateReqs(sb);
+    if (!cands.length) return;
+    const best = pickBestReq(cands, base);
+    if (!best) return;
+    p.req = best.no;
+    done.push({ i, no: best.no });
+  });
+  return done;
+}
+
+// その整番の、まだ記録書になっていない依頼
+function candidateReqs(seiban) {
+  return liveReqs().filter(r => String(r.seiban||'').trim() === String(seiban).trim() && !r.usedBy);
+}
+
+// 基準の依頼にいちばん近いものを選ぶ
+function pickBestReq(cands, base) {
+  if (cands.length === 1) return cands[0];
+  const score = r => {
+    let s = 0;
+    if (base.qty  && Number(r.qty) === Number(base.qty)) s += 100;
+    if (base.plan && r.plan && r.plan === base.plan)     s += 100;
+    if (base.hope && r.hope === base.hope)               s += 40;
+    else if (base.hope && r.hope) {
+      const d = Math.abs(new Date(r.hope) - new Date(base.hope)) / 86400000;
+      if (!isNaN(d)) s += Math.max(0, 30 - d * 3);       // 希望日が近いほど高い
+    }
+    return s;
+  };
+  const sorted = cands.slice().sort((a,b) => score(b) - score(a));
+  return score(sorted[0]) > 0 ? sorted[0] : null;
+}
+
+// ── 行ごとに依頼番号を選び直す ──
+let RP_IDX = -1;
+function openReqPick(i) {
+  RP_IDX = i;
+  const p = PN_PAIRS[i];
+  const sb = String(p && p.seiban || '').trim();
+  const el = document.getElementById('rpBody');
+  if (!sb) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;font-size:12px;color:var(--tx3);">'
+      + 'この品番には整番が設定されていません<br><span style="font-size:10.5px;">⚙️ マスターで整番を登録すると候補が出ます</span></div>';
+  } else {
+    const cands = liveReqs().filter(r => String(r.seiban||'').trim() === sb)
+      .sort((a,b) => String(a.hope||'').localeCompare(String(b.hope||'')));
+    if (!cands.length) {
+      el.innerHTML = '<div style="padding:20px;text-align:center;font-size:12px;color:var(--tx3);">'
+        + '整番「' + esc(sb) + '」の依頼は取り込まれていません</div>';
+    } else {
+      el.innerHTML = '<div style="font-size:11.5px;color:var(--tx2);margin-bottom:8px;">品番'
+        + (i+1) + '（整番 <b>' + esc(sb) + '</b>）の依頼</div>'
+        + cands.map(r => {
+            const safe = String(r.no).replace(/'/g,"\\'");
+            const on = String(p.req||'') === String(r.no);
+            return '<div class="rqc' + (r.usedBy ? ' done' : '') + '"' + (on ? ' style="background:#eef7ff;"' : '') + '>'
+              + '<div class="rqc-main">'
+                + '<div class="rqc-sb">' + esc(r.no)
+                  + (on ? '<span class="rtag rtag-dup">選択中</span>' : '')
+                  + (r.usedBy ? '<span class="rtag rtag-done">✅ 作成済み</span>' : '') + '</div>'
+                + '<div class="rqc-meta"><span>希望日 ' + esc((r.hope||'-').replace(/-/g,'/')) + '</span>'
+                  + '<span>数量 ' + esc(String(r.qty||0)) + '</span>'
+                  + (r.plan ? '<span>予定 ' + esc(r.plan) + '</span>' : '') + '</div>'
+              + '</div>'
+              + '<button class="rqc-use" onclick="setPairReq(\'' + safe + '\')">これにする</button>'
+            + '</div>';
+          }).join('')
+        + '<div style="text-align:center;margin-top:10px;">'
+        + '<button class="rqc-del" onclick="setPairReq(\'\')">この品番の依頼番号を空にする</button></div>';
+    }
+  }
+  document.getElementById('reqPickModal').classList.add('show');
+}
+
+function setPairReq(no) {
+  if (RP_IDX < 0 || !PN_PAIRS[RP_IDX]) return;
+  PN_PAIRS[RP_IDX].req = no;
+  const i = RP_IDX;
+  renderPnPairs();
+  closeM('reqPickModal');
+  setTimeout(() => {
+    const el = document.querySelectorAll('#pnPairs .pn-pair')[i];
+    const inp = el ? el.querySelector('.rqno') : null;
+    if (inp && no) inp.classList.add('rqfill');
+  }, 30);
+}
+
+// 保存した記録書と依頼を結び付ける
+async function markRequestUsed(data) {
+  const reqNos = (data.pnPairs || []).map(p => String(p.req||'').trim()).filter(Boolean);
+  if (!reqNos.length) return;
+  const hits = REQS.filter(r => !r.deleted && reqNos.includes(String(r.no)) && !r.usedBy);
+  if (!hits.length) return;
+  hits.forEach(r => { r.usedBy = data.id; r.usedByName = CU.name; r.usedAt = data.savedAt || toJST(new Date()); });
+  try {
+    await pushRequests({ action:'markRequestsUsed', nos: hits.map(r=>r.no),
+                         recordId: data.id, byName: CU.name });
+  } catch(e) { /* 記録書の保存は済んでいるので、ここは黙って続行 */ }
+}
+
 function setPsTab(tab) {
   PS_TAB = tab;
   renderPartSelect();
@@ -2185,10 +2674,14 @@ function usePartMaster(i) {
   RID = null;
   STARTER = { name: CU.name, id: CU.id, loginId: CU.loginId };
   document.getElementById('operator').value = CU.name;
-  PN_PAIRS = (m.nos || [m.no || '']).map(no => ({no, req:''}));
+  PN_PAIRS = (m.nos || [m.no || '']).map((no, i) => ({
+    no,
+    seiban: (m.seibans && m.seibans[i]) ? m.seibans[i] : '',
+    name:   (m.names && m.names[i]) ? m.names[i] : (i === 0 ? (m.name||'') : ''),
+    req: ''
+  }));
   renderPnPairs();
   const sv = (id, v) => { const e=document.getElementById(id); if(e) e.value=v||''; };
-  sv('productName', m.name);
   sv('seibanNo',    m.seibanNo);
   sv('material',    m.mat);
   sv('mbName',      m.mb);
@@ -2210,7 +2703,7 @@ function usePartMaster(i) {
     renderPC('pcTb', PC_ITEMS, false);
   }
   renderNotesFrom(m.notes);
-  CUR_DEL = null; applyDelBanner();
+  CUR_REQ = null; CUR_DEL = null; applyDelBanner();
   REF_PHOTOS = (m.photos && m.photos.length) ? deep(m.photos) : [];
   PHOTOS = [];
   renderRefPhotos(); renderPhotos();
@@ -2269,7 +2762,8 @@ async function fetchProductMasterAll() {
 }
 
 async function fetchFromProductMaster() {
-  const nos = M_PNS.filter(n => n.trim());
+  commitMstPns();
+  const nos = M_PNS.map(p => p.no).filter(n => n.trim());
   if (!nos.length) { toast('品番を入力してから実行してください', 'warn'); return; }
 
   const statusEl = document.getElementById('m-fetch-status');
@@ -2284,8 +2778,8 @@ async function fetchFromProductMaster() {
   };
 
   const found = [];
-  M_PNS.forEach((no, idx) => {
-    const no_t = (no || '').trim();
+  M_PNS.forEach((p, idx) => {
+    const no_t = (p.no || '').trim();
     if (!no_t) return;
     let match = products.find(p => get(p,'partNo','品番','itemNo','item_no') === no_t);
     if (!match) match = products.find(p => get(p,'partNo','品番','itemNo','item_no').startsWith(no_t));
@@ -2302,30 +2796,58 @@ async function fetchFromProductMaster() {
     return;
   }
 
-  let replaced = 0;
+  let replaced = 0, named = 0;
   found.forEach(f => {
-    if (f.fullNo && f.fullNo !== M_PNS[f.idx]) {
-      M_PNS[f.idx] = f.fullNo;
+    if (f.fullNo && f.fullNo !== M_PNS[f.idx].no) {
+      M_PNS[f.idx].no = f.fullNo;
       replaced++;
     }
+    // 製品名は品番ごとに入れる（品番①→製品名①）
+    const pn = get(f.product, 'productName','製品名','name','product_name','itemName');
+    if (pn && !(M_PNS[f.idx].name||'').trim()) { M_PNS[f.idx].name = pn; named++; }
   });
-  if (replaced > 0) renderMstPns();
+  renderMstPns();
 
   const first = found[0].product;
-  const productName = get(first, 'productName','製品名','name','product_name','itemName');
-  const client      = get(first, 'basicClient','基本取引先','client','customer','clientName','取引先');
-
-  const nameEl   = document.getElementById('m-productName');
+  const client = get(first, 'basicClient','基本取引先','client','customer','clientName','取引先');
   const clientEl = document.getElementById('m-client');
-  if (nameEl   && !nameEl.value.trim()   && productName) nameEl.value   = productName;
-  if (clientEl && !clientEl.value.trim() && client)      clientEl.value = client;
+  if (clientEl && !clientEl.value.trim() && client) clientEl.value = client;
 
   const updates = [];
   if (replaced > 0)  updates.push('品番' + replaced + '件を完全品番に補完');
-  if (productName)   updates.push('製品名: ' + productName);
+  if (named > 0)     updates.push('製品名' + named + '件');
   if (client)        updates.push('取引先: ' + client);
   statusEl.textContent = '✅ ' + found.length + '件の品番が見つかりました';
   toast('製品マスタから自動入力しました（' + updates.join(' / ') + '）', 'ok');
+}
+
+// ── 成形依頼リスト 専用画面 ──
+async function openImport() {
+  if (!isUnlockRole()) { toast('成形依頼リストの権限がありません', 'err'); return; }
+  const ir = document.getElementById('impRes'); if (ir) ir.style.display = 'none';
+  setReqTab(1);
+  document.getElementById('reqModal').classList.add('show');
+  if (!PARTS.length) await loadMasters();
+  await loadRequests();
+  renderImportHist();
+  renderReqAdmin();
+  updReqBadges();
+}
+
+function setReqTab(n) {
+  for (let i = 1; i <= 3; i++) {
+    const t = document.getElementById('rqTab' + i);
+    const p = document.getElementById('rqPane' + i);
+    if (t) t.classList.toggle('on', i === n);
+    if (p) p.style.display = i === n ? '' : 'none';
+  }
+  if (n === 2) renderReqAdmin();
+  if (n === 3) renderImportHist();
+}
+
+function updReqBadges() {
+  const b2 = document.getElementById('rqB2'); if (b2) b2.textContent = liveReqs().length;
+  const b3 = document.getElementById('rqB3'); if (b3) b3.textContent = BATCHES.length;
 }
 
 async function openMasterModal() {
@@ -2334,7 +2856,7 @@ async function openMasterModal() {
   M_PC_ITEMS  = deep(DEF_PC);
   M_NOTES     = [{c:'',s:''},{c:'',s:''},{c:'',s:''}];
   M_PHOTOS    = [];
-  M_PNS = [''];
+  M_PNS = [{no:'', seiban:'', name:''}];
   ['m-productName','m-seibanNo','m-material','m-mbName','m-mbRatio','m-client','m-machineNo','m-condNo','m-dryTemp','m-dryTime','m-moldMachine','m-takeMachine','m-boxMachine'].forEach(id=>{
     const e=document.getElementById(id); if(e) e.value='';
   });
@@ -2414,10 +2936,16 @@ function setMstTab(tab) {
 function loadMasterToModal(i) {
   const m=PARTS[i];
   M_SEC_CACHE = {};
-  M_PNS = m.nos && m.nos.length ? [...m.nos] : [m.no||''];
+  // 旧データ（整番なし）も読めるようにする
+  M_PNS = (m.nos && m.nos.length ? m.nos : [m.no||'']).map((no, i) => ({
+    no: no || '',
+    seiban: (m.seibans && m.seibans[i]) ? m.seibans[i] : '',
+    // 旧データ（製品名が1つだけ）は①に入れる
+    name: (m.names && m.names[i]) ? m.names[i] : (i === 0 ? (m.name||'') : '')
+  }));
+  if (!M_PNS.length) M_PNS = [{no:'', seiban:'', name:''}];
   renderMstPns();
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
-  sv('m-productName', m.name);
   sv('m-seibanNo',    m.seibanNo);
   sv('m-material',    m.mat);
   sv('m-mbName',      m.mb);
@@ -2455,9 +2983,14 @@ function numOrText(s) {
 }
 
 async function savePartMaster() {
-  const name=gv('m-productName').trim();
-  const nos=M_PNS.filter(n=>n.trim());
-  if(!name||!nos.length){toast('製品名と品番は必須です','err');return;}
+  commitMstPns();
+  const pairs = M_PNS.filter(p => (p.no||'').trim());
+  const nos = pairs.map(p => p.no.trim());
+  const seibans = pairs.map(p => (p.seiban||'').trim());
+  const names = pairs.map(p => (p.name||'').trim());
+  const name = names.find(n => n) || '';
+  if(!nos.length){toast('品番は必須です','err');return;}
+  if(!name){toast('製品名は必須です（品番ごとに入力してください）','err');return;}
 
   const condData=collectCondData('m');
   M_COND_SECS.forEach((sec,si)=>{
@@ -2486,7 +3019,7 @@ async function savePartMaster() {
   });
 
   const m={
-    nos, no:nos[0],
+    nos, seibans, names, no:nos[0],
     name, seibanNo:gv('m-seibanNo'), mat:gv('m-material'), mb:gv('m-mbName'),
     mbRatio:gv('m-mbRatio'),
     client:gv('m-client'),
@@ -2528,10 +3061,14 @@ async function delMaster(no) {
 
 function loadMaster(i) {
   const m=PARTS[i];
-  PN_PAIRS=(m.nos||[m.no||'']).map(no=>({no,req:''}));
+  PN_PAIRS=(m.nos||[m.no||'']).map((no,i)=>({
+    no,
+    seiban:(m.seibans&&m.seibans[i])?m.seibans[i]:'',
+    name:(m.names&&m.names[i])?m.names[i]:(i===0?(m.name||''):''),
+    req:''
+  }));
   renderPnPairs();
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
-  sv('productName', m.name);
   sv('material',    m.mat);
   sv('mbName',      m.mb);
   sv('mbRatio',     m.mbRatio);
@@ -2584,6 +3121,7 @@ function collectData() {
     photos: deep(PHOTOS.filter(p => (p.url||'').trim())),
     refPhotos: deep(REF_PHOTOS),
     ...(CUR_DEL || {}),
+    srcRequest: CUR_REQ ? deep(CUR_REQ) : null,
   };
   document.querySelectorAll('[data-k]').forEach(el=>{
     const k=el.getAttribute('data-k');
@@ -2606,7 +3144,14 @@ function fillForm(d) {
   document.getElementById('s-start').textContent  = startSign ? startSign.name : origOperator;
   document.getElementById('ss-start').textContent = startSign ? startSign.name + ' ✔' : origOperator + ' ✔';
 
-  PN_PAIRS=d.pnPairs&&d.pnPairs.length?deep(d.pnPairs):[{no:d.partNo||'',req:d.reqNo||''}];
+  PN_PAIRS = d.pnPairs && d.pnPairs.length
+    ? deep(d.pnPairs).map(p => ({ no:p.no||'', seiban:p.seiban||'', name:p.name||'', req:p.req||'' }))
+    : [{no:d.partNo||'', seiban:'', name:'', req:d.reqNo||''}];
+  // 旧データ（製品名が1つだけ）は①に入れる
+  if (!PN_PAIRS.some(p => (p.name||'').trim()) && (d.productName||'').trim()) {
+    PN_PAIRS[0].name = d.productName;
+  }
+  fillSeibanFromMaster();
   renderPnPairs();
   if(d.condSections){COND_SECS=deep(d.condSections);}
   renderCondSecs('condBody',COND_SECS,false,d);
@@ -2657,6 +3202,7 @@ function fillForm(d) {
  applyLock(!!SIGNS.agg);
 
   // 削除情報を引き継ぐ（このまま保存しても復活しないように）
+  CUR_REQ = d.srcRequest ? deep(d.srcRequest) : null;
   CUR_DEL = d.deleted
     ? { deleted:true, deletedBy:d.deletedBy, deletedByName:d.deletedByName, deletedAt:d.deletedAt }
     : null;
@@ -2813,6 +3359,9 @@ async function saveRecord() {
     setStatus('⚠️ ローカル保存済み（GAS未設定）','warn');
   }
 
+  // 保存した記録書と成形依頼を結び付ける
+  try { await markRequestUsed(data); } catch(e) {}
+
   // 保存後、現在値を新たなスナップショットにする（次回の差分基準）
   LAST_SNAPSHOT = takeSnapshot();
 
@@ -2824,7 +3373,7 @@ async function saveRecord() {
 function newForm(){
   if(!confirm('入力内容をクリアして新規作成しますか？'))return;
   RID=null;
-  PN_PAIRS=[{no:'',req:''}]; renderPnPairs();
+  PN_PAIRS=[{no:'',seiban:'',name:'',req:''}]; renderPnPairs();
   STARTER = { name: CU.name, id: CU.id, loginId: CU.loginId };
   document.getElementById('operator').value = CU.name;
   document.getElementById('s-start').textContent  = CU.name;
@@ -2841,7 +3390,7 @@ function newForm(){
     document.getElementById(`cb-${role}`).checked=false;
   });
   document.getElementById('sid').textContent='';
-  CUR_DEL = null; applyDelBanner();
+  CUR_REQ = null; CUR_DEL = null; applyDelBanner();
   PHOTOS = []; REF_PHOTOS = [];
   renderPhotos(); renderRefPhotos();
   CHANGE_LOG = [];
@@ -3281,11 +3830,15 @@ function newFromMaster(partNoKey) {
   if (!master) { toast('マスターデータが見つかりません', 'err'); return; }
 
   RID = null;
-  PN_PAIRS = (master.nos||[master.no||'']).map(no => ({no, req:''}));
+  PN_PAIRS = (master.nos||[master.no||'']).map((no, i) => ({
+    no,
+    seiban:(master.seibans&&master.seibans[i])?master.seibans[i]:'',
+    name:(master.names&&master.names[i])?master.names[i]:(i===0?(master.name||''):''),
+    req:''
+  }));
   renderPnPairs();
 
   const sv = (id, v) => { const e=document.getElementById(id); if(e) e.value=v||''; };
-  sv('productName', master.name);
   sv('seibanNo',    master.seibanNo);
   sv('material',    master.mat);
   sv('mbName',      master.mb);
@@ -3308,7 +3861,7 @@ function newFromMaster(partNoKey) {
     renderPC('pcTb', PC_ITEMS, false);
   }
   renderNotesFrom(master.notes);
-  CUR_DEL = null; applyDelBanner();
+  CUR_REQ = null; CUR_DEL = null; applyDelBanner();
   REF_PHOTOS = (master.photos && master.photos.length) ? deep(master.photos) : [];
   PHOTOS = [];
   renderRefPhotos(); renderPhotos();
@@ -3328,6 +3881,349 @@ function newFromMaster(partNoKey) {
   closeM('histModal');
   window.scrollTo({top:0, behavior:'smooth'});
   toast('📦 品番「' + partNoKey + '」で新規作成します。依頼番号を入力してください。', 'ok');
+}
+
+// ══════════════════════════════════════════════
+// 成形依頼リスト（取込・一覧・削除）
+// ══════════════════════════════════════════════
+let REQS = [];        // 取り込んだ依頼 [{no,seiban,hope,qty,mat,reqDate,code,batchId,usedBy,usedByName,usedAt,deleted}]
+let BATCHES = [];     // 取込履歴 [{id,at,file,from,to,count,byName}]
+
+// ── 保存・読込（GASが無ければ端末に保存して動作確認できる） ──
+function reqsLoadLocal() {
+  try {
+    REQS    = JSON.parse(localStorage.getItem('seikei_reqs')     || '[]');
+    BATCHES = JSON.parse(localStorage.getItem('seikei_batches')  || '[]');
+  } catch(e) { REQS = []; BATCHES = []; }
+}
+function reqsSaveLocal() {
+  try {
+    localStorage.setItem('seikei_reqs',    JSON.stringify(REQS));
+    localStorage.setItem('seikei_batches', JSON.stringify(BATCHES));
+  } catch(e) {}
+}
+async function loadRequests() {
+  reqsLoadLocal();
+  if (!GAS_URL) return;
+  try {
+    const r = await gasGet('listRequests');
+    if (r.ok && r.requests) {
+      REQS    = r.requests;
+      BATCHES = r.batches || [];
+      reqsSaveLocal();
+    }
+  } catch(e) {}
+}
+async function pushRequests(payload) {
+  reqsSaveLocal();
+  if (!GAS_URL) return true;
+  const r = await gasPost(payload);
+  if (!r || !r.ok) throw new Error((r && r.error) || '保存に失敗しました');
+  return true;
+}
+
+// ── 取込 ──
+function pickImportFile() {
+  if (!isUnlockRole()) { toast('取込の権限がありません', 'err'); return; }
+  const el = document.getElementById('impFile');
+  if (el) { el.value = ''; el.click(); }
+}
+
+function impMsg(html, isErr) {
+  const el = document.getElementById('impRes');
+  if (!el) return;
+  el.style.display = 'block';
+  el.className = 'imp-res' + (isErr ? ' err' : '');
+  el.innerHTML = html;
+}
+
+// Excelの日付をそのまま文字列に（時差でずれないように）
+function xlDate(v) {
+  if (!v) return '';
+  if (v instanceof Date) {
+    const p = n => String(n).padStart(2,'0');
+    return v.getFullYear() + '-' + p(v.getMonth()+1) + '-' + p(v.getDate());
+  }
+  const s = String(v).trim();
+  const m = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+  if (m) return m[1] + '-' + String(m[2]).padStart(2,'0') + '-' + String(m[3]).padStart(2,'0');
+  return s;
+}
+
+// CSVを読む（Excelの部品が無くても取り込めるように）
+function parseCsv(text) {
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i+1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else {
+      if (c === '"') q = true;
+      else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+      else if (c !== '\r') cell += c;
+    }
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+
+// 文字コードを判定して読む（Excelから出したCSVはShift_JISのことが多い）
+async function readCsvText(file) {
+  const buf = await file.arrayBuffer();
+  let t = new TextDecoder('utf-8').decode(buf);
+  if (t.indexOf('�') >= 0) {
+    try { t = new TextDecoder('shift_jis').decode(buf); } catch(e) {}
+  }
+  return t;
+}
+
+// ファイル選択ボタンから
+async function onImportFile(inp) {
+  const file = inp.files && inp.files[0];
+  if (!file) return;
+  try { await importFromFile(file); } finally { inp.value = ''; }
+}
+
+// ドラッグ＆ドロップから
+function impDrag(e, on) {
+  e.preventDefault(); e.stopPropagation();
+  const z = document.getElementById('impZone');
+  if (z) z.classList.toggle('over', !!on);
+}
+async function onImpDrop(e) {
+  e.preventDefault(); e.stopPropagation();
+  const z = document.getElementById('impZone');
+  if (z) z.classList.remove('over');
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (!f) return;
+  if (!/\.(xlsx|xls|csv)$/i.test(f.name)) {
+    toast('Excel（.xlsx）かCSVファイルを入れてください', 'err');
+    impMsg('❌ このファイルは取り込めません<br>' + esc(f.name), true);
+    return;
+  }
+  await importFromFile(f);
+}
+
+// ブラウザが画面全体でファイルを開いてしまわないようにする
+['dragover','drop'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+
+async function importFromFile(file) {
+  const btn = document.getElementById('impBtn');
+  if (btn) btn.disabled = true;
+  impMsg('読み込み中...');
+
+  try {
+    let aoa;
+    if (/\.csv$/i.test(file.name)) {
+      aoa = parseCsv(await readCsvText(file));
+    } else {
+      if (typeof XLSX === 'undefined') {
+        throw new Error('Excelを読む部品を読み込めませんでした。'
+          + 'ネットワークの制限が考えられます。Excelで「CSV（カンマ区切り）」として保存し直すと、部品なしで取り込めます');
+      }
+      const buf = await file.arrayBuffer();
+      const wb  = XLSX.read(buf, { type:'array', cellDates:true });
+      const ws  = wb.Sheets[wb.SheetNames[0]];
+      aoa = XLSX.utils.sheet_to_json(ws, { header:1, raw:false, cellDates:true, defval:'' });
+    }
+
+    // 「成形依頼番号」がある行を見出しとして探す
+    let hi = -1;
+    for (let i = 0; i < Math.min(aoa.length, 15); i++) {
+      if ((aoa[i]||[]).some(c => String(c||'').replace(/\s/g,'') === '成形依頼番号')) { hi = i; break; }
+    }
+    if (hi < 0) throw new Error('「成形依頼番号」の見出しが見つかりません。成形依頼リストのファイルか確認してください');
+
+    const hdr = (aoa[hi]||[]).map(c => String(c||'').replace(/\s/g,''));
+    const col = (...names) => { for (const n of names){ const i = hdr.indexOf(n); if (i>=0) return i; } return -1; };
+    const cNo = col('成形依頼番号'), cSb = col('整番'), cHp = col('希望日');
+    const cQt = col('依頼数量'), cMt = col('発注材料名','材料名'), cRq = col('依頼日');
+    const cCd = col('製品ｺｰﾄﾞ','製品コード'), cSt = col('成形完了');
+    const cPl = col('予定時間');
+    if (cNo < 0 || cSb < 0) throw new Error('「成形依頼番号」または「整番」の列が見つかりません');
+
+    const rows = [];
+    for (let i = hi+1; i < aoa.length; i++) {
+      const r = aoa[i] || [];
+      const no = String(r[cNo]||'').trim();
+      if (!no) continue;
+      rows.push({
+        no,
+        seiban:  String(cSb>=0 ? r[cSb]||'' : '').trim(),
+        hope:    cHp>=0 ? xlDate(r[cHp]) : '',
+        qty:     cQt>=0 ? Number(String(r[cQt]||'').replace(/,/g,'')) || 0 : 0,
+        mat:     String(cMt>=0 ? r[cMt]||'' : '').trim(),
+        reqDate: cRq>=0 ? xlDate(r[cRq]) : '',
+        code:    String(cCd>=0 ? r[cCd]||'' : '').trim(),
+        status:  String(cSt>=0 ? r[cSt]||'' : '').trim(),
+        plan:    String(cPl>=0 ? r[cPl]||'' : '').trim(),
+      });
+    }
+    if (!rows.length) throw new Error('取り込めるデータがありませんでした');
+
+    // 成形依頼番号で重複を判定
+    //  一度取り込んだ依頼番号は上書きしない（差分があっても反映しない）
+    const batchId = 'B' + Date.now();
+    let add = 0, skip = 0;
+    const newRows = [];
+    const diffs = [];
+    rows.forEach(x => {
+      const cur = REQS.find(y => String(y.no) === String(x.no));
+      if (!cur) {
+        REQS.push({ ...x, batchId, usedBy:'', usedByName:'', usedAt:'', deleted:false });
+        newRows.push(x);
+        add++;
+      } else {
+        skip++;
+        // 内容が変わっていた場合は「取り込まなかった」ことだけ知らせる
+        const ch = [];
+        if (cur.hope !== x.hope)                   ch.push('希望日 ' + (cur.hope||'-').replace(/-/g,'/') + '→' + (x.hope||'-').replace(/-/g,'/'));
+        if (Number(cur.qty) !== Number(x.qty))     ch.push('数量 ' + (cur.qty||0) + '→' + (x.qty||0));
+        if ((cur.seiban||'') !== (x.seiban||''))   ch.push('整番 ' + (cur.seiban||'-') + '→' + (x.seiban||'-'));
+        if (ch.length) diffs.push(x.no + '（' + ch.join('・') + '）');
+      }
+    });
+    if (!add) {
+      impMsg('ℹ️ <b>' + esc(file.name) + '</b><br>'
+        + 'すべて取込済みの依頼番号でした（新規 <b>0</b> 件／取込済み <b>' + skip + '</b> 件）<br>'
+        + '<span style="font-size:10.5px;">一度取り込んだ依頼番号は上書きしません</span>'
+        + (diffs.length ? '<br><span style="color:var(--o);font-weight:bold;">⚠ 元データと内容が違う依頼: ' + diffs.length + '件（反映していません）</span>'
+            + '<br><span style="font-size:10.5px;">' + esc(diffs.slice(0,5).join(' / ')) + (diffs.length>5?' ほか':'') + '</span>' : ''));
+      toast('新しい依頼はありませんでした', 'warn');
+      return;
+    }
+
+    const hopes = newRows.map(x=>x.hope).filter(Boolean).sort();
+    const batch = {
+      id: batchId,
+      at: toJST(new Date()).substring(0,16).replace('T',' '),
+      file: file.name,
+      from: hopes[0] || '', to: hopes[hopes.length-1] || '',
+      count: newRows.length,
+      byName: CU.name
+    };
+    BATCHES.unshift(batch);
+
+    // 新規の分だけ送る（既存は上書きしない）
+    await pushRequests({ action:'importRequests', requests: newRows, batch });
+
+    // マスター未登録の整番を洗い出す
+    const noMst = [...new Set(newRows.filter(x => !findMasterBySeiban(x.seiban)).map(x => x.seiban))];
+
+    impMsg(
+      '✅ <b>' + esc(file.name) + '</b> を取り込みました<br>'
+      + '新規 <b>' + add + '</b> 件　取込済みのため対象外 <b>' + skip + '</b> 件<br>'
+      + (diffs.length ? '<span style="color:var(--o);font-weight:bold;">⚠ 元データと内容が違う依頼: ' + diffs.length
+          + '件（上書きしていません）</span><br><span style="font-size:10.5px;">'
+          + esc(diffs.slice(0,5).join(' / ')) + (diffs.length>5?' ほか':'') + '</span><br>' : '')
+      + (batch.from ? '希望日の範囲: ' + batch.from.replace(/-/g,'/') + ' 〜 ' + batch.to.replace(/-/g,'/') + '<br>' : '')
+      + (noMst.length
+          ? '<span style="color:var(--o);font-weight:bold;">⚠ 整番がマスター未登録: ' + noMst.length + '件</span><br>'
+            + '<span style="font-size:10.5px;">' + esc(noMst.slice(0,8).join(' / ')) + (noMst.length>8?' ほか':'') + '</span>'
+          : '<span style="color:var(--g);font-weight:bold;">整番はすべてマスターに登録済みです</span>')
+    );
+    renderImportHist();
+    renderReqAdmin();
+    toast('📥 ' + add + '件を取り込みました', 'ok');
+
+  } catch(e) {
+    impMsg('❌ 取込に失敗しました<br>' + esc(e.message), true);
+    toast('取込に失敗: ' + e.message, 'err');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// 整番からマスターを探す（品番ごとの整番と照合）
+function findMasterBySeiban(seiban) {
+  const s = String(seiban||'').trim();
+  if (!s) return null;
+  for (const m of PARTS) {
+    const sb = m.seibans || [];
+    const i = sb.findIndex(x => String(x||'').trim() === s);
+    if (i >= 0) return { master:m, idx:i };
+  }
+  return null;
+}
+
+// ── 取込履歴 ──
+function renderImportHist() {
+  const el = document.getElementById('impHist');
+  if (!el) return;
+  if (!BATCHES.length) { el.innerHTML = '<div style="font-size:11px;color:var(--tx3);padding:6px;">まだ取込はありません</div>'; return; }
+  el.innerHTML = '<table class="imp-tbl"><thead><tr>'
+    + '<th>取込日時</th><th>ファイル名</th><th>希望日の範囲</th><th>件数</th><th>取込者</th><th></th>'
+    + '</tr></thead><tbody>'
+    + BATCHES.map(b => {
+        const live = REQS.filter(r => r.batchId === b.id && !r.deleted).length;
+        return '<tr>'
+          + '<td>' + esc(b.at) + '</td>'
+          + '<td style="text-align:left;">' + esc(b.file) + '</td>'
+          + '<td>' + esc((b.from||'').replace(/-/g,'/')) + ' 〜 ' + esc((b.to||'').replace(/-/g,'/')) + '</td>'
+          + '<td>' + live + ' / ' + b.count + '</td>'
+          + '<td>' + esc(b.byName||'') + '</td>'
+          + '<td><button class="delw" onclick="deleteBatch(\'' + esc(b.id) + '\')">🗑 この回を削除</button></td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table>';
+}
+
+async function deleteBatch(batchId) {
+  if (!isUnlockRole()) { toast('削除の権限がありません', 'err'); return; }
+  const b = BATCHES.find(x => x.id === batchId);
+  const target = REQS.filter(r => r.batchId === batchId && !r.deleted);
+  if (!target.length) { toast('削除できる依頼がありません', 'warn'); return; }
+  const used = target.filter(r => r.usedBy).length;
+  const ok = confirm(
+    '【この取込分をまとめて削除します】\n\n'
+    + 'ファイル: ' + (b ? b.file : '-') + '\n'
+    + '対象: ' + target.length + '件\n\n'
+    + (used ? '⚠ うち ' + used + '件 は記録書が作成済みです。\n　記録書そのものは消えません。\n\n' : '')
+    + 'よろしいですか？'
+  );
+  if (!ok) return;
+  target.forEach(r => { r.deleted = true; });
+  try {
+    await pushRequests({ action:'deleteRequests', nos: target.map(r=>r.no), batchId });
+    toast('🗑 ' + target.length + '件を削除しました', 'ok');
+  } catch(e) {
+    target.forEach(r => { r.deleted = false; });
+    toast('削除に失敗: ' + e.message, 'err');
+  }
+  refreshReqViews();
+}
+
+async function deleteRequest(no) {
+  if (!isUnlockRole()) { toast('削除の権限がありません', 'err'); return; }
+  const r = REQS.find(x => String(x.no) === String(no) && !x.deleted);
+  if (!r) return;
+  const ok = confirm(
+    '【この依頼を削除します】\n\n'
+    + '依頼番号: ' + r.no + '\n整番: ' + r.seiban + '\n'
+    + '希望日: ' + (r.hope||'-') + '\n数量: ' + (r.qty||0) + '\n\n'
+    + (r.usedBy ? '⚠ この依頼は記録書が作成済みです。\n　記録書そのものは消えません。\n\n' : '')
+    + 'よろしいですか？'
+  );
+  if (!ok) return;
+  r.deleted = true;
+  try {
+    await pushRequests({ action:'deleteRequests', nos:[r.no] });
+    toast('🗑 依頼を削除しました', 'ok');
+  } catch(e) {
+    r.deleted = false;
+    toast('削除に失敗: ' + e.message, 'err');
+  }
+  refreshReqViews();
+}
+
+// 依頼を表示している画面をまとめて描き直す
+function refreshReqViews() {
+  renderImportHist();
+  if (document.getElementById('reqModal').classList.contains('show')) renderReqAdmin();
+  if (document.getElementById('partSelectModal').classList.contains('show')) renderReqList();
+  updReqBadges();
 }
 
 // ══════════════════════════════════════════════
