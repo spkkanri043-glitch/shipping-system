@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>成形記録書</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<meta name="app-version" content="2026-10-02b">
+<meta name="app-version" content="2026-10-07a">
 <style>
 :root{
   --blue:#1a3a6b;--blue2:#2955a0;--acc:#c8392b;
@@ -197,6 +197,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 .pn-sg-item:hover, .pn-sg-item.active{ background:var(--sec); }
 .pn-sg-no{ font-weight:bold; color:var(--blue); }
 .pn-sg-name{ font-size:10px; color:var(--tx2); margin-top:1px; }
+.pn-sg-sb{ font-size:9.5px; font-weight:bold; color:#fff; background:var(--blue2); border-radius:3px; padding:1px 6px; margin-left:6px; vertical-align:1px; }
 .pn-sg-empty{ padding:9px 10px; font-size:11px; color:var(--tx3); }
 
 /* ═══ 印刷スタイル ═══ */
@@ -736,7 +737,7 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
           <!-- 品番・整番・製品名は1組（品番①＝整番①＝製品名①） -->
           <div style="margin-bottom:6px;">
             <label style="font-size:10px;color:var(--tx2);font-weight:bold;">⭐ 品番（マスター）</label>
-            <div style="font-size:10px;color:var(--tx3);margin-bottom:3px;">品番・整番・製品名は<b>同じ番号どうしが1組</b>です（品番①＝整番①＝製品名①）。品番を入力すると製品マスタから製品名・取引先を自動取得できます</div>
+            <div style="font-size:10px;color:var(--tx3);margin-bottom:3px;">品番・整番・製品名は<b>同じ番号どうしが1組</b>です（品番①＝整番①＝製品名①）。品番を入力すると製品マスタから<b>整番・製品名・取引先</b>を自動取得できます</div>
             <div style="display:grid;grid-template-columns:1fr .9fr 1.2fr auto;gap:6px;margin:4px 0 2px;">
               <label style="font-size:10px;color:var(--tx2);font-weight:bold;">品番</label>
               <label style="font-size:10px;color:var(--tx2);font-weight:bold;">整番</label>
@@ -1284,8 +1285,9 @@ async function onMstPnInput(i, inp) {
   // 品番で前方一致→部分一致、最大20件
   const matches = products
     .map(p => ({
-      no:   get(p,'partNo','品番','itemNo','item_no'),
-      name: get(p,'productName','製品名','name','product_name','itemName'),
+      no:     get(p,'partNo','品番','itemNo','item_no'),
+      name:   get(p,'productName','製品名','name','product_name','itemName'),
+      seiban: getSeibanOf(p),
       p
     }))
     .filter(x => x.no && x.no.toLowerCase().includes(q))
@@ -1306,7 +1308,7 @@ async function onMstPnInput(i, inp) {
   box.innerHTML = matches.map((m, mi) =>
     `<div class="pn-sg-item" data-mi="${mi}"
        onmousedown="pickMstPn(${i}, '${esc(m.no).replace(/'/g,"\\'")}')">
-       <div class="pn-sg-no">${esc(m.no)}</div>
+       <div class="pn-sg-no">${esc(m.no)}${m.seiban ? `<span class="pn-sg-sb">整番 ${esc(m.seiban)}</span>` : ''}</div>
        ${m.name ? `<div class="pn-sg-name">${esc(m.name)}</div>` : ''}
      </div>`
   ).join('');
@@ -1351,10 +1353,17 @@ function pickMstPn(i, fullNo) {
     if (!match) return;
     const productName = get(match, 'productName','製品名','name','product_name','itemName');
     const client      = get(match, 'basicClient','基本取引先','client','customer','clientName','取引先');
+    const seiban      = getSeibanOf(match);
     const clientEl = document.getElementById('m-client');
-    if (productName && !(M_PNS[i].name||'').trim()) { M_PNS[i].name = productName; renderMstPns(); }
+    let filled = false;
+    if (productName && !(M_PNS[i].name||'').trim())   { M_PNS[i].name   = productName; filled = true; }
+    if (seiban      && !(M_PNS[i].seiban||'').trim()) { M_PNS[i].seiban = seiban;      filled = true; }
+    if (filled) renderMstPns();
     if (clientEl && !clientEl.value.trim() && client) clientEl.value = client;
-    toast('品番「' + fullNo + '」を選択しました', 'ok');
+    const got = [];
+    if (productName) got.push('製品名');
+    if (seiban)      got.push('整番 ' + seiban);
+    toast('品番「' + fullNo + '」を選択しました' + (got.length ? '（' + got.join(' / ') + '）' : ''), 'ok');
   });
 }
 
@@ -2739,6 +2748,39 @@ function printForm() {
 // ══════════════════════════════════════════════
 let PRODUCT_CACHE = null;
 
+// ============================================================
+// 製品マスタから「整番」を取り出す
+//  列名が環境で違う可能性があるので、整番・整理番号・seiban を含む列を広く探す
+// ============================================================
+const SEIBAN_KEYS = ['整番','整番No','整理番号','seiban','seibanNo','seiban_no','seibanno','SeibanNo'];
+const SEIBAN_RE   = /整番|整理番号|seiban/i;
+
+function getSeibanOf(obj) {
+  if (!obj) return '';
+  for (const k of SEIBAN_KEYS) {
+    const v = obj[k];
+    if (v !== undefined && v !== null && String(v).trim()) return String(v).trim();
+  }
+  for (const k of Object.keys(obj)) {
+    if (!SEIBAN_RE.test(k)) continue;
+    const v = obj[k];
+    if (v !== undefined && v !== null && String(v).trim()) return String(v).trim();
+  }
+  return '';
+}
+
+// 製品マスタに整番らしい列があるか
+function hasSeibanColumn(products) {
+  return (products || []).some(p => Object.keys(p || {}).some(k => SEIBAN_RE.test(k)));
+}
+
+// 列名の一覧（整番の列が見つからないときの案内用）
+function productColumns(products) {
+  const set = new Set();
+  (products || []).slice(0, 30).forEach(p => Object.keys(p || {}).forEach(k => set.add(k)));
+  return [...set];
+}
+
 async function fetchProductMasterAll() {
   if (PRODUCT_CACHE) return PRODUCT_CACHE;
   if (!PRODUCT_GAS_URL) {
@@ -2796,15 +2838,21 @@ async function fetchFromProductMaster() {
     return;
   }
 
-  let replaced = 0, named = 0;
+  let replaced = 0, named = 0, sbFilled = 0;
+  const sbDiff = [];
   found.forEach(f => {
     if (f.fullNo && f.fullNo !== M_PNS[f.idx].no) {
       M_PNS[f.idx].no = f.fullNo;
       replaced++;
     }
-    // 製品名は品番ごとに入れる（品番①→製品名①）
+    // 製品名・整番は品番ごとに入れる（品番①→製品名①・整番①）
     const pn = get(f.product, 'productName','製品名','name','product_name','itemName');
     if (pn && !(M_PNS[f.idx].name||'').trim()) { M_PNS[f.idx].name = pn; named++; }
+
+    const sb  = getSeibanOf(f.product);
+    const cur = (M_PNS[f.idx].seiban || '').trim();
+    if (sb && !cur)            { M_PNS[f.idx].seiban = sb; sbFilled++; }
+    else if (sb && cur !== sb) { sbDiff.push('品番' + (f.idx+1) + '：' + cur + ' ≠ マスタ ' + sb); }
   });
   renderMstPns();
 
@@ -2816,9 +2864,22 @@ async function fetchFromProductMaster() {
   const updates = [];
   if (replaced > 0)  updates.push('品番' + replaced + '件を完全品番に補完');
   if (named > 0)     updates.push('製品名' + named + '件');
+  if (sbFilled > 0)  updates.push('整番' + sbFilled + '件');
   if (client)        updates.push('取引先: ' + client);
-  statusEl.textContent = '✅ ' + found.length + '件の品番が見つかりました';
-  toast('製品マスタから自動入力しました（' + updates.join(' / ') + '）', 'ok');
+
+  // 製品マスタに整番の列が無いときは、何が入っているか画面で知らせる
+  if (!hasSeibanColumn(products)) {
+    statusEl.innerHTML = '✅ ' + found.length + '件の品番が見つかりました'
+      + '<br><span style="color:var(--o);">⚠ 製品マスタに整番の列が見つかりません（整番は手入力してください）</span>'
+      + '<br><span style="color:var(--tx3);">製品マスタの列: ' + esc(productColumns(products).join(' / ')) + '</span>';
+  } else if (sbDiff.length) {
+    statusEl.innerHTML = '✅ ' + found.length + '件の品番が見つかりました'
+      + '<br><span style="color:var(--o);">⚠ 入力済みの整番とマスタが違います（上書きしていません）</span>'
+      + '<br><span style="color:var(--tx3);">' + esc(sbDiff.join(' ／ ')) + '</span>';
+  } else {
+    statusEl.textContent = '✅ ' + found.length + '件の品番が見つかりました';
+  }
+  toast('製品マスタから自動入力しました' + (updates.length ? '（' + updates.join(' / ') + '）' : ''), 'ok');
 }
 
 // ── 成形依頼リスト 専用画面 ──
