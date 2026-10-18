@@ -1,7 +1,75 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-0r73l91UWdkWBFhitGs6QE6zY+RfK1qlewryDBNKGgk=' 'sha256-j2YQmqo8Ww84V3tXfBPQdkSJLXAXjtN94Xzwl8o9cmQ='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
+<script>/* MOGU_CSP_RUNTIME_V1 */
+const __moguCsp = (() => {
+  const handlers = {"h0": function(event, _p) { closeTab()
+},
+"h1": function(event, _p) { saveGasUrl()
+},
+"h2": function(event, _p) { applyFilter()
+},
+"h3": function(event, _p) { applyFilter()
+},
+"h4": function(event, _p) { loadData()
+},
+"h5": function(event, _p) { closeModal()
+},
+"h6": function(event, _p) { closeUserModal()
+},
+"h7": function(event, _p) { confirmUser()
+},
+"h8": function(event, _p) { this.style.display='none'
+},
+"h9": function(event, _p) { closeModal();openUserModal()
+}};
+  const events = ["click","input","change","error"];
+  const bound = new WeakMap();
+  function bind(el) {
+    if (!el || el.nodeType !== 1) return;
+    let state = bound.get(el); if (!state) { state = new Map(); bound.set(el, state); }
+    for (const type of events) {
+      const id = el.getAttribute('data-csp-' + type);
+      if (!id || state.get(type) === id) continue;
+      if (!Object.prototype.hasOwnProperty.call(handlers, id)) continue;
+      const fn = function(event) {
+        const value = this.getAttribute('data-csp-args-' + type);
+        const params = value ? JSON.parse(decodeURIComponent(value)) : [];
+        return handlers[id].call(this, event, params);
+      };
+      // Native event-handler properties preserve this/currentTarget, cancellation,
+      // async return behavior and later application assignments to .onclick etc.
+      el['on' + type] = fn;
+      state.set(type, id);
+    }
+  }
+  function scan(root) {
+    bind(root);
+    if (root.querySelectorAll) for (const el of root.querySelectorAll('*')) bind(el);
+  }
+  for (const type of events) document.addEventListener(type, event => {
+    for (const el of event.composedPath()) bind(el);
+  }, true);
+  new MutationObserver(records => {
+    for (const record of records) {
+      if (record.type === 'attributes') bind(record.target);
+      else for (const node of record.addedNodes) scan(node);
+    }
+  }).observe(document, {subtree:true, childList:true, attributes:true,
+    attributeFilter: events.map(type => 'data-csp-' + type)});
+  document.addEventListener('DOMContentLoaded', () => scan(document));
+  const encode = values => encodeURIComponent(JSON.stringify(values)).replace(/'/g, '%27');
+  function assign(el,type,id,values) {
+    el.setAttribute('data-csp-' + type,id);
+    el.setAttribute('data-csp-args-' + type,encode(values));
+    bind(el);
+  }
+  return Object.freeze({ encode, scan, assign });
+})();
+</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>不具合展開シート</title>
 <style>
@@ -184,7 +252,7 @@ td { padding: 11px 12px; font-size: 13px; vertical-align: middle; }
     <div class="header-user-dot"></div>
     <span id="current-user-name">未ログイン</span>
   </div>
-  <button onclick="closeTab()" style="
+  <button data-csp-click="h0" data-csp-source-click="closeTab()" style="
     padding:5px 11px;font-size:11px;font-weight:600;
     background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
     color:#fff;border-radius:6px;cursor:pointer;white-space:nowrap;margin-left:8px;
@@ -196,7 +264,7 @@ td { padding: 11px 12px; font-size: 13px; vertical-align: middle; }
   <div class="setup-panel" id="setup-panel">
     <div class="setup-label">⚙️ GAS URL 未設定</div>
     <input class="setup-input" id="gas-url-input" type="text" placeholder="https://script.google.com/macros/s/...../exec">
-    <button class="btn-setup" onclick="saveGasUrl()">接続する</button>
+    <button class="btn-setup" data-csp-click="h1" data-csp-source-click="saveGasUrl()">接続する</button>
   </div>
 
   <!-- 新着・自分担当アラート -->
@@ -227,15 +295,15 @@ td { padding: 11px 12px; font-size: 13px; vertical-align: middle; }
   <div class="toolbar">
     <div class="search-wrap">
       <span style="color:var(--text3)">🔍</span>
-      <input type="text" id="search-input" placeholder="品番・担当者・不具合内容で検索..." oninput="applyFilter()">
+      <input type="text" id="search-input" placeholder="品番・担当者・不具合内容で検索..." data-csp-input="h2" data-csp-source-input="applyFilter()">
     </div>
-    <select class="filter-select" id="filter-status" onchange="applyFilter()">
+    <select class="filter-select" id="filter-status" data-csp-change="h3" data-csp-source-change="applyFilter()">
       <option value="">すべて</option>
       <option value="my">自分が未確認</option>
       <option value="none">誰も未確認</option>
       <option value="all">全員確認済み</option>
     </select>
-    <button class="btn btn-outline" onclick="loadData()">🔄 更新</button>
+    <button class="btn btn-outline" data-csp-click="h4" data-csp-source-click="loadData()">🔄 更新</button>
     <!-- ユーザー切替ボタン非表示 -->
   </div>
 
@@ -256,7 +324,7 @@ td { padding: 11px 12px; font-size: 13px; vertical-align: middle; }
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="modal-title">不具合詳細</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" data-csp-click="h5" data-csp-source-click="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
   </div>
@@ -268,8 +336,8 @@ td { padding: 11px 12px; font-size: 13px; vertical-align: middle; }
     <div class="user-modal-title">👤 ユーザーを選択</div>
     <select class="user-select" id="user-select"><option value="">選択してください</option></select>
     <div class="user-btn-row">
-      <button class="btn-cancel" onclick="closeUserModal()">キャンセル</button>
-      <button class="btn-confirm" onclick="confirmUser()">決定</button>
+      <button class="btn-cancel" data-csp-click="h6" data-csp-source-click="closeUserModal()">キャンセル</button>
+      <button class="btn-confirm" data-csp-click="h7" data-csp-source-click="confirmUser()">決定</button>
     </div>
   </div>
 </div>
@@ -277,51 +345,113 @@ td { padding: 11px 12px; font-size: 13px; vertical-align: middle; }
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY_URL  = 'fuguai_gas_url';
-const STORAGE_KEY_USER = 'fuguai_current_user';
-let GAS_URL     = localStorage.getItem(STORAGE_KEY_URL) || '';
-let currentUser = JSON.parse(localStorage.getItem(STORAGE_KEY_USER) || 'null');
+
+// Business drafts are page-memory only. SSO tokens stay in sessionStorage;
+// static HTML/GAS cannot issue HttpOnly cookies.
+const pageMemoryStorage = (() => {
+  const entries = new Map();
+  return {
+    getItem: key => entries.has(key) ? entries.get(key) : null,
+    setItem: (key, value) => entries.set(key, String(value)),
+    removeItem: key => entries.delete(key),
+    clear: () => entries.clear()
+  };
+})();
+function clearBrowserBusinessData_() {
+  pageMemoryStorage.clear();
+  const known = new Set(['kpk_app_perms', 'kpk_shift_employees', 'kpk_shift_data',
+    'kpk_cal_special', 'kpk_data_ver', 'kpk_session', 'kpk_vac_req', 'kpk_ot_req',
+    'kpk_h_req', 'kpk_sync_log', 'sakugyo_wip_backup', 'inv_current_user',
+    'inv_sat_v2', 'inv_portal_url', 'inv_gas_url', 'inv_master_url',
+    'sakugyo_portal_url', 'daily_report_portal_url']);
+  for (const name of ['localStorage', 'sessionStorage']) {
+    try {
+      const storage = window[name];
+      for (let i = storage.length - 1; i >= 0; i--) {
+        const key = storage.key(i);
+        if (known.has(key) || (key && key.startsWith('inv_sat_v2_'))) storage.removeItem(key);
+      }
+    } catch (e) {}
+  }
+}
+clearBrowserBusinessData_();
+
+// セキュリティ改修：接続先は固定（?fuguai_gas_url= 差し替え・localStorage保持を撤去）。
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbz0AQZelUX9LVy1dzxFCNnagha6XUYCGkR1bRUcbCIm5tGEIUAIqn3KTfy7I5Ll9uxR3g/exec';
+let currentUser = null;
 let allRecords  = [];
 let confirmLogs = {};
 
-// ポータルSSO
-function parseSsoToken(token) {
-  try { return JSON.parse(decodeURIComponent(escape(atob(token.split('').reverse().join(''))))); }
-  catch(e) { return null; }
+// ══ SSO署名トークン（ポータルが #sso= で受け渡す） ══
+const AUTH_TOKEN_KEY = 'kpk_fuguai_token';
+let AUTH_TOKEN = (function() {
+  try {
+    const h = location.hash || '';
+    const m = h.match(/[#&]sso=([^&]+)/);
+    if (m) {
+      const t = decodeURIComponent(m[1]);
+      sessionStorage.setItem(AUTH_TOKEN_KEY, t);
+      history.replaceState(null, '', location.pathname + location.search);
+      return t;
+    }
+    return sessionStorage.getItem(AUTH_TOKEN_KEY) || '';
+  } catch(e) { return ''; }
+})();
+function handleUnauthorized_() {
+  clearPrivatePhotoViews_();
+  closeModal();
+  allRecords = []; confirmLogs = {}; currentUser = null;
+  document.getElementById('modal-body').replaceChildren();
+  setTableArea('<div class="empty">業務管理ポータルからご利用ください</div>');
+  clearBrowserBusinessData_();
+  try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch(e) {}
+  AUTH_TOKEN = ''; currentUser = null;
+}
+// 全API：トークン付きPOST（GETの匿名取得は廃止）。
+async function gasCall_(action, payload) {
+  if (!AUTH_TOKEN) { handleUnauthorized_(); return null; }
+  syncPrivatePhotoToken_();
+  const token = AUTH_TOKEN;
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ ...(payload || {}), action, token })
+    });
+    if (!res.ok) throw new Error('通信エラー');
+  const json = await res.json();
+    if (token !== AUTH_TOKEN) { syncPrivatePhotoToken_(); return null; }
+    if (json && json.error === 'unauthorized') { handleUnauthorized_(); return null; }
+    if (!json || typeof json !== 'object' || json.ok === false || json.error) throw new Error('処理に失敗しました');
+    if (action === 'logout') handleUnauthorized_();
+    return json;
+  } catch(e) { console.error('[gasCall_]', action, e); return null; }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  const gasFromPortal = params.get('fuguai_gas_url');
-  if (gasFromPortal) { GAS_URL = gasFromPortal; localStorage.setItem(STORAGE_KEY_URL, GAS_URL); }
-  const sso = params.get('sso');
-  if (sso) {
-    const user = parseSsoToken(sso);
-    if (user && user.name) { currentUser = { id: user.id, name: user.name }; localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser)); }
-  }
-  if (GAS_URL) { document.getElementById('setup-panel').classList.add('hidden'); document.getElementById('gas-url-input').value = GAS_URL; }
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = AUTH_TOKEN ? await gasCall_('whoami', {}) : null;
+  if (user && user.ok === true && typeof user.id === 'string' && user.id &&
+      ['staff','leader','admin','master'].includes(user.role)) currentUser = {id:user.id, name:String(user.name || user.id)};
+  else handleUnauthorized_();
+  const sp = document.getElementById('setup-panel'); if (sp) sp.classList.add('hidden');
   if (currentUser) document.getElementById('current-user-name').textContent = currentUser.name;
   loadData();
 });
 
-function saveGasUrl() {
-  const v = document.getElementById('gas-url-input').value.trim();
-  if (!v) return showToast('URLを入力してください', 'err');
-  GAS_URL = v; localStorage.setItem(STORAGE_KEY_URL, v);
-  document.getElementById('setup-panel').classList.add('hidden');
-  showToast('接続しました', 'ok'); loadData();
-}
+function saveGasUrl() { /* 接続先差し替えは廃止（no-op） */ }
 
 async function loadData() {
+  closeModal();
   setTableArea('<div class="loading"><div class="spinner"></div>読み込み中...</div>');
-  if (!GAS_URL) { setTableArea('<div class="empty">⚙️ GAS URLを設定してください</div>'); return; }
+  if (!AUTH_TOKEN) { setTableArea('<div class="empty">🔒 業務管理ポータルからご利用ください</div>'); return; }
   try {
-    const [r1, r2] = await Promise.all([
-      fetch(`${GAS_URL}?action=getDefects`),
-      fetch(`${GAS_URL}?action=getConfirmLogs`)
+    const [d1, d2] = await Promise.all([
+      gasCall_('getDefects', {}),
+      gasCall_('getConfirmLogs', {})
     ]);
-    const d1 = await r1.json(), d2 = await r2.json();
-    allRecords  = d1.records || [];
+    if (!d1 || !d2) { setTableArea('<div class="empty">🔒 認証が無効です。ポータルから入り直してください</div>'); return; }
+    if (!Array.isArray(d1.records) || !Array.isArray(d2.logs)) throw new Error('不正な応答');
+    allRecords  = d1.records;
     confirmLogs = {};
     (d2.logs || []).forEach(log => {
       if (!confirmLogs[log.recordId]) confirmLogs[log.recordId] = [];
@@ -418,21 +548,26 @@ function getStatusBadge(id) {
   return `<span class="badge badge-none">● 未確認</span>`;
 }
 
+// XSS対策ヘルパー（要素本文用 / 二重引用符属性値用）。保存データ(不具合内容等)を必ず通す。
+function escapeHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function escapeAttr(s){ return escapeHtml(s); }
+
 function renderTable(records) {
   document.getElementById('table-count').textContent = `${records.length} 件`;
   if (records.length === 0) { setTableArea('<div class="empty">📋 該当する不具合がありません</div>'); return; }
 
+  // ★XSS対策：保存データはエスケープ。行クリックは data-detail-id ＋委譲（インラインonclickに文字列を入れない）。
   // PC テーブル
   const pcRows = records.map(r => {
-    const hasPhoto = r.photo1 || r.photo2 || r.photo3;
+    const hasPhoto = defectPhotoItems_(r).length > 0;
     const myDone = iConfirmed(r.id);
-    return `<tr onclick="openDetail('${r.id}')" style="${!myDone ? 'background:#fff9f9' : ''}">
-      <td class="td-date">${r.date ? r.date.slice(0,10) : '—'}</td>
-      <td class="td-name">${r.worker || '—'}</td>
-      <td style="font-family:monospace;font-size:12px">${r.part || '—'}</td>
-      <td>${r.customer || '—'}</td>
-      <td>${r.defectType || '—'}</td>
-      <td class="td-count">${r.defectCount || 0}</td>
+    return `<tr class="detail-row" data-detail-id="${escapeAttr(r.id)}" style="${!myDone ? 'background:#fff9f9' : ''}">
+      <td class="td-date">${escapeHtml(r.date ? r.date.slice(0,10) : '—')}</td>
+      <td class="td-name">${escapeHtml(r.worker || '—')}</td>
+      <td style="font-family:monospace;font-size:12px">${escapeHtml(r.part || '—')}</td>
+      <td>${escapeHtml(r.customer || '—')}</td>
+      <td>${escapeHtml(r.defectType || '—')}</td>
+      <td class="td-count">${Number(r.defectCount)||0}</td>
       <td>${getStatusBadge(r.id)}</td>
       <td>${hasPhoto ? '📷' : '—'}</td>
     </tr>`;
@@ -441,20 +576,20 @@ function renderTable(records) {
   // スマホ カード
   const cards = records.map(r => {
     const myDone = iConfirmed(r.id);
-    const hasPhoto = r.photo1 || r.photo2 || r.photo3;
-    return `<div class="defect-card" onclick="openDetail('${r.id}')" style="${!myDone ? 'border-left:3px solid var(--danger)' : 'border-left:3px solid var(--ok)'}">
+    const hasPhoto = defectPhotoItems_(r).length > 0;
+    return `<div class="defect-card detail-row" data-detail-id="${escapeAttr(r.id)}" style="${!myDone ? 'border-left:3px solid var(--danger)' : 'border-left:3px solid var(--ok)'}">
       <div class="card-top">
-        <div class="card-part">${r.part || '—'}</div>
-        <div class="card-count">${r.defectCount || 0}個</div>
+        <div class="card-part">${escapeHtml(r.part || '—')}</div>
+        <div class="card-count">${Number(r.defectCount)||0}個</div>
       </div>
       <div class="card-mid">
-        <span class="card-worker">👤 ${r.worker || '—'}</span>
-        <span class="card-customer">🏭 ${r.customer || '—'}</span>
+        <span class="card-worker">👤 ${escapeHtml(r.worker || '—')}</span>
+        <span class="card-customer">🏭 ${escapeHtml(r.customer || '—')}</span>
         ${hasPhoto ? '<span style="font-size:11px">📷</span>' : ''}
       </div>
-      <div class="card-defect">${r.defectType || '—'}</div>
+      <div class="card-defect">${escapeHtml(r.defectType || '—')}</div>
       <div class="card-bottom" style="margin-top:6px">
-        <div class="card-date">${r.date ? r.date.slice(0,10) : '—'}</div>
+        <div class="card-date">${escapeHtml(r.date ? r.date.slice(0,10) : '—')}</div>
         ${getStatusBadge(r.id)}
       </div>
     </div>`;
@@ -472,31 +607,28 @@ function renderTable(records) {
     </div>
     <div class="card-list">${cards}</div>
   `);
+  // 委譲：行/カードのクリックで詳細を開く（idはdata属性から）
+  document.getElementById('table-area').querySelectorAll('.detail-row').forEach(el => {
+    el.addEventListener('click', () => openDetail(el.getAttribute('data-detail-id')));
+  });
 }
 
 function setTableArea(html) { document.getElementById('table-area').innerHTML = html; }
 
-function openDetail(id) {
+async function openDetail(id) {
+  clearPrivatePhotoViews_();
   const r = allRecords.find(x => x.id === id);
   if (!r) return;
   const logs   = confirmLogs[id] || [];
   const myDone = iConfirmed(r.id);
 
-  const photos = [r.photo1, r.photo2, r.photo3].filter(Boolean);
-  const photoHtml = photos.length > 0
-    ? `<div class="photo-row">${photos.map(url => {
-        if (url.includes('/preview')) return `<div style="width:100%;max-width:320px;height:220px;border-radius:8px;overflow:hidden;border:1px solid var(--border)"><iframe src="${url}" width="100%" height="220" frameborder="0" allowfullscreen style="border:none"></iframe></div>`;
-        return `<a href="${url}" target="_blank"><img style="width:100%;max-width:280px;height:200px;object-fit:cover;border-radius:8px;border:1px solid var(--border)" src="${url}" alt="写真" onerror="this.style.display='none'"></a>`;
-      }).join('')}</div>`
-    : '<div class="photo-placeholder">📷 写真なし</div>';
-
   const logHtml = logs.length > 0
     ? logs.map(l => {
         const isMe = currentUser && l.name === currentUser.name;
         return `<div class="log-item">
-          <div class="log-avatar ${isMe ? 'me' : ''}">${l.name.slice(0,1)}</div>
-          <div class="log-name">${l.name}${isMe ? ' <span style="font-size:10px;color:var(--ok)">(あなた)</span>' : ''}</div>
-          <div class="log-time">${l.time}</div>
+          <div class="log-avatar ${isMe ? 'me' : ''}">${escapeHtml(String(l.name||'').slice(0,1))}</div>
+          <div class="log-name">${escapeHtml(l.name)}${isMe ? ' <span style="font-size:10px;color:var(--ok)">(あなた)</span>' : ''}</div>
+          <div class="log-time">${escapeHtml(l.time)}</div>
         </div>`;
       }).join('')
     : '<div class="confirm-log-empty">まだ確認者がいません</div>';
@@ -512,58 +644,57 @@ function openDetail(id) {
   document.getElementById('modal-body').innerHTML = `
     ${myBanner}
     <div class="detail-grid">
-      <div><div class="detail-label">報告書ID</div><div class="detail-value" style="font-size:11px;font-family:monospace">${r.id}</div></div>
-      <div><div class="detail-label">発生日</div><div class="detail-value">${r.date || '—'}</div></div>
-      <div><div class="detail-label">担当者</div><div class="detail-value">${r.worker || '—'}</div></div>
-      <div><div class="detail-label">基本取引先</div><div class="detail-value">${r.customer || '—'}</div></div>
-      <div><div class="detail-label">品番</div><div class="detail-value">${r.part || '—'}</div></div>
-      <div><div class="detail-label">不良数</div><div class="detail-value large">${r.defectCount || 0} 個</div></div>
-      <div style="grid-column:1/-1"><div class="detail-label">不具合内容</div><div class="detail-value">${r.defectType || '—'}</div></div>
-      <div style="grid-column:1/-1"><div class="detail-label">不具合詳細</div><div class="detail-value">${r.detail || '—'}</div></div>
+      <div><div class="detail-label">報告書ID</div><div class="detail-value" style="font-size:11px;font-family:monospace">${escapeHtml(r.id)}</div></div>
+      <div><div class="detail-label">発生日</div><div class="detail-value">${escapeHtml(r.date || '—')}</div></div>
+      <div><div class="detail-label">担当者</div><div class="detail-value">${escapeHtml(r.worker || '—')}</div></div>
+      <div><div class="detail-label">基本取引先</div><div class="detail-value">${escapeHtml(r.customer || '—')}</div></div>
+      <div><div class="detail-label">品番</div><div class="detail-value">${escapeHtml(r.part || '—')}</div></div>
+      <div><div class="detail-label">不良数</div><div class="detail-value large">${Number(r.defectCount)||0} 個</div></div>
+      <div style="grid-column:1/-1"><div class="detail-label">不具合内容</div><div class="detail-value">${escapeHtml(r.defectType || '—')}</div></div>
+      <div style="grid-column:1/-1"><div class="detail-label">不具合詳細</div><div class="detail-value">${escapeHtml(r.detail || '—')}</div></div>
     </div>
     <div class="section-title">📷 写真</div>
-    ${photoHtml}
+    <div class="photo-row" id="defect-private-photos"></div>
     <div class="section-title">✅ 確認ログ（${logs.length}名）</div>
     <div class="confirm-log">${logHtml}</div>
     ${currentUser
       ? `<div class="confirm-area">
           <div class="confirm-note">${myDone ? 'あなたは確認済みです' : 'この不具合内容を確認しましたか？'}</div>
-          <button class="btn-confirm" id="confirm-btn" onclick="confirmRecord('${id}')" ${myDone ? 'disabled' : ''}>
+          <button class="btn-confirm" id="confirm-btn" ${myDone ? 'disabled' : ''}>
             ${myDone ? '✔ 確認済み' : '✔ 確認する'}
           </button>
         </div>`
       : `<div class="confirm-area">
           <div class="confirm-note">確認するにはユーザーを選択してください</div>
-          <button class="btn-confirm" onclick="closeModal();openUserModal()">👤 ユーザー選択</button>
-        </div>`
-    }
+          <button class="btn-confirm" data-csp-click="h9" data-csp-source-click="closeModal();openUserModal()">👤 ユーザー選択</button>
+        </div>`}
   `;
   document.getElementById('detail-modal').classList.add('open');
+  // ★確認ボタンはインラインonclickをやめ、idをクロージャで渡す委譲に変更（保存文字列をJS属性に入れない）。
+  const cbtn = document.getElementById('confirm-btn');
+  if (cbtn && !cbtn.disabled) cbtn.addEventListener('click', () => confirmRecord(id));
+  await renderPrivatePhotos_(document.getElementById('defect-private-photos'), defectPhotoItems_(r));
 }
 
-function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
+function closeModal() {
+  clearPrivatePhotoViews_();
+  document.getElementById('detail-modal').classList.remove('open');
+}
 
 async function confirmRecord(id) {
   if (!currentUser) return openUserModal();
   const btn = document.getElementById('confirm-btn');
   btn.disabled = true; btn.textContent = '送信中...';
   try {
-    const params = new URLSearchParams({
-      action: 'addConfirmLog',
-      recordId: id,
-      userId: currentUser.id || '',
-      userName: currentUser.name,
-      time: new Date().toLocaleString('ja-JP')
-    });
-    const res  = await fetch(`${GAS_URL}?${params.toString()}`);
-    const data = await res.json();
-    if (data.ok) {
+    // 確認者はサーバーがトークンのsub/nameで記録する（recordIdだけ送る）。
+    const data = await gasCall_('addConfirmLog', { recordId: id });
+    if (data && data.ok) {
       if (!confirmLogs[id]) confirmLogs[id] = [];
       confirmLogs[id].push({ name: currentUser.name, time: new Date().toLocaleString('ja-JP') });
       showToast('確認しました！', 'ok');
       closeModal(); updateStats(); applyFilter();
     } else {
-      showToast('エラー: ' + (data.error || '送信失敗'), 'err');
+      showToast('エラー: ' + ((data && data.error) || '送信失敗（認証切れの可能性）'), 'err');
       btn.disabled = false; btn.textContent = '✔ 確認する';
     }
   } catch(e) {
@@ -581,8 +712,8 @@ function closeUserModal() { document.getElementById('user-modal').classList.remo
 
 async function loadEmployees() {
   try {
-    const res  = await fetch(`${GAS_URL}?action=getEmployees`);
-    const data = await res.json();
+    const data = await gasCall_('getEmployees', {});
+    if (!data) return;
     const sel  = document.getElementById('user-select');
     sel.innerHTML = '<option value="">選択してください</option>';
     (data.employees || []).forEach(e => {
@@ -600,10 +731,10 @@ async function loadEmployees() {
 }
 
 function confirmUser() {
+  // 表示上の切替のみ。確認記録の本人はサーバーがトークンのsub/nameで確定する。
   const v = document.getElementById('user-select').value;
   if (!v) return showToast('ユーザーを選択してください', 'err');
   currentUser = JSON.parse(v);
-  localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
   document.getElementById('current-user-name').textContent = currentUser.name;
   closeUserModal();
   showToast(`${currentUser.name} に切り替えました`, 'ok');
@@ -620,6 +751,7 @@ document.getElementById('detail-modal').addEventListener('click', e => { if (e.t
 document.getElementById('user-modal').addEventListener('click', e => { if (e.target === document.getElementById('user-modal')) closeUserModal(); });
 
 function closeTab() {
+  clearPrivatePhotoViews_();
   try {
     window.close();
   } catch(e) {}
@@ -627,7 +759,165 @@ function closeTab() {
     showToast('このタブを閉じてポータルに戻ってください', '');
   }, 300);
 }
-</script>
+
+const PRIVATE_PHOTO_API_URL = GAS_URL;
+
+const PRIVATE_PHOTO_MAX_BYTES = 8 * 1024 * 1024;
+const PRIVATE_PHOTO_MAX_BASE64 = Math.ceil(PRIVATE_PHOTO_MAX_BYTES / 3) * 4;
+const PRIVATE_PHOTO_VIEWS = new Map();
+let PRIVATE_PHOTO_TOKEN = AUTH_TOKEN;
+
+function syncPrivatePhotoToken_() {
+  if (PRIVATE_PHOTO_TOKEN !== AUTH_TOKEN) {
+    clearPrivatePhotoViews_();
+    PRIVATE_PHOTO_TOKEN = AUTH_TOKEN;
+  }
+}
+
+function defectPhotoItems_(record) {
+  if (!record || typeof record.id !== 'string' || !record.id || !Array.isArray(record.photoSlots)) return [];
+  return Array.from(new Set(record.photoSlots.filter(slot => Number.isInteger(slot) && slot >= 0 && slot < 3)))
+    .map(slot => ({name:'写真'+(slot+1), binding:{recordId:record.id, slot}}));
+}
+
+function clearPrivatePhotoView_(container) {
+  const state = PRIVATE_PHOTO_VIEWS.get(container);
+  if (state) {
+    state.cancelled = true;
+    state.controller.abort();
+    state.urls.forEach(url => URL.revokeObjectURL(url));
+    state.urls.clear();
+    PRIVATE_PHOTO_VIEWS.delete(container);
+  }
+  if (container) container.replaceChildren();
+}
+
+function clearPrivatePhotoViews_() {
+  Array.from(PRIVATE_PHOTO_VIEWS.keys()).forEach(clearPrivatePhotoView_);
+}
+
+function privatePhotoBytes_(photo) {
+  if (!photo || !['image/jpeg','image/png'].includes(photo.mimeType) ||
+      typeof photo.base64 !== 'string' || !photo.base64 || photo.base64.length > PRIVATE_PHOTO_MAX_BASE64 ||
+      photo.base64.length % 4 || !/^[A-Za-z0-9+/]+={0,2}$/.test(photo.base64) ||
+      !Number.isInteger(photo.byteLength) || photo.byteLength <= 0 || photo.byteLength > PRIVATE_PHOTO_MAX_BYTES) throw new Error('invalid_image');
+  const binary = atob(photo.base64);
+  if (binary.length !== photo.byteLength || btoa(binary) !== photo.base64) throw new Error('invalid_image');
+  const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+  const valid = photo.mimeType === 'image/png'
+    ? bytes.length >= 45 && Array.from(bytes.slice(0,8)).join(',') === '137,80,78,71,13,10,26,10'
+    : bytes.length >= 16 && bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255 &&
+      bytes[bytes.length-2] === 255 && bytes[bytes.length-1] === 217;
+  if (!valid) throw new Error('invalid_image');
+  let width = 0, height = 0;
+  if (photo.mimeType === 'image/png') {
+    const u32 = at => bytes[at]*0x1000000+(bytes[at+1]<<16)+(bytes[at+2]<<8)+bytes[at+3];
+    width = u32(16); height = u32(20);
+  } else {
+    let pos = 2;
+    while (pos+4 < bytes.length) {
+      if (bytes[pos++] !== 255) throw new Error('invalid_image');
+      while (bytes[pos] === 255) pos++;
+      const marker = bytes[pos++], length = (bytes[pos]<<8)+bytes[pos+1];
+      if (length < 2 || pos+length > bytes.length) throw new Error('invalid_image');
+      if ([192,193,194].includes(marker)) {
+        height = (bytes[pos+3]<<8)+bytes[pos+4]; width = (bytes[pos+5]<<8)+bytes[pos+6]; break;
+      }
+      if (marker === 218 || marker === 217) break;
+      pos += length;
+    }
+  }
+  if (!width || !height || width > 8192 || height > 8192 || width*height > 16*1024*1024) throw new Error('invalid_image');
+  return bytes;
+}
+
+async function requestPrivatePhoto_(binding, signal) {
+  syncPrivatePhotoToken_();
+  if (!AUTH_TOKEN) throw new Error('unauthorized');
+  if (!binding || typeof binding.recordId !== 'string' || !binding.recordId || binding.recordId.length > 500 ||
+      !Number.isInteger(binding.slot) || binding.slot < 0 || binding.slot >= 3 || binding.partNo !== undefined ||
+      binding.collection !== undefined || binding.fileId !== undefined || binding.url !== undefined) throw new Error('invalid_binding');
+  const request = {recordId:binding.recordId, slot:binding.slot};
+  const token = AUTH_TOKEN;
+  const response = await fetch(PRIVATE_PHOTO_API_URL, {
+    method:'POST', credentials:'omit', headers:{'Content-Type':'text/plain'}, cache:'no-store', signal,
+    body:JSON.stringify({...request, action:'getPhoto', token})
+  });
+  if (!response.ok) throw new Error('photo_unavailable');
+  const raw = await response.text();
+  syncPrivatePhotoToken_();
+  if (token !== AUTH_TOKEN) throw new Error('photo_unavailable');
+  if (raw.length > PRIVATE_PHOTO_MAX_BASE64+2048) throw new Error('photo_unavailable');
+  const result = JSON.parse(raw);
+  if (result && result.error === 'unauthorized') {
+    clearPrivatePhotoViews_();
+    if (typeof handleUnauthorized_ === 'function') handleUnauthorized_();
+    else { AUTH_TOKEN = ''; try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch (e) {} }
+    throw new Error('unauthorized');
+  }
+  if (!result || result.ok !== true || !result.photo || token !== AUTH_TOKEN) throw new Error('photo_unavailable');
+  return result.photo;
+}
+
+async function renderPrivatePhotos_(container, items) {
+  if (!container) return;
+  syncPrivatePhotoToken_();
+  clearPrivatePhotoView_(container);
+  const state = {cancelled:false, urls:new Set(), controller:new AbortController(), token:AUTH_TOKEN};
+  PRIVATE_PHOTO_VIEWS.set(container, state);
+  if (!items.length) { container.textContent = '写真なし'; return; }
+  for (const item of items) {
+    if (state.cancelled) return;
+    const figure = document.createElement('figure');
+    figure.className = 'private-photo';
+    figure.style.cssText = 'display:inline-flex;flex-direction:column;gap:4px;margin:4px;max-width:100%;vertical-align:top';
+    const img = document.createElement('img');
+    img.alt = String(item.name || '写真');
+    img.style.cssText = 'width:240px;height:180px;max-width:100%;object-fit:contain';
+    const caption = document.createElement('figcaption');
+    caption.textContent = String(item.name || '写真');
+    const status = document.createElement('span');
+    status.setAttribute('role','status');
+    status.textContent = '写真を読み込み中...';
+    figure.append(img, caption, status);
+    container.appendChild(figure);
+    let url;
+    try {
+      if (!item.binding) throw new Error('invalid_binding');
+      const photo = await requestPrivatePhoto_(item.binding, state.controller.signal);
+      const bytes = privatePhotoBytes_(photo);
+      if (state.cancelled) return;
+      url = URL.createObjectURL(new Blob([bytes], {type:photo.mimeType}));
+      state.urls.add(url);
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('image_timeout')), 10000);
+        img.onload = () => {
+          clearTimeout(timer);
+          syncPrivatePhotoToken_();
+          if (state.cancelled || state.token !== AUTH_TOKEN) { reject(new Error('photo_unavailable')); return; }
+          if (!img.naturalWidth || !img.naturalHeight || img.naturalWidth > 8192 || img.naturalHeight > 8192 ||
+              img.naturalWidth * img.naturalHeight > 16*1024*1024) reject(new Error('invalid_image'));
+          else resolve();
+        };
+        img.onerror = () => { clearTimeout(timer); reject(new Error('invalid_image')); };
+        img.src = url;
+      });
+      if (state.cancelled) { img.removeAttribute('src'); return; }
+      status.textContent = '';
+    } catch (error) {
+      if (url) { URL.revokeObjectURL(url); state.urls.delete(url); }
+      img.removeAttribute('src');
+      if (!state.cancelled) status.textContent = '写真を表示できません（権限または画像を確認してください）';
+    }
+  }
+}
+window.addEventListener('pagehide', clearPrivatePhotoViews_);
+window.addEventListener('beforeunload', clearPrivatePhotoViews_);
+window.addEventListener('focus', syncPrivatePhotoToken_);
+document.addEventListener('visibilitychange', syncPrivatePhotoToken_);
+window.addEventListener('storage', event => {
+  if ((event.key === AUTH_TOKEN_KEY || event.key === null) && event.newValue !== AUTH_TOKEN) handleUnauthorized_();
+});
 </script>
 </body>
 </html>

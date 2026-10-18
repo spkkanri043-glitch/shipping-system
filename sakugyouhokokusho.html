@@ -1,7 +1,103 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-Bui7sEH2mZgBNTOWxJqjmotPaLf2ot1QW/hHgyeC6Kc=' 'sha256-xivlwxE38xr1OMkZ6/xwsDLgJjxum+viaRos2YuDMNw=' https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
+<script>/* MOGU_CSP_RUNTIME_V1 */
+const __moguCsp = (() => {
+  const handlers = {"h0": function(event, _p) { goPortal()
+},
+"h1": function(event, _p) { doLogout()
+},
+"h2": function(event, _p) { doPause()
+},
+"h3": function(event, _p) { doResume()
+},
+"h4": function(event, _p) { doEnd()
+},
+"h5": function(event, _p) { this.classList.remove('err')
+},
+"h6": function(event, _p) { setScanMode('scan')
+},
+"h7": function(event, _p) { setScanMode('manual')
+},
+"h8": function(event, _p) { this.classList.remove('err'); onHinbanInput()
+},
+"h9": function(event, _p) { startScan()
+},
+"h10": function(event, _p) { this.classList.remove('err'); calcTotal()
+},
+"h11": function(event, _p) { countChange(-1)
+},
+"h12": function(event, _p) { countChange(1)
+},
+"h13": function(event, _p) { calcTotal()
+},
+"h14": function(event, _p) { addDefect()
+},
+"h15": function(event, _p) { addPhoto()
+},
+"h16": function(event, _p) { onPhotoSelected(event)
+},
+"h17": function(event, _p) { doSave()
+},
+"h18": function(event, _p) { doResume()
+},
+"h19": function(event, _p) { startNew()
+},
+"h20": function(event, _p) { goPortal()
+},
+"h21": function(event, _p) { stopCamera(true)
+},
+"h22": function(event, _p) { closeConfirm()
+},
+"h23": function(event, _p) { execConfirm()
+}};
+  const events = ["click","change","input"];
+  const bound = new WeakMap();
+  function bind(el) {
+    if (!el || el.nodeType !== 1) return;
+    let state = bound.get(el); if (!state) { state = new Map(); bound.set(el, state); }
+    for (const type of events) {
+      const id = el.getAttribute('data-csp-' + type);
+      if (!id || state.get(type) === id) continue;
+      if (!Object.prototype.hasOwnProperty.call(handlers, id)) continue;
+      const fn = function(event) {
+        const value = this.getAttribute('data-csp-args-' + type);
+        const params = value ? JSON.parse(decodeURIComponent(value)) : [];
+        return handlers[id].call(this, event, params);
+      };
+      // Native event-handler properties preserve this/currentTarget, cancellation,
+      // async return behavior and later application assignments to .onclick etc.
+      el['on' + type] = fn;
+      state.set(type, id);
+    }
+  }
+  function scan(root) {
+    bind(root);
+    if (root.querySelectorAll) for (const el of root.querySelectorAll('*')) bind(el);
+  }
+  for (const type of events) document.addEventListener(type, event => {
+    for (const el of event.composedPath()) bind(el);
+  }, true);
+  new MutationObserver(records => {
+    for (const record of records) {
+      if (record.type === 'attributes') bind(record.target);
+      else for (const node of record.addedNodes) scan(node);
+    }
+  }).observe(document, {subtree:true, childList:true, attributes:true,
+    attributeFilter: events.map(type => 'data-csp-' + type)});
+  document.addEventListener('DOMContentLoaded', () => scan(document));
+  const encode = values => encodeURIComponent(JSON.stringify(values)).replace(/'/g, '%27');
+  function assign(el,type,id,values) {
+    el.setAttribute('data-csp-' + type,id);
+    el.setAttribute('data-csp-args-' + type,encode(values));
+    bind(el);
+  }
+  return Object.freeze({ encode, scan, assign });
+})();
+</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>作業報告書 | 関ケ原プラ工業(株)</title>
 <style>
@@ -458,7 +554,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
       </div>
       <button class="btnl" id="btn-login">ログイン</button>
     </div>
-    <div class="login-back" onclick="goPortal()">← 業務管理ポータルに戻る</div>
+    <div class="login-back" data-csp-click="h0" data-csp-source-click="goPortal()">← 業務管理ポータルに戻る</div>
   </div>
 </div>
 
@@ -474,7 +570,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     </div>
     <div class="tbr">
       <div class="user-chip" id="user-chip">---</div>
-      <button class="btn-logout" onclick="doLogout()">退出</button>
+      <button class="btn-logout" data-csp-click="h1" data-csp-source-click="doLogout()">退出</button>
     </div>
   </div>
 
@@ -491,9 +587,9 @@ textarea.fi2 { resize: none; line-height: 1.6; }
 
     <!-- 一時停止 / 再開 -->
     <div class="work-controls">
-      <button class="btn-pause"  id="btn-pause"  onclick="doPause()">⏸ 一時停止</button>
-      <button class="btn-resume" id="btn-resume" onclick="doResume()" disabled>▶ 再開</button>
-      <button class="btn-end"    id="btn-end"    onclick="doEnd()">🏁 作業終了して保存</button>
+      <button class="btn-pause"  id="btn-pause"  data-csp-click="h2" data-csp-source-click="doPause()">⏸ 一時停止</button>
+      <button class="btn-resume" id="btn-resume" data-csp-click="h3" data-csp-source-click="doResume()" disabled>▶ 再開</button>
+      <button class="btn-end"    id="btn-end"    data-csp-click="h4" data-csp-source-click="doEnd()">🏁 作業終了して保存</button>
     </div>
 
     <!-- 基本情報 -->
@@ -509,7 +605,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
       </div>
       <div class="frow">
         <label class="fl2">作業項目 <span class="req">必須</span></label>
-        <select class="fi2" id="f-sakugyo" onchange="this.classList.remove('err')">
+        <select class="fi2" id="f-sakugyo" data-csp-change="h5" data-csp-source-change="this.classList.remove('err')">
           <option value="">選択してください</option>
           <option value="加工">加工</option>
           <option value="検査">検査</option>
@@ -523,8 +619,8 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     <div class="section-card">
       <div class="sc-title">📦 製品情報</div>
       <div class="scan-tabs">
-  <div class="scan-tab on" id="tab-scan"   onclick="setScanMode('scan')">📷 スキャン</div>
-  <div class="scan-tab"    id="tab-manual" onclick="setScanMode('manual')">⌨️ 手入力</div>
+  <div class="scan-tab on" id="tab-scan"   data-csp-click="h6" data-csp-source-click="setScanMode('scan')">📷 スキャン</div>
+  <div class="scan-tab"    id="tab-manual" data-csp-click="h7" data-csp-source-click="setScanMode('manual')">⌨️ 手入力</div>
 </div>
       </div>
       <div class="frow">
@@ -532,8 +628,8 @@ textarea.fi2 { resize: none; line-height: 1.6; }
         <div class="scan-area">
           <input class="fi2" type="text" id="f-hinban"
             placeholder="スキャンまたは手入力"
-            oninput="this.classList.remove('err'); onHinbanInput()">
-          <button class="btn-scan" id="btn-scan" onclick="startScan()">📷</button>
+            data-csp-input="h8" data-csp-source-input="this.classList.remove('err'); onHinbanInput()">
+          <button class="btn-scan" id="btn-scan" data-csp-click="h9" data-csp-source-click="startScan()">📷</button>
         </div>
         <div id="scan-result-tag" style="display:none">
           <span class="scan-result-tag">✅ <span id="scan-result-text"></span></span>
@@ -548,7 +644,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
         <input class="fi2" type="number" id="f-hakoiri"
           placeholder="箱入数" inputmode="numeric" min="0"
           readonly style="-moz-appearance:textfield;pointer-events:none"
-          oninput="this.classList.remove('err'); calcTotal()">
+          data-csp-input="h10" data-csp-source-input="this.classList.remove('err'); calcTotal()">
       </div>
     </div>
 
@@ -556,16 +652,16 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     <div class="section-card">
       <div class="sc-title">🔢 カウント</div>
       <div class="count-wrap">
-        <button class="count-btn minus" id="btn-minus" onclick="countChange(-1)" disabled>−</button>
+        <button class="count-btn minus" id="btn-minus" data-csp-click="h11" data-csp-source-click="countChange(-1)" disabled>−</button>
         <div class="count-display" id="count-disp">0</div>
-        <button class="count-btn plus" onclick="countChange(1)">＋</button>
+        <button class="count-btn plus" data-csp-click="h12" data-csp-source-click="countChange(1)">＋</button>
       </div>
       <div class="count-unit">箱</div>
       <div class="frow" style="margin-top:10px">
         <label class="fl2">端数個数（最後の箱が半端な場合）</label>
         <input class="fi2" type="number" id="f-hasuu" value="0" min="0"
           inputmode="numeric" style="-moz-appearance:textfield"
-          oninput="calcTotal()">
+          data-csp-input="h13" data-csp-source-input="calcTotal()">
       </div>
       <div class="total-row">
         <span class="total-label">合計数量</span>
@@ -577,7 +673,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     <div class="section-card">
       <div class="defect-header">
         <div class="sc-title" style="margin:0;border:none;padding:0">⚠️ 不具合入力</div>
-        <button class="btn-add-defect" onclick="addDefect()">＋ 追加</button>
+        <button class="btn-add-defect" data-csp-click="h14" data-csp-source-click="addDefect()">＋ 追加</button>
       </div>
       <div id="defect-list"><div class="defect-empty">不具合なし</div></div>
     </div>
@@ -592,18 +688,18 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     <div class="section-card">
       <div class="sc-title">📸 写真（最大3枚）</div>
       <div id="photo-list" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px"></div>
-      <button class="btn" id="btn-photo" onclick="addPhoto()" style="width:100%;padding:12px;font-size:13px">
+      <button class="btn" id="btn-photo" data-csp-click="h15" data-csp-source-click="addPhoto()" style="width:100%;padding:12px;font-size:13px">
         📷 写真を追加
       </button>
       <input type="file" id="photo-input" accept="image/*" capture="environment"
-        style="display:none" onchange="onPhotoSelected(event)">
+        style="display:none" data-csp-change="h16" data-csp-source-change="onPhotoSelected(event)">
       <div style="font-size:11px;color:var(--tx3);margin-top:6px;text-align:center">
         撮影した写真は保存時にGoogleドライブにアップロードされます
       </div>
     </div>
 
     <!-- 一時保存 -->
-    <button class="btn-submit" id="btn-save" onclick="doSave()">💾 一時保存</button>
+    <button class="btn-submit" id="btn-save" data-csp-click="h17" data-csp-source-click="doSave()">💾 一時保存</button>
     <div class="submit-note">「作業終了して保存」で最終保存されます</div>
 
     <div class="bottom-pad"></div>
@@ -616,7 +712,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
   <div class="break-title">作業中断札</div>
   <div class="break-sub" id="break-start-label">開始: --:--</div>
   <div class="break-timer" id="break-timer">00:00</div>
-  <button class="btn-break-resume" onclick="doResume()">▶ 再開する</button>
+  <button class="btn-break-resume" data-csp-click="h18" data-csp-source-click="doResume()">▶ 再開する</button>
 </div>
 
 <!-- ===== COMPLETE ===== -->
@@ -626,8 +722,8 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     <div class="cmp-title">作業完了！</div>
     <div class="cmp-sub">作業報告書をGoogleスプレッドシートに<br>保存しました</div>
     <div class="cmp-summary" id="cmp-summary"></div>
-    <button class="btn-new"    onclick="startNew()">＋ 新しい作業を開始</button>
-    <button class="btn-portal" onclick="goPortal()">✕ このタブを閉じる（ポータルに戻る）</button>
+    <button class="btn-new"    data-csp-click="h19" data-csp-source-click="startNew()">＋ 新しい作業を開始</button>
+    <button class="btn-portal" data-csp-click="h20" data-csp-source-click="goPortal()">✕ このタブを閉じる（ポータルに戻る）</button>
   </div>
 </div>
 
@@ -641,7 +737,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     <div class="cam-status" id="cam-status">スキャン中...</div>
   </div>
   <div class="cam-footer">
-    <button class="btn-cam-cancel" onclick="stopCamera(true)">キャンセル</button>
+    <button class="btn-cam-cancel" data-csp-click="h21" data-csp-source-click="stopCamera(true)">キャンセル</button>
   </div>
 </div>
 
@@ -651,8 +747,8 @@ textarea.fi2 { resize: none; line-height: 1.6; }
     <div class="confirm-title" id="cf-title">確認</div>
     <div class="confirm-msg"   id="cf-msg"></div>
     <div class="confirm-btns">
-      <button class="btn-cf-cancel" onclick="closeConfirm()">キャンセル</button>
-      <button class="btn-cf-ok"     id="cf-ok"  onclick="execConfirm()">OK</button>
+      <button class="btn-cf-cancel" data-csp-click="h22" data-csp-source-click="closeConfirm()">キャンセル</button>
+      <button class="btn-cf-ok"     id="cf-ok"  data-csp-click="h23" data-csp-source-click="execConfirm()">OK</button>
     </div>
   </div>
 </div>
@@ -667,6 +763,48 @@ textarea.fi2 { resize: none; line-height: 1.6; }
 <div class="toast" id="toast"></div>
 
 <script>
+document.addEventListener('click', event => {
+  const el = event.target.closest('[data-defect-action="remove"]');
+  if (el && /^[0-9]+$/.test(el.dataset.id)) removeDefect(Number(el.dataset.id));
+});
+document.addEventListener('change', event => {
+  const el = event.target.closest('[data-defect-field]');
+  if (el && /^[0-9]+$/.test(el.dataset.id) && ['worker','type','count','detail'].includes(el.dataset.defectField)) {
+    updateDefect(Number(el.dataset.id), el.dataset.defectField, el.value);
+  }
+});
+
+
+// Business drafts are page-memory only. SSO tokens stay in sessionStorage;
+// static HTML/GAS cannot issue HttpOnly cookies.
+const pageMemoryStorage = (() => {
+  const entries = new Map();
+  return {
+    getItem: key => entries.has(key) ? entries.get(key) : null,
+    setItem: (key, value) => entries.set(key, String(value)),
+    removeItem: key => entries.delete(key),
+    clear: () => entries.clear()
+  };
+})();
+function clearBrowserBusinessData_() {
+  pageMemoryStorage.clear();
+  const known = new Set(['kpk_app_perms', 'kpk_shift_employees', 'kpk_shift_data',
+    'kpk_cal_special', 'kpk_data_ver', 'kpk_session', 'kpk_vac_req', 'kpk_ot_req',
+    'kpk_h_req', 'kpk_sync_log', 'sakugyo_wip_backup', 'inv_current_user',
+    'inv_sat_v2', 'inv_portal_url', 'inv_gas_url', 'inv_master_url',
+    'sakugyo_portal_url', 'daily_report_portal_url']);
+  for (const name of ['localStorage', 'sessionStorage']) {
+    try {
+      const storage = window[name];
+      for (let i = storage.length - 1; i >= 0; i--) {
+        const key = storage.key(i);
+        if (known.has(key) || (key && key.startsWith('inv_sat_v2_'))) storage.removeItem(key);
+      }
+    } catch (e) {}
+  }
+}
+clearBrowserBusinessData_();
+
 // ============================================================
 // GAS URL — 各GASのURLを取得
 // ポータルGAS   : URLパラメータ gas_url     or localStorage（ログイン・addLog用）
@@ -674,39 +812,37 @@ textarea.fi2 { resize: none; line-height: 1.6; }
 // 製品マスタGAS : URLパラメータ product_url or localStorage（getProducts・searchProduct用）
 // ============================================================
 
-// ▼▼▼ デプロイ後に各GASのURLをここに入力してください ▼▼▼
-const REPORT_GAS_URL_HARDCODED  = 'https://script.google.com/macros/s/AKfycby-AS3uRATUSAmLb5kqyfxuTy-Y1jDTg4SnbXbqAKpSjEYwlId1n86dHw0sQqmbu3sDEw/exec';
-const PRODUCT_GAS_URL_HARDCODED = 'https://script.google.com/macros/s/AKfycbww1lPYGVf7FLmIbjwxODbFMKSn8Q6yxFL9OpPnYmh9AnkAWVf9BgrRgk0Wc8GvK2XN/exec';
+// ▼▼▼ デプロイ後に各GASのURLをここに入力してください（固定。URLパラメータ差し替えは廃止）▼▼▼
+//   セキュリティ改修：?gas_url= 等での接続先差し替え・localStorage保持を撤去。
+//   任意サーバへトークンを送られる経路を塞ぐため、接続先は必ずこの定数のみを使う。
+const REPORT_GAS_URL  = 'https://script.google.com/macros/s/AKfycby-AS3uRATUSAmLb5kqyfxuTy-Y1jDTg4SnbXbqAKpSjEYwlId1n86dHw0sQqmbu3sDEw/exec';   // 作業報告書GAS（saveReport・getReports）
+const PRODUCT_GAS_URL = 'https://script.google.com/macros/s/AKfycbww1lPYGVf7FLmIbjwxODbFMKSn8Q6yxFL9OpPnYmh9AnkAWVf9BgrRgk0Wc8GvK2XN/exec';  // 製品マスタGAS（getProducts・searchProduct／現状は匿名読取）
 
-function getGasUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const fromUrl = params.get('gas_url');
-  if (fromUrl) { localStorage.setItem('sakugyo_gas_url', fromUrl); return fromUrl; }
-  return localStorage.getItem('sakugyo_gas_url') || '';
-}
-
-function getReportGasUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const fromUrl = params.get('report_url');
-  if (fromUrl) { localStorage.setItem('sakugyo_report_gas_url', fromUrl); return fromUrl; }
-  return localStorage.getItem('sakugyo_report_gas_url') || REPORT_GAS_URL_HARDCODED;
-}
-
-function getProductGasUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const fromUrl = params.get('product_url');
-  if (fromUrl) { localStorage.setItem('sakugyo_product_gas_url', fromUrl); return fromUrl; }
-  return localStorage.getItem('sakugyo_product_gas_url') || PRODUCT_GAS_URL_HARDCODED;
-}
-
-const GAS_URL         = getGasUrl();         // ポータルGAS（login・addLog）
-const REPORT_GAS_URL  = getReportGasUrl();   // 作業報告書GAS（saveReport）
-const PRODUCT_GAS_URL = getProductGasUrl();  // 製品マスタGAS（getProducts・searchProduct）
+// ============================================================
+// SSOトークン（ポータルが #sso= で受け渡す署名トークン）
+//   ・URLフラグメント(#)はサーバへ送られないため漏えいしにくい。
+//   ・取得後は即URLから除去し、sessionStorageに保持。
+// ============================================================
+const AUTH_TOKEN_KEY = 'kpk_report_token';
+let AUTH_TOKEN = (function() {
+  try {
+    const h = location.hash || '';
+    const m = h.match(/[#&]sso=([^&]+)/);
+    if (m) {
+      const t = decodeURIComponent(m[1]);
+      sessionStorage.setItem(AUTH_TOKEN_KEY, t);
+      // URLバーからトークンを消す（履歴・共有からの漏えい防止）
+      history.replaceState(null, '', location.pathname + location.search);
+      return t;
+    }
+    return sessionStorage.getItem(AUTH_TOKEN_KEY) || '';
+  } catch(e) { return ''; }
+})();
 
 // ポータルのURL（「ポータルに戻る」ボタン用）
 const PORTAL_URL = (function() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('portal_url') || localStorage.getItem('sakugyo_portal_url') || '';
+  return params.get('portal_url') || pageMemoryStorage.getItem('sakugyo_portal_url') || '';
 })();
 
 // 従業員データ（不具合作業者選択用）
@@ -726,17 +862,11 @@ let reportEmployees = (function() {
   return [];
 })();
 
-// ポータルGASから従業員データを直接取得（①②が空 or 不十分だった場合のフォールバック）
+// 従業員データは原則ポータルが emps パラメータで渡す。
+//   セキュリティ改修：ポータルGASへの直接getEmploy(master限定・別aud)フォールバックは廃止。
+//   emps が空でも手入力で運用継続できる。
 async function loadReportEmployeesFromPortal() {
-  if (reportEmployees.length > 0) return; // 既に取得済みなら不要
-  if (!GAS_URL) return;
-  try {
-    const res = await gasPost('getEmployees', {});
-    if (res && res.ok && Array.isArray(res.data)) {
-      reportEmployees = res.data.filter(e => e.status === 'active' || e.status === '在職' || !e.status);
-      renderDefects(); // 既に表示中の不具合フォームがあれば再描画して反映
-    }
-  } catch(e) { /* サイレント失敗（手入力で運用継続できるため） */ }
+  return; // フォールバック廃止（互換のため関数は残す）
 }
 
 // ============================================================
@@ -763,7 +893,7 @@ let jsQRReady   = false;
 window.addEventListener('pagehide', () => { autoSave(); stopCamera(true); });
 window.addEventListener('beforeunload', () => { autoSave(); stopCamera(true); });
 
-window.addEventListener('load', function() {
+window.addEventListener('load', async function() {
   loadJsQR();
   loadZXing();
 
@@ -772,69 +902,85 @@ function loadZXing() {
   s.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js';
   document.head.appendChild(s);
 }
-  // URLパラメータから sso トークンを取得
-  const params = new URLSearchParams(location.search);
-  const ssoToken = params.get('sso');
-
-  if (ssoToken) {
+  // 署名トークン（#sso）があれば、それを本人情報として起動する。
+  //   最終的な正当性はGAS側で検証される。ここではトークンの有無と有効期限のみ確認。
+  if (AUTH_TOKEN) {
     try {
-      // ポータルの生成ロジックと逆順: reverse → atob → JSON.parse
-      const reversed = ssoToken.split('').reverse().join('');
-      const json     = decodeURIComponent(escape(atob(reversed)));
-      const payload  = JSON.parse(json);
-
-      // タイムスタンプが30分以内か確認
-      if (Date.now() - payload.ts < 30 * 60 * 1000) {
-        currentUser = { id: payload.id, name: payload.name, role: payload.role };
-        enterMain();
-        return;
-      }
-    } catch(e) {
-      console.warn('SSOトークン解析失敗:', e);
-    }
+      const user = await gasPost('whoami', {});
+      if (!user || user.ok !== true || typeof user.id !== 'string' || !user.id ||
+          !['staff','leader','admin','master'].includes(user.role)) throw new Error('invalid identity');
+      currentUser = {id:user.id, name:String(user.name || user.id), role:user.role};
+      enterMain(); return;
+    } catch (error) { handleUnauthorized_(); }
   }
 
-  // sessionStorage にセッションが残っているか確認
-  try {
-    const saved = sessionStorage.getItem('kpk_report_user');
-    if (saved) {
-      currentUser = JSON.parse(saved);
-      enterMain();
-      return;
-    }
-  } catch(e) {}
-
-  // どちらもなければログイン画面
-  document.getElementById('s-login').classList.add('on');
+  // トークンが無い＝ポータル経由でない。独自ログインは廃止し、ポータルへ誘導する。
+  showPortalRequired_();
 });
+
+// ポータルからの入場を促す画面（独自ログイン廃止）
+function showPortalRequired_() {
+  const el = document.getElementById('s-login');
+  if (el) el.classList.add('on');
+  const err = document.getElementById('login-err');
+  if (err) {
+    err.textContent = 'このアプリは業務管理ポータルからご利用ください。';
+    err.style.display = 'block';
+  }
+  // ID/PW入力とログインボタンを隠す（独自認証は無効）
+  ['inp-id', 'inp-pw', 'btn-login'].forEach(id => {
+    const n = document.getElementById(id);
+    if (n) n.style.display = 'none';
+  });
+}
 
 // ============================================================
 // GAS通信 — actionごとに送り先GASを振り分け
 // ============================================================
 function resolveGasUrl(action) {
-  if (['saveReport', 'getReports'].includes(action)) return REPORT_GAS_URL;
-  if (['getProducts', 'searchProduct'].includes(action)) return PRODUCT_GAS_URL;
-  return GAS_URL; // login・addLog等はポータルGAS
+  // 製品マスタ参照のみ製品GAS。それ以外（saveReport/getReports等）は作業報告書GAS。
+  if (action === 'getProducts') return PRODUCT_GAS_URL;
+  return REPORT_GAS_URL;
+}
+
+// トークン失効・未ログインを検知したときの共通処理
+function handleUnauthorized_() {
+  clearPrivatePhotoViews_();
+  photos = [];
+  clearBrowserBusinessData_();
+  try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch(e) {}
+  AUTH_TOKEN = '';
+  currentUser = null;
+  try {
+    document.getElementById('s-main').classList.remove('on');
+  } catch(e) {}
+  showPortalRequired_();
 }
 
 async function gasPost(action, data) {
   const url  = resolveGasUrl(action);
-  const body = JSON.stringify({ action, ...data });
+  // トークンは全リクエストに添付（匿名の製品GASでは無視される）。
+  const body = JSON.stringify({ ...data, action, token: AUTH_TOKEN });
   const res  = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
+    headers: { 'Content-Type': 'text/plain' }, // application/jsonにするとCORSプリフライトが必要になりGASが応答できない
     body
   });
   if (!res.ok) throw new Error('通信エラー ' + res.status);
-  return res.json();
+  const json = await res.json();
+  if (json && json.error === 'unauthorized') { handleUnauthorized_(); throw new Error('認証が無効です。ポータルから入り直してください。'); }
+  if (!json || typeof json !== 'object' || json.ok === false || json.error) throw new Error('処理に失敗しました');
+  return json;
 }
 
 async function gasGet(params) {
-  const url = resolveGasUrl(params.action || '');
-  const qs  = new URLSearchParams(params).toString();
-  const res = await fetch(url + '?' + qs, { redirect: 'follow' });
+  if (!params || params.action !== 'getProducts') throw new Error('公開一覧以外のGETは利用できません');
+  // Public projection only. Never send the report token to the product service.
+  const res = await fetch(PRODUCT_GAS_URL + '?action=getProducts', { redirect: 'follow' });
   if (!res.ok) throw new Error('通信エラー ' + res.status);
-  return res.json();
+  const json = await res.json();
+  if (!json || json.ok !== true || !Array.isArray(json.data)) throw new Error('製品一覧の取得に失敗しました');
+  return json;
 }
 
 // ============================================================
@@ -848,40 +994,21 @@ document.getElementById('inp-pw').addEventListener('keydown', e => {
 });
 document.getElementById('btn-login').addEventListener('click', doLogin);
 
+// 独自ログインは廃止（認証はポータル署名トークンに一本化）。
 async function doLogin() {
-  const loginId = document.getElementById('inp-id').value.trim();
-  const pw      = document.getElementById('inp-pw').value;
-  const errEl   = document.getElementById('login-err');
-  const btn     = document.getElementById('btn-login');
-  errEl.style.display = 'none';
-  if (!loginId || !pw) {
-    errEl.textContent = 'IDとパスワードを入力してください';
-    errEl.style.display = 'block'; return;
-  }
-  btn.disabled = true; btn.textContent = 'ログイン中...';
-  try {
-    const res = await gasPost('login', { loginId, pw });
-    if (res.ok) {
-      currentUser = res.user;
-      sessionStorage.setItem('kpk_report_user', JSON.stringify(currentUser));
-      gasPost('addLog', { userId: currentUser.id, action: '作業報告書ログイン', result: '成功' }).catch(() => {});
-      enterMain();
-    } else {
-      errEl.textContent = res.message || 'IDまたはパスワードが違います';
-      errEl.style.display = 'block';
-    }
-  } catch(e) {
-    errEl.textContent = 'エラー: ' + e.message;
-    errEl.style.display = 'block';
-  }
-  btn.disabled = false; btn.textContent = 'ログイン';
+  showPortalRequired_();
 }
 
 function doLogout() {
   openConfirm('ログアウトしますか？\n保存していない作業データは失われます。', '確認', () => {
+    clearPrivatePhotoViews_();
+    photos = [];
+    clearBrowserBusinessData_();
     stopTimer(); stopCamera(true); hideBreakOverlay();
     clearAutoSave(); // ログアウト → バックアップ破棄
     sessionStorage.removeItem('kpk_report_user');
+    try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch(e) {}
+    AUTH_TOKEN = '';
     currentUser = null;
     // タブを閉じてポータルに戻る
     try {
@@ -896,10 +1023,24 @@ function doLogout() {
     }, 300);
   });
 }
+function safePortalUrl_(raw) {
+  if (typeof raw !== 'string' || !raw) return '';
+  if (raw === 'https://spkkanri043-glitch.github.io/shipping-system/portal_index.html') return raw;
+  let url; try { url = new URL(raw); } catch (e) { return ''; }
+  if (url.protocol !== 'https:' || url.hostname !== 'script.google.com' || url.username || url.password || url.port) return '';
+  return url.href;
+}
+
 function goPortal() {
+  clearPrivatePhotoViews_();
   // 作業報告書タブを閉じてポータルタブに戻る
   try {
     window.close();
+    setTimeout(() => {
+      const safe = safePortalUrl_(PORTAL_URL);
+      if (safe) window.location.href = safe;
+      else showToast('このタブを閉じてポータルに戻ってください', 'warn');
+    }, 300);
   } catch(e) {
     showToast('このタブを閉じてポータルに戻ってください', 'warn');
   }
@@ -941,9 +1082,17 @@ function enterMain() {
 // ============================================================
 async function loadProducts() {
   try {
-    const res = await gasPost('getProducts', {});
-    if (res.ok && res.data) products = res.data;
-  } catch(e) { /* サイレント */ }
+    const res = await gasGet({ action: 'getProducts' });
+    if (res.ok !== true || !Array.isArray(res.data) || res.data.some(p => !p || typeof p !== 'object' || Array.isArray(p))) throw new Error('不正な製品一覧');
+    products = res.data.map(p => ({
+      '品番': p['品番'], '製品名': p['製品名'], '基本取引先': p['基本取引先'], '箱入数': p['箱入数']
+    }));
+    return true;
+  } catch(e) {
+    products = [];
+    showToast('製品一覧を取得できませんでした。再試行してください。', 'error');
+    return false;
+  }
 }
 
 // ============================================================
@@ -1205,39 +1354,25 @@ function showScanTag(val) {
 function onHinbanInput() {
   const val = document.getElementById('f-hinban').value.trim();
   document.getElementById('scan-result-tag').style.display = 'none';
-  if (val.length >= 4) searchProduct(val);
+  searchProduct(val);
 }
 
+let productLookupVersion = 0;
 async function searchProduct(code) {
+  const lookupVersion = ++productLookupVersion;
+  document.getElementById('f-torihiki').value = '';
+  document.getElementById('f-hakoiri').value = '';
   if (!code) return;
-
-  // 比較用に記号・スペースを除去して大文字化
-  const normalize = s => String(s || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  const normalize = s => String(s || '').normalize('NFKC').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
   const key = normalize(code);
   if (!key) return;
-
-  // ① まずローカルキャッシュから完全一致照合
-  const found = products.find(p => normalize(p['品番']) === key);
+  let found = products.find(p => normalize(p['品番']) === key);
   if (found) { applyProduct(found); return; }
-
-  // ② キャッシュにない → 製品マスタGASに直接問い合わせ
-  if (!PRODUCT_GAS_URL || PRODUCT_GAS_URL === '★製品マスタGASのURLを入力★') {
-    showToast('製品マスタGASが未設定です', 'warn');
-    return;
-  }
-
-  showToast('製品マスタを検索中...', '');
-  try {
-    const res = await gasPost('searchProduct', { code });
-    if (res.ok && res.data) {
-      products.push(res.data); // キャッシュに追加
-      applyProduct(res.data);
-    } else {
-      showToast('品番が見つかりませんでした: ' + code, 'warn');
-    }
-  } catch(e) {
-    showToast('製品マスタの検索に失敗しました', 'error');
-  }
+  // Reload the same limited public projection once, never a private search RPC.
+  if (!await loadProducts() || lookupVersion !== productLookupVersion) return;
+  found = products.find(p => normalize(p['品番']) === key);
+  if (found) { applyProduct(found); return; }
+  showToast('取得した公開一覧（最大20,000件）では品番を確認できませんでした。管理者へ確認してください。', 'warn');
 }
 
 function applyProduct(p) {
@@ -1268,21 +1403,55 @@ function addPhoto() {
   document.getElementById('photo-input').click();
 }
 
-function onPhotoSelected(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (photos.length >= 3) { showToast('写真は最大3枚までです', 'warn'); return; }
+// スマホで撮った写真は、JPEG末尾の付加データ（動く写真等）や位置情報(EXIF)を含み、
+// サーバーの厳格な画像検査で拒否されることがある。送信前にブラウザ内で描き直して
+// 素のJPEG（長辺最大2048px）にする。付加データ・位置情報は除去される（サーバー検査は緩めない）。
+const PHOTO_REENCODE_MAX_SIDE = 2048;
+const PHOTO_INPUT_MAX_BYTES   = 30 * 1024 * 1024; // 描き直し前の元ファイルの上限
+function reencodePhoto_(file) {
+  return new Promise(function (resolve, reject) {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = function () {
+      try {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (!w || !h) throw new Error('size');
+        const scale = Math.min(1, PHOTO_REENCODE_MAX_SIDE / Math.max(w, h));
+        w = Math.max(1, Math.round(w * scale)); h = Math.max(1, Math.round(h * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h); // PNGの透過部分を白に
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      } catch (err) { reject(err); }
+      finally { URL.revokeObjectURL(url); }
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('decode')); };
+    img.src = url;
+  });
+}
 
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    photos.push(ev.target.result); // Base64データ
-    renderPhotos();
-    // 3枚になったらボタンを無効化
-    document.getElementById('btn-photo').disabled = photos.length >= 3;
-  };
-  reader.readAsDataURL(file);
+async function onPhotoSelected(e) {
+  const file = e.target.files[0];
   // 同じファイルを再選択できるようリセット
   e.target.value = '';
+  if (!file) return;
+  if (photos.length >= 3) { showToast('写真は最大3枚までです', 'warn'); return; }
+  if (!['image/jpeg','image/png'].includes(file.type) || !file.size || file.size > PHOTO_INPUT_MAX_BYTES) {
+    showToast('JPEG/PNGの写真を選択してください', 'warn'); return;
+  }
+
+  let dataUrl;
+  try {
+    dataUrl = await reencodePhoto_(file);
+    privatePhotoBytes_(privatePhotoFromDraft_(dataUrl));
+  } catch (error) { showToast('画像データを確認できませんでした', 'error'); return; }
+  if (photos.length >= 3) return;
+  photos.push(dataUrl); // Base64データ（描き直し後のJPEG）
+  renderPhotos();
+  // 3枚になったらボタンを無効化
+  document.getElementById('btn-photo').disabled = photos.length >= 3;
 }
 
 function removePhoto(idx) {
@@ -1291,14 +1460,25 @@ function removePhoto(idx) {
   document.getElementById('btn-photo').disabled = false;
 }
 
+// ============================================================
+// XSS対策：innerHTMLに動的値を入れる箇所は必ずエスケープを通す。
+//   escapeHtml=要素本文用 / escapeAttr=二重引用符属性値用（& < > " ' を実体参照化）。
+// ============================================================
+function escapeHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function escapeAttr(s){ return escapeHtml(s); }
+
 function renderPhotos() {
   const list = document.getElementById('photo-list');
-  list.innerHTML = photos.map((src, i) => `
-    <div class="photo-thumb">
-      <img src="${src}" alt="写真${i+1}">
-      <button class="photo-del" onclick="removePhoto(${i})">✕</button>
-    </div>
-  `).join('');
+  const snapshot = photos.slice();
+  return renderPrivatePhotos_(list, snapshot.map((src, i) => ({name:'写真'+(i+1), localDataUrl:src}))).then(() => {
+    if (snapshot.length !== photos.length || snapshot.some((photo, i) => photo !== photos[i])) return;
+    Array.from(list.children).forEach((figure, i) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.textContent = '削除';
+      button.addEventListener('click', () => removePhoto(i));
+      figure.appendChild(button);
+    });
+  });
 }
 
 function resetPhotos() {
@@ -1327,19 +1507,19 @@ function renderDefects() {
   el.innerHTML = defects.map((d, i) => `
     <div class="defect-item">
       <div class="defect-no">不具合 #${i+1}</div>
-      <button class="defect-del" onclick="removeDefect(${d.id})">×</button>
+      <button class="defect-del" data-defect-action="remove" data-id="${escapeAttr(d.id)}">×</button>
       ${reportEmployees.length ? `
       <div style="margin-bottom:8px">
         <label style="font-size:11px;color:var(--tx2);font-weight:600">不具合作業者</label>
-        <select class="defect-fi" style="width:100%" onchange="updateDefect(${d.id},'worker',this.value)">
+        <select class="defect-fi" style="width:100%" data-defect-field="worker" data-id="${escapeAttr(d.id)}">
           <option value="">選択してください</option>
-          ${reportEmployees.map(e => `<option value="${e.name}" ${d.worker===e.name?'selected':''}>${e.name}（${e.dept||''}）</option>`).join('')}
+          ${reportEmployees.map(e => `<option value="${escapeAttr(e.name)}" ${d.worker===e.name?'selected':''}>${escapeHtml(e.name)}（${escapeHtml(e.dept||'')}）</option>`).join('')}
         </select>
       </div>` : ''}
       <div class="defect-grid">
         <div>
           <label style="font-size:11px;color:var(--tx2);font-weight:600">種類</label>
-          <select class="defect-fi" onchange="updateDefect(${d.id},'type',this.value)">
+          <select class="defect-fi" data-defect-field="type" data-id="${escapeAttr(d.id)}">
             <option value="">選択</option>
             ${['スタートサンプル','黒点','異物','S.S','フラッシュ','キズ','ヒケ','色むら','フローマーク','離形不良','焼け','汚れ','ムクレ','変形','入り数不足','入り数過多','その他','タイムサンプル','ゲート高','終了サンプル','製品落下','捨てショット','リークNG','欠品','加工不良','バリ','ウェルド','異機種混入'].map(v=>
               `<option value="${v}" ${d.type===v?'selected':''}>${v}</option>`).join('')}
@@ -1347,12 +1527,12 @@ function renderDefects() {
         </div>
         <div>
           <label style="font-size:11px;color:var(--tx2);font-weight:600">不良数</label>
-          <input class="defect-fi" type="number" value="${d.count}" placeholder="0"
-            inputmode="numeric" onchange="updateDefect(${d.id},'count',this.value)">
+          <input class="defect-fi" type="number" value="${escapeAttr(d.count)}" placeholder="0"
+            inputmode="numeric" data-defect-field="count" data-id="${escapeAttr(d.id)}">
         </div>
       </div>
       <textarea class="defect-textarea" placeholder="詳細を記入..."
-        onchange="updateDefect(${d.id},'detail',this.value)">${d.detail}</textarea>
+        data-defect-field="detail" data-id="${escapeAttr(d.id)}">${escapeHtml(d.detail)}</textarea>
     </div>`).join('');
 }
 
@@ -1415,7 +1595,36 @@ function validate(strict = true) {
 // ============================================================
 // レポート送信
 // ============================================================
+
+function notificationSummary_(notification) {
+  const unknown = { text: '通知結果は未確認です。未送信とは断定できません。管理者に確認してください。', type: 'warn' };
+  if (!notification || typeof notification !== 'object' || Array.isArray(notification)) return unknown;
+  if (notification.deliveryUnknown === true) return {
+    text: '通知の配信結果は不明です（deliveryUnknown）。送信0件とは断定できません。重複防止のため再送前に管理者へ確認してください。',
+    type: 'warn'
+  };
+  const count = value => Number.isSafeInteger(value) && value >= 0;
+  const sent = notification.sent, failed = notification.failed, skipped = notification.skipped === undefined ? 0 : notification.skipped;
+  if (notification.ok === false || (count(failed) && failed > 0)) return {
+    text: '通知に失敗しました。' + (count(sent) && count(failed) && count(skipped)
+      ? 'LINE WORKS API受理' + sent + '件・失敗' + failed + '件・スキップ' + skipped + '件。'
+      : '配信件数は未確認です。') + '業務データの再保存は不要です。',
+    type: 'warn'
+  };
+  if (notification.ok !== true || !count(sent) || !count(failed) || !count(skipped) ||
+      (notification.dryRun !== undefined && typeof notification.dryRun !== 'boolean') ||
+      (notification.deliveryUnknown !== undefined && typeof notification.deliveryUnknown !== 'boolean')) return unknown;
+  if (notification.dryRun === true) return {
+    text: sent === 0 ? '通知はdry-runです。実送信なし・スキップ' + skipped + '件。'
+      : '通知はdry-runを含みます。LINE WORKS API受理' + sent + '件・スキップ' + skipped + '件（既読未確認）。',
+    type: 'warn'
+  };
+  if (sent === 0) return { text: skipped > 0 ? '通知はスキップ' + skipped + '件・API受理0件です。' : '通知対象0件のため送信していません。', type: 'warn' };
+  return { text: 'LINE WORKS API受理' + sent + '件・スキップ' + skipped + '件（既読未確認）。', type: skipped > 0 ? 'warn' : 'success' };
+}
+
 async function submitReport(isFinal) {
+  let notification, saved;
   showLoading('Googleスプレッドシートに保存中...');
 
   const endTime    = new Date();
@@ -1448,7 +1657,9 @@ const totalCount = count * hakoiri + hasuu;
 
   try {
     const res = await gasPost('saveReport', { report });
-    if (!res.ok) throw new Error(res.message || '保存失敗');
+    if (!res || res.ok !== true) throw new Error((res && res.message) || '保存失敗');
+    saved = res;
+    notification = res.notification;
   } catch(e) {
     hideLoading();
     showToast('保存エラー: ' + e.message, 'error');
@@ -1462,13 +1673,14 @@ const totalCount = count * hakoiri + hasuu;
 
   hideLoading();
   clearAutoSave(); // 正常保存完了 → バックアップ破棄
-  if (isFinal) showComplete(report);
+  if (isFinal) showComplete(report, notification, saved);
 }
 
 // ============================================================
 // 完了画面
 // ============================================================
-function showComplete(r) {
+function showComplete(r, notification, saved) {
+  clearPrivatePhotoViews_();
   document.getElementById('s-main').classList.remove('on');
   document.getElementById('s-complete').classList.add('on');
   document.getElementById('cmp-summary').innerHTML = [
@@ -1479,10 +1691,23 @@ function showComplete(r) {
     ['合計',     r.合計 + ' 個'],
     ['作業時間', r.作業時間分 + ' 分'],
     ['不具合数', r.不具合数 + ' 個'],
-  ].map(([l, v]) => `<div class="cmp-row"><span class="cmp-l">${l}</span><span class="cmp-v">${v}</span></div>`).join('');
+  ].map(([l, v]) => `<div class="cmp-row"><span class="cmp-l">${escapeHtml(l)}</span><span class="cmp-v">${escapeHtml(v)}</span></div>`).join('');
+  const status = notificationSummary_(notification);
+  const notice = document.createElement('div');
+  notice.setAttribute('role', 'status');
+  notice.textContent = '報告書は保存済みです。' + status.text;
+  document.getElementById('cmp-summary').appendChild(notice);
+  const photoList = document.createElement('div');
+  photoList.id = 'saved-report-photos';
+  document.getElementById('cmp-summary').appendChild(photoList);
+  if (saved && typeof saved.id === 'string' && Array.isArray(saved.photoSlots)) {
+    renderPrivatePhotos_(photoList, saved.photoSlots.filter(slot => Number.isInteger(slot) && slot >= 0 && slot < 3)
+      .map(slot => ({name:'写真'+(slot+1), binding:{recordId:saved.id, slot}})));
+  }
 }
 
 function startNew() {
+  clearPrivatePhotoViews_();
   document.getElementById('s-complete').classList.remove('on');
   document.getElementById('s-main').classList.add('on');
   hideBreakOverlay();
@@ -1595,19 +1820,19 @@ function autoSave() {
       count:   count,
       defects: defects,
     };
-    localStorage.setItem(BACKUP_KEY, JSON.stringify(data));
+    pageMemoryStorage.setItem(BACKUP_KEY, JSON.stringify(data));
   } catch(e) {}
 }
 
 // バックアップをクリア（正常保存・ログアウト時）
 function clearAutoSave() {
-  try { localStorage.removeItem(BACKUP_KEY); } catch(e) {}
+  try { pageMemoryStorage.removeItem(BACKUP_KEY); } catch(e) {}
 }
 
 // 起動時にバックアップがあれば復元確認
 function checkAndRestoreBackup() {
   try {
-    const raw = localStorage.getItem(BACKUP_KEY);
+    const raw = pageMemoryStorage.getItem(BACKUP_KEY);
     if (!raw) return;
     const data = JSON.parse(raw);
     if (!data.user || !currentUser || data.user.id !== currentUser.id) { clearAutoSave(); return; }
@@ -1619,9 +1844,14 @@ function checkAndRestoreBackup() {
     const savedAt = new Date(data.savedAt);
     const timeStr = pad(savedAt.getHours()) + ':' + pad(savedAt.getMinutes());
     openConfirm(
-      `前回の作業データが残っています（${timeStr} 時点）\n\n` +
-      `品番: ${data.form.hinban || '未入力'}\n` +
-      `カウント: ${data.count} 箱\n\n` +
+      `前回の作業データが残っています（${timeStr} 時点）
+
+` +
+      `品番: ${data.form.hinban || '未入力'}
+` +
+      `カウント: ${data.count} 箱
+
+` +
       `続きから再開しますか？`,
       '💾 作業データの復元',
       () => restoreBackup(data),
@@ -1660,6 +1890,155 @@ function restoreBackup(data) {
   startTimer();
   showToast('作業データを復元しました', 'success');
 }
+
+const PRIVATE_PHOTO_API_URL = REPORT_GAS_URL;
+
+const PRIVATE_PHOTO_MAX_BYTES = 8 * 1024 * 1024;
+const PRIVATE_PHOTO_MAX_BASE64 = Math.ceil(PRIVATE_PHOTO_MAX_BYTES / 3) * 4;
+const PRIVATE_PHOTO_VIEWS = new Map();
+
+function clearPrivatePhotoView_(container) {
+  const state = PRIVATE_PHOTO_VIEWS.get(container);
+  if (state) {
+    state.cancelled = true;
+    state.controller.abort();
+    state.urls.forEach(url => URL.revokeObjectURL(url));
+    state.urls.clear();
+    PRIVATE_PHOTO_VIEWS.delete(container);
+  }
+  if (container) container.replaceChildren();
+}
+
+function clearPrivatePhotoViews_() {
+  Array.from(PRIVATE_PHOTO_VIEWS.keys()).forEach(clearPrivatePhotoView_);
+}
+
+function privatePhotoBytes_(photo) {
+  if (!photo || !['image/jpeg','image/png'].includes(photo.mimeType) ||
+      typeof photo.base64 !== 'string' || !photo.base64 || photo.base64.length > PRIVATE_PHOTO_MAX_BASE64 ||
+      photo.base64.length % 4 || !/^[A-Za-z0-9+/]+={0,2}$/.test(photo.base64) ||
+      !Number.isInteger(photo.byteLength) || photo.byteLength <= 0 || photo.byteLength > PRIVATE_PHOTO_MAX_BYTES) throw new Error('invalid_image');
+  const binary = atob(photo.base64);
+  if (binary.length !== photo.byteLength || btoa(binary) !== photo.base64) throw new Error('invalid_image');
+  const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+  const valid = photo.mimeType === 'image/png'
+    ? bytes.length >= 45 && Array.from(bytes.slice(0,8)).join(',') === '137,80,78,71,13,10,26,10'
+    : bytes.length >= 16 && bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255 &&
+      bytes[bytes.length-2] === 255 && bytes[bytes.length-1] === 217;
+  if (!valid) throw new Error('invalid_image');
+  let width = 0, height = 0;
+  if (photo.mimeType === 'image/png') {
+    const u32 = at => bytes[at]*0x1000000+(bytes[at+1]<<16)+(bytes[at+2]<<8)+bytes[at+3];
+    width = u32(16); height = u32(20);
+  } else {
+    let pos = 2;
+    while (pos+4 < bytes.length) {
+      if (bytes[pos++] !== 255) throw new Error('invalid_image');
+      while (bytes[pos] === 255) pos++;
+      const marker = bytes[pos++], length = (bytes[pos]<<8)+bytes[pos+1];
+      if (length < 2 || pos+length > bytes.length) throw new Error('invalid_image');
+      if ([192,193,194].includes(marker)) {
+        height = (bytes[pos+3]<<8)+bytes[pos+4]; width = (bytes[pos+5]<<8)+bytes[pos+6]; break;
+      }
+      if (marker === 218 || marker === 217) break;
+      pos += length;
+    }
+  }
+  if (!width || !height || width > 8192 || height > 8192 || width*height > 16*1024*1024) throw new Error('invalid_image');
+  return bytes;
+}
+
+function privatePhotoFromDraft_(dataUrl) {
+  if (typeof dataUrl !== 'string' || dataUrl.length > PRIVATE_PHOTO_MAX_BASE64+64) throw new Error('invalid_image');
+  const match = dataUrl.match(/^data:(image\/(?:jpeg|png));base64,([A-Za-z0-9+/]+={0,2})$/);
+  if (!match) throw new Error('invalid_image');
+  const padding = match[2].endsWith('==') ? 2 : match[2].endsWith('=') ? 1 : 0;
+  return {mimeType:match[1], base64:match[2], byteLength:match[2].length/4*3-padding};
+}
+
+async function requestPrivatePhoto_(binding, signal) {
+  if (!AUTH_TOKEN) throw new Error('unauthorized');
+  if (!binding || typeof binding !== 'object' || !Number.isInteger(binding.slot) || binding.slot < 0 || binding.slot >= 100 ||
+      (!!binding.recordId === !!binding.partNo) || binding.fileId !== undefined || binding.url !== undefined) throw new Error('invalid_binding');
+  const request = {slot:binding.slot};
+  if (binding.recordId) request.recordId = String(binding.recordId);
+  else request.partNo = String(binding.partNo);
+  if (binding.collection !== undefined) request.collection = binding.collection;
+  const token = AUTH_TOKEN;
+  const response = await fetch(PRIVATE_PHOTO_API_URL, {
+    method:'POST', credentials:'omit', headers:{'Content-Type':'text/plain'}, cache:'no-store', signal,
+    body:JSON.stringify({...request, action:'getPhoto', token})
+  });
+  if (!response.ok) throw new Error('photo_unavailable');
+  const raw = await response.text();
+  if (raw.length > PRIVATE_PHOTO_MAX_BASE64+2048) throw new Error('photo_unavailable');
+  const result = JSON.parse(raw);
+  if (result && result.error === 'unauthorized') {
+    clearPrivatePhotoViews_();
+    if (typeof handleUnauthorized_ === 'function') handleUnauthorized_();
+    else { AUTH_TOKEN = ''; try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch (e) {} }
+    throw new Error('unauthorized');
+  }
+  if (!result || result.ok !== true || !result.photo || token !== AUTH_TOKEN) throw new Error('photo_unavailable');
+  return result.photo;
+}
+
+async function renderPrivatePhotos_(container, items) {
+  if (!container) return;
+  clearPrivatePhotoView_(container);
+  const state = {cancelled:false, urls:new Set(), controller:new AbortController()};
+  PRIVATE_PHOTO_VIEWS.set(container, state);
+  if (!items.length) { container.textContent = '写真なし'; return; }
+  for (const item of items) {
+    if (state.cancelled) return;
+    const figure = document.createElement('figure');
+    figure.className = 'private-photo';
+    figure.style.cssText = 'display:inline-flex;flex-direction:column;gap:4px;margin:4px;max-width:100%;vertical-align:top';
+    const img = document.createElement('img');
+    img.alt = String(item.name || '写真');
+    img.style.cssText = 'width:240px;height:180px;max-width:100%;object-fit:contain';
+    const caption = document.createElement('figcaption');
+    caption.textContent = String(item.name || '写真');
+    const status = document.createElement('span');
+    status.setAttribute('role','status');
+    status.textContent = '写真を読み込み中...';
+    figure.append(img, caption, status);
+    container.appendChild(figure);
+    let url;
+    try {
+      if (!item.binding && !item.localDataUrl) throw new Error('save_before_view');
+      const photo = item.binding
+        ? await requestPrivatePhoto_(item.binding, state.controller.signal)
+        : privatePhotoFromDraft_(item.localDataUrl);
+      const bytes = privatePhotoBytes_(photo);
+      if (state.cancelled) return;
+      url = URL.createObjectURL(new Blob([bytes], {type:photo.mimeType}));
+      state.urls.add(url);
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('image_timeout')), 10000);
+        img.onload = () => {
+          clearTimeout(timer);
+          if (!img.naturalWidth || !img.naturalHeight || img.naturalWidth > 8192 || img.naturalHeight > 8192 ||
+              img.naturalWidth * img.naturalHeight > 16*1024*1024) reject(new Error('invalid_image'));
+          else resolve();
+        };
+        img.onerror = () => { clearTimeout(timer); reject(new Error('invalid_image')); };
+        img.src = url;
+      });
+      if (state.cancelled) { img.removeAttribute('src'); return; }
+      status.textContent = '';
+    } catch (error) {
+      if (url) { URL.revokeObjectURL(url); state.urls.delete(url); }
+      img.removeAttribute('src');
+      if (!state.cancelled) status.textContent = error.message === 'save_before_view'
+        ? '保存後に写真を表示できます'
+        : '写真を表示できません（権限または画像を確認してください）';
+    }
+  }
+}
+window.addEventListener('pagehide', clearPrivatePhotoViews_);
+window.addEventListener('beforeunload', clearPrivatePhotoViews_);
+
 </script>
 </body>
 </html>

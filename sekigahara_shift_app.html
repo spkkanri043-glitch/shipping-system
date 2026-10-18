@@ -1,7 +1,233 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-HCUm991b1I6IJA5aMSbxaFQ/xTfFauYPlK6wuaxKsyw=' 'sha256-E2B39IdXj4AQUobl2+tIi7hnugWUo0qk7FE+UjR/Fy4='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
+<script>/* MOGU_CSP_RUNTIME_V1 */
+const __moguCsp = (() => {
+  const handlers = {"h0": function(event, _p) { manualSyncSheet()
+},
+"h1": function(event, _p) { doLogoutAndClose()
+},
+"h2": function(event, _p) { sp('db',this)
+},
+"h3": function(event, _p) { sp('sh',this)
+},
+"h4": function(event, _p) { sp('emp',this)
+},
+"h5": function(event, _p) { sp('pl',this)
+},
+"h6": function(event, _p) { sp('vreq',this)
+},
+"h7": function(event, _p) { sp('otreq',this)
+},
+"h8": function(event, _p) { sp('hreq',this)
+},
+"h9": function(event, _p) { sp('ot',this)
+},
+"h10": function(event, _p) { sp('cal',this)
+},
+"h11": function(event, _p) { sp('st',this)
+},
+"h12": function(event, _p) { sp('vreq',document.querySelector('[data-csp-source-click*=vreq]'))
+},
+"h13": function(event, _p) { sp('otreq',document.querySelector('[data-csp-source-click*=otreq]'))
+},
+"h14": function(event, _p) { sp('hreq',document.querySelector('[data-csp-source-click*=hreq]'))
+},
+"h15": function(event, _p) { setD('all',this)
+},
+"h16": function(event, _p) { setD('製造部',this)
+},
+"h17": function(event, _p) { setD('生産管理部',this)
+},
+"h18": function(event, _p) { setD('品質保証部',this)
+},
+"h19": function(event, _p) { setD('派遣',this)
+},
+"h20": function(event, _p) { chM(-1)
+},
+"h21": function(event, _p) { chM(1)
+},
+"h22": function(event, _p) { applyBulk()
+},
+"h23": function(event, _p) { clearSel()
+},
+"h24": function(event, _p) { openAddEmp()
+},
+"h25": function(event, _p) { setED('all',this)
+},
+"h26": function(event, _p) { setED('製造部',this)
+},
+"h27": function(event, _p) { setED('生産管理部',this)
+},
+"h28": function(event, _p) { setED('品質保証部',this)
+},
+"h29": function(event, _p) { setED('派遣',this)
+},
+"h30": function(event, _p) { setPD('all',this)
+},
+"h31": function(event, _p) { setPD('製造部',this)
+},
+"h32": function(event, _p) { setPD('生産管理部',this)
+},
+"h33": function(event, _p) { setPD('品質保証部',this)
+},
+"h34": function(event, _p) { setPD('派遣',this)
+},
+"h35": function(event, _p) { calcVreqPreview()
+},
+"h36": function(event, _p) { submitVreq()
+},
+"h37": function(event, _p) { clearVreqForm()
+},
+"h38": function(event, _p) { setRF('all',this)
+},
+"h39": function(event, _p) { setRF('pending',this)
+},
+"h40": function(event, _p) { setRF('approved',this)
+},
+"h41": function(event, _p) { setRF('rejected',this)
+},
+"h42": function(event, _p) { setRF('cancelled',this)
+},
+"h43": function(event, _p) { calcOTReqPreview()
+},
+"h44": function(event, _p) { calcOTReqPreview()
+},
+"h45": function(event, _p) { calcOTReqPreview()
+},
+"h46": function(event, _p) { submitOTReq()
+},
+"h47": function(event, _p) { clearOTReqForm()
+},
+"h48": function(event, _p) { setOTRF('all',this)
+},
+"h49": function(event, _p) { setOTRF('pending',this)
+},
+"h50": function(event, _p) { setOTRF('approved',this)
+},
+"h51": function(event, _p) { setOTRF('rejected',this)
+},
+"h52": function(event, _p) { setOTRF('cancelled',this)
+},
+"h53": function(event, _p) { checkHreqDay()
+},
+"h54": function(event, _p) { calcHreqHours()
+},
+"h55": function(event, _p) { calcHreqHours()
+},
+"h56": function(event, _p) { submitHReq()
+},
+"h57": function(event, _p) { clearHReqForm()
+},
+"h58": function(event, _p) { setHRF('all',this)
+},
+"h59": function(event, _p) { setHRF('pending',this)
+},
+"h60": function(event, _p) { setHRF('approved',this)
+},
+"h61": function(event, _p) { setHRF('rejected',this)
+},
+"h62": function(event, _p) { setHRF('cancelled',this)
+},
+"h63": function(event, _p) { setOD('all',this)
+},
+"h64": function(event, _p) { setOD('製造部',this)
+},
+"h65": function(event, _p) { setOD('生産管理部',this)
+},
+"h66": function(event, _p) { setOD('品質保証部',this)
+},
+"h67": function(event, _p) { setOD('派遣',this)
+},
+"h68": function(event, _p) { chCalM(-1)
+},
+"h69": function(event, _p) { chCalM(1)
+},
+"h70": function(event, _p) { resetCalMonth()
+},
+"h71": function(event, _p) { manualSyncSheet()
+},
+"h72": function(event, _p) { loadSyncLog()
+},
+"h73": function(event, _p) { saveDeptSettings()
+},
+"h74": function(event, _p) { closeMod()
+},
+"h75": function(event, _p) { calcPTHours()
+},
+"h76": function(event, _p) { calcPTHours()
+},
+"h77": function(event, _p) { onShiftTypeChange()
+},
+"h78": function(event, _p) { closeMod()
+},
+"h79": function(event, _p) { saveSh()
+},
+"h80": function(event, _p) { closeEmod()
+},
+"h81": function(event, _p) { updateTeamOpts()
+},
+"h82": function(event, _p) { updateEtypeOpts()
+},
+"h83": function(event, _p) { togglePartTimeFields()
+},
+"h84": function(event, _p) { updatePTPreview()
+},
+"h85": function(event, _p) { updatePTPreview()
+},
+"h86": function(event, _p) { closeEmod()
+},
+"h87": function(event, _p) { saveEmp()
+},
+"h88": function(event, _p) { toggleCalDay(Number(_p[1]),Number(_p[2]),Number(_p[3]))
+}};
+  const events = ["click","change"];
+  const bound = new WeakMap();
+  function bind(el) {
+    if (!el || el.nodeType !== 1) return;
+    let state = bound.get(el); if (!state) { state = new Map(); bound.set(el, state); }
+    for (const type of events) {
+      const id = el.getAttribute('data-csp-' + type);
+      if (!id || state.get(type) === id) continue;
+      if (!Object.prototype.hasOwnProperty.call(handlers, id)) continue;
+      const fn = function(event) {
+        const value = this.getAttribute('data-csp-args-' + type);
+        const params = value ? JSON.parse(decodeURIComponent(value)) : [];
+        return handlers[id].call(this, event, params);
+      };
+      // Native event-handler properties preserve this/currentTarget, cancellation,
+      // async return behavior and later application assignments to .onclick etc.
+      el['on' + type] = fn;
+      state.set(type, id);
+    }
+  }
+  function scan(root) {
+    bind(root);
+    if (root.querySelectorAll) for (const el of root.querySelectorAll('*')) bind(el);
+  }
+  for (const type of events) document.addEventListener(type, event => {
+    for (const el of event.composedPath()) bind(el);
+  }, true);
+  new MutationObserver(records => {
+    for (const record of records) {
+      if (record.type === 'attributes') bind(record.target);
+      else for (const node of record.addedNodes) scan(node);
+    }
+  }).observe(document, {subtree:true, childList:true, attributes:true,
+    attributeFilter: events.map(type => 'data-csp-' + type)});
+  document.addEventListener('DOMContentLoaded', () => scan(document));
+  const encode = values => encodeURIComponent(JSON.stringify(values)).replace(/'/g, '%27');
+  function assign(el,type,id,values) {
+    el.setAttribute('data-csp-' + type,id);
+    el.setAttribute('data-csp-args-' + type,encode(values));
+    bind(el);
+  }
+  return Object.freeze({ encode, scan, assign });
+})();
+</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>関ケ原プラ工業(株) シフト管理システム</title>
 <style>
@@ -330,14 +556,10 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       <div class="lsub">従業員の皆様、ようこそ</div>
     </div>
     <div class="lcard">
-      <div class="ltabs">
-        <div class="ltab on" id="lt-a" onclick="slt('a')">管理者ログイン</div>
-        <div class="ltab" id="lt-s" onclick="slt('s')">従業員ログイン</div>
+      <div class="lhint" style="font-size:14px;line-height:1.8;text-align:center;padding:12px">
+        このアプリは<strong>業務管理ポータル</strong>からご利用ください。<br>
+        ポータルにログインし、シフト管理を開いてください。
       </div>
-      <div class="fg"><label class="fl">ユーザーID</label><input class="fi" id="lid" placeholder="admin または emp001〜emp032"></div>
-      <div class="fg"><label class="fl">パスワード</label><input class="fi" id="lpw" type="password" placeholder="パスワード"></div>
-      <button class="btnl" onclick="doLogin()">ログイン</button>
-      <div class="lhint">管理者: admin / admin<br>従業員: emp001〜emp032 / 1234</div>
     </div>
   </div>
 </div>
@@ -350,22 +572,22 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       <div><div class="tbco">関ケ原プラ工業(株) シフト管理</div><div class="tbmd" id="tbmd">管理者モード</div></div>
       <span id="sync-badge" style="display:none;font-size:10px;padding:2px 8px;border-radius:12px;font-weight:600;margin-left:8px"></span>
       <span id="sync-info" style="font-size:9px;color:rgba(255,255,255,.6);margin-left:6px;display:none"></span>
-      <button onclick="manualSyncSheet()" style="font-size:10px;padding:3px 8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;cursor:pointer;margin-left:4px" title="最新データに同期（手動）">🔄 同期</button>
+      <button data-csp-click="h0" data-csp-source-click="manualSyncSheet()" style="font-size:10px;padding:3px 8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;cursor:pointer;margin-left:4px" title="最新データに同期（手動）">🔄 同期</button>
       <span id="auto-sync-badge" style="font-size:9px;color:rgba(255,255,255,.45);margin-left:4px" title="自動同期（1時間ごと）">⏱ 自動</span>
     </div>
-    <div class="tbr"><span class="rbg ra" id="rbg">管理者</span><button class="blo" onclick="doLogoutAndClose()">✕ タブを閉じる</button></div>
+    <div class="tbr"><span class="rbg ra" id="rbg">管理者</span><button class="blo" data-csp-click="h1" data-csp-source-click="doLogoutAndClose()">✕ タブを閉じる</button></div>
   </div>
   <div class="nav">
-    <div class="nt on" onclick="sp('db',this)">📊 ダッシュボード</div>
-    <div class="nt"    onclick="sp('sh',this)">📋 シフト表</div>
-    <div class="nt ao" onclick="sp('emp',this)">👥 従業員管理</div>
-    <div class="nt"    onclick="sp('pl',this)">🌿 有給管理</div>
-    <div class="nt"    onclick="sp('vreq',this)" id="nav-vreq">📝 有給申請<span class="badge-cnt hid" id="req-badge">0</span></div>
-    <div class="nt"    onclick="sp('otreq',this)" id="nav-otreq">⏱ 残業申請<span class="badge-cnt hid" id="otreq-badge">0</span></div>
-    <div class="nt"    onclick="sp('hreq',this)" id="nav-hreq">🏭 休日出勤申請<span class="badge-cnt hid" id="hreq-badge">0</span></div>
-    <div class="nt ao" onclick="sp('ot',this)">📊 残業管理</div>
-    <div class="nt ao" onclick="sp('cal',this)">📅 カレンダー設定</div>
-    <div class="nt ao" onclick="sp('st',this)">⚙ 設定</div>
+    <div class="nt on" data-csp-click="h2" data-csp-source-click="sp('db',this)">📊 ダッシュボード</div>
+    <div class="nt"    data-csp-click="h3" data-csp-source-click="sp('sh',this)">📋 シフト表</div>
+    <div class="nt ao" data-csp-click="h4" data-csp-source-click="sp('emp',this)">👥 従業員管理</div>
+    <div class="nt"    data-csp-click="h5" data-csp-source-click="sp('pl',this)">🌿 有給管理</div>
+    <div class="nt"    data-csp-click="h6" data-csp-source-click="sp('vreq',this)" id="nav-vreq">📝 有給申請<span class="badge-cnt hid" id="req-badge">0</span></div>
+    <div class="nt"    data-csp-click="h7" data-csp-source-click="sp('otreq',this)" id="nav-otreq">⏱ 残業申請<span class="badge-cnt hid" id="otreq-badge">0</span></div>
+    <div class="nt"    data-csp-click="h8" data-csp-source-click="sp('hreq',this)" id="nav-hreq">🏭 休日出勤申請<span class="badge-cnt hid" id="hreq-badge">0</span></div>
+    <div class="nt ao" data-csp-click="h9" data-csp-source-click="sp('ot',this)">📊 残業管理</div>
+    <div class="nt ao" data-csp-click="h10" data-csp-source-click="sp('cal',this)">📅 カレンダー設定</div>
+    <div class="nt ao" data-csp-click="h11" data-csp-source-click="sp('st',this)">⚙ 設定</div>
   </div>
   <div class="content">
 
@@ -378,13 +600,13 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
         <div class="mc"><div class="mv" id="m-ot" style="color:var(--r)">—</div><div class="ml" id="ml-ot">残業超過(42H)</div></div>
       </div>
       <div class="mgrid" style="grid-template-columns:repeat(3,1fr);margin-top:-4px">
-        <div class="mc" style="cursor:pointer;border-top:2px solid #d1fae5" onclick="sp('vreq',document.querySelector('[onclick*=vreq]'))" title="有給申請一覧へ">
+        <div class="mc" style="cursor:pointer;border-top:2px solid #d1fae5" data-csp-click="h12" data-csp-source-click="sp('vreq',document.querySelector('[onclick*=vreq]'))" title="有給申請一覧へ">
           <div class="mv" id="m-req" style="color:var(--a)">—</div><div class="ml">📝 有給申請待ち</div>
         </div>
-        <div class="mc" style="cursor:pointer;border-top:2px solid #fee2e2" onclick="sp('otreq',document.querySelector('[onclick*=otreq]'))" title="残業申請一覧へ">
+        <div class="mc" style="cursor:pointer;border-top:2px solid #fee2e2" data-csp-click="h13" data-csp-source-click="sp('otreq',document.querySelector('[onclick*=otreq]'))" title="残業申請一覧へ">
           <div class="mv" id="m-otreq" style="color:var(--r)">—</div><div class="ml">⏱ 残業申請待ち</div>
         </div>
-        <div class="mc" style="cursor:pointer;border-top:2px solid #fef3c7" onclick="sp('hreq',document.querySelector('[onclick*=hreq]'))" title="休日出勤申請一覧へ">
+        <div class="mc" style="cursor:pointer;border-top:2px solid #fef3c7" data-csp-click="h14" data-csp-source-click="sp('hreq',document.querySelector('[onclick*=hreq]'))" title="休日出勤申請一覧へ">
           <div class="mv" id="m-hreq" style="color:var(--a)">—</div><div class="ml">🏭 休出申請待ち</div>
         </div>
       </div>
@@ -396,16 +618,16 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
     <div class="pg" id="pg-sh">
       <div class="stbar">
         <div class="dtabs" id="dt">
-          <div class="dtab on" onclick="setD('all',this)">全体</div>
-          <div class="dtab" onclick="setD('製造部',this)">製造部</div>
-          <div class="dtab" onclick="setD('生産管理部',this)">生産管理部</div>
-          <div class="dtab" onclick="setD('品質保証部',this)">品質保証部</div>
-          <div class="dtab" onclick="setD('派遣',this)">派遣</div>
+          <div class="dtab on" data-csp-click="h15" data-csp-source-click="setD('all',this)">全体</div>
+          <div class="dtab" data-csp-click="h16" data-csp-source-click="setD('製造部',this)">製造部</div>
+          <div class="dtab" data-csp-click="h17" data-csp-source-click="setD('生産管理部',this)">生産管理部</div>
+          <div class="dtab" data-csp-click="h18" data-csp-source-click="setD('品質保証部',this)">品質保証部</div>
+          <div class="dtab" data-csp-click="h19" data-csp-source-click="setD('派遣',this)">派遣</div>
         </div>
         <div class="mnw">
-          <button class="mnb" onclick="chM(-1)">‹</button>
+          <button class="mnb" data-csp-click="h20" data-csp-source-click="chM(-1)">‹</button>
           <span class="mlbl" id="mlbl"></span>
-          <button class="mnb" onclick="chM(1)">›</button>
+          <button class="mnb" data-csp-click="h21" data-csp-source-click="chM(1)">›</button>
         </div>
       </div>
       <div class="bulk-bar hid" id="bulk-bar">
@@ -413,8 +635,8 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
         <select class="sel" id="bulk-type" style="font-size:11px">
           <option value="">─ シフト ─</option>
         </select>
-        <button class="btn pri sm" onclick="applyBulk()">一括適用</button>
-        <button class="btn sm" onclick="clearSel()">選択解除</button>
+        <button class="btn pri sm" data-csp-click="h22" data-csp-source-click="applyBulk()">一括適用</button>
+        <button class="btn sm" data-csp-click="h23" data-csp-source-click="clearSel()">選択解除</button>
       </div>
       <div class="leg">
         <div class="li"><div class="ld sA"></div>A勤</div><div class="li"><div class="ld sB"></div>B勤</div>
@@ -441,14 +663,17 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
     <!-- EMPLOYEE -->
     <div class="pg" id="pg-emp">
       <div class="stl">👥 従業員登録一覧
-        <button class="btn pri sm" style="margin-left:auto" onclick="openAddEmp()">＋ 追加</button>
+        <button class="btn sm" style="margin-left:auto" data-shift-action="openPortalLink">🔗 ポータルと連携</button>
+        <button class="btn sm" data-shift-action="openPortalImport">⬇ ポータルから取り込み</button>
+        <button class="btn pri sm" data-csp-click="h24" data-csp-source-click="openAddEmp()">＋ 追加</button>
       </div>
+      <div id="emp-portal-note" style="font-size:11px;color:var(--tx2);margin:-4px 0 8px"></div>
       <div class="dtabs" id="edt" style="margin-bottom:10px">
-        <div class="dtab on" onclick="setED('all',this)">全体</div>
-        <div class="dtab" onclick="setED('製造部',this)">製造部</div>
-        <div class="dtab" onclick="setED('生産管理部',this)">生産管理部</div>
-        <div class="dtab" onclick="setED('品質保証部',this)">品質保証部</div>
-        <div class="dtab" onclick="setED('派遣',this)">派遣</div>
+        <div class="dtab on" data-csp-click="h25" data-csp-source-click="setED('all',this)">全体</div>
+        <div class="dtab" data-csp-click="h26" data-csp-source-click="setED('製造部',this)">製造部</div>
+        <div class="dtab" data-csp-click="h27" data-csp-source-click="setED('生産管理部',this)">生産管理部</div>
+        <div class="dtab" data-csp-click="h28" data-csp-source-click="setED('品質保証部',this)">品質保証部</div>
+        <div class="dtab" data-csp-click="h29" data-csp-source-click="setED('派遣',this)">派遣</div>
       </div>
       <div class="card">
         <div class="tw"><table class="t">
@@ -467,11 +692,11 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       <div class="notice">📌 <strong>労基法第39条：</strong>年10日以上付与の従業員は年5日以上の取得が義務付けられています。</div>
       <div id="pl-al" style="margin-bottom:10px"></div>
       <div class="dtabs" id="pdt" style="margin-bottom:10px">
-        <div class="dtab on" onclick="setPD('all',this)">全体</div>
-        <div class="dtab" onclick="setPD('製造部',this)">製造部</div>
-        <div class="dtab" onclick="setPD('生産管理部',this)">生産管理部</div>
-        <div class="dtab" onclick="setPD('品質保証部',this)">品質保証部</div>
-        <div class="dtab" onclick="setPD('派遣',this)">派遣</div>
+        <div class="dtab on" data-csp-click="h30" data-csp-source-click="setPD('all',this)">全体</div>
+        <div class="dtab" data-csp-click="h31" data-csp-source-click="setPD('製造部',this)">製造部</div>
+        <div class="dtab" data-csp-click="h32" data-csp-source-click="setPD('生産管理部',this)">生産管理部</div>
+        <div class="dtab" data-csp-click="h33" data-csp-source-click="setPD('品質保証部',this)">品質保証部</div>
+        <div class="dtab" data-csp-click="h34" data-csp-source-click="setPD('派遣',this)">派遣</div>
       </div>
       <div class="card">
         <div class="tw"><table class="t">
@@ -496,7 +721,7 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
           <div class="req-row" id="vreq-target-row" style="display:none">
             <div class="req-lbl">申請対象者</div>
             <div class="req-ctrl">
-              <select class="req-inp" id="vreq-target" onchange="calcVreqPreview()"></select>
+              <select class="req-inp" id="vreq-target" data-csp-change="h35" data-csp-source-change="calcVreqPreview()"></select>
               <div style="font-size:10px;color:var(--tx2);margin-top:3px">管理者は代理申請が可能です</div>
             </div>
           </div>
@@ -540,19 +765,19 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
           </div>
           <div id="vreq-remain-preview" style="margin-bottom:10px"></div>
           <div style="display:flex;gap:8px">
-            <button class="btn pri" onclick="submitVreq()">申請する</button>
-            <button class="btn" onclick="clearVreqForm()">クリア</button>
+            <button class="btn pri" data-csp-click="h36" data-csp-source-click="submitVreq()">申請する</button>
+            <button class="btn" data-csp-click="h37" data-csp-source-click="clearVreqForm()">クリア</button>
           </div>
         </div>
       </div>
 
       <!-- フィルタ -->
       <div class="req-filter" id="vreq-filter">
-        <button class="rfbtn on" onclick="setRF('all',this)">すべて</button>
-        <button class="rfbtn" onclick="setRF('pending',this)">申請中</button>
-        <button class="rfbtn" onclick="setRF('approved',this)">承認済</button>
-        <button class="rfbtn" onclick="setRF('rejected',this)">却下</button>
-        <button class="rfbtn" onclick="setRF('cancelled',this)">取消済</button>
+        <button class="rfbtn on" data-csp-click="h38" data-csp-source-click="setRF('all',this)">すべて</button>
+        <button class="rfbtn" data-csp-click="h39" data-csp-source-click="setRF('pending',this)">申請中</button>
+        <button class="rfbtn" data-csp-click="h40" data-csp-source-click="setRF('approved',this)">承認済</button>
+        <button class="rfbtn" data-csp-click="h41" data-csp-source-click="setRF('rejected',this)">却下</button>
+        <button class="rfbtn" data-csp-click="h42" data-csp-source-click="setRF('cancelled',this)">取消済</button>
       </div>
 
       <!-- 申請一覧 -->
@@ -574,13 +799,13 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
           <div class="req-row" id="otreq-target-row" style="display:none">
             <div class="req-lbl">申請対象者</div>
             <div class="req-ctrl">
-              <select class="req-inp" id="otreq-target" onchange="calcOTReqPreview()"></select>
+              <select class="req-inp" id="otreq-target" data-csp-change="h43" data-csp-source-change="calcOTReqPreview()"></select>
               <div style="font-size:10px;color:var(--tx2);margin-top:3px">管理者は代理申請が可能です</div>
             </div>
           </div>
           <div class="req-row">
             <div class="req-lbl">対象日</div>
-            <div class="req-ctrl"><input type="date" class="req-inp" id="otreq-date" onchange="calcOTReqPreview()"></div>
+            <div class="req-ctrl"><input type="date" class="req-inp" id="otreq-date" data-csp-change="h44" data-csp-source-change="calcOTReqPreview()"></div>
           </div>
           <div class="req-row">
             <div class="req-lbl">勤務シフト</div>
@@ -597,7 +822,7 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
           <div class="req-row">
             <div class="req-lbl">残業時間</div>
             <div class="req-ctrl" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <select class="req-inp" id="otreq-hours" onchange="calcOTReqPreview()" style="width:130px">
+              <select class="req-inp" id="otreq-hours" data-csp-change="h45" data-csp-source-change="calcOTReqPreview()" style="width:130px">
                 <option value="0.5">0.5時間</option><option value="1">1時間</option>
                 <option value="1.5">1.5時間</option><option value="2" selected>2時間</option>
                 <option value="2.5">2.5時間</option><option value="3">3時間</option>
@@ -615,17 +840,17 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
           </div>
           <div id="otreq-month-preview" style="margin-bottom:10px"></div>
           <div style="display:flex;gap:8px">
-            <button class="btn pri" onclick="submitOTReq()">申請する</button>
-            <button class="btn" onclick="clearOTReqForm()">クリア</button>
+            <button class="btn pri" data-csp-click="h46" data-csp-source-click="submitOTReq()">申請する</button>
+            <button class="btn" data-csp-click="h47" data-csp-source-click="clearOTReqForm()">クリア</button>
           </div>
         </div>
       </div>
       <div class="req-filter" id="otreq-filter">
-        <button class="rfbtn on" onclick="setOTRF('all',this)">すべて</button>
-        <button class="rfbtn" onclick="setOTRF('pending',this)">申請中</button>
-        <button class="rfbtn" onclick="setOTRF('approved',this)">承認済</button>
-        <button class="rfbtn" onclick="setOTRF('rejected',this)">却下</button>
-        <button class="rfbtn" onclick="setOTRF('cancelled',this)">取消済</button>
+        <button class="rfbtn on" data-csp-click="h48" data-csp-source-click="setOTRF('all',this)">すべて</button>
+        <button class="rfbtn" data-csp-click="h49" data-csp-source-click="setOTRF('pending',this)">申請中</button>
+        <button class="rfbtn" data-csp-click="h50" data-csp-source-click="setOTRF('approved',this)">承認済</button>
+        <button class="rfbtn" data-csp-click="h51" data-csp-source-click="setOTRF('rejected',this)">却下</button>
+        <button class="rfbtn" data-csp-click="h52" data-csp-source-click="setOTRF('cancelled',this)">取消済</button>
       </div>
       <div id="otreq-list"></div>
     </div>
@@ -652,16 +877,16 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
           <div class="req-row">
             <div class="req-lbl">出勤日</div>
             <div class="req-ctrl">
-              <input type="date" class="req-inp" id="hreq-date" onchange="checkHreqDay()">
+              <input type="date" class="req-inp" id="hreq-date" data-csp-change="h53" data-csp-source-change="checkHreqDay()">
               <div id="hreq-day-check" style="font-size:11px;margin-top:4px"></div>
             </div>
           </div>
           <div class="req-row">
             <div class="req-lbl">出勤時間</div>
             <div class="req-ctrl" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <input type="time" class="req-inp" id="hreq-start" value="08:00" style="width:110px" onchange="calcHreqHours()">
+              <input type="time" class="req-inp" id="hreq-start" value="08:00" style="width:110px" data-csp-change="h54" data-csp-source-change="calcHreqHours()">
               <span style="font-size:12px;color:var(--tx2)">〜</span>
-              <input type="time" class="req-inp" id="hreq-end" value="17:00" style="width:110px" onchange="calcHreqHours()">
+              <input type="time" class="req-inp" id="hreq-end" value="17:00" style="width:110px" data-csp-change="h55" data-csp-source-change="calcHreqHours()">
               <div id="hreq-hours-preview" style="font-size:11px;color:var(--tx2)"></div>
             </div>
           </div>
@@ -679,17 +904,17 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
             </div>
           </div>
           <div style="display:flex;gap:8px">
-            <button class="btn pri" onclick="submitHReq()">申請する</button>
-            <button class="btn" onclick="clearHReqForm()">クリア</button>
+            <button class="btn pri" data-csp-click="h56" data-csp-source-click="submitHReq()">申請する</button>
+            <button class="btn" data-csp-click="h57" data-csp-source-click="clearHReqForm()">クリア</button>
           </div>
         </div>
       </div>
       <div class="req-filter" id="hreq-filter">
-        <button class="rfbtn on" onclick="setHRF('all',this)">すべて</button>
-        <button class="rfbtn" onclick="setHRF('pending',this)">申請中</button>
-        <button class="rfbtn" onclick="setHRF('approved',this)">承認済</button>
-        <button class="rfbtn" onclick="setHRF('rejected',this)">却下</button>
-        <button class="rfbtn" onclick="setHRF('cancelled',this)">取消済</button>
+        <button class="rfbtn on" data-csp-click="h58" data-csp-source-click="setHRF('all',this)">すべて</button>
+        <button class="rfbtn" data-csp-click="h59" data-csp-source-click="setHRF('pending',this)">申請中</button>
+        <button class="rfbtn" data-csp-click="h60" data-csp-source-click="setHRF('approved',this)">承認済</button>
+        <button class="rfbtn" data-csp-click="h61" data-csp-source-click="setHRF('rejected',this)">却下</button>
+        <button class="rfbtn" data-csp-click="h62" data-csp-source-click="setHRF('cancelled',this)">取消済</button>
       </div>
       <div id="hreq-list"></div>
     </div>
@@ -701,11 +926,11 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       </div>
       <div class="al ai" style="margin-bottom:10px">ℹ 社内上限: <strong>42H/月</strong>　法定: 月45H・年360H（特別条項:月100H未満）　※残業はシフト編集時に個別入力</div>
       <div class="dtabs" id="odt" style="margin-bottom:10px">
-        <div class="dtab on" onclick="setOD('all',this)">全体</div>
-        <div class="dtab" onclick="setOD('製造部',this)">製造部</div>
-        <div class="dtab" onclick="setOD('生産管理部',this)">生産管理部</div>
-        <div class="dtab" onclick="setOD('品質保証部',this)">品質保証部</div>
-        <div class="dtab" onclick="setOD('派遣',this)">派遣</div>
+        <div class="dtab on" data-csp-click="h63" data-csp-source-click="setOD('all',this)">全体</div>
+        <div class="dtab" data-csp-click="h64" data-csp-source-click="setOD('製造部',this)">製造部</div>
+        <div class="dtab" data-csp-click="h65" data-csp-source-click="setOD('生産管理部',this)">生産管理部</div>
+        <div class="dtab" data-csp-click="h66" data-csp-source-click="setOD('品質保証部',this)">品質保証部</div>
+        <div class="dtab" data-csp-click="h67" data-csp-source-click="setOD('派遣',this)">派遣</div>
       </div>
       <div class="ot-grid" id="ot-cards"></div>
       <div class="card">
@@ -726,10 +951,10 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
         ℹ <strong>基本:</strong> 土日は休日。土曜日をクリックして「出勤日」に設定するか、任意の日を「会社休日」に設定できます。設定はシフト表の列色に反映されます。
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-        <button class="mnb" onclick="chCalM(-1)">‹</button>
+        <button class="mnb" data-csp-click="h68" data-csp-source-click="chCalM(-1)">‹</button>
         <span class="mlbl" id="cal-mlbl" style="font-size:15px;min-width:100px"></span>
-        <button class="mnb" onclick="chCalM(1)">›</button>
-        <button class="btn sm" onclick="resetCalMonth()">今月リセット</button>
+        <button class="mnb" data-csp-click="h69" data-csp-source-click="chCalM(1)">›</button>
+        <button class="btn sm" data-csp-click="h70" data-csp-source-click="resetCalMonth()">今月リセット</button>
       </div>
       <div class="cal-legend" style="margin-bottom:12px">
         <div class="cl-item"><div class="cl-dot" style="background:#f1f5f9;border:1px solid #cfd9e6"></div>通常日</div>
@@ -761,8 +986,8 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
             <span id="auto-sync-status" style="font-size:10px;color:var(--g);display:flex;align-items:center;gap:4px">
               <span class="auto-sync-dot"></span>自動同期 ON（1時間ごと）
             </span>
-            <button class="btn sm pri" onclick="manualSyncSheet()">🔄 今すぐ同期</button>
-            <button class="btn sm" onclick="loadSyncLog()">📋 ログ更新</button>
+            <button class="btn sm pri" data-csp-click="h71" data-csp-source-click="manualSyncSheet()">🔄 今すぐ同期</button>
+            <button class="btn sm" data-csp-click="h72" data-csp-source-click="loadSyncLog()">📋 ログ更新</button>
           </div>
         </div>
         <div style="font-size:11px;color:var(--tx2);margin-bottom:8px">
@@ -775,7 +1000,7 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       <div class="card">
         <div class="stl">🏢 部署・チーム設定</div>
         <div id="dept-setting"></div>
-        <button class="btn pri sm" style="margin-top:10px" onclick="saveDeptSettings()">保存</button>
+        <button class="btn pri sm" style="margin-top:10px" data-csp-click="h73" data-csp-source-click="saveDeptSettings()">保存</button>
       </div>
       <div class="card">
         <div class="stl">🔧 勤務体制</div>
@@ -803,7 +1028,7 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
     <!-- タイトル＋閉じるボタン -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div class="mttl" style="margin-bottom:0">✏ <span id="mttl">シフト編集</span></div>
-      <button onclick="closeMod()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--tx2);line-height:1;padding:0 2px">✕</button>
+      <button data-csp-click="h74" data-csp-source-click="closeMod()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--tx2);line-height:1;padding:0 2px">✕</button>
     </div>
     <div class="mr"><span class="mlb">対象者</span><select class="msel" id="memp"></select></div>
     <!-- パート・アルバイト専用：個別勤務時間 -->
@@ -811,17 +1036,17 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       <div style="font-size:11px;font-weight:700;color:#166534;margin-bottom:8px">🕐 この日の勤務時間（パート・アルバイト）</div>
       <div class="mr" style="margin-bottom:7px">
         <span class="mlb" style="font-size:11px;min-width:50px">開始</span>
-        <input class="msel" id="m-start" type="time" style="flex:1" onchange="calcPTHours()">
+        <input class="msel" id="m-start" type="time" style="flex:1" data-csp-change="h75" data-csp-source-change="calcPTHours()">
       </div>
       <div class="mr" style="margin-bottom:7px">
         <span class="mlb" style="font-size:11px;min-width:50px">終了</span>
-        <input class="msel" id="m-end" type="time" style="flex:1" onchange="calcPTHours()">
+        <input class="msel" id="m-end" type="time" style="flex:1" data-csp-change="h76" data-csp-source-change="calcPTHours()">
       </div>
       <div id="pt-hours-calc" style="font-size:11px;font-weight:600;color:#166534;margin-bottom:4px"></div>
       <div style="font-size:10px;color:var(--tx2)">※ 休憩時間は含みません</div>
     </div>
     <div class="mr"><span class="mlb">シフト区分</span>
-      <select class="msel" id="mtype" onchange="onShiftTypeChange()">
+      <select class="msel" id="mtype" data-csp-change="h77" data-csp-source-change="onShiftTypeChange()">
         <option value="A">A勤 (8:00〜20:00)</option><option value="B">B勤 (8:00〜17:00)</option>
         <option value="C">C勤 (21:00〜翌8:00)</option><option value="D">D勤 (8:00〜18:00)</option>
         <option value="E">E勤 (17:00〜翌2:00)</option><option value="F">F勤 (20:00〜翌5:00)</option>
@@ -846,8 +1071,8 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       <div id="ot-month-preview" style="font-size:10px;color:var(--a);margin-top:5px;font-weight:600"></div>
     </div>
     <div class="mbtns">
-      <button class="mbtn" onclick="closeMod()">キャンセル</button>
-      <button class="mbtn p" onclick="saveSh()">保存</button>
+      <button class="mbtn" data-csp-click="h78" data-csp-source-click="closeMod()">キャンセル</button>
+      <button class="mbtn p" data-csp-click="h79" data-csp-source-click="saveSh()">保存</button>
     </div>
   </div>
 </div>
@@ -857,23 +1082,24 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
   <div class="mod" style="max-width:min(520px,calc(100vw - 20px))">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div class="mttl" style="margin-bottom:0">👤 <span id="emttl">従業員追加</span></div>
-      <button onclick="closeEmod()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--tx2);line-height:1;padding:0 2px">✕</button>
+      <button data-csp-click="h80" data-csp-source-click="closeEmod()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--tx2);line-height:1;padding:0 2px">✕</button>
     </div>
+    <div class="mr hid" id="e-pick-row"><span class="mlb">ポータル</span><select class="msel" id="e-pick"></select></div>
     <div class="mr"><span class="mlb">氏名</span><input class="msel" id="e-name" placeholder="例: 山田 太郎"></div>
     <div class="mr"><span class="mlb">部署</span>
-      <select class="msel" id="e-dept" onchange="updateTeamOpts()">
+      <select class="msel" id="e-dept" data-csp-change="h81" data-csp-source-change="updateTeamOpts()">
         <option>製造部</option><option>生産管理部</option><option>品質保証部</option><option>派遣</option>
       </select></div>
     <div class="mr"><span class="mlb">チーム</span><select class="msel" id="e-team"></select></div>
     <div class="mr"><span class="mlb">勤続年数</span><input class="msel" id="e-years" type="number" min="0" step="0.5" placeholder="0"></div>
     <div class="mr"><span class="mlb">雇用区分</span>
-      <select class="msel" id="e-ecat" onchange="updateEtypeOpts()">
+      <select class="msel" id="e-ecat" data-csp-change="h82" data-csp-source-change="updateEtypeOpts()">
         <option value="無期雇用">無期雇用</option>
         <option value="有期雇用">有期雇用</option>
         <option value="派遣">派遣</option>
       </select></div>
     <div class="mr" id="e-etype-row"><span class="mlb">雇用形態</span>
-      <select class="msel" id="e-etype" onchange="togglePartTimeFields()">
+      <select class="msel" id="e-etype" data-csp-change="h83" data-csp-source-change="togglePartTimeFields()">
         <option>正社員</option><option>嘱託社員</option>
       </select></div>
     <!-- パート・アルバイト専用：デフォルト勤務時間 -->
@@ -882,23 +1108,113 @@ table.t td input:focus,table.t td select:focus{border-color:var(--pr);outline:no
       <div style="font-size:10px;color:#166534;margin-bottom:8px">この従業員の標準勤務時間を設定します。シフト登録時にこの時間が初期値として入ります（個別変更も可能）。</div>
       <div class="mr" style="margin-bottom:7px">
         <span class="mlb" style="font-size:11px;min-width:50px">開始</span>
-        <input class="msel" id="e-start" type="time" value="09:00" style="flex:1" onchange="updatePTPreview()">
+        <input class="msel" id="e-start" type="time" value="09:00" style="flex:1" data-csp-change="h84" data-csp-source-change="updatePTPreview()">
       </div>
       <div class="mr" style="margin-bottom:7px">
         <span class="mlb" style="font-size:11px;min-width:50px">終了</span>
-        <input class="msel" id="e-end" type="time" value="15:00" style="flex:1" onchange="updatePTPreview()">
+        <input class="msel" id="e-end" type="time" value="15:00" style="flex:1" data-csp-change="h85" data-csp-source-change="updatePTPreview()">
       </div>
       <div id="pt-hours-preview" style="font-size:11px;font-weight:600;color:#166534;text-align:right"></div>
     </div>
-    <div class="mr"><span class="mlb">パスワード</span><input class="msel" id="e-pw" placeholder="初期: 1234"></div>
     <div class="mbtns">
-      <button class="mbtn" onclick="closeEmod()">キャンセル</button>
-      <button class="mbtn p" onclick="saveEmp()">保存</button>
+      <button class="mbtn" data-csp-click="h86" data-csp-source-click="closeEmod()">キャンセル</button>
+      <button class="mbtn p" data-csp-click="h87" data-csp-source-click="saveEmp()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- PORTAL LINK / IMPORT MODAL -->
+<div id="pmod" class="mov hid">
+  <div class="mod" style="max-width:min(640px,calc(100vw - 20px))">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="mttl" style="margin-bottom:0"><span id="pmttl"></span></div>
+      <button data-shift-action="closePortalMod" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--tx2);line-height:1;padding:0 2px">✕</button>
+    </div>
+    <div id="pmdesc" style="font-size:11px;color:var(--tx2);margin-bottom:8px"></div>
+    <div id="pmbody" style="max-height:55vh;overflow:auto"></div>
+    <div class="mbtns">
+      <button class="mbtn" data-shift-action="closePortalMod">キャンセル</button>
+      <button class="mbtn p" id="pmok" data-shift-action="confirmPortalMod">確定</button>
     </div>
   </div>
 </div>
 
 <script>
+// 読込が完了するまで（読込異常の間も）、データを変える操作は受け付けない。
+//   読込で置き換わる・保存されない編集を作らないため。ページ・部署・月の切替、絞り込み、同期・再試行は使える。
+const BLOCK_BEFORE_READY_SRC_ = ['toggleCalDay','submitVreq','submitOTReq','submitHReq','saveSh','saveEmp','saveDeptSettings','resetCalMonth','openAddEmp','applyBulk'];
+function blockedBeforeReady_(target, type) {
+  if (SHIFT_DATA_READY || !cUser || !target || !target.closest) return false;
+  if (type === 'click') {
+    const a = target.closest('[data-shift-action]');
+    if (a && a.dataset.shiftAction !== 'closePortalMod') return true;
+    const c = target.closest('[data-csp-source-click]');
+    if (c) { const src = c.getAttribute('data-csp-source-click') || ''; if (BLOCK_BEFORE_READY_SRC_.some(n => src.indexOf(n + '(') === 0)) return true; }
+  }
+  if (type === 'change' && target.closest('[data-shift-change]')) return true;
+  if ((type === 'dragstart' || type === 'drop') && target.closest('[data-shift-drag]')) return true;
+  return false;
+}
+['click', 'change', 'dragstart', 'drop'].forEach(type => document.addEventListener(type, event => {
+  let blocked = false;
+  try { blocked = blockedBeforeReady_(event.target, type); } catch (e) { blocked = false; }
+  if (!blocked) return;
+  event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();
+  try { showDataNotReadyBanner_(_loadFailed); if (type === 'change') { rEmp(); } } catch (e) {}
+}, true));
+document.addEventListener('click', event => {
+  const el = event.target.closest('[data-shift-action]');
+  if (!el) return;
+  const actions = { openPortalLink, openPortalImport, closePortalMod, confirmPortalMod, openEditEmp, delEmp, approveReq, rejectReq, cancelReq, approveOTReq, rejectOTReq, cancelOTReq, approveHReq, rejectHReq, cancelHReq, editFurikae, deleteCalDay };
+  if (el.dataset.shiftAction === 'cell') return onCell(event, el.dataset.eid, el.dataset.dk);
+  if (Object.prototype.hasOwnProperty.call(actions, el.dataset.shiftAction)) actions[el.dataset.shiftAction](el.dataset.id);
+});
+document.addEventListener('change', event => {
+  const el = event.target.closest('[data-shift-change]');
+  if (!el) return;
+  const actions = { chEmpDept, chEmpTeam, chEmpYears, chEmpAL };
+  if (Object.prototype.hasOwnProperty.call(actions, el.dataset.shiftChange)) actions[el.dataset.shiftChange](el.dataset.id, el.value);
+});
+for (const type of ['dragstart','dragover','dragleave','drop']) document.addEventListener(type, event => {
+  const el = event.target.closest('[data-shift-drag]');
+  if (!el) return;
+  if (type === 'dragstart') onDragStart(event, el.dataset.eid, el.dataset.dk);
+  if (type === 'dragover') onDragOver(event);
+  if (type === 'dragleave') onDragLeave(event);
+  if (type === 'drop') onDrop(event, el.dataset.eid, el.dataset.dk);
+});
+
+
+// Business drafts are page-memory only. SSO tokens stay in sessionStorage;
+// static HTML/GAS cannot issue HttpOnly cookies.
+const pageMemoryStorage = (() => {
+  const entries = new Map();
+  return {
+    getItem: key => entries.has(key) ? entries.get(key) : null,
+    setItem: (key, value) => entries.set(key, String(value)),
+    removeItem: key => entries.delete(key),
+    clear: () => entries.clear()
+  };
+})();
+function clearBrowserBusinessData_() {
+  pageMemoryStorage.clear();
+  const known = new Set(['kpk_app_perms', 'kpk_shift_employees', 'kpk_shift_data',
+    'kpk_cal_special', 'kpk_data_ver', 'kpk_session', 'kpk_vac_req', 'kpk_ot_req',
+    'kpk_h_req', 'kpk_sync_log', 'sakugyo_wip_backup', 'inv_current_user',
+    'inv_sat_v2', 'inv_portal_url', 'inv_gas_url', 'inv_master_url',
+    'sakugyo_portal_url', 'daily_report_portal_url']);
+  for (const name of ['localStorage', 'sessionStorage']) {
+    try {
+      const storage = window[name];
+      for (let i = storage.length - 1; i >= 0; i--) {
+        const key = storage.key(i);
+        if (known.has(key) || (key && key.startsWith('inv_sat_v2_'))) storage.removeItem(key);
+      }
+    } catch (e) {}
+  }
+}
+clearBrowserBusinessData_();
+
 // ══════════════════════════════
 //  CONSTANTS & MASTER
 // ══════════════════════════════
@@ -939,7 +1255,7 @@ function buildBulkSelect(){
   workKeys.forEach(k=>{
     const d=SHIFT_DEF[k];if(!d)return;
     const label=k==='P'?'P勤（パート/アルバイト・個別時間設定）':`${k}勤 (${d.time})`;
-    html+=`<option value="${k}">${label}</option>`;
+    html+=`<option value="${k}">${escapeHtml(label)}</option>`;
   });
   otherKeys.forEach(([k,lbl])=>{ html+=`<option value="${k}">${lbl}</option>`; });
   sel.innerHTML=html;
@@ -982,10 +1298,171 @@ function getDayType(y,m,d){
 // ══ EMPLOYEES ══
 let EMPLOYEES = [];
 let _eid = 1;
+// 代理申請の対象候補＝ポータル正本名簿(TOKEN_CONTROL_SS_ID)のactive従業員（管理者のみ取得）。
+// createRequest_ はポータル名簿の一意active IDのみ許可するため、代理対象はこの名簿から出す（シフト独自ダミーは対象にしない）。
+let ROSTER = [];
+// 認証付きの初回読込(loadShiftData＋listRequests)が完全に成功するまで false。
+// false の間はサーバーへの保存(saveToSheet/scheduleSave)を行わない＝未読込の端末内データでシートを上書きしない。
+let SHIFT_DATA_READY = false;
+// 代理申請の対象を解決：まずシフト従業員(EMPLOYEES＝年休等の詳細を持つ)、無ければポータル名簿(ROSTER＝id/name/dept)。
+// これで代理対象がポータル名簿由来IDでも emp が見つかり、req.eid をサーバー(shiftRosterOwner_)が正本照合できる。
+function resolveTarget_(id){
+  return EMPLOYEES.find(x=>x&&x.id===id) || ROSTER.find(x=>x&&x.id===id) || null;
+}
+// ポータル名簿を取得できたか（取得前・失敗時は、取り込み・連携・追加を止め、保存済みの氏名で表示する）
+let ROSTER_READY = false;
+async function loadRoster_(){
+  if(!isA) return;
+  const token = AUTH_TOKEN; // ログアウト・別セッションへの切替後に届いた応答は適用しない
+  try{
+    const r = await gasCall_('listRoster', {});
+    if(AUTH_TOKEN !== token || !cUser || !isA) return;
+    if(r && r.ok && Array.isArray(r.data)){
+      ROSTER = r.data; ROSTER_READY = true;
+      applyPortalNames_();
+      rVreq(); rOTReq(); rHReq(); rEmp(); rSh(); rDB();
+    }
+  }catch(e){ /* 取得失敗時は ROSTER 空のまま（対象欄に取得不可を表示）。静かに全消去しない */ }
+}
+
+// ══ ポータル従業員マスターとの連携 ══
+// シフトGASの保存時ID検査・申請の本人照合（shiftRosterOwner_）と同じ形式。合わないIDは取り込み・連携の対象外。
+const PORTAL_ID_RE_ = /^[A-Za-z0-9_-]{1,100}$/;
+function portalById_(id){ return ROSTER.find(x=>x&&x.id===id) || null; }
+// 読み込み：IDがポータルと一致する人の氏名をポータルの最新の氏名にそろえる（管理者の次回保存で保存データにも反映）。
+// 名前からの推測ではなくIDの一致だけで行う。
+function applyPortalNames_(){
+  if(!ROSTER_READY) return;
+  EMPLOYEES.forEach(e=>{ const p=portalById_(e.id); if(p && p.name && e.name!==p.name) e.name=p.name; });
+}
+// まだシフト側にいないポータル在籍者（ID形式が合う人だけ）
+function unregisteredPortal_(){
+  return ROSTER.filter(p=>p && PORTAL_ID_RE_.test(p.id) && !EMPLOYEES.some(e=>e.id===p.id));
+}
+// 名簿未取得・シフトデータ未読込のときは操作させない（読込前の変更は読込で置き換わるため）
+function portalNotReady_(){
+  if(!ROSTER_READY){ alert('ポータルの従業員マスターを取得できていません。画面を再読込してから操作してください。'); return true; }
+  if(!SHIFT_DATA_READY){ alert('データの読み込みが完了してから操作してください。'); return true; }
+  return false;
+}
+let _pmodMode = null;
+function closePortalMod(){ _pmodMode=null; document.getElementById('pmod').classList.add('hid'); }
+function confirmPortalMod(){ if(_pmodMode==='link') confirmPortalLink_(); else if(_pmodMode==='import') confirmPortalImport_(); }
+function portalOption_(p, selected){
+  return `<option value="${escapeAttr(p.id)}"${selected?' selected':''}>${escapeHtml(p.name)}（${escapeHtml(p.dept||'')}・${escapeHtml(p.id)}）</option>`;
+}
+
+// 連携：ポータルにIDが無い従業員（emp001型など）を、管理者が選んだポータルの人へつなぐ。
+// 候補＝氏名が完全に一致する人がポータル側に1人だけ・その人がまだ誰ともつながっていないとき。自動では確定しない。
+function openPortalLink(){
+  if(!isA || portalNotReady_()) return;
+  const targets=EMPLOYEES.filter(e=>!portalById_(e.id));
+  const free=unregisteredPortal_();
+  const body=document.getElementById('pmbody');
+  if(!targets.length){ alert('連携が必要な従業員はいません（全員ポータルとつながっています）。'); return; }
+  body.innerHTML=`<table class="t"><thead><tr><th>シフトの従業員</th><th>ポータルの従業員</th></tr></thead><tbody>`+
+    targets.map(e=>{
+      const same=ROSTER.filter(p=>p&&p.name===e.name);
+      const cand=(same.length===1 && free.includes(same[0])) ? same[0].id : '';
+      return `<tr><td><strong>${escapeHtml(e.name)}</strong><div style="font-size:10px;color:var(--tx2)">${escapeHtml(e.id)}・${escapeHtml(e.dept||'')}</div></td>
+        <td><select class="msel pm-link" data-old="${escapeAttr(e.id)}"><option value="">（つながない）</option>${free.map(p=>portalOption_(p,p.id===cand)).join('')}</select>
+        ${cand?'<div style="font-size:10px;color:var(--a)">同じ氏名の候補を選んでいます。確認してください</div>':''}</td></tr>`;
+    }).join('')+`</tbody></table>`;
+  document.getElementById('pmttl').textContent='🔗 ポータルと連携';
+  document.getElementById('pmdesc').textContent='シフトの従業員を、ポータルの従業員につなぎます。つなぐと、IDがポータルのIDに変わり、氏名はポータルの氏名になります。シフト表・勤続年数・年休などはそのまま引き継ぎます。確定する前に、シフトのシートの控え（コピー）を取ってください。';
+  _pmodMode='link';
+  document.getElementById('pmod').classList.remove('hid');
+}
+function confirmPortalLink_(){
+  if(!isA || portalNotReady_()) return;
+  const pairs=[...document.querySelectorAll('#pmbody .pm-link')].map(s=>({oldId:s.dataset.old,newId:s.value})).filter(x=>x.newId);
+  if(!pairs.length){ alert('つなぐ相手が選ばれていません。'); return; }
+  const used=new Set();
+  for(const x of pairs){
+    if(used.has(x.newId)){ alert('同じポータルの従業員を2人に選んでいます。選び直してください。'); return; }
+    used.add(x.newId);
+    if(!PORTAL_ID_RE_.test(x.newId) || !portalById_(x.newId) || EMPLOYEES.some(e=>e.id===x.newId)){ alert('選んだポータルの従業員はつなげません。画面を開き直してください。'); return; }
+    if(!EMPLOYEES.some(e=>e.id===x.oldId)){ alert('シフトの従業員が見つかりません。画面を開き直してください。'); return; }
+  }
+  const list=pairs.map(x=>`・${EMPLOYEES.find(e=>e.id===x.oldId).name}（${x.oldId}）→ ${portalById_(x.newId).name}（${x.newId}）`).join('\n');
+  if(!confirm(`次の${pairs.length}人をつなぎます。よろしいですか？\n\n${list}`)) return;
+  pairs.forEach(x=>linkEmployeeToPortal_(x.oldId, x.newId));
+  closePortalMod();
+  rEmp(); rSh(); rDB(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
+  persistData(); scheduleSave();
+  alert(`${pairs.length}人をつなぎました。保存の表示が「保存済」になることを確認してください。\n過去に承認した有給の年休の残りは、従業員管理で見直してください。`);
+}
+// 旧ID→ポータルIDへ移す（画面・保存の基準の両方に同じ移し替えを当てる）。
+// シフト表は旧IDの行を引き継ぎ、ポータルIDの行にある申請の反映（reqId 付き・振替休日の OFF）は残す。
+// 確定はサーバー（saveShiftPatch の links）が名簿確認・承認済み申請との照合・隠し項目の引継ぎとともに一体で行う。
+function applyLinkTo_(t, oldId, newId){
+  const e=t.employees.find(x=>x&&x.id===oldId);
+  if(!e || t.employees.some(x=>x&&x.id===newId)) return;
+  const oldRows=t.shifts[oldId]||{}, cur=t.shifts[newId]||{};
+  const merged=JSON.parse(JSON.stringify(oldRows));
+  Object.keys(cur).forEach(k=>{
+    const c=cur[k];
+    const keep=c && (c.reqId || c.furikaeReqId || (c.type==='OFF' && c.note==='振替休日'));
+    if(keep || !Object.prototype.hasOwnProperty.call(merged,k)) merged[k]=c;
+  });
+  t.shifts[newId]=merged;
+  delete t.shifts[oldId];
+  e.id=newId;
+}
+function linkEmployeeToPortal_(oldId, newId){
+  if(!EMPLOYEES.some(x=>x.id===oldId) || !portalById_(newId)) return;
+  applyLinkTo_({ shifts: SHIFTS, employees: EMPLOYEES }, oldId, newId);
+  if(_base) applyLinkTo_({ shifts: _base.shifts, employees: _base.employees }, oldId, newId);
+  _pendingLinks.push({ old: oldId, 'new': newId });
+  applyPortalNames_(); // 氏名はIDの一致でポータルの氏名になる
+}
+
+// 取り込み：ポータルの在籍者のうち、シフト側にいない人を管理者が選んで追加する。
+function openPortalImport(){
+  if(!isA || portalNotReady_()) return;
+  const free=unregisteredPortal_();
+  if(!free.length){ alert('取り込める従業員はいません（ポータルの在籍者は全員登録済みです）。'); return; }
+  document.getElementById('pmbody').innerHTML=`<table class="t"><thead><tr><th></th><th>氏名</th><th>部署</th><th>ID</th></tr></thead><tbody>`+
+    free.map(p=>`<tr><td><input type="checkbox" class="pm-imp" value="${escapeAttr(p.id)}"></td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.dept||'')}</td><td style="font-size:10px;color:var(--tx2)">${escapeHtml(p.id)}</td></tr>`).join('')+
+    `</tbody></table>`;
+  document.getElementById('pmttl').textContent='⬇ ポータルから取り込み';
+  document.getElementById('pmdesc').textContent='チェックした人を、シフトの従業員に追加します。勤続年数・雇用区分などは既定値で入るので、追加後に「編集」で直してください。今いる従業員と同じ人がいる場合は、取り込まずに「ポータルと連携」を使ってください。';
+  _pmodMode='import';
+  document.getElementById('pmod').classList.remove('hid');
+}
+function newEmpFromPortal_(p){
+  const dept=DEPT_STRUCT[p.dept] ? p.dept : '製造部';
+  const team=(DEPT_STRUCT[dept]?.teams||[dept])[0];
+  return {id:p.id,name:p.name,dept,team,years:0,ecat:'無期雇用',etype:'正社員',ptStart:'09:00',ptEnd:'15:00'};
+}
+function confirmPortalImport_(){
+  if(!isA || portalNotReady_()) return;
+  const ids=[...document.querySelectorAll('#pmbody .pm-imp:checked')].map(c=>c.value);
+  if(!ids.length){ alert('取り込む人を選んでください。'); return; }
+  const add=ids.map(portalById_).filter(p=>p && PORTAL_ID_RE_.test(p.id) && !EMPLOYEES.some(e=>e.id===p.id));
+  add.forEach(p=>{ EMPLOYEES.push(newEmpFromPortal_(p)); if(!SHIFTS[p.id]) SHIFTS[p.id]={}; });
+  closePortalMod();
+  rEmp(); rSh(); rDB(); rVreq(); rOTReq(); rHReq();
+  persistData(); scheduleSave();
+  alert(`${add.length}人を取り込みました。勤続年数・雇用区分などを「編集」で確認してください。`);
+}
+function withoutEmployeePassword_(employee) {
+  const { pw, password, ...publicEmployee } = employee;
+  return publicEmployee;
+}
+function nextEmpId_(){
+  // 既存のEMPLOYEES・SHIFTSと衝突しないIDを採番する。
+  // ※_eid は再読込で1に戻るため、番号だけに頼ると既存IDを再利用して
+  //   SHIFTS[id] を空で上書き＝既存シフト消去の事故が起きる（実データを走査して回避）。
+  let id;
+  do { id='emp'+String(_eid++).padStart(3,'0'); }
+  while (EMPLOYEES.some(x=>x&&x.id===id) || (SHIFTS && Object.prototype.hasOwnProperty.call(SHIFTS,id)));
+  return id;
+}
 function mkEmp(name,dept,team,years,ecat,etype,ptStart,ptEnd){
-  const id='emp'+String(_eid++).padStart(3,'0');
+  const id=nextEmpId_();
   return{id,name,dept,team,years,ecat,etype,
-    ptStart:ptStart||'09:00',ptEnd:ptEnd||'15:00',pw:'1234'};
+    ptStart:ptStart||'09:00',ptEnd:ptEnd||'15:00'};
 }
 // ※ 従業員は「従業員管理」画面から登録してください
 
@@ -1017,7 +1494,6 @@ function getEmpOrCurrent(targetId) {
       ptStart: '09:00',
       ptEnd:   '18:00',
       al:      10,
-      pw:      ''
     };
     // 仮データをEMPLOYEESに追加して次回から使えるようにする
     EMPLOYEES.push(emp);
@@ -1074,34 +1550,59 @@ function seedShifts(){
 
 // ══ AUTH ══
 function slt(t){ltab=t;document.getElementById('lt-a').classList.toggle('on',t==='a');document.getElementById('lt-s').classList.toggle('on',t==='s');}
+// ============================================================
+// ★このアプリ単体でのログインは廃止した（2026-07-30）
+//
+// 【削除した理由】
+//  (1) id==='admin' && pw==='admin' という判定が直書きされており、
+//      一致した場合に管理者権限(isA=true)を与えていた。
+//      このファイルはGitHub Pagesで公開配信されているため、
+//      ソースを開けば誰でもこの2つの値を読めた。
+//  (2) もう一方の分岐は EMPLOYEES 配列（ポータルからURLで渡された従業員一覧）の
+//      pw と突き合わせていた。ブラウザ内の判定なので、
+//      開発者ツールから cUser と isA を直接書き換えれば素通りできる。
+//
+//  値を変えても (2) の性質は変わらないため、判定そのものを廃止する。
+//
+// 【今後の入り方】
+//   業務管理ポータルから開く。利用者の判定はポータルとGASが行う。
+//
+// ★注意：このアプリのGASはまだトークン検証に対応していない。
+//   ポータル側の改修（Step 10）が入ると有効なトークンが渡らなくなるため、
+//   移行までは利用できない。移行手順は出荷照合システムと同じ。
+// ============================================================
 function doLogin(){
-  const id=document.getElementById('lid').value.trim(),pw=document.getElementById('lpw').value;
-  if(ltab==='a'&&id==='admin'&&pw==='admin'){cUser={id:'admin',name:'管理者'};isA=true;persistData();launch();}
-  else{const e=EMPLOYEES.find(x=>x.id===id&&x.pw===pw);if(e){cUser={id:e.id,name:e.name,dept:e.dept||''};isA=false;persistData();launch();}else{alert('IDまたはパスワードが違います');}}
+  alert('このアプリは業務管理ポータルからご利用ください');
 }
-document.getElementById('lpw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-// オフライン状態をGASに通知
+const _shiftPwEl = document.getElementById('lpw');
+if (_shiftPwEl) _shiftPwEl.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+// オフライン状態をGASに通知（トークン付きPOSTをsendBeaconで送る）
 function notifyOffline() {
-  if (!cUser || !GAS_URL_SHIFT) return;
+  if (!cUser || !AUTH_TOKEN) return;
   try {
-    const url = GAS_URL_SHIFT + '?action=setOnlineStatus' +
-      '&appId=shift' +
-      '&userId=' + encodeURIComponent(cUser.id) +
-      '&userName=' + encodeURIComponent(cUser.name) +
-      '&action2=logout';
-    navigator.sendBeacon(url); // ページ離脱時も確実に送信
+    // userId/userNameはGAS側でトークンのsub/nameに固定するため本文には含めない
+    const body = JSON.stringify({ action: 'setOnlineStatus', token: AUTH_TOKEN, action2: 'logout' });
+    const blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
+    navigator.sendBeacon(GAS_URL_SHIFT, blob); // ページ離脱時も確実に送信
   } catch(e) {}
 }
 
 function doLogout(){
+  clearBrowserBusinessData_();
+  EMPLOYEES.length = 0;
+  Object.keys(SHIFTS).forEach(key => delete SHIFTS[key]);
+  CAL_SPECIAL = {};
+  VAC_REQUESTS.length = 0; OT_REQUESTS.length = 0; H_REQUESTS.length = 0;
+  _syncLog = [];
+  if (_saveTimer) clearTimeout(_saveTimer);
   notifyOffline();
   cUser=null;isA=false;
-  // セッションをlocalStorageから削除（次回リロード時にログイン画面を表示）
-  try { localStorage.removeItem(LS_USER); } catch(e) {}
+  // セッション・トークンを破棄（次回はポータルからの入場が必要）
+  try { pageMemoryStorage.removeItem(LS_USER); } catch(e) {}
+  try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch(e) {}
+  AUTH_TOKEN = null;
   document.getElementById('lw').classList.remove('hid');
   document.getElementById('mainApp').classList.add('hid');
-  document.getElementById('lid').value='';
-  document.getElementById('lpw').value='';
 }
 
 // ページを閉じる・離脱する時もオフラインを記録
@@ -1109,9 +1610,18 @@ window.addEventListener('beforeunload', notifyOffline);
 window.addEventListener('pagehide', notifyOffline);
 
   function doLogoutAndClose() {
+  clearBrowserBusinessData_();
+  EMPLOYEES.length = 0;
+  Object.keys(SHIFTS).forEach(key => delete SHIFTS[key]);
+  CAL_SPECIAL = {};
+  VAC_REQUESTS.length = 0; OT_REQUESTS.length = 0; H_REQUESTS.length = 0;
+  _syncLog = [];
+  if (_saveTimer) clearTimeout(_saveTimer);
   notifyOffline();
   cUser = null; isA = false;
-  try { localStorage.removeItem(LS_USER); } catch(e) {}
+  try { pageMemoryStorage.removeItem(LS_USER); } catch(e) {}
+  try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch(e) {}
+  AUTH_TOKEN = null;
   try {
     window.close();
   } catch(e) {}
@@ -1119,8 +1629,6 @@ window.addEventListener('pagehide', notifyOffline);
   setTimeout(() => {
     document.getElementById('lw').classList.remove('hid');
     document.getElementById('mainApp').classList.add('hid');
-    document.getElementById('lid').value = '';
-    document.getElementById('lpw').value = '';
   }, 300);
 }
 
@@ -1137,8 +1645,9 @@ function launch(){
   rDB();rSh();rEmp();rPL();rVreq();rOTReq();rHReq();rOT();rCal();rSt();setupKB();buildBulkSelect();
   restoreSyncLog(); // ログ復元
   startAutoSync(); // 自動同期タイマー開始
+  loadRoster_(); // 代理申請の対象候補（ポータル正本名簿のactive従業員）を取得（管理者のみ）
   // ログインセッションをlocalStorageに保存（リロード後も維持）
-  try { localStorage.setItem(LS_USER, JSON.stringify({ user: cUser, isA })); } catch(e) {}
+
 }
 function sp(pg,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
@@ -1159,11 +1668,11 @@ function rDB(){
     const s=(SHIFTS[e.id]||{})[k]||{type:'OFF',ot:0};
     const st=SHIFT_DEF[s.type]||SHIFT_DEF.OFF;
     const w=s.type!=='OFF'&&s.type!=='VAC';if(w)wk++;
-    const oStr=s.ot>0?` <span style="font-size:9px;background:#fff7db;color:#b07000;padding:1px 4px;border-radius:3px">残業${s.ot}H</span>`:'';
+    const oStr=s.ot>0?` <span style="font-size:9px;background:#fff7db;color:#b07000;padding:1px 4px;border-radius:3px">残業${escapeHtml(s.ot)}H</span>`:'';
     const isMe=cUser&&String(e.id)===String(cUser.id);
     h+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)${isMe?';background:#fffbea;border-radius:4px;padding:5px 6px':''}">
-      <div style="width:28px;height:28px;border-radius:50%;background:var(--bbg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--b);flex-shrink:0">${e.name.charAt(0)}</div>
-      <div style="flex:1"><div style="font-size:12px;font-weight:600">${e.name}${isMe?' <span style="font-size:9px;background:#e8a020;color:#fff;padding:1px 5px;border-radius:3px">あなた</span>':''}</div><div style="font-size:10px;color:var(--tx2)">${e.dept}</div></div>
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--bbg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--b);flex-shrink:0">${escapeHtml(e.name.charAt(0))}</div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:600">${escapeHtml(e.name)}${isMe?' <span style="font-size:9px;background:#e8a020;color:#fff;padding:1px 5px;border-radius:3px">あなた</span>':''}</div><div style="font-size:10px;color:var(--tx2)">${escapeHtml(e.dept)}</div></div>
       <span class="badge bg-b ${st.cls}" style="font-size:10px">${st.lb}勤</span>${oStr}
     </div>`;
   });
@@ -1185,9 +1694,9 @@ function rDB(){
   const alertTargets=isA?EMPLOYEES:(cUser?EMPLOYEES.filter(e=>String(e.id)===String(cUser.id)):[]);
   alertTargets.forEach(e=>{
     const tot=getAL(e),u=cntVac(e.id);
-    if(tot>=10&&u<5){al+=`<div class="al aw">⚠ <strong>${e.name}</strong>（${e.dept}）：年5日取得 残${5-u}日未達</div>`;ac++;}
+    if(tot>=10&&u<5){al+=`<div class="al aw">⚠ <strong>${escapeHtml(e.name)}</strong>（${escapeHtml(e.dept)}）：年5日取得 残${5-u}日未達</div>`;ac++;}
     const ot=calcPeriodOT(e.id,td.getFullYear(),td.getMonth());
-    if(ot>OT_LIMIT){al+=`<div class="al ar">🚨 <strong>${e.name}</strong>：今月計画残業${ot}H（社内上限${OT_LIMIT}H超過）</div>`;otc++;}
+    if(ot>OT_LIMIT){al+=`<div class="al ar">🚨 <strong>${escapeHtml(e.name)}</strong>：今月計画残業${ot}H（社内上限${OT_LIMIT}H超過）</div>`;otc++;}
   });
   if(!al)al='<div class="al aok">✓ 現在アラートはありません</div>';
   document.getElementById('alts').innerHTML=al;
@@ -1259,7 +1768,7 @@ function rSh(){
     // 月が変わった最初のセルにborder-leftで区切り
     const borderStyle=(m!==prevM&&prevM!==-1)?'border-left:2px solid var(--pr)!important':'';
     prevM=m;
-    th+=`<th class="${cls}" style="${borderStyle}">${d}${label}<br><span style="font-size:8px">${'日月火水木金土'[new Date(y,m,d).getDay()]}</span></th>`;
+    th+=`<th class="${cls}" style="${borderStyle}">${d}${escapeHtml(label)}<br><span style="font-size:8px">${'日月火水木金土'[new Date(y,m,d).getDay()]}</span></th>`;
   });
   th+=`<th style="min-width:26px;font-size:9px">有給</th><th style="min-width:26px;font-size:9px">深夜</th><th style="min-width:30px;font-size:9px">残業H</th></tr></thead>`;
 
@@ -1268,7 +1777,7 @@ function rSh(){
   if(curD==='all'){
     Object.keys(DEPT_STRUCT).forEach(dept=>{
       const de=emps.filter(e=>e.dept===dept);if(!de.length)return;
-      tb+=`<tr class="dept-hr"><td colspan="${colSpan}">${dept}（${de.length}名）</td></tr>`;
+      tb+=`<tr class="dept-hr"><td colspan="${colSpan}">${escapeHtml(dept)}（${de.length}名）</td></tr>`;
       de.forEach(e=>tb+=buildRow(e,days,tdk));
       tb+=buildSum(de,days,tdk);
     });
@@ -1283,9 +1792,9 @@ function rSh(){
 
 function buildRow(e,days,tdk){
   const isMe=cUser&&String(e.id)===String(cUser.id);
-  let r=`<tr data-eid="${e.id}"${isMe?' style="background:#fffbea"':''}>
-    <td class="fx">${e.name}${isMe?' <span style="font-size:8px;color:var(--a)">▶</span>':''}</td>
-    <td class="fx2">${e.team}</td>`;
+  let r=`<tr data-eid="${escapeAttr(e.id)}"${isMe?' style="background:#fffbea"':''}>
+    <td class="fx">${escapeHtml(e.name)}${isMe?' <span style="font-size:8px;color:var(--a)">▶</span>':''}</td>
+    <td class="fx2">${escapeHtml(e.team)}</td>`;
   let vc=0,nc=0,otH=0;
   let prevM=-1;
   days.forEach(({y,m,d})=>{
@@ -1317,14 +1826,14 @@ function buildRow(e,days,tdk){
     // 月の変わり目にボーダー
     const bdrStyle=(m!==prevM&&prevM!==-1)?'border-left:2px solid var(--pr)':'';
     prevM=m;
-    const dndAttr=isA?`draggable="true" ondragstart="onDragStart(event,'${e.id}','${k}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${e.id}','${k}')"`:'' ;
+    const dndAttr=isA?`draggable="true" data-shift-drag="true"`:'' ;
     const scStyle=(s.type==='P'||(isPT(emp)&&s.type!=='OFF'&&s.type!=='VAC'))?'style="font-size:8px;min-width:50px;letter-spacing:-0.3px"':'';
     r+=`<td class="${tdCls}" style="${bdrStyle}">
-      <span class="${cls}" data-eid="${e.id}" data-dk="${k}"
+      <span class="${cls}" data-eid="${escapeAttr(e.id)}" data-dk="${escapeAttr(k)}"
         ${dndAttr}
-        onclick="onCell(event,'${e.id}','${k}')"
+        data-shift-action="cell"
         ${scStyle}
-      >${cellLabel}${s.type!=='OFF'&&s.type!=='VAC'&&s.ot>0?`<br><span style="font-size:7px">+${s.ot}H</span>`:''}</span></td>`;
+      >${escapeHtml(cellLabel)}${s.type!=='OFF'&&s.type!=='VAC'&&s.ot>0?`<br><span style="font-size:7px">+${escapeHtml(s.ot)}H</span>`:''}</span></td>`;
   });
   const otRnd=Math.round(otH*10)/10;
   const otCls=otRnd>OT_LIMIT?'style="color:var(--r);font-weight:700"':otRnd>OT_LIMIT*0.9?'style="color:var(--a);font-weight:600"':'';
@@ -1355,7 +1864,7 @@ function onCell(ev,eid,dk){
     const k=eid+'|'+dk;
     if(selCells.has(k))selCells.delete(k);else selCells.add(k);
     updBulkBar();
-    const sp=document.querySelector(`.sc[data-eid="${eid}"][data-dk="${dk}"]`);
+    const sp=Array.from(document.querySelectorAll('.sc[data-eid][data-dk]')).find(el => el.dataset.eid === eid && el.dataset.dk === dk);
     if(sp)sp.classList.toggle('sel',selCells.has(k));
     return;
   }
@@ -1393,14 +1902,14 @@ function applyBulk(){
 function onDragStart(ev,eid,dk){
   const s=(SHIFTS[eid]||{})[dk]||{type:'OFF',ot:0};
   dragSrc={eid,dk,type:s.type,ot:s.ot,start:s.start,end:s.end};
-  ev.currentTarget.classList.add('dragging');
+  ev.target.closest('[data-shift-drag]').classList.add('dragging');
   ev.dataTransfer.effectAllowed='move';
   ev.dataTransfer.setData('text/plain',eid+'|'+dk);
 }
-function onDragOver(ev){ev.preventDefault();ev.dataTransfer.dropEffect='move';ev.currentTarget.classList.add('drag-over');}
-function onDragLeave(ev){ev.currentTarget.classList.remove('drag-over');}
+function onDragOver(ev){ev.preventDefault();ev.dataTransfer.dropEffect='move';ev.target.closest('[data-shift-drag]').classList.add('drag-over');}
+function onDragLeave(ev){ev.target.closest('[data-shift-drag]').classList.remove('drag-over');}
 function onDrop(ev,toEid,toDk){
-  ev.preventDefault();ev.currentTarget.classList.remove('drag-over');
+  ev.preventDefault();ev.target.closest('[data-shift-drag]').classList.remove('drag-over');
   if(!dragSrc||!isA)return;
   const{eid:fE,dk:fD,type,ot,start,end}=dragSrc;
   if(fE===toEid&&fD===toDk){dragSrc=null;return;}
@@ -1413,6 +1922,7 @@ function onDrop(ev,toEid,toDk){
   if(end)newToShift.end=end;
   SHIFTS[toEid][toDk]=newToShift;
   dragSrc=null;rSh();rDB();rOT();
+  scheduleSave(); // 入れ替えを保存（以前は他の編集のついでにしか保存されなかった）
 }
 document.addEventListener('dragend',()=>{
   document.querySelectorAll('.sc.dragging').forEach(el=>el.classList.remove('dragging'));
@@ -1461,7 +1971,7 @@ function updateOTPreview(){
 function openMod(eid,dk){
   edEid=eid;edDK=dk;
   const ev=visEmps();
-  document.getElementById('memp').innerHTML=ev.map(e=>`<option value="${e.id}"${e.id===eid?' selected':''}>${e.name}</option>`).join('');
+  document.getElementById('memp').innerHTML=ev.map(e=>`<option value="${escapeAttr(e.id)}"${e.id===eid?' selected':''}>${escapeHtml(e.name)}</option>`).join('');
   document.getElementById('memp').onchange=()=>{
     edEid=document.getElementById('memp').value;
     // 対象者変更時も時間エリアを再更新
@@ -1549,28 +2059,35 @@ function rEmp(){
     'パートタイマー':'bg-a','アルバイト':'bg-a','派遣社員':'bg-p'
   };
   const ecatBadge={'無期雇用':'bg-g','有期雇用':'bg-a','派遣':'bg-p'};
+  const note=document.getElementById('emp-portal-note');
+  if(note){
+    const unl=EMPLOYEES.filter(e=>!portalById_(e.id)).length, free=ROSTER_READY?unregisteredPortal_().length:0;
+    note.textContent=!ROSTER_READY?'ポータルの従業員マスターを取得できていません（保存済みの氏名で表示しています）。'
+      :`氏名はポータルの従業員マスターから表示しています。ポータル未登録 ${unl}人／未取り込みの在籍者 ${free}人`;
+  }
   let html=emps.map(e=>{
+    const unlinked=ROSTER_READY && !portalById_(e.id);
     return`<tr>
-      <td style="color:var(--tx2);font-size:10px">${e.id}</td>
-      <td><strong>${e.name}</strong></td>
+      <td style="color:var(--tx2);font-size:10px">${escapeHtml(e.id)}</td>
+      <td><strong>${escapeHtml(e.name)}</strong>${unlinked?' <span class="badge bg-a" style="font-size:9px" title="IDがポータルの在籍者と一致しません（未連携・退職など）">ポータル未登録</span>':''}</td>
       <td>
-        <select onchange="chEmpDept('${e.id}',this.value)" style="font-size:11px;padding:2px 5px;border:1px solid var(--bd2);border-radius:4px;background:var(--sf)">
-          ${Object.keys(DEPT_STRUCT).map(d=>`<option${d===e.dept?' selected':''}>${d}</option>`).join('')}
+        <select data-shift-change="chEmpDept" data-id="${escapeAttr(e.id)}" style="font-size:11px;padding:2px 5px;border:1px solid var(--bd2);border-radius:4px;background:var(--sf)">
+          ${Object.keys(DEPT_STRUCT).map(d=>`<option${d===e.dept?' selected':''}>${escapeHtml(d)}</option>`).join('')}
         </select>
       </td>
       <td>
-        <select id="team-sel-${e.id}" onchange="chEmpTeam('${e.id}',this.value)" style="font-size:11px;padding:2px 5px;border:1px solid var(--bd2);border-radius:4px;background:var(--sf)">
-          ${(DEPT_STRUCT[e.dept]?.teams||[e.dept]).map(t=>`<option${t===e.team?' selected':''}>${t}</option>`).join('')}
+        <select id="team-sel-${escapeAttr(e.id)}" data-shift-change="chEmpTeam" data-id="${escapeAttr(e.id)}" style="font-size:11px;padding:2px 5px;border:1px solid var(--bd2);border-radius:4px;background:var(--sf)">
+          ${(DEPT_STRUCT[e.dept]?.teams||[e.dept]).map(t=>`<option${t===e.team?' selected':''}>${escapeHtml(t)}</option>`).join('')}
         </select>
       </td>
-      <td><input type="number" value="${e.years}" min="0" step="0.5" onchange="chEmpYears('${e.id}',this.value)" style="width:50px"></td>
-      <td><span class="badge ${ecatBadge[e.ecat]||'bg-gray'}" style="font-size:9px">${e.ecat}</span></td>
-      <td><span class="badge ${etBadge[e.etype]||'bg-gray'}" style="font-size:9px">${e.etype}</span></td>
-      <td>${isPT(e)?`<span style="font-size:11px;font-weight:600;color:#166534;background:#f0fdf4;padding:2px 7px;border-radius:4px;border:1px solid #86efac">${e.ptStart||'09:00'}〜${e.ptEnd||'15:00'}</span>`:'<span style="color:var(--tx3);font-size:11px">—</span>'}</td>
+      <td><input type="number" value="${Number(e.years)||0}" min="0" step="0.5" data-shift-change="chEmpYears" data-id="${escapeAttr(e.id)}" style="width:50px"></td>
+      <td><span class="badge ${ecatBadge[e.ecat]||'bg-gray'}" style="font-size:9px">${escapeHtml(e.ecat)}</span></td>
+      <td><span class="badge ${etBadge[e.etype]||'bg-gray'}" style="font-size:9px">${escapeHtml(e.etype)}</span></td>
+      <td>${isPT(e)?`<span style="font-size:11px;font-weight:600;color:#166534;background:#f0fdf4;padding:2px 7px;border-radius:4px;border:1px solid #86efac">${escapeHtml(e.ptStart||'09:00')}〜${escapeHtml(e.ptEnd||'15:00')}</span>`:'<span style="color:var(--tx3);font-size:11px">—</span>'}</td>
       <td>
         <div style="display:flex;align-items:center;gap:4px">
           <input type="number" value="${getAL(e)}" min="0" step="0.5"
-            onchange="chEmpAL('${e.id}',this.value)"
+            data-shift-change="chEmpAL" data-id="${escapeAttr(e.id)}"
             style="width:46px;font-size:11px;border:1px solid var(--bd2);border-radius:4px;padding:2px 4px;background:var(--sf);color:var(--tx)"
             title="有給残日数を手入力で変更できます">
           <span style="font-size:9px;color:var(--tx3)">日</span>
@@ -1578,16 +2095,16 @@ function rEmp(){
         </div>
       </td>
       <td style="white-space:nowrap">
-        <button class="btn sm" onclick="openEditEmp('${e.id}')">編集</button>
-        <button class="btn danger sm" onclick="delEmp('${e.id}')">削除</button>
+        <button class="btn sm" data-shift-action="openEditEmp" data-id="${escapeAttr(e.id)}">編集</button>
+        <button class="btn danger sm" data-shift-action="delEmp" data-id="${escapeAttr(e.id)}">削除</button>
       </td>
     </tr>`;
   }).join('');
   document.getElementById('etbd').innerHTML=html||'<tr><td colspan="10" style="text-align:center;color:var(--tx2)">該当者なし</td></tr>';
 }
-function chEmpDept(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e){e.dept=val;e.team=(DEPT_STRUCT[val]?.teams||[val])[0];rEmp();rSh();}}
-function chEmpTeam(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e)e.team=val;}
-function chEmpYears(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e)e.years=parseFloat(val)||0;}
+function chEmpDept(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e){e.dept=val;e.team=(DEPT_STRUCT[val]?.teams||[val])[0];rEmp();rSh();scheduleSave();}}
+function chEmpTeam(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e){e.team=val;scheduleSave();}}
+function chEmpYears(eid,val){const e=EMPLOYEES.find(x=>x.id===eid);if(e){e.years=parseFloat(val)||0;scheduleSave();}}
 // 有給残日数の手動上書き（管理者のみ）
 function chEmpAL(eid,val){
   if(!isA)return;
@@ -1599,12 +2116,12 @@ function chEmpAL(eid,val){
   persistData();scheduleSave();
   rEmp(); // 自動/手動バッジ再描画
 }
-function delEmp(eid){if(!confirm('削除しますか？'))return;const i=EMPLOYEES.findIndex(x=>x.id===eid);if(i>=0){EMPLOYEES.splice(i,1);rEmp();rSh();rDB();}}
+function delEmp(eid){if(!confirm('削除しますか？'))return;const i=EMPLOYEES.findIndex(x=>x.id===eid);if(i>=0){EMPLOYEES.splice(i,1);rEmp();rSh();rDB();rVreq();rOTReq();rHReq();scheduleSave();}} // 削除後も申請対象欄を更新
 
 function updateEtypeOpts(){
   const cat=document.getElementById('e-ecat').value;
   const opts=ETYPE_MAP[cat]||['正社員'];
-  document.getElementById('e-etype').innerHTML=opts.map(o=>`<option>${o}</option>`).join('');
+  document.getElementById('e-etype').innerHTML=opts.map(o=>`<option>${escapeHtml(o)}</option>`).join('');
   togglePartTimeFields();
 }
 function togglePartTimeFields(){
@@ -1630,18 +2147,36 @@ function updatePTPreview(){
 function updateTeamOpts(){
   const dept=document.getElementById('e-dept').value;
   const teams=(DEPT_STRUCT[dept]?.teams)||[dept];
-  document.getElementById('e-team').innerHTML=teams.map(t=>`<option>${t}</option>`).join('');
+  document.getElementById('e-team').innerHTML=teams.map(t=>`<option>${escapeHtml(t)}</option>`).join('');
+}
+// 追加はポータルの在籍者から選ぶ（氏名・IDはポータルの値。手入力でIDを作らない）
+function setEmpNameEditable_(editable){
+  const n=document.getElementById('e-name');
+  n.readOnly=!editable;
+  n.title=editable?'':'氏名はポータルの従業員マスターで変更してください';
+  n.style.background=editable?'':'var(--bg2, #f3f4f6)';
 }
 function openAddEmp(){
+  if(portalNotReady_()) return;
+  const free=unregisteredPortal_();
+  if(!free.length){ alert('追加できるポータルの在籍者はいません（全員登録済みです）。'); return; }
   editingEmpId=null;
   document.getElementById('emttl').textContent='従業員追加';
+  const pick=document.getElementById('e-pick');
+  pick.innerHTML='<option value="">（ポータルの従業員を選んでください）</option>'+free.map(p=>portalOption_(p,false)).join('');
+  pick.onchange=()=>{
+    const p=portalById_(pick.value);
+    document.getElementById('e-name').value=p?p.name:'';
+    if(p && DEPT_STRUCT[p.dept]){ document.getElementById('e-dept').value=p.dept; updateTeamOpts(); }
+  };
+  document.getElementById('e-pick-row').classList.remove('hid');
+  setEmpNameEditable_(false);
   document.getElementById('e-name').value='';
   document.getElementById('e-dept').value='製造部';updateTeamOpts();
   document.getElementById('e-years').value='0';
   document.getElementById('e-ecat').value='無期雇用';updateEtypeOpts();
   document.getElementById('e-start').value='09:00';
   document.getElementById('e-end').value='15:00';
-  document.getElementById('e-pw').value='1234';
   togglePartTimeFields();
   document.getElementById('emod').classList.remove('hid');
 }
@@ -1649,6 +2184,9 @@ function openEditEmp(eid){
   const e=EMPLOYEES.find(x=>x.id===eid);if(!e)return;
   editingEmpId=eid;
   document.getElementById('emttl').textContent='従業員編集';
+  document.getElementById('e-pick-row').classList.add('hid');
+  // ポータルとつながっている人の氏名はポータルで直す。未登録の人だけ手で直せる。
+  setEmpNameEditable_(!portalById_(eid));
   document.getElementById('e-name').value=e.name;
   document.getElementById('e-dept').value=e.dept;updateTeamOpts();
   document.getElementById('e-team').value=e.team;
@@ -1658,13 +2196,19 @@ function openEditEmp(eid){
   // パート・アルバイト用デフォルト時間
   document.getElementById('e-start').value=e.ptStart||'09:00';
   document.getElementById('e-end').value=e.ptEnd||'15:00';
-  document.getElementById('e-pw').value=e.pw;
   togglePartTimeFields();
   document.getElementById('emod').classList.remove('hid');
 }
 function closeEmod(){document.getElementById('emod').classList.add('hid');}
 function saveEmp(){
-  const name=document.getElementById('e-name').value.trim();
+  let name=document.getElementById('e-name').value.trim();
+  let portal=null;
+  if(!editingEmpId){
+    portal=portalById_(document.getElementById('e-pick').value);
+    if(!portal || !PORTAL_ID_RE_.test(portal.id)){alert('ポータルの従業員を選んでください');return;}
+    if(EMPLOYEES.some(x=>x.id===portal.id)){alert('この従業員はすでに登録されています');return;}
+    name=portal.name;
+  } else if(portalById_(editingEmpId)) name=portalById_(editingEmpId).name;
   if(!name){alert('氏名を入力してください');return;}
   const dept=document.getElementById('e-dept').value;
   const team=document.getElementById('e-team').value;
@@ -1673,15 +2217,15 @@ function saveEmp(){
   const etype=document.getElementById('e-etype').value;
   const ptStart=document.getElementById('e-start').value||'09:00';
   const ptEnd=document.getElementById('e-end').value||'15:00';
-  const pw=document.getElementById('e-pw').value||'1234';
   if(editingEmpId){
     const e=EMPLOYEES.find(x=>x.id===editingEmpId);
-    if(e){e.name=name;e.dept=dept;e.team=team;e.years=years;e.ecat=ecat;e.etype=etype;e.ptStart=ptStart;e.ptEnd=ptEnd;e.pw=pw;}
+    if(e){e.name=name;e.dept=dept;e.team=team;e.years=years;e.ecat=ecat;e.etype=etype;e.ptStart=ptStart;e.ptEnd=ptEnd;}
   }else{
-    const e=mkEmp(name,dept,team,years,ecat,etype,ptStart,ptEnd);e.pw=pw;
-    EMPLOYEES.push(e);SHIFTS[e.id]={};
+    const e=mkEmp(name,dept,team,years,ecat,etype,ptStart,ptEnd);
+    e.id=portal.id; // ポータルの社員IDで登録（申請・年休の照合と同じID）
+    EMPLOYEES.push(e);if(!SHIFTS[e.id])SHIFTS[e.id]={}; // 既存SHIFTSは消さない（新規IDのみ初期化）
   }
-  closeEmod();rEmp();rSh();rDB();
+  closeEmod();rEmp();rSh();rDB();rVreq();rOTReq();rHReq(); // 申請対象欄も更新（rVreq/rOTReq/rHReq）
   persistData(); // localStorageに保存
   scheduleSave(); // GASへ自動保存
 }
@@ -1729,7 +2273,7 @@ function calcVreqPreview(){
   const el=document.getElementById('vreq-remain-preview');
   if(!from||!cUser){if(el)el.innerHTML='';return;}
   const targetId=isA?(document.getElementById('vreq-target')?.value||''):cUser.id;
-  const emp=EMPLOYEES.find(x=>x.id===targetId);
+  const emp=resolveTarget_(targetId);
   if(!emp){if(el)el.innerHTML='';return;}
   const tot=getAL(emp),used=cntVac(emp.id),rem=tot-used;
   let days=0;
@@ -1754,13 +2298,13 @@ function clearVreqForm(){
   onVreqTypeChange();
   document.getElementById('vreq-remain-preview').innerHTML='';
 }
-function submitVreq(){
+async function submitVreq(){
   if(!cUser)return;
   // 申請対象者の決定（管理者は選択、従業員は自分）
   const targetId=isA
     ?(document.getElementById('vreq-target')?.value||'')
     :cUser.id;
-  const emp = isA ? EMPLOYEES.find(x=>x.id===targetId) : getEmpOrCurrent(targetId);
+  const emp = isA ? resolveTarget_(targetId) : getEmpOrCurrent(targetId);
   if(!emp){alert(isA?'申請対象者を選択してください（先に従業員を登録してください）':'従業員情報が見つかりません');return;}
   const type=document.getElementById('vreq-type').value;
   const from=document.getElementById('vreq-from').value;
@@ -1783,117 +2327,64 @@ function submitVreq(){
     return !(to<r.from||from>r.to);
   });
   if(overlap){alert('同じ期間に既に申請があります。');return;}
-  const req={
-    id:genReqId(),eid:emp.id,name:emp.name,
-    dept:emp.dept,type,from,to,days,
-    tstart,tend,reason,
-    status:'pending',
-    appliedAt:new Date().toISOString(),reviewedAt:null,reviewNote:''
-  };
+  // ★サーバー権威：申請はcreateRequestで作成（idは server が採番、所有者=トークンのsub）
+  const cres = await gasCall_('createRequest', { kind:'vac', req:{
+    eid:emp.id, name:emp.name, dept:emp.dept, type, from, to, days, tstart, tend, reason
+  }});
+  if (!cres || !cres.ok) { alert('申請の保存に失敗しました' + (cres&&cres.message?'\n'+cres.message:'')); return; }
+  const req = cres.request;
   VAC_REQUESTS.unshift(req);
-  persistData();
-  scheduleSave();
   clearVreqForm();
   rVreq();updVreqBadge();rDB();
- 
-  // ★LINEWORKS通知（申請時→管理者へ）
-  sendShiftNotify('apply', {
-    name:   emp.name,
-    type:   '有給申請（' + type + '）',
-    date:   from + (to && to !== from ? '〜' + to : ''),
-    detail: reason || '理由なし'
-  });
-  alert(`✅ 有給申請を提出しました（${req.id}）\n${isA?emp.name+'の':''}申請が完了しました。`);
+
+  alert(`✅ 有給申請を提出しました（${req.id}）
+${isA?escapeHtml(emp.name)+'の':''}申請が完了しました。` + '\n' + notificationSummary_(cres.notification).text);
 }
 
 // 管理者操作
-function approveReq(id){
+async function approveReq(id){
   const req=VAC_REQUESTS.find(r=>r.id===id);if(!req||req.status!=='pending')return;
   const note=prompt('承認コメント（任意）','');
   if(note===null)return;
-  req.status='approved';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
-  req.reviewedBy=cUser?cUser.name:'管理者'; // 承認者名を記録
-  // シフトに反映（全休・半休の場合）
-  if(req.type==='全休'||req.type==='半休前'||req.type==='半休後'){
-    const from=new Date(req.from),to=new Date(req.to);
-    let cur=new Date(from);
-    while(cur<=to){
-      const y=cur.getFullYear(),m=cur.getMonth(),d=cur.getDate();
-      if(!isRestDay(y,m,d)){
-        const k=dkey(y,m,d);
-        if(!SHIFTS[req.eid])SHIFTS[req.eid]={};
-        SHIFTS[req.eid][k]={type:'VAC',ot:0,vacType:req.type,reqId:req.id};
-      }
-      cur.setDate(cur.getDate()+1);
-    }
-  }
-  // 有給残日数を自動減算（alOverrideを更新）
-  const emp=EMPLOYEES.find(x=>x.id===req.eid);
-  if(emp&&req.days>0){
-    const cur=getAL(emp);
-    emp.alOverride=Math.max(0,Math.round((cur-req.days)*10)/10);
-  }
+  // ★サーバー決裁（leader以上のみ）。状態遷移・審査者はサーバーが確定する。
+  const dres=await gasCall_('decideRequest',{id:req.id,decision:'approved',reviewNote:note||'',baseVersion:req.version});
+  if(!dres||!dres.ok){ if(dres&&dres.conflict){await reloadReqsAndRender_();alert('他の端末で更新されました。最新の状態に更新しました。');} else {alert('承認に失敗しました'+(dres&&dres.message?'\n'+dres.message:''));} return; }
+  syncReq_(req,dres.request); // status/reviewedAt/reviewedBy/version をサーバー値に同期
+  // シフトへの反映（全休・半休）と有給残日数の減算は、サーバーが承認と同時に保存済み。結果を画面へ反映する。
+  applyServerEffects_(dres.effects);
   rVreq();updVreqBadge();rSh();rPL();rDB();rEmp();
-  persistData();scheduleSave();
 
-  // ★LINEWORKS通知（承認時→申請者へ）
-  const empNotifyV = EMPLOYEES.find(x => x.id === req.eid);
-  if (empNotifyV && empNotifyV.lwUserId) {
-    sendShiftNotify('approved', {
-      type:     '有給申請（' + req.type + '）',
-      date:     req.from + (req.to && req.to !== req.from ? '〜' + req.to : ''),
-      approver: cUser ? cUser.name : '管理者',
-      lwUserId: empNotifyV.lwUserId
-    });
-  }
-  alert(`✅ ${req.id} を承認しました。シフトに反映されました。`);
+  alert(`✅ ${req.id} を承認しました。シフトに反映されました。` + '\n' + notificationSummary_(dres.notification).text);
 }
-function rejectReq(id){
+async function rejectReq(id){
   const req=VAC_REQUESTS.find(r=>r.id===id);if(!req||req.status!=='pending')return;
   const note=prompt('却下理由を入力してください','');
   if(note===null)return;
   if(!note.trim()){alert('却下理由を入力してください');return;}
-  req.status='rejected';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
-  req.reviewedBy=cUser?cUser.name:'管理者'; // 却下者名を記録
+  const dres=await gasCall_('decideRequest',{id:req.id,decision:'rejected',reviewNote:note,baseVersion:req.version});
+  if(!dres||!dres.ok){ if(dres&&dres.conflict){await reloadReqsAndRender_();alert('他の端末で更新されました。最新の状態に更新しました。');} else {alert('却下に失敗しました'+(dres&&dres.message?'\n'+dres.message:''));} return; }
+  syncReq_(req,dres.request);
   rVreq();updVreqBadge();rDB();
-  persistData();scheduleSave();
 
-  // ★LINEWORKS通知（却下時→申請者へ）
-  const empNotifyVR = EMPLOYEES.find(x => x.id === req.eid);
-  if (empNotifyVR && empNotifyVR.lwUserId) {
-    sendShiftNotify('rejected', {
-      type:     '有給申請（' + req.type + '）',
-      date:     req.from + (req.to && req.to !== req.from ? '〜' + req.to : ''),
-      reason:   note,
-      lwUserId: empNotifyVR.lwUserId
-    });
-  }
-  alert(`❌ ${req.id} を却下しました。`);
+  alert(`❌ ${req.id} を却下しました。` + '\n' + notificationSummary_(dres.notification).text);
 }
-function cancelReq(id){
+async function cancelReq(id){
   const req=VAC_REQUESTS.find(r=>r.id===id);if(!req)return;
-  if(req.status==='approved'){
+  const wasApproved=req.status==='approved';
+  if(wasApproved){
     if(!confirm('承認済みの申請を取り消しますか？シフトの有給も削除されます。'))return;
-    // シフトから削除
-    const from=new Date(req.from),to=new Date(req.to);
-    let cur=new Date(from);
-    while(cur<=to){
-      const y=cur.getFullYear(),m=cur.getMonth(),d=cur.getDate();
-      const k=dkey(y,m,d);
-      if(SHIFTS[req.eid]?.[k]?.reqId===req.id)SHIFTS[req.eid][k]={type:'OFF',ot:0};
-      cur.setDate(cur.getDate()+1);
-    }
-    // 有給残日数を加算して戻す
-    const emp=EMPLOYEES.find(x=>x.id===req.eid);
-    if(emp&&req.days>0){
-      const cur=getAL(emp);
-      emp.alOverride=Math.round((cur+req.days)*10)/10;
-    }
-    rSh();rPL();rEmp();
   }else if(req.status!=='pending'){alert('取消できない状態です');return;}
-  req.status='cancelled';req.reviewedAt=new Date().toISOString();
+  // ★サーバー権威で取消（pending＝本人or管理者／approved＝管理者のみ）
+  const cres=await gasCall_('cancelRequest',{id:req.id,baseVersion:req.version});
+  if(!cres||!cres.ok){ if(cres&&cres.conflict){await reloadReqsAndRender_();alert('他の端末で更新されました。最新の状態に更新しました。');} else {alert('取消に失敗しました'+(cres&&cres.message?'\n'+cres.message:''));} return; }
+  syncReq_(req,cres.request);
+  if(wasApproved){
+    // シフト反映の巻き戻しと有給残日数の戻しは、サーバーが取消と同時に保存済み。
+    applyServerEffects_(cres.effects);
+    rSh();rPL();rEmp();
+    if(cres.effects&&cres.effects.alNotReverted) alert('この申請は以前の版で承認されたため、有給残日数は自動で戻していません。従業員管理で確認してください。');
+  }
   rVreq();updVreqBadge();rDB();
-  persistData();scheduleSave();
 }
 
 let curRF='all';
@@ -1910,9 +2401,9 @@ function rVreq(){
     if(lbl)lbl.textContent='申請フォーム（代理申請・自己申請が可能）';
     if(targetRow)targetRow.style.display='';
     if(targetSel){
-      targetSel.innerHTML=EMPLOYEES.length>0
-        ?EMPLOYEES.map(e=>`<option value="${e.id}">${e.name}（${e.dept}）</option>`).join('')
-        :'<option value="">※先に従業員を登録してください</option>';
+      targetSel.innerHTML=ROSTER.length>0
+        ?ROSTER.map(e=>`<option value="${escapeAttr(e.id)}">${escapeHtml(e.name)}（${escapeHtml(e.dept)}）</option>`).join('')
+        :'<option value="">※対象者を取得できません（ポータル名簿を確認）</option>';
     }
   }else{
     if(lbl)lbl.textContent='有給申請を提出します。承認後にシフトへ反映されます。';
@@ -1948,31 +2439,31 @@ function rVreqList(){
     const isPending=req.status==='pending';
     // 管理者ボタン
     const adminBtns=isA&&isPending?
-      `<button class="btn pri sm" onclick="approveReq('${req.id}')">✓ 承認</button>
-       <button class="btn danger sm" onclick="rejectReq('${req.id}')">✗ 却下</button>`:'';
+      `<button class="btn pri sm" data-shift-action="approveReq" data-id="${escapeAttr(req.id)}">✓ 承認</button>
+       <button class="btn danger sm" data-shift-action="rejectReq" data-id="${escapeAttr(req.id)}">✗ 却下</button>`:'';
     // 取消：申請中は誰でも、承認済は管理者のみ
     const canCancel=isPending||(req.status==='approved'&&isA);
     const cancelBtn=canCancel?
-      `<button class="btn sm" onclick="cancelReq('${req.id}')" style="color:var(--r)">取消</button>`:'';
+      `<button class="btn sm" data-shift-action="cancelReq" data-id="${escapeAttr(req.id)}" style="color:var(--r)">取消</button>`:'';
     // 申請者名（管理者は誰の申請か表示）
-    const nameArea=isA?`<span class="req-name">${req.name}</span><span style="font-size:10px;color:var(--tx2);margin-left:4px">(${req.dept})</span>`:'';
+    const nameArea=isA?`<span class="req-name">${escapeHtml(req.name)}</span><span style="font-size:10px;color:var(--tx2);margin-left:4px">(${escapeHtml(req.dept)})</span>`:'';
     return`<div class="req-card">
       <div class="req-header">
         ${nameArea}
-        <span style="font-size:11px;color:var(--tx2)">${req.id}</span>
+        <span style="font-size:11px;color:var(--tx2)">${escapeHtml(req.id)}</span>
         <span>${typeIcon[req.type]||'📋'}</span>
-        <span class="req-date">${dateStr}${timeStr}</span>
-        <span class="req-days">${req.days}日</span>
-        <span class="status-badge ${stCls[req.status]}">${stMap[req.status]}</span>
+        <span class="req-date">${escapeHtml(dateStr)}${escapeHtml(timeStr)}</span>
+        <span class="req-days">${Number(req.days)||0}日</span>
+        <span class="status-badge ${escapeHtml(stCls[req.status])}">${escapeHtml(stMap[req.status])}</span>
       </div>
       <div class="req-body">
-        申請種別: <strong>${req.type}</strong>　申請日: ${appliedDt}
-        ${reviewDt?`　査定日: ${reviewDt}`:''}
-        ${req.reviewedBy?`　<span style="font-size:10px;color:var(--tx2)">担当: <strong style="color:var(--pr)">${req.reviewedBy}</strong></span>`:''}
+        申請種別: <strong>${escapeHtml(req.type)}</strong>　申請日: ${escapeHtml(appliedDt)}
+        ${reviewDt?`　査定日: ${escapeHtml(reviewDt)}`:''}
+        ${req.reviewedBy?`　<span style="font-size:10px;color:var(--tx2)">担当: <strong style="color:var(--pr)">${escapeHtml(req.reviewedBy)}</strong></span>`:''}
       </div>
-      ${req.reason?`<div class="req-reason">理由: ${req.reason}</div>`:''}
+      ${req.reason?`<div class="req-reason">理由: ${escapeHtml(req.reason)}</div>`:''}
       ${req.reviewNote?`<div class="req-reason" style="border-left-color:${req.status==='rejected'?'var(--r)':'var(--g)'}">
-        ${req.status==='rejected'?'却下理由':'承認コメント'}: ${req.reviewNote}</div>`:''}
+        ${req.status==='rejected'?'却下理由':'承認コメント'}: ${escapeHtml(req.reviewNote)}</div>`:''}
       <div class="req-foot">
         ${adminBtns}${cancelBtn}
       </div>
@@ -1995,7 +2486,7 @@ function calcOTReqPreview(){
   const dow='日月火水木金土'[dt.getDay()];
   if(prev)prev.textContent=`（${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日・${dow}）`;
   const tgtId=isA?(document.getElementById('otreq-target')?.value||''):cUser.id;
-  const emp=EMPLOYEES.find(x=>x.id===tgtId);
+  const emp=resolveTarget_(tgtId);
   if(!emp||!mPrev)return;
   const curOT=calcPeriodOT(emp.id,dt.getFullYear(),dt.getMonth());
   const newOT=Math.round((curOT+hours)*10)/10;
@@ -2010,10 +2501,10 @@ function clearOTReqForm(){
   document.getElementById('otreq-preview').textContent='';
   document.getElementById('otreq-month-preview').innerHTML='';
 }
-function submitOTReq(){
+async function submitOTReq(){
   if(!cUser)return;
   const targetId=isA?(document.getElementById('otreq-target')?.value||''):cUser.id;
-  const emp = isA ? EMPLOYEES.find(x=>x.id===targetId) : getEmpOrCurrent(targetId);
+  const emp = isA ? resolveTarget_(targetId) : getEmpOrCurrent(targetId);
   if(!emp){alert(isA?'申請対象者を選択してください':'従業員情報が見つかりません');return;}
   const date=document.getElementById('otreq-date').value;
   if(!date){alert('対象日を入力してください');return;}
@@ -2030,87 +2521,55 @@ function submitOTReq(){
   // 重複チェック
   const overlap=OT_REQUESTS.some(r=>r.eid===emp.id&&r.date===date&&r.status!=='cancelled'&&r.status!=='rejected');
   if(overlap){alert('同じ日に既に残業申請があります');return;}
-  const req={
-    id:genOTReqId(),eid:emp.id,name:emp.name,dept:emp.dept,
-    date,shift,hours,reason,status:'pending',
-    appliedAt:new Date().toISOString(),reviewedAt:null,reviewNote:''
-  };
+  const cres = await gasCall_('createRequest', { kind:'ot', req:{
+    eid:emp.id, name:emp.name, dept:emp.dept, date, shift, hours, reason
+  }});
+  if (!cres || !cres.ok) { alert('申請の保存に失敗しました' + (cres&&cres.message?'\n'+cres.message:'')); return; }
+  const req = cres.request;
   OT_REQUESTS.unshift(req);
-  persistData();
-  scheduleSave();
   clearOTReqForm();
   rOTReq();updAllBadges();rDB();
 
-  // ★LINEWORKS通知（申請時→管理者へ）
-  sendShiftNotify('apply', {
-    name:   emp.name,
-    type:   '残業申請',
-    date:   date,
-    detail: shift + '勤 ' + hours + 'H　理由: ' + reason
-  });
 
-  // ★LINEWORKS通知（承認時→申請者へ）
-  const empNotifyO = EMPLOYEES.find(x => x.id === req.eid);
-  if (empNotifyO && empNotifyO.lwUserId) {
-    sendShiftNotify('approved', {
-      type:     '残業申請（' + req.shift + '勤 ' + req.hours + 'H）',
-      date:     req.date,
-      approver: cUser ? cUser.name : '管理者',
-      lwUserId: empNotifyO.lwUserId
-    });
-  }
-  alert(`✅ 残業申請を提出しました（${req.id}）\n管理者の承認をお待ちください。`);
+  alert(`✅ 残業申請を提出しました（${req.id}）
+管理者の承認をお待ちください。` + '\n' + notificationSummary_(cres.notification).text);
 }
-function approveOTReq(id){
+async function approveOTReq(id){
   const req=OT_REQUESTS.find(r=>r.id===id);if(!req||req.status!=='pending')return;
   const note=prompt('承認コメント（任意）','');
   if(note===null)return;
-  req.status='approved';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
-  req.reviewedBy=cUser?cUser.name:'管理者'; // 承認者名を記録
-  // シフトの残業時間を更新
-  const dt=new Date(req.date);
-  const k=dkey(dt.getFullYear(),dt.getMonth(),dt.getDate());
-  if(!SHIFTS[req.eid])SHIFTS[req.eid]={};
-  const cur=SHIFTS[req.eid][k]||{type:req.shift,ot:0};
-  SHIFTS[req.eid][k]={...cur,type:req.shift,ot:req.hours,reqId:req.id};
+  const dres=await gasCall_('decideRequest',{id:req.id,decision:'approved',reviewNote:note||'',baseVersion:req.version});
+  if(!dres||!dres.ok){ if(dres&&dres.conflict){await reloadReqsAndRender_();alert('他の端末で更新されました。最新の状態に更新しました。');} else {alert('承認に失敗しました'+(dres&&dres.message?'\n'+dres.message:''));} return; }
+  syncReq_(req,dres.request);
+  // シフトの残業時間への反映は、サーバーが承認と同時に保存済み。
+  applyServerEffects_(dres.effects);
   rOTReq();updAllBadges();rSh();rOT();rDB();
-  persistData();scheduleSave(); // ★追加
-  alert(`✅ ${req.id} を承認しました。シフトの残業時間に反映されました。`);
+  alert(`✅ ${req.id} を承認しました。シフトの残業時間に反映されました。` + '\n' + notificationSummary_(dres.notification).text);
 }
-function rejectOTReq(id){
+async function rejectOTReq(id){
   const req=OT_REQUESTS.find(r=>r.id===id);if(!req||req.status!=='pending')return;
   const note=prompt('却下理由を入力してください','');
   if(note===null)return;
   if(!note.trim()){alert('却下理由を入力してください');return;}
-  req.status='rejected';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
-  req.reviewedBy=cUser?cUser.name:'管理者'; // 却下者名を記録
+  const dres=await gasCall_('decideRequest',{id:req.id,decision:'rejected',reviewNote:note,baseVersion:req.version});
+  if(!dres||!dres.ok){ if(dres&&dres.conflict){await reloadReqsAndRender_();alert('他の端末で更新されました。最新の状態に更新しました。');} else {alert('却下に失敗しました'+(dres&&dres.message?'\n'+dres.message:''));} return; }
+  syncReq_(req,dres.request);
   rOTReq();updAllBadges();rDB();
-
-  // ★LINEWORKS通知（却下時→申請者へ）
-  const empNotifyOR = EMPLOYEES.find(x => x.id === req.eid);
-  if (empNotifyOR && empNotifyOR.lwUserId) {
-    sendShiftNotify('rejected', {
-      type:     '残業申請（' + req.shift + '勤 ' + req.hours + 'H）',
-      date:     req.date,
-      reason:   note,
-      lwUserId: empNotifyOR.lwUserId
-    });
-  }
-  persistData();scheduleSave(); // ★追加
-  alert(`❌ ${req.id} を却下しました。`);
+  alert(`❌ ${req.id} を却下しました。` + '\n' + notificationSummary_(dres.notification).text);
 }
-function cancelOTReq(id){
+async function cancelOTReq(id){
   const req=OT_REQUESTS.find(r=>r.id===id);if(!req)return;
-  if(req.status==='approved'){
+  const wasApproved=req.status==='approved';
+  if(wasApproved){
     if(!confirm('承認済みの残業申請を取り消しますか？シフトの残業時間も削除されます。'))return;
-    const dt=new Date(req.date);
-    const k=dkey(dt.getFullYear(),dt.getMonth(),dt.getDate());
-    if(SHIFTS[req.eid]?.[k]?.reqId===req.id){
-      SHIFTS[req.eid][k]={...SHIFTS[req.eid][k],ot:0};
-    }
-    rSh();rOT();
   }else if(req.status!=='pending'){alert('取消できない状態です');return;}
-  req.status='cancelled';req.reviewedAt=new Date().toISOString();
+  const cres=await gasCall_('cancelRequest',{id:req.id,baseVersion:req.version});
+  if(!cres||!cres.ok){ if(cres&&cres.conflict){await reloadReqsAndRender_();alert('他の端末で更新されました。最新の状態に更新しました。');} else {alert('取消に失敗しました'+(cres&&cres.message?'\n'+cres.message:''));} return; }
+  syncReq_(req,cres.request);
+  if(wasApproved){
+    applyServerEffects_(cres.effects); // 残業時間の戻しはサーバーが取消と同時に保存済み
+    rSh();rOT();
+  }
   rOTReq();updAllBadges();rDB();
 }
 let curOTRF='all';
@@ -2125,9 +2584,9 @@ function rOTReq(){
     if(lbl)lbl.textContent='申請フォーム（代理申請・自己申請が可能）';
     if(targetRow)targetRow.style.display='';
     if(targetSel){
-      targetSel.innerHTML=EMPLOYEES.length>0
-        ?EMPLOYEES.map(e=>`<option value="${e.id}">${e.name}（${e.dept}）</option>`).join('')
-        :'<option value="">※先に従業員を登録してください</option>';
+      targetSel.innerHTML=ROSTER.length>0
+        ?ROSTER.map(e=>`<option value="${escapeAttr(e.id)}">${escapeHtml(e.name)}（${escapeHtml(e.dept)}）</option>`).join('')
+        :'<option value="">※対象者を取得できません（ポータル名簿を確認）</option>';
     }
   }else{
     if(lbl)lbl.textContent='残業の事前申請です。承認後にシフトへ反映されます。';
@@ -2153,25 +2612,25 @@ function rOTReqList(){
     const appliedDt=new Date(req.appliedAt).toLocaleDateString('ja-JP');
     const reviewDt=req.reviewedAt?new Date(req.reviewedAt).toLocaleDateString('ja-JP'):'';
     const isPending=req.status==='pending';
-    const nameArea=isA?`<span class="req-name">${req.name}</span><span style="font-size:10px;color:var(--tx2);margin-left:4px">(${req.dept})</span>`:'';
+    const nameArea=isA?`<span class="req-name">${escapeHtml(req.name)}</span><span style="font-size:10px;color:var(--tx2);margin-left:4px">(${escapeHtml(req.dept)})</span>`:'';
     const adminBtns=isA&&isPending?
-      `<button class="btn pri sm" onclick="approveOTReq('${req.id}')">✓ 承認</button>
-       <button class="btn danger sm" onclick="rejectOTReq('${req.id}')">✗ 却下</button>`:'';
-    const cancelBtn=(isPending||(req.status==='approved'&&isA))?`<button class="btn sm" onclick="cancelOTReq('${req.id}')" style="color:var(--r)">取消</button>`:'';
+      `<button class="btn pri sm" data-shift-action="approveOTReq" data-id="${escapeAttr(req.id)}">✓ 承認</button>
+       <button class="btn danger sm" data-shift-action="rejectOTReq" data-id="${escapeAttr(req.id)}">✗ 却下</button>`:'';
+    const cancelBtn=(isPending||(req.status==='approved'&&isA))?`<button class="btn sm" data-shift-action="cancelOTReq" data-id="${escapeAttr(req.id)}" style="color:var(--r)">取消</button>`:'';
     return`<div class="req-card" style="border-left:4px solid ${isPending?'#f0c040':req.status==='approved'?'#6ee7b7':'#fca5a5'}">
       <div class="req-header">
         ${nameArea}
-        <span style="font-size:11px;color:var(--tx2)">${req.id}</span>
+        <span style="font-size:11px;color:var(--tx2)">${escapeHtml(req.id)}</span>
         <span>⏱</span>
-        <span class="req-date">${dateStr}</span>
-        <span class="req-days" style="background:#fee2e2;color:var(--r)">${req.hours}H残業</span>
-        <span class="req-days">${req.shift}勤</span>
-        <span class="status-badge ${stCls[req.status]}">${stMap[req.status]}</span>
+        <span class="req-date">${escapeHtml(dateStr)}</span>
+        <span class="req-days" style="background:#fee2e2;color:var(--r)">${Number(req.hours)||0}H残業</span>
+        <span class="req-days">${escapeHtml(req.shift)}勤</span>
+        <span class="status-badge ${escapeHtml(stCls[req.status])}">${escapeHtml(stMap[req.status])}</span>
       </div>
-      <div class="req-body">申請日: ${appliedDt}${reviewDt?`　査定日: ${reviewDt}`:''}${req.reviewedBy?`　<span style="font-size:10px;color:var(--tx2)">担当: <strong style="color:var(--pr)">${req.reviewedBy}</strong></span>`:''}</div>
-      ${req.reason?`<div class="req-reason">理由: ${req.reason}</div>`:''}
+      <div class="req-body">申請日: ${escapeHtml(appliedDt)}${reviewDt?`　査定日: ${escapeHtml(reviewDt)}`:''}${req.reviewedBy?`　<span style="font-size:10px;color:var(--tx2)">担当: <strong style="color:var(--pr)">${escapeHtml(req.reviewedBy)}</strong></span>`:''}</div>
+      ${req.reason?`<div class="req-reason">理由: ${escapeHtml(req.reason)}</div>`:''}
       ${req.reviewNote?`<div class="req-reason" style="border-left-color:${req.status==='rejected'?'var(--r)':'var(--g)'}">
-        ${req.status==='rejected'?'却下理由':'承認コメント'}: ${req.reviewNote}</div>`:''}
+        ${req.status==='rejected'?'却下理由':'承認コメント'}: ${escapeHtml(req.reviewNote)}</div>`:''}
       <div class="req-foot">${adminBtns}${cancelBtn}</div>
     </div>`;
   }).join('');
@@ -2218,10 +2677,10 @@ function clearHReqForm(){
   const dc=document.getElementById('hreq-day-check');if(dc)dc.textContent='';
   const hp=document.getElementById('hreq-hours-preview');if(hp)hp.textContent='';
 }
-function submitHReq(){
+async function submitHReq(){
   if(!cUser)return;
   const targetId=isA?(document.getElementById('hreq-target')?.value||''):cUser.id;
-  const emp = isA ? EMPLOYEES.find(x=>x.id===targetId) : getEmpOrCurrent(targetId);
+  const emp = isA ? resolveTarget_(targetId) : getEmpOrCurrent(targetId);
   if(!emp){alert(isA?'申請対象者を選択してください':'従業員情報が見つかりません');return;}
   const date=document.getElementById('hreq-date').value;
   if(!date){alert('出勤日を入力してください');return;}
@@ -2241,116 +2700,76 @@ function submitHReq(){
   // 重複チェック
   const overlap=H_REQUESTS.some(r=>r.eid===emp.id&&r.date===date&&r.status!=='cancelled'&&r.status!=='rejected');
   if(overlap){alert('同じ日に既に休日出勤申請があります');return;}
-  const req={
-    id:genHReqId(),eid:emp.id,name:emp.name,dept:emp.dept,
-    date,start,end,hours,furikae,reason,status:'pending',
-    appliedAt:new Date().toISOString(),reviewedAt:null,reviewNote:''
-  };
+  const cres = await gasCall_('createRequest', { kind:'h', req:{
+    eid:emp.id, name:emp.name, dept:emp.dept, date, start, end, hours, furikae, reason
+  }});
+  if (!cres || !cres.ok) { alert('申請の保存に失敗しました' + (cres&&cres.message?'\n'+cres.message:'')); return; }
+  const req = cres.request;
   H_REQUESTS.unshift(req);
-  persistData();
-  scheduleSave();
   clearHReqForm();
   rHReq();updAllBadges();rDB();
 
-  // ★LINEWORKS通知（申請時→管理者へ）
-  sendShiftNotify('apply', {
-    name:   emp.name,
-    type:   '休日出勤申請',
-    date:   date,
-    detail: start + '〜' + end + '　業務: ' + reason
-  });
-  alert(`✅ 休日出勤申請を提出しました（${req.id}）\n管理者の承認をお待ちください。`);
+  alert(`✅ 休日出勤申請を提出しました（${req.id}）
+管理者の承認をお待ちください。` + '\n' + notificationSummary_(cres.notification).text);
 }
-function approveHReq(id){
+async function approveHReq(id){
   const req=H_REQUESTS.find(r=>r.id===id);if(!req||req.status!=='pending')return;
   const note=prompt('承認コメント（任意）','');
   if(note===null)return;
-  req.status='approved';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
-  req.reviewedBy=cUser?cUser.name:'管理者'; // 承認者名を記録
-  const dt=new Date(req.date);
-  const k=dkey(dt.getFullYear(),dt.getMonth(),dt.getDate());
-  if(!SHIFTS[req.eid])SHIFTS[req.eid]={};
-  SHIFTS[req.eid][k]={type:'HOL-W',ot:0,start:req.start,end:req.end,reqId:req.id};
-  // 振替休日があればシフトにOFFをセット
-  if(req.furikae){
-    const fdt=new Date(req.furikae);
-    const fk=dkey(fdt.getFullYear(),fdt.getMonth(),fdt.getDate());
-    if(!SHIFTS[req.eid])SHIFTS[req.eid]={};
-    SHIFTS[req.eid][fk]={type:'OFF',ot:0,note:'振替休日'};
-  }
+  const dres=await gasCall_('decideRequest',{id:req.id,decision:'approved',reviewNote:note||'',baseVersion:req.version});
+  if(!dres||!dres.ok){ if(dres&&dres.conflict){await reloadReqsAndRender_();alert('他の端末で更新されました。最新の状態に更新しました。');} else {alert('承認に失敗しました'+(dres&&dres.message?'\n'+dres.message:''));} return; }
+  syncReq_(req,dres.request);
+  // 休出と振替休日（OFF）のシフトへの反映は、サーバーが承認と同時に保存済み。
+  applyServerEffects_(dres.effects);
   rHReq();updAllBadges();rSh();rOT();rDB();
-  persistData();scheduleSave();
 
-  // ★LINEWORKS通知（承認時→申請者へ）
-  const empNotifyH = EMPLOYEES.find(x => x.id === req.eid);
-  if (empNotifyH && empNotifyH.lwUserId) {
-    sendShiftNotify('approved', {
-      type:     '休日出勤申請（' + req.start + '〜' + req.end + '）',
-      date:     req.date,
-      approver: cUser ? cUser.name : '管理者',
-      lwUserId: empNotifyH.lwUserId
-    });
-  }
-  alert(`✅ ${req.id} を承認しました。シフトに「休出」として反映されました。${req.furikae?'\n振替休日('+req.furikae+')もシフトに反映されました。':''}`);
+  alert(`✅ ${req.id} を承認しました。シフトに「休出」として反映されました。${req.furikae?'\n振替休日('+req.furikae+')もシフトに反映されました。':''}` + '\n' + notificationSummary_(dres.notification).text);
 }
-function rejectHReq(id){
+async function rejectHReq(id){
   const req=H_REQUESTS.find(r=>r.id===id);if(!req||req.status!=='pending')return;
   const note=prompt('却下理由を入力してください','');
   if(note===null)return;
   if(!note.trim()){alert('却下理由を入力してください');return;}
-  req.status='rejected';req.reviewedAt=new Date().toISOString();req.reviewNote=note;
-  req.reviewedBy=cUser?cUser.name:'管理者'; // 却下者名を記録
+  const dres=await gasCall_('decideRequest',{id:req.id,decision:'rejected',reviewNote:note,baseVersion:req.version});
+  if(!dres||!dres.ok){ if(dres&&dres.conflict){await reloadReqsAndRender_();alert('他の端末で更新されました。最新の状態に更新しました。');} else {alert('却下に失敗しました'+(dres&&dres.message?'\n'+dres.message:''));} return; }
+  syncReq_(req,dres.request);
   rHReq();updAllBadges();rDB();
-  persistData();scheduleSave();
 
-  // ★LINEWORKS通知（却下時→申請者へ）
-  const empNotifyHR = EMPLOYEES.find(x => x.id === req.eid);
-  if (empNotifyHR && empNotifyHR.lwUserId) {
-    sendShiftNotify('rejected', {
-      type:     '休日出勤申請',
-      date:     req.date,
-      reason:   note,
-      lwUserId: empNotifyHR.lwUserId
-    });
-  }
-  alert(`❌ ${req.id} を却下しました。`);
+  alert(`❌ ${req.id} を却下しました。` + '\n' + notificationSummary_(dres.notification).text);
 }
 // 振替休日の後日設定
-function editFurikae(id){
+async function editFurikae(id){
   const req=H_REQUESTS.find(r=>r.id===id);
   if(!req||req.status!=='approved'){alert('承認済みの申請にのみ設定できます');return;}
-  const val=prompt(`${req.name} の振替休日を入力してください\n例: 2026-05-10`,'');
+  const val=prompt(`${escapeHtml(req.name)} の振替休日を入力してください
+例: 2026-05-10`,'');
   if(val===null)return;
   if(!val.trim()){alert('日付を入力してください');return;}
   const dt=new Date(val.trim());
   if(isNaN(dt)){alert('正しい日付形式で入力してください（例: 2026-05-10）');return;}
-  const fk=dkey(dt.getFullYear(),dt.getMonth(),dt.getDate());
-  req.furikae=val.trim();
-  // シフトに振替休日（OFF）を反映
-  if(!SHIFTS[req.eid])SHIFTS[req.eid]={};
-  SHIFTS[req.eid][fk]={type:'OFF',ot:0,note:'振替休日'};
+  // ★サーバー権威で振替休日を保存（本人or管理者・承認済みのみ）。シフトへの反映（OFF）もサーバーが同時に保存する。
+  const fres=await gasCall_('setFurikae',{id:req.id,furikae:val.trim(),baseVersion:req.version});
+  if(!fres||!fres.ok){ if(fres&&fres.conflict){await reloadReqsAndRender_();alert('他の端末で更新されました。最新の状態に更新しました。');} else {alert('設定に失敗しました'+(fres&&fres.message?'\n'+fres.message:''));} return; }
+  syncReq_(req,fres.request);
+  applyServerEffects_(fres.effects);
   rHReqList();rSh();rDB();
-  persistData();scheduleSave();
   alert(`✅ 振替休日（${val.trim()}）をシフトに反映しました。`);
 }
 
-function cancelHReq(id){
+async function cancelHReq(id){
   const req=H_REQUESTS.find(r=>r.id===id);if(!req)return;
-  if(req.status==='approved'){
+  const wasApproved=req.status==='approved';
+  if(wasApproved){
     if(!confirm('承認済みの休日出勤申請を取り消しますか？シフトも戻されます。'))return;
-    const dt=new Date(req.date);
-    const k=dkey(dt.getFullYear(),dt.getMonth(),dt.getDate());
-    if(SHIFTS[req.eid]?.[k]?.reqId===req.id)SHIFTS[req.eid][k]={type:'OFF',ot:0};
-    if(req.furikae){
-      const fdt=new Date(req.furikae);
-      const fk=dkey(fdt.getFullYear(),fdt.getMonth(),fdt.getDate());
-      if(SHIFTS[req.eid]?.[fk]?.note==='振替休日')delete SHIFTS[req.eid][fk];
-    }
-    rSh();rOT();
   }else if(req.status!=='pending'){alert('取消できない状態です');return;}
-  req.status='cancelled';req.reviewedAt=new Date().toISOString();
+  const cres=await gasCall_('cancelRequest',{id:req.id,baseVersion:req.version});
+  if(!cres||!cres.ok){ if(cres&&cres.conflict){await reloadReqsAndRender_();alert('他の端末で更新されました。最新の状態に更新しました。');} else {alert('取消に失敗しました'+(cres&&cres.message?'\n'+cres.message:''));} return; }
+  syncReq_(req,cres.request);
+  if(wasApproved){
+    applyServerEffects_(cres.effects); // 休出・振替休日の戻しはサーバーが取消と同時に保存済み
+    rSh();rOT();
+  }
   rHReq();updAllBadges();rDB();
-  persistData();scheduleSave();
 }
 let curHRF='all';
 function setHRF(f,el){curHRF=f;document.querySelectorAll('#hreq-filter .rfbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');rHReqList();}
@@ -2364,9 +2783,9 @@ function rHReq(){
     if(lbl)lbl.textContent='申請フォーム（代理申請・自己申請が可能）';
     if(targetRow)targetRow.style.display='';
     if(targetSel){
-      targetSel.innerHTML=EMPLOYEES.length>0
-        ?EMPLOYEES.map(e=>`<option value="${e.id}">${e.name}（${e.dept}）</option>`).join('')
-        :'<option value="">※先に従業員を登録してください</option>';
+      targetSel.innerHTML=ROSTER.length>0
+        ?ROSTER.map(e=>`<option value="${escapeAttr(e.id)}">${escapeHtml(e.name)}（${escapeHtml(e.dept)}）</option>`).join('')
+        :'<option value="">※対象者を取得できません（ポータル名簿を確認）</option>';
     }
   }else{
     if(lbl)lbl.textContent='休日出勤の事前申請です。承認後にシフトへ反映されます。';
@@ -2391,34 +2810,34 @@ function rHReqList(){
     const appliedDt=new Date(req.appliedAt).toLocaleDateString('ja-JP');
     const reviewDt=req.reviewedAt?new Date(req.reviewedAt).toLocaleDateString('ja-JP'):'';
     const isPending=req.status==='pending';
-    const nameArea=isA?`<span class="req-name">${req.name}</span><span style="font-size:10px;color:var(--tx2);margin-left:4px">(${req.dept})</span>`:'';
+    const nameArea=isA?`<span class="req-name">${escapeHtml(req.name)}</span><span style="font-size:10px;color:var(--tx2);margin-left:4px">(${escapeHtml(req.dept)})</span>`:'';
     const adminBtns=isA&&isPending?
-      `<button class="btn pri sm" onclick="approveHReq('${req.id}')">✓ 承認</button>
-       <button class="btn danger sm" onclick="rejectHReq('${req.id}')">✗ 却下</button>`:'';
+      `<button class="btn pri sm" data-shift-action="approveHReq" data-id="${escapeAttr(req.id)}">✓ 承認</button>
+       <button class="btn danger sm" data-shift-action="rejectHReq" data-id="${escapeAttr(req.id)}">✗ 却下</button>`:'';
     // 取消：申請中は誰でも、承認済は管理者のみ
     const canCancel=isPending||(req.status==='approved'&&isA);
-    const cancelBtn=canCancel?`<button class="btn sm" onclick="cancelHReq('${req.id}')" style="color:var(--r)">取消</button>`:'';
+    const cancelBtn=canCancel?`<button class="btn sm" data-shift-action="cancelHReq" data-id="${escapeAttr(req.id)}" style="color:var(--r)">取消</button>`:'';
     // 振替休日の後日設定：承認済で未定の場合のみ表示（管理者・本人）
     const canEditFurikae=req.status==='approved'&&!req.furikae&&(isA||req.eid===cUser?.id);
     const furikaeEditBtn=canEditFurikae
-      ?`<button class="btn sm" onclick="editFurikae('${req.id}')" style="color:var(--b);border-color:var(--b)">📅 振替休日を設定</button>`
+      ?`<button class="btn sm" data-shift-action="editFurikae" data-id="${escapeAttr(req.id)}" style="color:var(--b);border-color:var(--b)">📅 振替休日を設定</button>`
       :'';
     return`<div class="req-card" style="border-left:4px solid ${isPending?'#f0c040':req.status==='approved'?'#6ee7b7':'#fca5a5'}">
       <div class="req-header">
         ${nameArea}
-        <span style="font-size:11px;color:var(--tx2)">${req.id}</span>
+        <span style="font-size:11px;color:var(--tx2)">${escapeHtml(req.id)}</span>
         <span>🏭</span>
-        <span class="req-date">${req.date}（${dow}）</span>
-        <span class="req-days" style="background:#fef3c7;color:#92400e">${req.start}〜${req.end}</span>
-        <span class="req-days">${req.hours}H</span>
-        <span class="status-badge ${stCls[req.status]}">${stMap[req.status]}</span>
+        <span class="req-date">${escapeHtml(req.date)}（${dow}）</span>
+        <span class="req-days" style="background:#fef3c7;color:#92400e">${escapeHtml(req.start)}〜${escapeHtml(req.end)}</span>
+        <span class="req-days">${Number(req.hours)||0}H</span>
+        <span class="status-badge ${escapeHtml(stCls[req.status])}">${escapeHtml(stMap[req.status])}</span>
       </div>
-      <div class="req-body">申請日: ${appliedDt}${reviewDt?`　査定日: ${reviewDt}`:''}
-        ${req.reviewedBy?`　<span style="font-size:10px;color:var(--tx2)">担当: <strong style="color:var(--pr)">${req.reviewedBy}</strong></span>`:''}
-        ${req.furikae?`　振替休日: <strong>${req.furikae}</strong>`:`　<span style="color:var(--a);font-size:10px">振替休日: 未定</span>`}</div>
-      ${req.reason?`<div class="req-reason">業務内容: ${req.reason}</div>`:''}
+      <div class="req-body">申請日: ${escapeHtml(appliedDt)}${reviewDt?`　査定日: ${escapeHtml(reviewDt)}`:''}
+        ${req.reviewedBy?`　<span style="font-size:10px;color:var(--tx2)">担当: <strong style="color:var(--pr)">${escapeHtml(req.reviewedBy)}</strong></span>`:''}
+        ${req.furikae?`　振替休日: <strong>${escapeHtml(req.furikae)}</strong>`:`　<span style="color:var(--a);font-size:10px">振替休日: 未定</span>`}</div>
+      ${req.reason?`<div class="req-reason">業務内容: ${escapeHtml(req.reason)}</div>`:''}
       ${req.reviewNote?`<div class="req-reason" style="border-left-color:${req.status==='rejected'?'var(--r)':'var(--g)'}">
-        ${req.status==='rejected'?'却下理由':'承認コメント'}: ${req.reviewNote}</div>`:''}
+        ${req.status==='rejected'?'却下理由':'承認コメント'}: ${escapeHtml(req.reviewNote)}</div>`:''}
       <div class="req-foot">${adminBtns}${furikaeEditBtn}${cancelBtn}</div>
     </div>`;
   }).join('');
@@ -2447,7 +2866,7 @@ function rPL(){
     const tot=getAL(e),u=cntVac(e.id),rem=tot-u;
     const ob=tot>=10,d5=u>=5;if(ob&&!d5)ac++;
     const st=ob?(d5?'<span class="badge bg-g">✓達成</span>':`<span class="badge bg-r">未達(${5-u}日)</span>`):'<span class="badge bg-gray">対象外</span>';
-    tbl+=`<tr><td><strong>${e.name}</strong></td><td>${e.dept}</td><td>${e.years}年</td><td>${tot}日</td><td>${u}日</td><td><strong>${rem}日</strong></td><td>${ob?'5日':'—'}</td><td>${st}</td></tr>`;
+    tbl+=`<tr><td><strong>${escapeHtml(e.name)}</strong></td><td>${escapeHtml(e.dept)}</td><td>${escapeHtml(e.years)}年</td><td>${tot}日</td><td>${u}日</td><td><strong>${rem}日</strong></td><td>${ob?'5日':'—'}</td><td>${st}</td></tr>`;
   });
   document.getElementById('pltb').innerHTML=tbl||'<tr><td colspan="8" style="text-align:center;color:var(--tx2)">該当者なし</td></tr>';
   document.getElementById('pl-al').innerHTML=ac>0
@@ -2459,7 +2878,7 @@ function rPL(){
     const pct=tot>0?Math.round((u/tot)*100):0;
     const cls=(tot>=10&&u<5)?'danger':pct>80?'warn':'';
     bars+=`<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">
-      <div style="width:70px;font-size:11px;text-align:right;flex-shrink:0">${e.name.split(' ')[0]}</div>
+      <div style="width:70px;font-size:11px;text-align:right;flex-shrink:0">${escapeHtml(e.name.split(' ')[0])}</div>
       <div class="plbar" style="flex:1;height:7px"><div class="plbf${cls?' '+cls:''}" style="width:${pct}%"></div></div>
       <div style="width:58px;font-size:10px;color:var(--tx2)">${u}/${tot}日(${pct}%)</div>
     </div>`;
@@ -2501,9 +2920,9 @@ function rOT(){
   let cards=sorted.map(({e,ot})=>{
     const over=ot>lim,warn=ot>lim*0.9&&ot<=lim;
     return`<div class="ot-card">
-      <div class="ot-name">${e.name}</div>
+      <div class="ot-name">${escapeHtml(e.name)}</div>
       <div class="ot-h ${over?'':warn?'warn':'ok'}">${ot}H</div>
-      <div class="ot-det">${e.dept}</div>
+      <div class="ot-det">${escapeHtml(e.dept)}</div>
       <div class="ot-det" style="${over?'color:var(--r);font-weight:600':warn?'color:var(--a)':''}">${over?`⚠ ${lim}H超過`:warn?`注意(上限90%超)`:''}</div>
     </div>`;
   }).join('');
@@ -2511,9 +2930,9 @@ function rOT(){
   cards+=ptEmps.slice(0,3).map(e=>{
     const wh=calcMonthWorkH(e.id,y,m);
     return`<div class="ot-card" style="border-color:#86efac;background:#f0fdf4">
-      <div class="ot-name">${e.name}</div>
+      <div class="ot-name">${escapeHtml(e.name)}</div>
       <div class="ot-h ok">${wh}H</div>
-      <div class="ot-det">${e.etype}（${e.ptStart||'09:00'}〜${e.ptEnd||'15:00'}）</div>
+      <div class="ot-det">${escapeHtml(e.etype)}（${escapeHtml(e.ptStart||'09:00')}〜${escapeHtml(e.ptEnd||'15:00')}）</div>
       <div class="ot-det" style="color:#166534">今月勤務時間</div>
     </div>`;
   }).join('');
@@ -2529,9 +2948,9 @@ function rOT(){
       warn?'<span class="badge bg-a">注意</span>':
       '<span class="badge bg-g">正常</span>';
     return`<tr>
-      <td><strong>${e.name}</strong></td>
-      <td>${e.dept}</td>
-      <td>${ptEmp?`<span style="color:#166534;font-size:10px">${e.ptStart||'09:00'}〜${e.ptEnd||'15:00'}</span>`:'通常勤務'}</td>
+      <td><strong>${escapeHtml(e.name)}</strong></td>
+      <td>${escapeHtml(e.dept)}</td>
+      <td>${ptEmp?`<span style="color:#166534;font-size:10px">${escapeHtml(e.ptStart||'09:00')}〜${escapeHtml(e.ptEnd||'15:00')}</span>`:'通常勤務'}</td>
       <td ${over?'style="color:var(--r);font-weight:700"':warn?'style="color:var(--a);font-weight:600"':''}>
         ${ptEmp?`<span style="color:#166534">${wh}H（勤務）</span>`:`${ot}H`}
       </td>
@@ -2574,6 +2993,7 @@ function toggleCalDay(y,m,d){
   }
   persistData();
   rCal();rSh();rDB();
+  scheduleSave(); // 会社カレンダーの変更を保存
 }
 function resetCalMonth(){
   if(!confirm(`${calPeriodLabel()}の特殊日設定をリセットしますか？`))return;
@@ -2582,6 +3002,7 @@ function resetCalMonth(){
   });
   persistData();
   rCal();rSh();rDB();
+  scheduleSave(); // リセットを保存
 }
 function rCal(){
   document.getElementById('cal-mlbl').textContent=calPeriodLabel();
@@ -2622,7 +3043,7 @@ function rCal(){
     const tooltip=dow===6?'クリック: 土曜出勤日の切替':dow!==0?'クリック: 会社休日の切替':'';
     // 月が変わるセルに視覚マーク
     const newMStyle=isNewM?'border-top:2px solid var(--pr);':'';
-    html+=`<div class="${cls}" onclick="toggleCalDay(${y},${m},${d})" title="${tooltip}" style="${newMStyle}">
+    html+=`<div class="${cls}" data-csp-click="h88" data-csp-source-click="toggleCalDay(,,)" data-csp-args-click="${__moguCsp.encode([null,(y),(m),(d),null,null,null,null,null])}" title="${tooltip}" style="${newMStyle}">
       ${isNewM?`<span style="position:absolute;top:1px;right:1px;font-size:7px;color:var(--pr);font-weight:700">${m+1}月</span>`:''}
       ${d}${badge}
     </div>`;
@@ -2642,14 +3063,14 @@ function rCal(){
       const label=v==='sat-work'?'土曜出勤日':'会社独自休日';
       const bc=v==='sat-work'?'bg-g':'bg-r';
       return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)">
-        <span style="font-size:12px;font-weight:600;flex:1">${k}（${'日月火水木金土'[dt.getDay()]}）</span>
-        <span class="badge ${bc}" style="font-size:10px">${label}</span>
-        ${isA?`<button class="btn danger sm" onclick="deleteCalDay('${k}')">削除</button>`:''}
+        <span style="font-size:12px;font-weight:600;flex:1">${escapeHtml(k)}（${'日月火水木金土'[dt.getDay()]}）</span>
+        <span class="badge ${bc}" style="font-size:10px">${escapeHtml(label)}</span>
+        ${isA?`<button class="btn danger sm" data-shift-action="deleteCalDay" data-id="${escapeAttr(k)}">削除</button>`:''}
       </div>`;
     }).join('');
   }
 }
-function deleteCalDay(k){delete CAL_SPECIAL[k];persistData();rCal();rSh();rDB();}
+function deleteCalDay(k){delete CAL_SPECIAL[k];persistData();rCal();rSh();rDB();scheduleSave();}
 
 // ══ SETTINGS ══
 function rSt(){
@@ -2662,22 +3083,22 @@ function rSt(){
         <span class="sc ${s.cls}" style="font-size:10px;cursor:default">${s.lb}</span>
         <span class="stn">${c}勤</span></div>
       <div class="stt">${s.time}</div>
-      <div class="sth">${note}</div>
+      <div class="sth">${escapeHtml(note)}</div>
     </div>`;
   }).join('');
   let dhtml='';
   Object.entries(DEPT_STRUCT).forEach(([dept,info])=>{
     dhtml+=`<div style="margin-bottom:12px;padding:10px;border:1px solid var(--bd);border-radius:var(--rads);background:var(--sf2)">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <strong style="font-size:12px">${dept}</strong>
-        <span class="badge bg-b" style="font-size:10px">定員${info.quota}名</span>
+        <strong style="font-size:12px">${escapeHtml(dept)}</strong>
+        <span class="badge bg-b" style="font-size:10px">定員${escapeHtml(info.quota)}名</span>
         <span class="badge bg-g" style="font-size:10px">現在${EMPLOYEES.filter(e=>e.dept===dept).length}名</span>
       </div>
       <div style="display:flex;gap:6px;align-items:center;font-size:11px">
         <span style="color:var(--tx2)">チーム名:</span>
-        <input id="dteam-${dept}" value="${info.teams[0]}" style="padding:3px 7px;font-size:11px;border:1px solid var(--bd2);border-radius:4px;flex:1">
+        <input id="dteam-${escapeHtml(dept)}" value="${escapeHtml(info.teams[0])}" style="padding:3px 7px;font-size:11px;border:1px solid var(--bd2);border-radius:4px;flex:1">
         <span style="color:var(--tx2)">定員:</span>
-        <input id="dquota-${dept}" type="number" value="${info.quota}" style="width:50px;padding:3px 6px;font-size:11px;border:1px solid var(--bd2);border-radius:4px">
+        <input id="dquota-${escapeHtml(dept)}" type="number" value="${escapeHtml(info.quota)}" style="width:50px;padding:3px 6px;font-size:11px;border:1px solid var(--bd2);border-radius:4px">
       </div>
     </div>`;
   });
@@ -2690,7 +3111,7 @@ function saveDeptSettings(){
     if(ti)DEPT_STRUCT[dept].teams=[ti.value||dept];
     if(qi)DEPT_STRUCT[dept].quota=parseInt(qi.value)||0;
   });
-  alert('保存しました');rSt();rEmp();
+  alert('この画面に反映しました（サーバーには未保存）');rSt();rEmp();
 }
 
 // ══ localStorage 保存・復元 ══
@@ -2753,85 +3174,11 @@ function migrateCalKeys(calObj) {
 
 // 従業員データ・シフトデータ・カレンダー設定をlocalStorageに保存
 function persistData() {
-  try {
-    localStorage.setItem(LS_EMP,   JSON.stringify(EMPLOYEES));
-    localStorage.setItem(LS_SHIFT, JSON.stringify(SHIFTS));
-    localStorage.setItem(LS_CAL,   JSON.stringify(CAL_SPECIAL));
-    localStorage.setItem(LS_VER,   '2');
-    localStorage.setItem('kpk_vac_req', JSON.stringify(VAC_REQUESTS));
-    localStorage.setItem('kpk_ot_req',  JSON.stringify(OT_REQUESTS));
-    localStorage.setItem('kpk_h_req',   JSON.stringify(H_REQUESTS));
-    // ログインセッションを保持（リロード後も維持）
-    if (cUser) {
-      localStorage.setItem(LS_USER, JSON.stringify({ user: cUser, isA }));
-    }
-  } catch(e) { console.warn('保存エラー:', e); }
+  // Data already lives in memory; scheduleSave performs actual GAS persistence.
+  EMPLOYEES = EMPLOYEES.map(withoutEmployeePassword_);
 }
-
-// localStorageから復元（v1データは自動マイグレーション）
 function restoreData() {
-  try {
-    const ver = localStorage.getItem(LS_VER) || '1';
-    const needsMigration = ver === '1'; // v1データはマイグレーションが必要
-
-    const empJson   = localStorage.getItem(LS_EMP);
-    const shiftJson = localStorage.getItem(LS_SHIFT);
-    const calJson   = localStorage.getItem(LS_CAL);
-
-    if (empJson) {
-      const saved = JSON.parse(empJson);
-      if (saved && saved.length > 0) {
-        EMPLOYEES.length = 0;
-        saved.forEach(e => EMPLOYEES.push(e));
-      }
-    }
-    if (shiftJson) {
-      let saved = JSON.parse(shiftJson);
-      if (needsMigration) {
-        console.log('SHIFTSキーをv1→v2にマイグレーション中...');
-        saved = migrateShiftKeys(saved);
-      }
-      if (saved) Object.assign(SHIFTS, saved);
-    }
-    if (calJson) {
-      let saved = JSON.parse(calJson);
-      if (needsMigration) {
-        console.log('CAL_SPECIALキーをv1→v2にマイグレーション中...');
-        saved = migrateCalKeys(saved);
-      }
-      if (saved) Object.assign(CAL_SPECIAL, saved);
-    }
-
-    // 申請データの復元
-    try {
-      const vacJson2 = localStorage.getItem('kpk_vac_req');
-      const otJson2  = localStorage.getItem('kpk_ot_req');
-      const hJson2   = localStorage.getItem('kpk_h_req');
-      if (vacJson2) { const s=JSON.parse(vacJson2); VAC_REQUESTS.length=0; s.forEach(r=>VAC_REQUESTS.push(r)); }
-      if (otJson2)  { const s=JSON.parse(otJson2);  OT_REQUESTS.length=0;  s.forEach(r=>OT_REQUESTS.push(r)); }
-      if (hJson2)   { const s=JSON.parse(hJson2);   H_REQUESTS.length=0;   s.forEach(r=>H_REQUESTS.push(r)); }
-      // IDカウンターを復元
-if (VAC_REQUESTS.length) { const mx=Math.max(...VAC_REQUESTS.map(r=>parseInt(r.id?.replace('REQ',''))||0)); if(mx>=_rid)_rid=mx+1; }
-if (OT_REQUESTS.length)  { const mx=Math.max(...OT_REQUESTS.map(r=>parseInt(r.id?.replace('OTR',''))||0)); if(mx>=_orid)_orid=mx+1; }
-if (H_REQUESTS.length)   { const mx=Math.max(...H_REQUESTS.map(r=>parseInt(r.id?.replace('HWR',''))||0)); if(mx>=_hrid)_hrid=mx+1; }
-    } catch(e2) {}
-
-    // 申請データの復元
-    const vacJson = localStorage.getItem('kpk_vac_req');
-    const otJson  = localStorage.getItem('kpk_ot_req');
-    const hJson   = localStorage.getItem('kpk_h_req');
-    if (vacJson) { const s=JSON.parse(vacJson); VAC_REQUESTS.length=0; s.forEach(r=>VAC_REQUESTS.push(r)); }
-    if (otJson)  { const s=JSON.parse(otJson);  OT_REQUESTS.length=0;  s.forEach(r=>OT_REQUESTS.push(r)); }
-    if (hJson)   { const s=JSON.parse(hJson);   H_REQUESTS.length=0;   s.forEach(r=>H_REQUESTS.push(r)); }
-
-    // マイグレーション完了後はv2として再保存
-    if (needsMigration && (shiftJson || calJson)) {
-      localStorage.setItem(LS_VER, '2');
-      if (shiftJson) localStorage.setItem(LS_SHIFT, JSON.stringify(SHIFTS));
-      if (calJson)   localStorage.setItem(LS_CAL,   JSON.stringify(CAL_SPECIAL));
-      console.log('マイグレーション完了');
-    }
-  } catch(e) { console.warn('復元エラー:', e); }
+  // Never restore a previous user's business data from browser storage.
 }
 
 // ポータルから従業員を受け取った時はlocalStorageも更新
@@ -2854,7 +3201,6 @@ function syncFromPortalAndPersist(portalEmps) {
       etype:   e.etype  || (existing ? existing.etype : '正社員'),
       ptStart: existing ? existing.ptStart : '09:00',
       ptEnd:   existing ? existing.ptEnd   : '18:00',
-      pw:      existing ? existing.pw      : '1234',
       al:      e.nenkyuu !== undefined && e.nenkyuu !== '' ? Number(e.nenkyuu) : (existing ? existing.al : 10),
       lwUserId: e.lwUserId || (existing ? existing.lwUserId : ''),
     };
@@ -2869,18 +3215,155 @@ function syncFromPortalAndPersist(portalEmps) {
 }
 
 // ══ GASスプレッドシート保存・読み込み ══
-const LS_GAS_URL = 'kpk_shift_gas_url';
-// GASのURL（ポータルと同じURL）
-const GAS_URL_HARDCODED = 'https://script.google.com/macros/s/AKfycbwfAkY2iW48xUKPhyjznxYQW_-n19qLa4QcJ0qIB1zSnyY66UyAhOkm0grR8KTgjcza/exec';
-let GAS_URL_SHIFT = GAS_URL_HARDCODED; // まずハードコード値をセット
-try {
-  const saved = localStorage.getItem(LS_GAS_URL);
-  if (saved) GAS_URL_SHIFT = saved; // 保存済みがあれば上書き
-} catch(e) {}
+// セキュリティ改修：接続先は固定（?shift_gas_url= / ?gas_url= 差し替え・localStorage保持を撤去）。
+const GAS_URL_SHIFT = 'https://script.google.com/macros/s/AKfycbwfAkY2iW48xUKPhyjznxYQW_-n19qLa4QcJ0qIB1zSnyY66UyAhOkm0grR8KTgjcza/exec';
+function setGasUrl(_url) { /* 接続先差し替えは廃止（no-op） */ }
 
-function setGasUrl(url) {
-  GAS_URL_SHIFT = url;
-  try { localStorage.setItem(LS_GAS_URL, url); } catch(e) {}
+// ══ SSO署名トークン（ポータルが #sso= で受け渡す） ══
+//   URLフラグメントはサーバへ送られない。取得後は即URLから除去しsessionStorageへ。
+const AUTH_TOKEN_KEY = 'kpk_shift_token';
+let AUTH_TOKEN = (function() {
+  try {
+    const h = location.hash || '';
+    const m = h.match(/[#&]sso=([^&]+)/);
+    if (m) {
+      const t = decodeURIComponent(m[1]);
+      sessionStorage.setItem(AUTH_TOKEN_KEY, t);
+      history.replaceState(null, '', location.pathname + location.search);
+      return t;
+    }
+    return sessionStorage.getItem(AUTH_TOKEN_KEY) || '';
+  } catch(e) { return ''; }
+})();
+
+// XSS対策ヘルパー（要素本文用 / 二重引用符属性値用）。氏名・申請理由・コメント等の保存データを必ず通す。
+// ※関数宣言はホイストされるため、これより前に定義された描画関数からも利用できる。
+function escapeHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+function decodeTokenClaims_(t) {
+  try {
+    const p = String(t).split('.')[0];
+    const b64 = p.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(decodeURIComponent(escape(atob(b64 + '==='.slice((b64.length + 3) % 4)))));
+  } catch(e) { return null; }
+}
+
+// 有効なshift用トークンの claim を返す（無効ならnull）
+function validClaims_() {
+  if (!AUTH_TOKEN) return null;
+  const c = decodeTokenClaims_(AUTH_TOKEN);
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (c && c.aud === 'shift' && c.exp && c.exp > nowSec) return c;
+  try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch(e) {}
+  AUTH_TOKEN = '';
+  return null;
+}
+
+function handleUnauthorized_() {
+  clearBrowserBusinessData_();
+  EMPLOYEES.length = 0;
+  Object.keys(SHIFTS).forEach(key => delete SHIFTS[key]);
+  CAL_SPECIAL = {};
+  VAC_REQUESTS.length = 0; OT_REQUESTS.length = 0; H_REQUESTS.length = 0;
+  _syncLog = [];
+  // 認証切れでは業務データを消すため、未保存状態も破棄して保存・読込を止める（宣言前に呼ばれてもよいよう try）
+  try { clearTimeout(_saveTimer); _saveTimer = null; _dirty = false; SHIFT_DATA_READY = false; hideDataGate_(); } catch(e) {}
+  // 保存の基準・保存待ちの連携・ポータル名簿も破棄する
+  try { _base = null; _pendingLinks.length = 0; } catch(e) {}
+  try { ROSTER = []; ROSTER_READY = false; } catch(e) {}
+  try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch(e) {}
+  AUTH_TOKEN = null; cUser = null; isA = false;
+  try {
+    document.body.classList.remove('app-loading');
+    document.getElementById('mainApp').classList.add('hid');
+    document.getElementById('lw').classList.remove('hid');
+  } catch(e) {}
+}
+
+// 全API：トークン付きPOST（text/plain）に統一。GETの匿名アクセスは廃止。
+// 申請を書き換えるAPI。送信のたびに世代を進め、送信前に取り始めた申請一覧（古い応答）を画面へ適用しない。
+const REQ_WRITE_ACTIONS_ = ['createRequest', 'decideRequest', 'cancelRequest', 'updateOwnRequest', 'setFurikae'];
+let _reqWriteGen = 0;
+let _reqReadSeq = 0;
+async function gasCall_(action, payload) {
+  if (!AUTH_TOKEN) { handleUnauthorized_(); return null; }
+  // 申請の書込みは送信時と応答後の両方で世代を進める（書込み中に取り始めた一覧も古い応答として捨てる）
+  const isReqWrite = REQ_WRITE_ACTIONS_.indexOf(action) >= 0;
+  if (isReqWrite) _reqWriteGen++;
+  try {
+    const res = await fetch(GAS_URL_SHIFT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, token: AUTH_TOKEN, ...(payload || {}) })
+    });
+    if (!res.ok) throw new Error('通信エラー');
+    const json = await res.json();
+    if (json && json.error === 'unauthorized') { handleUnauthorized_(); return null; }
+    if (!json || typeof json !== 'object') throw new Error('不正な応答');
+    return json;
+  } catch(e) { console.error('[gasCall_]', action, e); return null; }
+  finally { if (isReqWrite) _reqWriteGen++; }
+}
+// 決裁などのサーバー応答を、手元の申請（一覧の現在の要素も含む）へ反映する
+function syncReq_(req, r) {
+  if (!r) return;
+  Object.assign(req, r);
+  [VAC_REQUESTS, OT_REQUESTS, H_REQUESTS].forEach(arr => {
+    const cur = arr.find(x => x && x.id === r.id);
+    if (cur && cur !== req) Object.assign(cur, r);
+  });
+}
+// 決裁に伴うシフト表・年休の変更はサーバーが保存済み。画面と保存の基準（_base）の両方へ同じ変更を反映する
+// （基準にも入れるので、管理者の次の保存でこの変更を送り直さない）。
+function applyServerEffects_(eff) {
+  if (!eff) return;
+  (eff.cells || []).forEach(c => {
+    const eid = c[0], k = c[1], val = c[2];
+    [SHIFTS, _base && _base.shifts].forEach(t => {
+      if (!t) return;
+      if (val === null) { if (t[eid]) delete t[eid][k]; }
+      else { if (!t[eid]) t[eid] = {}; t[eid][k] = JSON.parse(JSON.stringify(val)); }
+    });
+  });
+  (eff.emps || []).forEach(u => {
+    const e = EMPLOYEES.find(x => x && x.id === u.id); if (e) e.alOverride = u.alOverride;
+    const b = _base && _base.employees.find(x => x && x.id === u.id); if (b) b.alOverride = u.alOverride;
+  });
+}
+
+// ══ 申請システム（サーバー権威・1件単位）══
+//   申請一覧はサーバー(listRequests)を唯一の真実として取得する。
+//   staffトークンでは本人分のみ、leader以上は全件が返る（サーバー側でフィルタ）。
+// 一覧の取得だけ行う（画面の配列は書き換えない）。古い応答なら stale:true。
+async function fetchRequests_() {
+  const token = AUTH_TOKEN, gen = _reqWriteGen, seq = ++_reqReadSeq;
+  const res = await gasCall_('listRequests', {});
+  if (!res || !res.ok || (res.requests != null && !Array.isArray(res.requests))) return null;
+  const stale = AUTH_TOKEN !== token || gen !== _reqWriteGen || seq !== _reqReadSeq;
+  return { requests: res.requests || [], stale: stale };
+}
+async function refreshRequests_() {
+  const got = await fetchRequests_();
+  if (!got) return false;
+  if (!got.stale) applyRequests_(got.requests);
+  return true;
+}
+function applyRequests_(all) {
+  VAC_REQUESTS.length = 0; OT_REQUESTS.length = 0; H_REQUESTS.length = 0;
+  all.forEach(r => {
+    if (r.kind === 'vac') VAC_REQUESTS.push(r);
+    else if (r.kind === 'ot') OT_REQUESTS.push(r);
+    else if (r.kind === 'h') H_REQUESTS.push(r);
+  });
+  const byNew = (a, b) => String(b.appliedAt || '').localeCompare(String(a.appliedAt || ''));
+  VAC_REQUESTS.sort(byNew); OT_REQUESTS.sort(byNew); H_REQUESTS.sort(byNew);
+  return true;
+}
+// 競合(conflict)時などにサーバー最新へ揃えて再描画する
+async function reloadReqsAndRender_() {
+  await refreshRequests_();
+  try { rVreq(); rOTReq(); rHReq(); rDB(); updAllBadges(); } catch(e) {}
 }
 
 // ══ オンライン状態通知（関数は上部で定義済み）══
@@ -2892,75 +3375,184 @@ function setGasUrl(url) {
 restoreData();
 seedShifts();
 
-// ログインセッション復元（リロード時にログアウトしないための処理）
-(function restoreSession() {
-  // SSOトークンがある場合はSSOが処理するので何もしない（SSOのlaunch()でapp-loadingが外れる）
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('sso')) return;
+// ログインは署名トークンに一本化。#sso で入る、またはリロード時は
+// sessionStorage のトークンで復元する。有効なトークンが無ければログイン画面。
+// 自動同期タイマーのハンドルは、これを使う startAutoSync が initFromToken→launch から
+// 実行される前に定義しておく（宣言前参照のTDZ例外を防ぐ。例外時は後続の初回読込予約も中止される）。
+// ※ let→var では、後段(旧3347行)の再代入 =null が稼働中タイマー参照を消すため不可。宣言をここへ移動する。
+let _autoSyncTimer = null;
+// 初回読込の多重実行防止（ensureInitialLoad_ 用。同じ理由で initFromToken より前に宣言）
+let _initialLoading = false;
+(function initFromToken() {
   try {
-    const saved = localStorage.getItem(LS_USER);
-    if (!saved) {
-      // セッションなし → ログイン画面を表示
+    const c = validClaims_();
+    if (!c) {
+      // 有効なトークンなし → ログイン画面（doLoginは「ポータルからご利用ください」）
       document.body.classList.remove('app-loading');
       return;
     }
-    const sess = JSON.parse(saved);
-    if (!sess || !sess.user || !sess.user.id) {
-      document.body.classList.remove('app-loading');
-      return;
+    let name = c.name || c.sub;
+    try { name = decodeURIComponent(escape(name)); } catch(e) {}
+    cUser = { id: c.sub, name: name, dept: c.dept || '' };
+    isA   = (c.role === 'admin' || c.role === 'master');
+    // ログインユーザーをEMPLOYEESに仮登録（申請機能のため）
+    if (!isA && !EMPLOYEES.find(x => x.id === c.sub)) {
+      try { getEmpOrCurrent(c.sub); persistData(); } catch(e) {}
     }
-    cUser = sess.user;
-    isA   = !!sess.isA;
     launch();
-    // GASから最新データを静かに取得
-    if (GAS_URL_SHIFT) {
-      setTimeout(async () => {
-        try {
-          await loadFromSheet();
-          rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
-        } catch(e) {}
-      }, 400);
-    }
+    // GASから最新データを取得。成功するまで保存は保留（ensureInitialLoad_ 参照）。
+    // バナーは即表示し、読込自体はスクリプト全体の評価後に開始する（後方の宣言をTDZで参照しないため）。
+    // 名簿取得(launch→loadRoster_)と同時送信にならないよう、従来どおり400ms後に開始する。
+    showDataNotReadyBanner_(false);
+    setTimeout(ensureInitialLoad_, 400);
   } catch(e) {
-    console.warn('[restoreSession] エラー:', e);
-    document.body.classList.remove('app-loading'); // エラー時もログイン画面を表示
+    console.warn('[initFromToken] エラー:', e);
+    document.body.classList.remove('app-loading');
   }
 })();
 
 // スプレッドシートに全データを保存
 let _saveTimer = null;
+let _saving = false;
+// 未保存の変更あり。保存が全キー成功し、保存中に新しい編集が無かったときだけ解除する（失敗・一部成功では残す）。
+let _dirty = false;
+// 編集のたびに進める。読込・保存の開始時と比べ、途中で編集があれば古い応答を適用しない／保存済みにしない。
+let _dataRevision = 0;
+// 読込の通し番号。後から始めた読込があれば、先に始めた読込の応答は適用しない（逆順応答対策）。
+let _loadSeq = 0;
+// 直近の読込が失敗したか（バナーを「読込中」と「失敗・再試行」で切り替える）
+let _loadFailed = false;
 function scheduleSave() {
+  // 初回読込前は自動保存を予約しない（未読込データでシートを上書きしない）
+  if (!SHIFT_DATA_READY) { showDataNotReadyBanner_(_loadFailed); return; }
+  // シフト表・カレンダー・従業員の保存は管理者のみ（GAS の SHIFT_KEY_ROLES）。申請は1件単位APIで保存済み。
+  if (!isA) return;
+  _dirty = true;
+  _dataRevision++;
+  showSyncBadge('pending');
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(saveToSheet, 2000);
 }
+// 未保存の変更（未保存・保存予約中・保存中）があるか。読込で端末の未保存変更を上書きしないために使う。
+function hasPendingSave_() { return _dirty || !!_saveTimer || _saving; }
 
-async function saveShiftKey(key, val) {
-  // 値をそのまま送信（エンコード後8000文字以下に制限）
-  const encoded = encodeURIComponent(val);
-  const safe = encoded.slice(0, 7500); // GASのURL上限
-  const url = GAS_URL_SHIFT + '?action=saveShiftKey' +
-    '&key=' + encodeURIComponent(key) +
-    '&val=' + safe;
-  try {
-    // GASはリダイレクトがあるためno-corsではレスポンスが読めない
-    // XMLHttpRequestで同期的に送信（CORSを回避）
-    return await new Promise((resolve) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', url, true);
-      xhr.onload = () => {
-        try {
-          const r = JSON.parse(xhr.responseText);
-          console.log('[saveKey]', key, ':', r.ok ? 'OK' : r.message);
-          resolve(r.ok);
-        } catch(e) { resolve(false); }
-      };
-      xhr.onerror = () => { console.error('[saveKey] XHR error', key); resolve(false); };
-      xhr.send();
-    });
-  } catch(e) {
-    console.error('[saveKey] エラー', key, e);
-    return false;
+// ══ 初回読込ゲート ══
+// 認証付き初回読込が成功するまで「読み込み中」を表示し、保存を保留する。失敗時は再試行ボタンを出す。
+function showDataNotReadyBanner_(failed) {
+  let el = document.getElementById('data-gate-banner');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'data-gate-banner';
+    el.setAttribute('role', 'status');
+    el.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;padding:10px 16px;font-size:13px;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;box-shadow:0 -2px 8px rgba(0,0,0,.15)';
+    document.body.appendChild(el);
   }
+  el.textContent = '';
+  const msg = document.createElement('span');
+  if (failed) {
+    el.style.background = '#fce8e8'; el.style.color = '#b53030';
+    msg.textContent = '⚠ データの読み込みに失敗しました。保存は無効になっています（変更はシートに保存されません）。' +
+      (_dirty ? '未保存の入力はこの画面に保持しています。画面を閉じずに再試行してください。' : '');
+    el.appendChild(msg);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = '再試行';
+    btn.style.cssText = 'padding:4px 14px;border:1px solid #b53030;border-radius:6px;background:#fff;color:#b53030;cursor:pointer;font-size:13px';
+    btn.addEventListener('click', () => { ensureInitialLoad_(); });
+    el.appendChild(btn);
+  } else {
+    el.style.background = '#e5effe'; el.style.color = '#1655b0';
+    msg.textContent = '🔄 データを読み込み中です。完了するまで編集しないでください（保存は保留され、読込完了時にシートの内容で置き換わります）。';
+    el.appendChild(msg);
+  }
+  el.style.display = 'flex';
+}
+function hideDataGate_() {
+  const el = document.getElementById('data-gate-banner');
+  if (el) el.style.display = 'none';
+}
+// 保存の失敗・一部失敗：未保存の入力を保持していることと再試行の方法を表示する（自動再送はしない）。
+function showUnsavedBanner_(reason) {
+  showDataNotReadyBanner_(false);
+  const el = document.getElementById('data-gate-banner');
+  el.textContent = '';
+  el.style.background = '#fce8e8'; el.style.color = '#b53030';
+  const msg = document.createElement('span');
+  msg.textContent = '⚠ 保存が完了していません（保存できたか確認できない場合を含みます）。入力はこの画面に保持しています。画面を閉じずに保存を再試行してください（同じ内容を送り直しても二重にはなりません）。' +
+    (reason ? '（理由：' + reason + '）' : '');
+  el.appendChild(msg);
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = '保存を再試行';
+  btn.style.cssText = 'padding:4px 14px;border:1px solid #b53030;border-radius:6px;background:#fff;color:#b53030;cursor:pointer;font-size:13px';
+  btn.addEventListener('click', () => { clearTimeout(_saveTimer); _saveTimer = null; saveToSheet(); });
+  el.appendChild(btn);
+}
+async function ensureInitialLoad_() {
+  if (SHIFT_DATA_READY) { hideDataGate_(); return true; }
+  if (_initialLoading) return false;
+  _initialLoading = true;
+  showDataNotReadyBanner_(false);
+  // GAS応答の転送先(googleusercontent)が一時的に404/CORSになることがあるため、読取のみの初回読込は数回自動再試行する
+  const retryDelays = [0, 1500, 3000];
+  let ok = false;
+  for (let i = 0; i < retryDelays.length && !ok; i++) {
+    if (retryDelays[i]) await new Promise(r => setTimeout(r, retryDelays[i]));
+    if (!AUTH_TOKEN) break; // 認証切れ（ログイン画面へ戻った）なら再試行しない
+    try { ok = await loadFromSheet(); } catch(e) { ok = false; }
+    if (!ok) console.warn('[ensureInitialLoad_] 初回読込失敗 ' + (i + 1) + '/' + retryDelays.length + ' 回目');
+  }
+  _initialLoading = false;
+  _loadFailed = !ok;
+  if (ok) {
+    // 異常からの復旧時に未保存の入力を保持している場合は、保存の再試行を案内する
+    if (_dirty) showUnsavedBanner_(); else hideDataGate_();
+    try { rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT(); } catch(e) {}
+  } else {
+    showDataNotReadyBanner_(true);
+  }
+  return ok;
+}
+
+// ══ 保存の基準と変更分 ══
+// 最後に読み込んだ（または保存できた）時点の状態。保存はこの基準からの変更分だけを送る。
+//   全体を上書きしないので、他端末の変更やサーバーが保存した決裁の結果を、古い全体で消さない。
+let _base = null;
+// 保存待ちのID連携（{old,new}）。サーバーが名簿で確認し、隠し項目の引継ぎと勤務表の移し替えを一体で行う。
+const _pendingLinks = [];
+const SHIFT_EMP_EDITABLE_ = ['name','dept','team','years','ecat','etype','ptStart','ptEnd','al','alOverride','lwUserId'];
+function snapshot_() {
+  return JSON.parse(JSON.stringify({ shifts: SHIFTS, calSpecial: CAL_SPECIAL, employees: EMPLOYEES.map(withoutEmployeePassword_) }));
+}
+function buildPatch_(base, cur) {
+  const j = v => JSON.stringify(v === undefined ? null : v);
+  const shifts = [];
+  new Set([...Object.keys(base.shifts), ...Object.keys(cur.shifts)]).forEach(eid => {
+    const b = base.shifts[eid] || {}, c = cur.shifts[eid] || {};
+    new Set([...Object.keys(b), ...Object.keys(c)]).forEach(k => {
+      if (j(b[k]) !== j(c[k])) shifts.push([eid, k, c[k] === undefined ? null : c[k]]);
+    });
+  });
+  const cal = [];
+  new Set([...Object.keys(base.calSpecial), ...Object.keys(cur.calSpecial)]).forEach(k => {
+    if (base.calSpecial[k] !== cur.calSpecial[k]) cal.push([k, cur.calSpecial[k] === undefined ? null : cur.calSpecial[k]]);
+  });
+  const bById = {};
+  base.employees.forEach(e => { if (e && e.id != null) bById[String(e.id)] = e; });
+  const cIds = new Set(cur.employees.filter(e => e && e.id != null).map(e => String(e.id)));
+  const remove = Object.keys(bById).filter(id => !cIds.has(id));
+  const upsert = [];
+  cur.employees.forEach(e => {
+    if (!e || e.id == null) return;
+    const b = bById[String(e.id)], fields = {};
+    SHIFT_EMP_EDITABLE_.forEach(f => {
+      if (!b) { if (e[f] !== undefined) fields[f] = e[f]; }
+      else if (j(b[f]) !== j(e[f])) fields[f] = e[f] === undefined ? null : e[f];
+    });
+    if (!b) upsert.push({ id: String(e.id), fields, isNew: true }); // 新しく追加した人だけ「新規」
+    else if (Object.keys(fields).length) upsert.push({ id: String(e.id), fields });
+  });
+  return { shifts, cal, emps: { remove, upsert } };
 }
 
 // ══ 同期ログ管理 ══
@@ -2981,11 +3573,11 @@ function addSyncLogEntry(action, ok) {
   const entry = { ts: new Date().toISOString(), user: getSyncUserName(), action: action + (ok ? ' ✓' : ' ✗'), device: getDeviceLabel() };
   _syncLog.unshift(entry);
   if (_syncLog.length > 50) _syncLog.length = 50;
-  try { localStorage.setItem(SYNC_LOG_KEY, JSON.stringify(_syncLog)); } catch(e) {}
+  try { pageMemoryStorage.setItem(SYNC_LOG_KEY, JSON.stringify(_syncLog)); } catch(e) {}
   updateSyncInfoBar(entry);
 }
 function restoreSyncLog() {
-  try { const s = localStorage.getItem(SYNC_LOG_KEY); if (s) { const p = JSON.parse(s); if (Array.isArray(p)) { _syncLog = p; if (p[0]) updateSyncInfoBar(p[0]); } } } catch(e) {}
+  try { const s = pageMemoryStorage.getItem(SYNC_LOG_KEY); if (s) { const p = JSON.parse(s); if (Array.isArray(p)) { _syncLog = p; if (p[0]) updateSyncInfoBar(p[0]); } } } catch(e) {}
 }
 function updateSyncInfoBar(entry) {
   if (!entry) return;
@@ -2998,111 +3590,191 @@ function updateSyncInfoBar(entry) {
 }
 // GASにログ送信（fire-and-forget）
 function pushLogToGas(action, ok) {
-  if (!GAS_URL_SHIFT) return;
-  const url = GAS_URL_SHIFT + '?action=addShiftLog' + '&user=' + encodeURIComponent(getSyncUserName()) + '&act=' + encodeURIComponent(action + (ok?':OK':':NG')) + '&dev=' + encodeURIComponent(getDeviceLabel());
-  try { const xhr = new XMLHttpRequest(); xhr.open('GET', url, true); xhr.send(); } catch(e) {}
+  if (!AUTH_TOKEN) return;
+  gasCall_('addShiftLog', { act: action + (ok ? ':OK' : ':NG'), dev: getDeviceLabel() });
 }
 // GASからログを取得して画面に表示
 async function loadSyncLog() {
   const el = document.getElementById('sync-log-list'); if (!el) return;
-  if (!GAS_URL_SHIFT) { el.innerHTML = '<div style="font-size:11px;color:var(--tx3);text-align:center;padding:8px">GAS URL未設定</div>'; return; }
+  if (!AUTH_TOKEN) { el.innerHTML = '<div style="font-size:11px;color:var(--tx3);text-align:center;padding:8px">ポータルからご利用ください</div>'; return; }
   el.innerHTML = '<div style="font-size:11px;color:var(--tx3);text-align:center;padding:8px">読み込み中...</div>';
   try {
-    const data = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest(); xhr.open('GET', GAS_URL_SHIFT + '?action=getShiftLog', true);
-      xhr.onload = () => { try { resolve(JSON.parse(xhr.responseText)); } catch(e) { reject(e); } };
-      xhr.onerror = () => reject(new Error('XHR error')); xhr.send();
-    });
-    if (!data.ok || !data.logs || !data.logs.length) { el.innerHTML = '<div style="font-size:11px;color:var(--tx3);text-align:center;padding:8px">ログなし</div>'; return; }
+    const data = await gasCall_('getShiftLog', {});
+    if (!data) { el.innerHTML = '<div style="font-size:11px;color:var(--r);text-align:center;padding:8px">認証エラー</div>'; return; }
+    if (data.ok !== true || !Array.isArray(data.logs)) throw new Error('ログ取得失敗');
+    if (!data.logs.length) { el.innerHTML = '<div style="font-size:11px;color:var(--tx3);text-align:center;padding:8px">ログなし</div>'; return; }
     el.innerHTML = data.logs.slice(0, 50).map(r => {
       const ts = r.ts ? new Date(r.ts) : null;
       const fmtTs = ts ? `${ts.getMonth()+1}/${ts.getDate()} ${String(ts.getHours()).padStart(2,'0')}:${String(ts.getMinutes()).padStart(2,'0')}` : (r.ts||'');
       const okIcon = (r.action||'').includes(':OK') ? '✅' : (r.action||'').includes(':NG') ? '❌' : '📝';
-      return `<div class="sync-log-row"><span class="sync-log-ts">${fmtTs}</span><span class="sync-log-who">${r.user||'?'}</span><span style="font-size:9px;color:var(--tx3)">${r.device||''}</span><span class="sync-log-act">${okIcon} ${(r.action||'').replace(':OK','').replace(':NG','')}</span></div>`;
+      // ★F02：ログの値(user/device/action)は staff が投稿し得る。管理者画面で実行されないよう必ずエスケープ。
+      const who = escapeHtml(r.user || '?');
+      const dev = escapeHtml(r.device || '');
+      const act = escapeHtml((r.action || '').replace(':OK','').replace(':NG',''));
+      return `<div class="sync-log-row"><span class="sync-log-ts">${escapeHtml(fmtTs)}</span><span class="sync-log-who">${who}</span><span style="font-size:9px;color:var(--tx3)">${dev}</span><span class="sync-log-act">${okIcon} ${act}</span></div>`;
     }).join('');
     if (data.logs[0]) updateSyncInfoBar({ ts: data.logs[0].ts, user: data.logs[0].user, device: data.logs[0].device });
-  } catch(e) { el.innerHTML = `<div style="font-size:11px;color:var(--r);text-align:center;padding:8px">読込エラー: ${e.message}</div>`; }
+  } catch(e) { el.innerHTML = `<div style="font-size:11px;color:var(--r);text-align:center;padding:8px">読込エラー: ${escapeHtml(e.message)}</div>`; }
 }
 
+// 戻り値：この保存で未保存の変更が無くなったら true。
 async function saveToSheet() {
-  if (!GAS_URL_SHIFT) { console.warn('[saveToSheet] GAS_URL_SHIFT未設定'); return; }
+  if (!GAS_URL_SHIFT) { console.warn('[saveToSheet] GAS_URL_SHIFT未設定'); return false; }
+  clearTimeout(_saveTimer); _saveTimer = null; // 直接呼ばれた場合も予約分を残さない（二重送信防止）
+  // 認証付き初回読込が成功するまでは保存しない（未読込の端末データでシートを上書きしない）
+  if (!SHIFT_DATA_READY) {
+    console.warn('[saveToSheet] 初回読込前のため保存を保留');
+    showDataNotReadyBanner_(_loadFailed);
+    return false;
+  }
+  if (!isA) return true; // 非管理者はシフト表等を保存しない（scheduleSave 参照）
+  // 保存中に次の保存が来たら、終了後に改めて予約する（同時保存で古い内容が後着しないように）
+  if (_saving) { clearTimeout(_saveTimer); _saveTimer = setTimeout(saveToSheet, 2000); return false; }
+  if (!_base) return false; // 読込前（基準なし）は保存しない
+  _saving = true;
+  const token = AUTH_TOKEN, revision = _dataRevision;
+  // 送る時点の状態と、基準からの変更分。シフト表・カレンダー・従業員・ID連携を1回の通信でまとめて保存する
+  // （サーバーがロック内で一体として確定する。一部だけ保存された組合せを作らない）。
+  const sent = snapshot_();
+  const links = _pendingLinks.slice();
+  const patch = buildPatch_(_base, sent);
+  patch.links = links;
   try {
     showSyncBadge('saving');
-    const shiftsJson = JSON.stringify(SHIFTS);
-    console.log('[saveToSheet] SHIFTSサイズ:', shiftsJson.length, 'bytes');
-    const results = await Promise.all([
-      saveShiftKey('shifts',     shiftsJson),
-      saveShiftKey('vacReqs',    JSON.stringify(VAC_REQUESTS)),
-      saveShiftKey('otReqs',     JSON.stringify(OT_REQUESTS)),
-      saveShiftKey('hReqs',      JSON.stringify(H_REQUESTS)),
-      saveShiftKey('calSpecial', JSON.stringify(CAL_SPECIAL)),
-      saveShiftKey('employees',  JSON.stringify(EMPLOYEES)),
-    ]);
-    const allOk = results.every(r => r);
-    showSyncBadge(allOk ? 'saved' : 'error');
+    // ★申請(vacReqs/otReqs/hReqs)はブロブ一括保存を廃止。
+    //   申請は1件単位API(createRequest/decideRequest/…)でその都度サーバーへ保存される。
+    const r = await gasCall_('saveShiftPatch', { patch: patch });
+    if (AUTH_TOKEN !== token) return false; // 別セッションに切り替わった後の応答は反映しない
+    const allOk = !!(r && r.ok === true);
+    if (allOk) {
+      _base = sent;
+      _pendingLinks.splice(0, links.length);
+    }
+    if (allOk && revision === _dataRevision) {
+      _dirty = false;
+      showSyncBadge('saved');
+      hideDataGate_();
+      // ID連携を保存したら、サーバーが確定した結果（ポータルの氏名・守ったセル）を読み直す
+      if (links.length) setTimeout(async () => { if (!hasPendingSave_() && await loadFromSheet()) { try { rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT(); } catch(e) {} } }, 0);
+    } else if (allOk) {
+      // 保存中に加わった入力は未保存のまま（予約済みの次回保存で送る）
+      showSyncBadge('pending');
+    } else {
+      // 失敗・応答不明：未保存を保持し、自動再送はしない（再送しても同じ結果になる形で送っている）
+      showSyncBadge('error');
+      showUnsavedBanner_(r && r.message ? r.message : '');
+    }
     addSyncLogEntry('保存', allOk);
     pushLogToGas('保存', allOk);
     console.log('[saveToSheet] 完了 ok=' + allOk);
+    return allOk && !_dirty;
   } catch(e) {
     console.error('[saveToSheet] エラー:', e);
     showSyncBadge('error');
+    showUnsavedBanner_();
     addSyncLogEntry('保存', false);
     pushLogToGas('保存', false);
+    return false;
+  } finally {
+    _saving = false;
   }
 }
 
 // スプレッドシートから全データを読み込み
 async function loadFromSheet() {
-  if (!GAS_URL_SHIFT) return false;
+  if (!AUTH_TOKEN) return false;
+  // 開始時点の状態。応答が届いた時点で、新しい読込・編集・保存・別セッションがあれば古い応答として捨てる。
+  const token = AUTH_TOKEN, revision = _dataRevision, seq = ++_loadSeq;
+  const superseded = () => AUTH_TOKEN !== token || seq !== _loadSeq;
+  // データ異常（壊れたJSON・型違い・キー欠損）。通信失敗とは分けて扱う。
+  const invalidData = msg => { const e = new Error(msg); e.shiftDataInvalid = true; return e; };
   try {
     showSyncBadge('loading');
-    const result = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', GAS_URL_SHIFT + '?action=loadShiftData', true);
-      xhr.onload = () => { try { resolve(JSON.parse(xhr.responseText)); } catch(e) { reject(e); } };
-      xhr.onerror = () => reject(new Error('XHR error'));
-      xhr.send();
-    });
-    if (!result.ok || !result.data) { showSyncBadge('error'); return false; }
+    const result = await gasCall_('loadShiftData', {});
+    if (superseded()) return false;
+    // データ異常（不正値・キー欠損/重複・見出し異常・シート不在・保存の途中停止）は空として扱わず止める
+    if (result && ['shift_data_invalid', 'shift_data_missing', 'shift_write_interrupted'].indexOf(result.error) >= 0) {
+      throw invalidData(result.message || '保存データの形式が不正です');
+    }
+    if (!result || !result.ok || !result.data || typeof result.data !== 'object') {
+      console.warn('[loadFromSheet] loadShiftData 失敗', result && result.message ? result.message : '(応答なし)');
+      showSyncBadge('error'); return false;
+    }
     const d = result.data;
     console.log('[loadFromSheet] 取得キー:', Object.keys(d));
 
-    function safeParseObj(json, label) {
-      if (!json || json === '') return null;
-      try { return JSON.parse(json); }
-      catch(e) { console.error('[loadFromSheet] パースエラー', label, e); return null; }
+    // 正規の新規空状態＝3キーとも無い（シートが空）。一部のキーだけ無いのは欠損として止める。
+    const KEYS = ['shifts', 'calSpecial', 'employees'];
+    const present = KEYS.filter(k => Object.prototype.hasOwnProperty.call(d, k));
+    if (present.length && present.length !== KEYS.length) throw invalidData('読込データにキーの欠損があります');
+    // 壊れたJSONを「データなし」と読み替えない
+    function parseKey(k) {
+      if (!Object.prototype.hasOwnProperty.call(d, k)) return null;
+      if (typeof d[k] !== 'string' || d[k] === '') throw invalidData('読込データの形式が不正です: ' + k);
+      try { return JSON.parse(d[k]); }
+      catch(e) { throw invalidData('読込データの形式が不正です: ' + k); }
     }
 
-    const shifts = safeParseObj(d.shifts, 'shifts');
+    // 先に全キーを解析・検証し、申請取得まで成功してから一括で適用する（部分適用を防ぐ）
+    const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+    const shifts = parseKey('shifts');
+    const calSpecial = parseKey('calSpecial');
+    const emps = parseKey('employees');
+    if ((shifts !== null && !isObj(shifts)) ||
+        (calSpecial !== null && !isObj(calSpecial)) ||
+        (emps !== null && (!Array.isArray(emps) || emps.some(e => !isObj(e))))) {
+      throw invalidData('読込データの形式が不正です');
+    }
+
+    // ★申請はブロブ(d.vacReqs等)から読まない。listRequests（サーバー権威）で取得する。
+    const reqs = await fetchRequests_();
+    if (superseded()) return false;
+    if (!reqs) throw new Error('申請の取得に失敗しました');
+    // 取得中に申請の書込みがあった一覧は古いので適用しない（書込み側で画面は更新済み）
+    if (!reqs.stale) applyRequests_(reqs.requests);
+
+    // 読込開始後に編集・保存があった、または未保存の変更がある場合は、
+    // 端末の変更を上書きしないようシフト表ブロブの適用を見送る（申請はサーバー権威なので上で反映済み）。
+    if (revision !== _dataRevision || hasPendingSave_()) {
+      console.warn('[loadFromSheet] 未保存・保存中の変更があるためシフト表の上書きを見送り');
+      _loadFailed = false;
+      SHIFT_DATA_READY = true;
+      showSyncBadge(_dirty ? 'pending' : 'loaded');
+      return true;
+    }
+
     if (shifts) { Object.keys(SHIFTS).forEach(k=>delete SHIFTS[k]); Object.assign(SHIFTS, shifts); }
-
-    const vacReqs = safeParseObj(d.vacReqs, 'vacReqs');
-    if (vacReqs) { VAC_REQUESTS.length=0; vacReqs.forEach(r=>VAC_REQUESTS.push(r)); }
-
-    const otReqs = safeParseObj(d.otReqs, 'otReqs');
-    if (otReqs) { OT_REQUESTS.length=0; otReqs.forEach(r=>OT_REQUESTS.push(r)); }
-
-    const hReqs = safeParseObj(d.hReqs, 'hReqs');
-    if (hReqs) { H_REQUESTS.length=0; hReqs.forEach(r=>H_REQUESTS.push(r)); }
-
-    const calSpecial = safeParseObj(d.calSpecial, 'calSpecial');
     if (calSpecial) { Object.keys(CAL_SPECIAL).forEach(k=>delete CAL_SPECIAL[k]); Object.assign(CAL_SPECIAL, calSpecial); }
 
-    const emps = safeParseObj(d.employees, 'employees');
     // ポータルから従業員データを受け取っていた場合はそちらを優先
     // シフトGASにemployeesが保存されていない場合のみ上書き
     if (emps && emps.length && EMPLOYEES.length === 0) {
-      EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(e));
+      EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(withoutEmployeePassword_(e)));
     } else if (emps && emps.length && !window._portalEmpsReceived) {
       // ポータルから受け取っていない場合はGASのデータを使用
-      EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(e));
+      EMPLOYEES.length=0; emps.forEach(e=>EMPLOYEES.push(withoutEmployeePassword_(e)));
     }
+    // 読み込んだ状態を保存の基準にする（未送信のID連携があれば基準にも同じ移し替えを当て直す）
+    _base = snapshot_();
+    _pendingLinks.forEach(l => applyLinkTo_({ shifts: _base.shifts, employees: _base.employees }, l.old, l['new']));
+    _pendingLinks.forEach(l => applyLinkTo_({ shifts: SHIFTS, employees: EMPLOYEES }, l.old, l['new']));
+    applyPortalNames_(); // ポータル名簿を取得済みなら、IDが一致する人の氏名をポータルの最新にそろえる（次の保存で反映）
     persistData();
+    _loadFailed = false;
+    SHIFT_DATA_READY = true;
     showSyncBadge('loaded');
     addSyncLogEntry('読込', true);
     pushLogToGas('読込', true);
     return true;
   } catch(e) {
+    if (superseded()) return false;
+    console.warn('[loadFromSheet] 失敗:', e && e.message ? e.message : e);
+    if (e && e.shiftDataInvalid) {
+      // データ異常：画面の既存データと未保存の入力は保持したまま、保存を止めて再試行を案内する
+      _loadFailed = true;
+      SHIFT_DATA_READY = false;
+      showDataNotReadyBanner_(true);
+    }
     showSyncBadge('error');
     addSyncLogEntry('読込', false);
     pushLogToGas('読込', false);
@@ -3113,6 +3785,15 @@ async function loadFromSheet() {
 // 手動同期（トップバーの🔄ボタン）
 async function manualSyncSheet() {
   if (!GAS_URL_SHIFT) { alert('ポータルから開いてください（GAS URLが未設定）'); return; }
+  // 初回読込が未完了なら、ゲート経由で読み直す（成功で保存解禁）
+  if (!SHIFT_DATA_READY) { await ensureInitialLoad_(); return; }
+  // 未保存の変更があれば先に保存してから読み直す（端末の変更を読込で消さない）。
+  // 保存が失敗・未完了なら読み直さない（入力を保持し、保存の再試行を案内する）。
+  if (hasPendingSave_()) {
+    if (_saving) return;
+    clearTimeout(_saveTimer); _saveTimer = null;
+    if (!await saveToSheet() || hasPendingSave_()) return;
+  }
   const ok = await loadFromSheet();
   rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT();
   // 設定ページが表示中ならログも更新
@@ -3120,11 +3801,14 @@ async function manualSyncSheet() {
 }
 
 // ══ 自動同期タイマー（1時間ごと）══
-let _autoSyncTimer = null;
+// ※ _autoSyncTimer の宣言は initFromToken の実行前へ移動済み（TDZ回避）。ここでは再宣言しない。
 function startAutoSync() {
   if (_autoSyncTimer) clearInterval(_autoSyncTimer);
   _autoSyncTimer = setInterval(async () => {
     if (!GAS_URL_SHIFT || !cUser) return;
+    // 初回読込が未完了なら再試行のみ。未保存の変更がある間は上書きしないよう今回は見送る。
+    if (!SHIFT_DATA_READY) { await ensureInitialLoad_(); return; }
+    if (hasPendingSave_()) { console.log('[自動同期] 未保存の変更があるため見送り'); return; }
     console.log('[自動同期] 開始', new Date().toLocaleTimeString());
     const ok = await loadFromSheet();
     if (ok) { rSh(); rDB(); rEmp(); rPL(); rVreq(); rOTReq(); rHReq(); rOT(); }
@@ -3138,6 +3822,7 @@ function showSyncBadge(status) {
   if (!el) return;
   const map = {
     saving:  ['💾 保存中', '#b07000', '#fff7db'],
+    pending: ['💾 未保存', '#b07000', '#fff7db'],
     saved:   ['✅ 保存済', '#0b7a3d', '#e3f6ed'],
     loading: ['🔄 読込中', '#1655b0', '#e5effe'],
     loaded:  ['✅ 読込完了','#0b7a3d','#e3f6ed'],
@@ -3146,102 +3831,43 @@ function showSyncBadge(status) {
   const [text, color, bg] = map[status] || map.saved;
   el.textContent = text; el.style.color = color; el.style.background = bg;
   el.style.display = 'inline-block';
-  if (status === 'saved' || status === 'loaded') setTimeout(() => { el.style.display='none'; }, 3000);
+  // 3秒後に消すのは同じ表示のままのときだけ（その間に出た「未保存」「エラー」を消さない）
+  if (status === 'saved' || status === 'loaded') setTimeout(() => { if (el.textContent === text) el.style.display='none'; }, 3000);
 }
 
-// ══ SSO：ポータルからの自動ログイン + 従業員同期 ══
-(function(){
-  function parseSSOToken(token){
-    try{
-      const decoded=atob(token.split('').reverse().join(''));
-      const data=JSON.parse(decoded);
-      if(Date.now()-data.ts>5*60*1000)return null;
-      return data;
-    }catch(e){return null;}
-  }
+// ══ SSO ══
+//   ポータルからの入場・識別・データ読込は上部の initFromToken() に一本化した。
+//   旧 ?sso=（reverse+atob・ts5分）方式と、?emps=/?shift_gas_url= 受け渡しは廃止。
+//   従業員データは loadShiftData（トークン必須）経由で取得する。
 
-  const params=new URLSearchParams(window.location.search);
-  const token=params.get('sso');
-  if(!token)return;
-  const data=parseSSOToken(token);
-  if(!data){
-    // SSOトークン無効（期限切れ等）→ ログイン画面を表示
-    document.body.classList.remove('app-loading');
-    return;
-  }
 
-  // empsパラメータから従業員データを同期してlocalStorageに保存
-  const empsParam=params.get('emps');
-  const empsKey=params.get('emps_key');
-  let empsJson=null;
-  if(empsParam) empsJson=decodeURIComponent(empsParam);
-  else if(empsKey){ try{empsJson=sessionStorage.getItem(empsKey);}catch(e){} }
-
-  if(empsJson){
-    try{
-      const emps=JSON.parse(empsJson);
-      syncFromPortalAndPersist(emps);
-      window._portalEmpsReceived = true; // ポータルから受け取ったフラグ
-      // シフトGASにも従業員データを保存（次回loadFromSheet時に正しいデータを返すため）
-      if(GAS_URL_SHIFT || params.get('shift_gas_url') || params.get('gas_url')) {
-        setTimeout(() => {
-          saveShiftKey('employees', JSON.stringify(emps)).catch(()=>{});
-        }, 500);
-      }
-    }catch(e){console.warn('従業員同期エラー:',e);}
-  }
-
-  // シフトGAS URLを受け取って保存（shift_gas_urlパラメータ優先）
-  const shiftGasUrlParam = params.get('shift_gas_url');
-  const gasUrlParam      = params.get('gas_url'); // 旧パラメータ名互換
-  const gasUrl = shiftGasUrlParam || gasUrlParam;
-  if (gasUrl) { setGasUrl(decodeURIComponent(gasUrl)); }
-
-  let name=data.name||'';
-  try{name=decodeURIComponent(escape(name));}catch(e){}
-  cUser={id:data.id,name,dept:data.dept||''};
-  isA=(data.role==='admin' || data.role==='master');
-  window.history.replaceState({},'',window.location.pathname);
-  // ログインユーザーをEMPLOYEESに仮登録（申請機能のため）
-  if(!isA && !EMPLOYEES.find(x=>x.id===data.id)){
-    getEmpOrCurrent(data.id);
-    persistData();
-  }
-  launch();
-  // スプレッドシートから最新データを読み込む
-  setTimeout(async()=>{
-    try{
-      if(GAS_URL_SHIFT){
-        await loadFromSheet();
-        rSh();rDB();rEmp();rPL();rVreq();rOTReq();rHReq();rOT();
-      }else{
-        rSh();rDB();rEmp();
-      }
-    }catch(e){}
-  }, 300);
-})();
-
-// ══ LINEWORKS通知送信（シフトGAS経由）══
-function sendShiftNotify(eventType, data) {
-  if (!GAS_URL_SHIFT) return;
-  try {
-    const url = GAS_URL_SHIFT
-      + '?action=notifyShift'
-      + '&eventType=' + encodeURIComponent(eventType)
-      + '&name='      + encodeURIComponent(data.name     || '')
-      + '&type='      + encodeURIComponent(data.type     || '')
-      + '&date='      + encodeURIComponent(data.date     || '')
-      + '&detail='    + encodeURIComponent(data.detail   || '')
-      + '&approver='  + encodeURIComponent(data.approver || '')
-      + '&reason='    + encodeURIComponent(data.reason   || '')
-      + '&lwUserId='  + encodeURIComponent(data.lwUserId || '');
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.send();
-  } catch(e) {
-    console.warn('通知エラー:', e);
-  }
+function notificationSummary_(notification) {
+  const unknown = { text: '通知結果は未確認です。未送信とは断定できません。管理者に確認してください。', type: 'warn' };
+  if (!notification || typeof notification !== 'object' || Array.isArray(notification)) return unknown;
+  if (notification.deliveryUnknown === true) return {
+    text: '通知の配信結果は不明です（deliveryUnknown）。送信0件とは断定できません。重複防止のため再送前に管理者へ確認してください。',
+    type: 'warn'
+  };
+  const count = value => Number.isSafeInteger(value) && value >= 0;
+  const sent = notification.sent, failed = notification.failed, skipped = notification.skipped === undefined ? 0 : notification.skipped;
+  if (notification.ok === false || (count(failed) && failed > 0)) return {
+    text: '通知に失敗しました。' + (count(sent) && count(failed) && count(skipped)
+      ? 'LINE WORKS API受理' + sent + '件・失敗' + failed + '件・スキップ' + skipped + '件。'
+      : '配信件数は未確認です。') + '業務データの再保存は不要です。',
+    type: 'warn'
+  };
+  if (notification.ok !== true || !count(sent) || !count(failed) || !count(skipped) ||
+      (notification.dryRun !== undefined && typeof notification.dryRun !== 'boolean') ||
+      (notification.deliveryUnknown !== undefined && typeof notification.deliveryUnknown !== 'boolean')) return unknown;
+  if (notification.dryRun === true) return {
+    text: sent === 0 ? '通知はdry-runです。実送信なし・スキップ' + skipped + '件。'
+      : '通知はdry-runを含みます。LINE WORKS API受理' + sent + '件・スキップ' + skipped + '件（既読未確認）。',
+    type: 'warn'
+  };
+  if (sent === 0) return { text: skipped > 0 ? '通知はスキップ' + skipped + '件・API受理0件です。' : '通知対象0件のため送信していません。', type: 'warn' };
+  return { text: 'LINE WORKS API受理' + sent + '件・スキップ' + skipped + '件（既読未確認）。', type: skipped > 0 ? 'warn' : 'success' };
 }
+
 </script>
 </body>
 </html>

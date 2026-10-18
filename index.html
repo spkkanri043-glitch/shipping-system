@@ -1,7 +1,103 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-LEBn/9POn2IH0kDT0VAkPRKzXIzyhTzHdVeDHUmftdI=' 'sha256-sptq+ApuuSLYnYNokgr7G3hWPeJbc/XL2Dgh+p/5TEQ=' 'sha256-PwQgPyJnrO1ekJ3I3BMJqhQsPksNgI7KaWLSdlqMcy8='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
+<script>/* MOGU_CSP_RUNTIME_V1 */
+const __moguCsp = (() => {
+  const handlers = {"h0": function(event, _p) { goPortal()
+},
+"h1": function(event, _p) { closeTab()
+},
+"h2": function(event, _p) { showCsvModal()
+},
+"h3": function(event, _p) { exportCSVByStatus()
+},
+"h4": function(event, _p) { clearAll()
+},
+"h5": function(event, _p) { toggleMoreMenu()
+},
+"h6": function(event, _p) { manualRefresh();closeMoreMenu()
+},
+"h7": function(event, _p) { loadFromCloud();closeMoreMenu()
+},
+"h8": function(event, _p) { toggleAutoRefresh()
+},
+"h9": function(event, _p) { doLogout();closeMoreMenu()
+},
+"h10": function(event, _p) { doScan()
+},
+"h11": function(event, _p) { switchTab('list',this)
+},
+"h12": function(event, _p) { switchTab('log',this)
+},
+"h13": function(event, _p) { setFilter('all',this)
+},
+"h14": function(event, _p) { setFilter('pending',this)
+},
+"h15": function(event, _p) { setFilter('done',this)
+},
+"h16": function(event, _p) { setFilter('adjusted',this)
+},
+"h17": function(event, _p) { setFilter('cancelled',this)
+},
+"h18": function(event, _p) { renderList()
+},
+"h19": function(event, _p) { closeUrlModal()
+},
+"h20": function(event, _p) { loadDriveFileList()
+},
+"h21": function(event, _p) { loadCSVFromFile(this)
+},
+"h22": function(event, _p) { toggleGroup(this.dataset.grp)
+},
+"h23": function(event, _p) { loadSelectedFiles()
+}};
+  const events = ["click","input","change"];
+  const bound = new WeakMap();
+  function bind(el) {
+    if (!el || el.nodeType !== 1) return;
+    let state = bound.get(el); if (!state) { state = new Map(); bound.set(el, state); }
+    for (const type of events) {
+      const id = el.getAttribute('data-csp-' + type);
+      if (!id || state.get(type) === id) continue;
+      if (!Object.prototype.hasOwnProperty.call(handlers, id)) continue;
+      const fn = function(event) {
+        const value = this.getAttribute('data-csp-args-' + type);
+        const params = value ? JSON.parse(decodeURIComponent(value)) : [];
+        return handlers[id].call(this, event, params);
+      };
+      // Native event-handler properties preserve this/currentTarget, cancellation,
+      // async return behavior and later application assignments to .onclick etc.
+      el['on' + type] = fn;
+      state.set(type, id);
+    }
+  }
+  function scan(root) {
+    bind(root);
+    if (root.querySelectorAll) for (const el of root.querySelectorAll('*')) bind(el);
+  }
+  for (const type of events) document.addEventListener(type, event => {
+    for (const el of event.composedPath()) bind(el);
+  }, true);
+  new MutationObserver(records => {
+    for (const record of records) {
+      if (record.type === 'attributes') bind(record.target);
+      else for (const node of record.addedNodes) scan(node);
+    }
+  }).observe(document, {subtree:true, childList:true, attributes:true,
+    attributeFilter: events.map(type => 'data-csp-' + type)});
+  document.addEventListener('DOMContentLoaded', () => scan(document));
+  const encode = values => encodeURIComponent(JSON.stringify(values)).replace(/'/g, '%27');
+  function assign(el,type,id,values) {
+    el.setAttribute('data-csp-' + type,id);
+    el.setAttribute('data-csp-args-' + type,encode(values));
+    bind(el);
+  }
+  return Object.freeze({ encode, scan, assign });
+})();
+</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>出荷照合システム(カナモリ向け)</title>
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACc0lEQVR4nL1XPWgTYRh+LvQgaWPvgnFoTEMIVFChCUUbq4M/6CCZpIjQIaCDg0t1csrk5OiSsUMX6aSDXaSC0khsFaHgD1Yol6RtCAR6tcWGtKkO6V3v++6+++ld71ne732/983z3Pv9XI4DBXm79Y+OeQkxHOS0fsBPciOOAGvCLxGcF+SxVMZ0fmhyRB1/mJxSx2I4yHFuySfuP8b84jfmfOphAqG4oPo7q5uEiIBRkVfQkpfzRZTzRYTiAq6+eKDm9HhB9Ce6UzeKZ4ABrT82/UiX44mA/mZowCieOrDlfFG1tAjXeyAWS5nODz29hlBcUMnpPeCJgL83+k1z0hcPT8Hv5++xvr6i+p4sgRWWPn9Vx73UnKtT0PPzh5vy7m9YJbRK47oYv7YPAOgc+AlMzNoh22s3cjJe2RegJVdIAWD3tPPG7bUbOaM4U4BC7pbYCjoBrdI4+LV98A5IqyNvoza4FgCgt4QsU0Bn5o4p8ZfFhVkAuDCaNWznUUAIqPe1Dx2ZXdSUW4Qf+5TOMlJ1kLFC+LoliBR3mcURnOs++Rw7xylcX0SZ0csQ+zqQN5oQI1FTu7W1jZNnh4n6Y30d0xhMJHUxXQfGJMmwuFKpbBrFPwIYvnRbGEwknwGAGOkeCJYFUNDWEx2Qlpds3WhaXLl1VwAAeaNZAIDaqTphlbhiafi6BJYCkmfSrs/3iWWesNcbvwhLQ7cHWGt9XCD+kKy+yeH8vTnHArSb0Aq1qlSYf/da9XUd+D5zU6BjCpRNql8qHrWqZLjJrBCgv9WOgpdP7N+M2qcXw0FOJffz00whBzSnwItOOCUnBPglgub4Dxaa44PD4JhWAAAAAElFTkSuQmCC">
@@ -9,6 +105,36 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="出荷照合">
+
+<!-- ============================================================
+     ★ポータルから渡されたトークンを回収する処理
+     ★この <script> は、このページで最初に実行されるJavaScriptであること。
+       置き場所：<head> の中、他のどの <script>（外部・インラインとも）よりも前。
+       現在このファイルは外部JSを読み込んでいないが、将来CDNのライブラリを
+       追加したときに、その <script> より後ろに移動させてはいけない。
+
+     ★理由：外部から読み込んだJSは location.hash を自由に読める。
+       消すのが後になると、読み込んだライブラリにトークンを渡してしまう。
+
+     ★トークンはクエリ(?)ではなくフラグメント(#)で受け取る。
+       フラグメントはサーバーに送信されないため、
+       GitHub Pages のアクセスログや Referer に残らない。
+     ============================================================ -->
+<script>
+(function () {
+  var TOKEN_KEY = 'shipping_token_v1';
+  try {
+    var h = window.location.hash || '';
+    var m = h.match(/[#&]sso=([^&]+)/);
+    if (m) {
+      // 保存してから、すぐURLから消す（履歴も残さない）
+      sessionStorage.setItem(TOKEN_KEY, decodeURIComponent(m[1]));
+      window.history.replaceState({}, '', window.location.pathname + window.location.search);
+    }
+  } catch (e) {}
+})();
+</script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Meiryo','Hiragino Sans',sans-serif;background:#f5f5f2;color:#1a1a18;min-height:100vh}
@@ -136,22 +262,14 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
   </div>
   <div class="login-company">関ケ原プラ工業(株)</div>
   <div class="login-greeting">従業員の皆様、ようこそ</div>
+  <!-- ★このアプリ単体ではログインさせない（Step 7）。
+       利用者の判定はポータル側とGAS側で行う。 -->
   <div class="login-card">
-    <div class="login-tabs">
-      <button class="login-tab active" id="tab-admin" onclick="switchLoginTab('admin')">管理者ログイン</button>
-      <button class="login-tab" id="tab-staff" onclick="switchLoginTab('staff')">従業員ログイン</button>
+    <div class="login-label" style="text-align:center;line-height:2;font-size:15px">
+      このアプリは<br><b>業務管理ポータル</b>からご利用ください
     </div>
-    <div class="login-field">
-      <div class="login-label">ユーザーID</div>
-      <input type="text" class="login-input" id="login-id" placeholder="" autocomplete="username">
-    </div>
-    <div class="login-field">
-      <div class="login-label">パスワード</div>
-      <input type="password" class="login-input" id="login-pw" placeholder="パスワード" autocomplete="current-password">
-    </div>
-    <button class="login-btn" onclick="doLogin()">ログイン</button>
-    <div class="login-error" id="login-error">IDまたはパスワードが違います</div>
-    <div class="login-hint" id="login-hint" style="display:none"></div>
+    <button class="login-btn" data-csp-click="h0" data-csp-source-click="goPortal()" style="margin-top:16px">ポータルを開く</button>
+    <div class="login-error" id="login-error" style="display:none"></div>
   </div>
   <div class="login-footer">© 関ケ原プラ工業株式会社</div>
 </div>
@@ -167,17 +285,17 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
     <div style="font-size:10px;color:rgba(255,255,255,0.4);white-space:nowrap" id="save-indicator"></div>
   </div>
   <div class="top-btns">
-    <button class="top-btn exit" onclick="closeTab()">✕ タブを閉じる</button>
-    <button class="top-btn" onclick="showCsvModal()">📂 CSVを開く</button>
-    <button class="top-btn" onclick="exportCSVByStatus()">📤 CSV書き出し</button>
-    <button class="top-btn danger" onclick="clearAll()">リセット</button>
+    <button class="top-btn exit" data-csp-click="h1" data-csp-source-click="closeTab()">✕ タブを閉じる</button>
+    <button class="top-btn" data-csp-click="h2" data-csp-source-click="showCsvModal()">📂 CSVを開く</button>
+    <button class="top-btn" data-csp-click="h3" data-csp-source-click="exportCSVByStatus()">📤 CSV書き出し</button>
+    <button class="top-btn danger" data-csp-click="h4" data-csp-source-click="clearAll()">リセット</button>
     <div class="more-wrap">
-      <button class="top-btn" id="more-btn" onclick="toggleMoreMenu()">⋯ その他 ▾</button>
+      <button class="top-btn" id="more-btn" data-csp-click="h5" data-csp-source-click="toggleMoreMenu()">⋯ その他 ▾</button>
       <div class="more-menu" id="more-menu">
-        <button class="more-item" id="refresh-btn" onclick="manualRefresh();closeMoreMenu()">🔄 更新</button>
-        <button class="more-item" onclick="loadFromCloud();closeMoreMenu()" title="クラウドからデータを復元">☁️ クラウド復元</button>
-        <button class="more-item" id="auto-refresh-btn" onclick="toggleAutoRefresh()">⏱ 自動更新 OFF</button>
-        <button class="more-item danger" onclick="doLogout();closeMoreMenu()">ログアウト</button>
+        <button class="more-item" id="refresh-btn" data-csp-click="h6" data-csp-source-click="manualRefresh();closeMoreMenu()">🔄 更新</button>
+        <button class="more-item" data-csp-click="h7" data-csp-source-click="loadFromCloud();closeMoreMenu()" title="クラウドからデータを復元">☁️ クラウド復元</button>
+        <button class="more-item" id="auto-refresh-btn" data-csp-click="h8" data-csp-source-click="toggleAutoRefresh()">⏱ 自動更新 OFF</button>
+        <button class="more-item danger" data-csp-click="h9" data-csp-source-click="doLogout();closeMoreMenu()">ログアウト</button>
       </div>
     </div>
   </div>
@@ -206,23 +324,23 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
       <div id="scan-area" style="display:none">
         <div class="scan-label">② 納品ラベル QR</div>
         <input type="text" id="scan-input" placeholder="QRをスキャン（Enter）">
-        <button class="btn btn-dark" onclick="doScan()">照合・消込</button>
+        <button class="btn btn-dark" data-csp-click="h10" data-csp-source-click="doScan()">照合・消込</button>
       </div>
     </div>
     <div class="feedback" id="feedback"></div>
   </div>
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('list',this)">出荷リスト</button>
-    <button class="tab" onclick="switchTab('log',this)">消込履歴</button>
+    <button class="tab active" data-csp-click="h11" data-csp-source-click="switchTab('list',this)">出荷リスト</button>
+    <button class="tab" data-csp-click="h12" data-csp-source-click="switchTab('log',this)">消込履歴</button>
   </div>
   <div id="tab-list">
     <div class="filter-row">
-      <button class="filter-btn active" onclick="setFilter('all',this)">すべて</button>
-      <button class="filter-btn" onclick="setFilter('pending',this)">未消込</button>
-      <button class="filter-btn" onclick="setFilter('done',this)">消込済</button>
-      <button class="filter-btn" onclick="setFilter('adjusted',this)">納期調整</button>
-      <button class="filter-btn" onclick="setFilter('cancelled',this)">キャンセル</button>
-      <input type="text" class="search-box" id="search-box" placeholder="品番・BC検索" oninput="renderList()">
+      <button class="filter-btn active" data-csp-click="h13" data-csp-source-click="setFilter('all',this)">すべて</button>
+      <button class="filter-btn" data-csp-click="h14" data-csp-source-click="setFilter('pending',this)">未消込</button>
+      <button class="filter-btn" data-csp-click="h15" data-csp-source-click="setFilter('done',this)">消込済</button>
+      <button class="filter-btn" data-csp-click="h16" data-csp-source-click="setFilter('adjusted',this)">納期調整</button>
+      <button class="filter-btn" data-csp-click="h17" data-csp-source-click="setFilter('cancelled',this)">キャンセル</button>
+      <input type="text" class="search-box" id="search-box" placeholder="品番・BC検索" data-csp-input="h18" data-csp-source-input="renderList()">
     </div>
     <div id="list-body"><div class="empty">CSVを読み込んでください<br><small style="font-size:11px;margin-top:8px;display:block">複数ファイルを同時に選択できます</small></div></div>
   </div>
@@ -237,13 +355,13 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
   <div class="modal" style="display:flex;flex-direction:column;max-height:90vh;padding:0;overflow:hidden">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #e5e5e0;flex-shrink:0">
       <div class="modal-title" style="margin:0">📂 CSVを開く</div>
-      <button onclick="closeUrlModal()" style="padding:6px 14px;background:#e5e5e0;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">✕ 閉じる</button>
+      <button data-csp-click="h19" data-csp-source-click="closeUrlModal()" style="padding:6px 14px;background:#e5e5e0;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">✕ 閉じる</button>
     </div>
     <div style="overflow-y:auto;flex:1;padding:14px">
       <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
         <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">☁️ ドライブから選ぶ</div>
         <div style="font-size:11px;color:#888;margin-bottom:10px">Googleドライブのフォルダからファイルを選択</div>
-        <button style="width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px" onclick="loadDriveFileList()">📋 ファイル一覧を取得</button>
+        <button style="width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px" data-csp-click="h20" data-csp-source-click="loadDriveFileList()">📋 ファイル一覧を取得</button>
         <div id="drive-file-list" style="display:none;border:1px solid #e5e5e0;border-radius:8px"></div>
       </div>
       <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
@@ -251,7 +369,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
         <div style="font-size:11px;color:#888;margin-bottom:10px">iPhone・PC・タブレット向け</div>
         <label style="display:block;width:100%;padding:12px;background:#1a1a18;color:#fff;border-radius:8px;text-align:center;font-size:14px;font-weight:700;cursor:pointer">
           ファイルを選択
-          <input type="file" accept=".csv,.CSV" multiple style="display:none" onchange="loadCSVFromFile(this)">
+          <input type="file" accept=".csv,.CSV" multiple style="display:none" data-csp-change="h21" data-csp-source-change="loadCSVFromFile(this)">
         </label>
       </div>
       <div id="url-feedback" style="margin-top:4px;font-size:12px;display:none;white-space:pre-wrap;line-height:1.6;padding:8px 10px;border-radius:6px"></div>
@@ -273,13 +391,36 @@ const SAVE_KEY       = 'shipping_data_v1';
 const SAVE_KEY_FILES = 'shipping_files_v1';
 const SAVE_KEY_LOG   = 'shipping_log_v1';
 
-const USERS = [
-  { id: 'admin',  pw: '435511spk', name: '管理者',   admin: true  },
-  { id: 'kouki',  pw: 'admin',     name: '安田光輝', admin: false },
-  { id: 'ryota',  pw: 'admin1',    name: '吉村亮汰', admin: false },
-  { id: 'tomoki', pw: 'admin2',    name: '安田智貴', admin: false },
-];
+// ★USERS配列（利用者のIDとパスワードの直書き）は Step 7 で削除した。
+//   このファイルはGitHub Pagesで公開配信されており、誰でもソースを読めるため、
+//   ここに認証情報を置いてはいけない。
+//   なお、削除しただけでは過去に公開された値は無効にならない。
+//   ★必ず全員分のパスワードを変更すること（Gitの履歴には残っているため）。
 const SESSION_KEY = 'shipping_session_v1';
+const TOKEN_KEY   = 'shipping_token_v1';   // <head> の先頭スクリプトと同じキー名にすること
+
+/**
+ * HTMLとして解釈されると困る文字を無害化する（Step 7）。
+ *
+ * ★なぜ必要か
+ *   この画面が表示しているのは取引先から届くCSVの中身。
+ *   品名の欄に <img src=x onerror=...> のような文字列が入っていると、
+ *   エスケープせずに innerHTML へ入れた瞬間にスクリプトとして動いてしまう。
+ *   トークンは sessionStorage にあるため、1箇所でも注入経路があると盗まれる。
+ *   （別オリジンのため httpOnly Cookie が使えず、sessionStorage 以外に置き場がない）
+ *
+ * ★本来は textContent が最善だが、この画面は行のHTMLを文字列で組み立てているため、
+ *   全面的な作り替えになる。ここでは「差し込む値を必ずこの関数に通す」方式にした。
+ *   新しく値を差し込むときは、必ず esc() を通すこと。
+ */
+function esc(v) {
+  return String(v === undefined || v === null ? '' : v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 let records          = [];
 let filterMode       = 'all';
@@ -350,8 +491,7 @@ async function manualRefresh() {
   restoreData();
   if (GAS_DEPLOY_URL && GAS_DEPLOY_URL !== 'YOUR_DEPLOY_URL') {
     try {
-      const res  = await fetch(GAS_DEPLOY_URL + '?action=loadShippingData');
-      const data = await res.json();
+      const data = await gasCall('loadShippingData', {});
       if (data.ok && data.records && data.records.length > 0) {
         const cloudMap = {};
         data.records.forEach(function(r) { cloudMap[r['バーコード番号']] = r; });
@@ -409,10 +549,9 @@ function stopAutoRefresh() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  const loginIdEl = document.getElementById('login-id');
-  const loginPwEl = document.getElementById('login-pw');
-  if (loginIdEl) loginIdEl.addEventListener('keydown', e => { if(e.key==='Enter') { if(loginPwEl) loginPwEl.focus(); } });
-  if (loginPwEl) loginPwEl.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  // ★ログイン欄（login-id / login-pw）のキー操作は Step 7 で削除した。
+  //   入力欄も doLogin() も無くなったため、ここに残しておくと
+  //   将来ログイン欄を作り直したときに、存在しない関数を呼びに行ってしまう。
   const hinbanEl = document.getElementById('hinban-input');
   if (hinbanEl) hinbanEl.addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); setHinban(); } });
   const scanEl = document.getElementById('scan-input');
@@ -423,17 +562,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // 自動保存・復元
 // ============================================================
 function autoSave() {
-  clearTimeout(autoSaveTimer);
-  autoSaveTimer = setTimeout(() => {
-    try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(records));
-      localStorage.setItem(SAVE_KEY_FILES, JSON.stringify(loadedFiles));
-      localStorage.setItem(SAVE_KEY_LOG, JSON.stringify(logEntries));
-      const el = document.getElementById('save-indicator');
-      if (el) { el.textContent = '💾 保存済 ' + nowStr().slice(11,16); el.style.opacity='1'; setTimeout(()=>el.style.opacity='.4',2000); }
-    } catch(e) { console.warn('自動保存失敗:', e); }
-    saveToCloud();
-  }, 800);
+  const el = document.getElementById('save-indicator');
+  if (el) { el.textContent = '未保存（この画面のみ）'; el.style.opacity = '1'; }
+  saveToCloud();
 }
 
 async function saveToCloud() {
@@ -441,24 +572,32 @@ async function saveToCloud() {
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer = setTimeout(async () => {
     try {
-      const payload = { action: 'saveShippingData', records: records, logEntries: logEntries, savedAt: nowStr() };
-      const res = await fetch(GAS_DEPLOY_URL, { method: 'POST', body: JSON.stringify(payload) });
-      const data = await res.json();
+      const data = await gasCall('saveShippingData', { records: records, logEntries: logEntries, savedAt: nowStr(), batchId: sourceFileName || '' });
+      if (!data || !data.ok) throw new Error((data && data.message) || '保存に失敗しました');
+      if (data && data.code === 'BATCH_BUSY') { showFB('warn', data.message || '別バッチの処理が未完了です'); return; }
       if (data.ok) {
         const el = document.getElementById('save-indicator');
         if (el) { el.textContent = '☁️ クラウド保存済 ' + nowStr().slice(11,16); el.style.opacity='1'; setTimeout(()=>el.style.opacity='.4',3000); }
+        // 区間B②：クライアントが全件完了と見なした時だけ、サーバー側の完了判定を依頼する。
+        //   ・判定の根拠はサーバー側（元CSV突合）。ここは「評価してほしい」合図にすぎない。
+        //   ・客先CSV生成はここでは呼ばない（時間主導トリガーが分離実行 §6-3/§7-1）。
+        if (sourceFileName && records.length && records.every(function(r){ return isDone(r); })) {
+          try { await gasCall('evaluateCompletion', { batchId: sourceFileName }); }
+          catch(e) { console.warn('evaluateCompletion失敗:', e); }
+        }
       }
-    } catch(e) { console.warn('クラウド保存失敗:', e.message); }
+    } catch(e) { showFB('err', 'クラウド未保存: ' + e.message); }
   }, 1500);
 }
 
 async function loadFromCloud() {
   if (!GAS_DEPLOY_URL || GAS_DEPLOY_URL.includes('YOUR_DEPLOY_URL')) { showFB('warn', 'GAS_DEPLOY_URLが未設定です'); return; }
   try {
-    const res = await fetch(GAS_DEPLOY_URL + '?action=loadShippingData');
-    const data = await res.json();
+    const data = await gasCall('loadShippingData', {});
     if (data.ok && data.records && data.records.length > 0) {
-      records = data.records; logEntries = data.logEntries || [];
+      const batches = [...new Set(data.records.map(r => r.batchId))];
+      if (batches.length !== 1 || !batches[0]) throw new Error('旧データのバッチ移行が必要です');
+      records = data.records; sourceFileName = batches[0]; loadedFiles = [sourceFileName + '.csv']; logEntries = [];
       updateStats(); renderList();
       showFB('ok', '☁️ クラウドから復元しました（' + records.length + '件）');
       autoSave();
@@ -467,66 +606,19 @@ async function loadFromCloud() {
 }
 
 function restoreData() {
-  try {
-    const saved      = localStorage.getItem(SAVE_KEY);
-    const savedFiles = localStorage.getItem(SAVE_KEY_FILES);
-    const savedLog   = localStorage.getItem(SAVE_KEY_LOG);
-    if (saved) {
-      const newRecords = JSON.parse(saved);
-      const prevDone   = records.filter(r=>isDone(r)).length;
-      records     = newRecords;
-      loadedFiles = savedFiles ? JSON.parse(savedFiles) : [];
-      logEntries  = savedLog   ? JSON.parse(savedLog)   : [];
-      const newDone = records.filter(r=>isDone(r)).length;
-      updateStats(); renderList(); renderHinbanFilter(); updateChips();
-      const el = document.getElementById('save-indicator');
-      if (el) { el.textContent = '🔄 ' + nowStr().slice(11,16) + ' 更新'; el.style.opacity='1'; setTimeout(()=>el.style.opacity='.4',3000); }
-      if (prevDone > 0 && newDone !== prevDone) showFB('ok', `データが更新されました（消込済: ${prevDone}→${newDone}件）`);
-    }
-  } catch(e) { console.warn('復元失敗:', e); }
+  // Business data stays in page memory; never hydrate a previous user's storage.
+  updateStats(); renderList(); updateChips();
 }
 
 // ============================================================
 // CSV読み込み
 // ============================================================
-function loadCSVFiles(input) {
-  const files = Array.from(input.files);
-  if (!files.length) return;
-  let pending = files.length;
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      let text = e.target.result;
-      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-      const lines   = text.trim().split('\n');
-      const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
-      const newRecs = lines.slice(1).map(line => {
-        const cols = splitCSV(line); const obj = {};
-        headers.forEach((h, i) => {
-          let v = (cols[i]||'').trim().replace(/^"|"$/g,'').replace(/^=?"?([^"]*)"?$/, '$1').replace(/^=/,'');
-          obj[h] = v;
-        });
-        if (obj['品番']) obj['品番'] = obj['品番'].replace(/-/g,'');
-        if (!obj['消込済'])   obj['消込済']   = '未';
-        if (!obj['消込日時']) obj['消込日時'] = '';
-        if (!obj['納品調整']) obj['納品調整'] = '';
-        return obj;
-      }).filter(r => r['品番'] && r['バーコード番号']);
-      const existingBCs = new Set(records.map(r => r['バーコード番号']));
-      let added = 0, skipped = 0;
-      newRecs.forEach(r => {
-        const bc = r['バーコード番号'];
-        if (existingBCs.has(bc)) { skipped++; } else { records.push(r); existingBCs.add(bc); added++; }
-      });
-      if (!loadedFiles.includes(file.name)) loadedFiles.push(file.name);
-      if (!sourceFileName) sourceFileName = getBaseFileName(file.name);
-      showFB('ok', `${file.name}：追加 ${added}件 / 重複スキップ ${skipped}件`);
-      pending--;
-      if (pending === 0) { updateStats(); renderList(); renderHinbanFilter(); updateChips(); autoSave(); }
-    };
-    reader.readAsText(file, 'utf-8');
-  });
-  input.value = '';
+async function loadCSVFiles(input) {
+  const files=Array.from(input.files);
+  if(files.length!==1){showFB('err','1つのCSVを選択してください');return;}
+  if(records.length){showFB('err','現在のバッチを保存・リセットしてから取り込んでください');return;}
+  try {await prepareLocalCsv_(files[0]);}catch(e){showFB('err',e.message);}
+  input.value='';
 }
 
 function loadCSVFromFile(input) { loadCSVFiles(input); }
@@ -546,13 +638,11 @@ function splitCSV(line) {
 function updateChips() {
   const wrap = document.getElementById('file-chips-wrap');
   wrap.style.display = loadedFiles.length ? 'block' : 'none';
-  document.getElementById('chip-list').innerHTML = loadedFiles.map(f => `<span class="file-chip">${f}</span>`).join('');
+  document.getElementById('chip-list').innerHTML = loadedFiles.map(f => `<span class="file-chip">${esc(f)}</span>`).join('');
 }
 
 function clearAll() {
-  if (!confirm('ページをリセットしますか？\n（読み込んだCSVデータはすべて消去されます）')) return;
-  try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(SAVE_KEY_FILES); localStorage.removeItem(SAVE_KEY_LOG); } catch(e) {}
-  sourceFileName = '';
+  if (!confirm('未保存データを破棄して画面をリセットしますか？')) return;
   location.reload();
 }
 
@@ -677,7 +767,7 @@ function renderList() {
   if (filterHinban) list = list.filter(r => (r['品番']||'').replace(/-/g,'') === filterHinban);
   if (search) list = list.filter(r => (r['品番']||'').toLowerCase().includes(search) || (r['バーコード番号']||'').includes(search) || (r['発注番号']||'').toLowerCase().includes(search));
   if (!list.length) { body.innerHTML='<div class="empty">該当なし</div>'; return; }
-  const groups = {}; const order = [];
+  const groups = Object.create(null); const order = [];
   list.forEach(function(r) {
     const hn = (r['品番']||'').replace(/-/g,'') || '(不明)';
     if (!groups[hn]) { groups[hn] = []; order.push(hn); }
@@ -689,7 +779,7 @@ function renderList() {
     const doneCount = grp.filter(r => isDone(r)).length;
     const total     = grp.length;
     const color     = doneCount === total ? '#1e8a55' : '#e8a000';
-    const mukouMap  = {};
+    const mukouMap  = Object.create(null);
     grp.forEach(function(r) {
       const mk = (r['行先コード'] || '').trim();
       if (!mk) return;
@@ -704,13 +794,13 @@ function renderList() {
       mukouKeys.forEach(function(mk) {
         const info = mukouMap[mk];
         const mc   = info.done === info.total ? '#1e8a55' : '#e8a000';
-        mukouHtml += mk + ':<span style="color:' + mc + '">' + info.done + '/' + info.total + '</span>　';
+        mukouHtml += esc(mk) + ':<span style="color:' + mc + '">' + info.done + '/' + info.total + '</span>　';
       });
       mukouHtml += '</span>';
     }
     const isOpen = expandedGroups[hn] === true;
     const arrow  = isOpen ? '▲' : '▼';
-    rows.push('<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:2px;padding:7px 12px;background:#f0f0ea;border-left:4px solid ' + color + ';border-radius:6px;margin-top:12px;font-size:13px;font-weight:700;cursor:pointer" data-grp="' + hn + '" onclick="toggleGroup(this.dataset.grp)"><span>' + hn + ' <span style="font-size:11px;color:#999;font-weight:400">' + arrow + '</span>' + mukouHtml + '</span><span style="color:' + color + ';font-size:12px;flex-shrink:0">' + doneCount + ' / ' + total + '</span></div>');
+    rows.push('<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:2px;padding:7px 12px;background:#f0f0ea;border-left:4px solid ' + color + ';border-radius:6px;margin-top:12px;font-size:13px;font-weight:700;cursor:pointer" data-grp="' + esc(hn) + "\" data-csp-click=\"h22\" data-csp-source-click=\"toggleGroup(this.dataset.grp)\"><span>" + esc(hn) + ' <span style="font-size:11px;color:#999;font-weight:400">' + arrow + '</span>' + mukouHtml + '</span><span style="color:' + color + ';font-size:12px;flex-shrink:0">' + doneCount + ' / ' + total + '</span></div>');
     if (!isOpen) return;
     grp.forEach(function(r) {
       const done      = isDone(r);
@@ -719,7 +809,7 @@ function renderList() {
       const bc        = r['バーコード番号'] || '';
       const adjClass  = cancelled ? 'cancelled' : adj==='前倒し' ? 'adjusted-mae' : adj==='後ろ倒し' ? 'adjusted-ato' : '';
       const badgeAdj  = adj==='前倒し' ? 'badge-adj-mae' : adj==='後ろ倒し' ? 'badge-adj-ato' : 'badge-cancel';
-      rows.push('<div class="list-item ' + (done?'done':'') + ' ' + adjClass + '" id="item-' + bc + '" style="border-radius:0;border-top:none"><div style="width:0;flex-shrink:0"></div><div class="item-body"><div class="item-top"><span class="item-hinban">' + (r['品番']||'') + '</span><span style="display:flex;gap:4px;align-items:center;flex-shrink:0">' + (adj ? '<span class="badge ' + badgeAdj + '">' + adj + '</span>' : '') + '<span class="badge ' + (done?'badge-done':cancelled?'badge-cancel':'badge-pending') + '">' + (done?'済':cancelled?'取消':'未') + '</span></span></div><div class="item-bc">' + bc + '</div><div class="item-meta"><span>数量:' + (r['数量']||'') + '</span><span>連番:' + (r['連番']||'') + '/' + (r['総数']||'') + '</span><span>納品日:' + (r['納品日']||'') + '</span><span>発注:' + (r['発注番号']||'') + '</span>' + (done ? '<span style="color:#1e8a55">消込:' + (r['消込日時']||'') + '</span>' : '') + '</div></div></div>');
+      rows.push('<div class="list-item ' + (done?'done':'') + ' ' + adjClass + '" id="item-' + esc(bc) + '" style="border-radius:0;border-top:none"><div style="width:0;flex-shrink:0"></div><div class="item-body"><div class="item-top"><span class="item-hinban">' + esc(r['品番']) + '</span><span style="display:flex;gap:4px;align-items:center;flex-shrink:0">' + (adj ? '<span class="badge ' + badgeAdj + '">' + esc(adj) + '</span>' : '') + '<span class="badge ' + (done?'badge-done':cancelled?'badge-cancel':'badge-pending') + '">' + (done?'済':cancelled?'取消':'未') + '</span></span></div><div class="item-bc">' + esc(bc) + '</div><div class="item-meta"><span>数量:' + esc(r['数量']) + '</span><span>連番:' + esc(r['連番']) + '/' + esc(r['総数']) + '</span><span>納品日:' + esc(r['納品日']) + '</span><span>発注:' + esc(r['発注番号']) + '</span>' + (done ? '<span style="color:#1e8a55">消込:' + esc(r['消込日時']) + '</span>' : '') + '</div></div></div>');
     });
   });
   body.innerHTML = rows.join('');
@@ -736,7 +826,7 @@ function switchTab(tab,btn) {
 function renderLog() {
   const body = document.getElementById('log-body');
   if (!logEntries.length) { body.innerHTML='<div class="empty">消込履歴なし</div>'; return; }
-  body.innerHTML = [...logEntries].reverse().map(r=>`<div class="list-item"><div style="width:16px;flex-shrink:0"></div><div class="item-body"><div class="item-top"><span class="item-hinban">${r['品番']||''}</span><span style="font-size:11px;color:#aaa">${r['ts']||''}</span></div><div class="item-bc">${r['バーコード番号']||''}</div><div class="item-meta"><span>${r['納品先']||''}</span><span>連番:${r['連番']||''}/${r['総数']||''}</span></div></div></div>`).join('');
+  body.innerHTML = [...logEntries].reverse().map(r=>`<div class="list-item"><div style="width:16px;flex-shrink:0"></div><div class="item-body"><div class="item-top"><span class="item-hinban">${esc(r['品番'])}</span><span style="font-size:11px;color:#aaa">${esc(r['ts'])}</span></div><div class="item-bc">${esc(r['バーコード番号'])}</div><div class="item-meta"><span>${esc(r['納品先'])}</span><span>連番:${esc(r['連番'])}/${esc(r['総数'])}</span></div></div></div>`).join('');
 }
 
 // ============================================================
@@ -749,11 +839,13 @@ async function exportCSVByStatus() {
     showFB('ok', '📤 CSV書き出し中...');
     try {
       const baseName = sourceFileName || ('出荷指示_' + today);
-      const res = await fetch(GAS_DEPLOY_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'saveCSVByStatus', records: records, today: today, baseName: baseName, tanto: currentUserName(), sourceFileNames: loadedFiles })
-      });
-      const resText = await res.text();
+      // ★担当者名は送らない。サーバーがトークンの中の名前を使う
+      //   （ブラウザから渡すと、他人の名前で書き出せてしまうため）
+      clearTimeout(cloudSaveTimer);
+      const saved = await gasCall('saveShippingData', {records, batchId: sourceFileName});
+      if (!saved.ok) throw new Error(saved.message || '保存失敗');
+      const resData = await gasCall('saveCSVByStatus', { records: records, today: today, baseName: baseName, batchId: sourceFileName });
+      const resText = JSON.stringify(resData);
       let data;
       try { data = JSON.parse(resText); } catch(e) { throw new Error('JSONパース失敗: ' + resText.slice(0,100)); }
       if (!data.ok) throw new Error(data.message);
@@ -763,7 +855,8 @@ async function exportCSVByStatus() {
         if (r.type === 'done')    msgs.push('完了フォルダ: '   + r.count + '件');
         if (r.type === 'cancel')  msgs.push('キャンセルフォルダ: ' + r.count + '件');
       });
-      showFB('ok', '☁️ Googleドライブに保存しました\n' + msgs.join('\n'));
+      const notificationFailed = (data.notifications || []).some(n => !n.ok);
+      showFB(notificationFailed ? 'warn' : 'ok', '☁️ Googleドライブに保存しました\n' + msgs.join('\n') + (notificationFailed ? '\n通知は未完了です。送信結果を確認してください。' : ''));
     } catch(err) { showFB('err', '書き出し失敗: ' + err.message); }
   } else {
     const pending   = records.filter(function(r) { return isPending(r); });
@@ -779,17 +872,7 @@ async function exportCSVByStatus() {
 
 function makeCSV(data) {
   const keys = ['品番','数量','バーコード番号','発注番号','納品先','荷姿','行先コード','連番','総数','出荷日','納品日','納品調整','発送元','消込済','消込日時'];
-  let csv = '\uFEFF' + keys.join(',') + '\n';
-  data.forEach(r => {
-    csv += keys.map(k => {
-      let v = r[k] || '';
-      if (k==='消込済'   && r['納品調整']==='後ろ倒し') v = '未';
-      if (k==='消込日時' && r['納品調整']==='後ろ倒し') v = '';
-      if (k==='バーコード番号') return '="' + v + '"';
-      return v.includes(',') ? '"' + v + '"' : v;
-    }).join(',') + '\n';
-  });
-  return csv;
+  return '\uFEFF' + keys.join(',') + '\r\n' + data.map(r => keys.map(k => csvOutputCell_(r[k], k === 'バーコード番号')).join(',')).join('\r\n') + '\r\n';
 }
 
 function downloadCSV(csv, filename) {
@@ -843,47 +926,55 @@ document.addEventListener('click', function(e) {
   if (wrap && !wrap.contains(e.target)) closeMoreMenu();
 });
 
-restoreData();
+// ★認証前にローカル保存データを表示しないため、ここでの無条件 restoreData() は廃止した。
+//   restoreData() は showMainScreen()（＝whoami でサーバー認証が確定した後）の中でのみ呼ぶ。
 
 // ============================================================
 // ログイン機能
 // ============================================================
-function switchLoginTab(type) {
-  const tabAdmin = document.getElementById('tab-admin');
-  const tabStaff = document.getElementById('tab-staff');
-  if (type === 'admin') { tabAdmin.classList.add('active'); tabStaff.classList.remove('active'); }
-  else { tabStaff.classList.add('active'); tabAdmin.classList.remove('active'); }
-  document.getElementById('login-id').value = '';
-  document.getElementById('login-pw').value = '';
-  document.getElementById('login-error').style.display = 'none';
+// ★switchLoginTab / doLogin（ブラウザ内でのID・パスワード判定）は Step 7 で削除した。
+//   ブラウザ内の判定は、開発者ツールから showMainScreen() を直接呼ぶだけで
+//   素通りできるため、認証として成立しない。
+
+/** 案内画面に戻す */
+function showGuide(msg) {
+  const err = document.getElementById('login-error');
+  if (err) {
+    if (msg) { err.textContent = msg; err.style.display = 'block'; }
+    else { err.style.display = 'none'; }
+  }
+  const main  = document.getElementById('main-screen');
+  const login = document.getElementById('login-screen');
+  if (main)  main.style.display  = 'none';
+  if (login) login.style.display = 'flex';
 }
 
-function doLogin() {
-  const id    = document.getElementById('login-id').value.trim();
-  const pw    = document.getElementById('login-pw').value;
-  const errEl = document.getElementById('login-error');
-  const user  = USERS.find(u => u.id === id && u.pw === pw);
-  if (!user) { errEl.style.display = 'block'; document.getElementById('login-pw').value = ''; return; }
-  errEl.style.display = 'none';
-  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id: user.id, name: user.name, admin: user.admin })); } catch(e){}
-  showMainScreen(user);
+/** ポータルを開く */
+function goPortal() {
+  const p = new URLSearchParams(window.location.search).get('portal_url');
+  window.location.href = safePortalUrl_(p);   // ★F10：検証済みURLのみ
 }
 
 function showMainScreen(user) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-screen').style.display  = 'block';
   const nameEl = document.getElementById('user-name-display');
-  if (nameEl) nameEl.textContent = '👤 ' + user.name + ' さん';
+  if (nameEl) nameEl.textContent = '👤 ' + ((user && user.name) || '') + ' さん';
   restoreData();
 }
 
 function notifyOfflineShipping() {
   try {
-    const sess = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
-    if (!sess || !GAS_DEPLOY_URL || GAS_DEPLOY_URL === 'YOUR_DEPLOY_URL') return;
-    const url = GAS_DEPLOY_URL + '?action=setOnlineStatus&appId=shipping&userId=' + encodeURIComponent(sess.id) + '&userName=' + encodeURIComponent(sess.name) + '&action2=logout';
-    if (navigator.sendBeacon) { navigator.sendBeacon(url); }
-    else { fetch(url, { keepalive: true, redirect: 'follow' }).catch(() => {}); }
+    const token = getStoredToken();
+    if (!token) return;
+    // ★トークンをURLに載せない。離脱時でもPOST本文で送る。
+    //   sendBeacon は Blob を本文として送れるので、Content-Type も text/plain にできる。
+    const body = JSON.stringify({ action: 'setOnlineStatus', appId: 'shipping', act: 'logout', token: token });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(GAS_URL, new Blob([body], { type: 'text/plain' }));
+    } else {
+      fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: body, keepalive: true, redirect: 'follow' }).catch(() => {});
+    }
   } catch(e) {}
 }
 window.addEventListener('beforeunload', notifyOfflineShipping);
@@ -892,16 +983,31 @@ window.addEventListener('pagehide',     notifyOfflineShipping);
 function doLogout() {
   if (!confirm('ログアウトしますか？')) return;
   notifyOfflineShipping();
-  try { sessionStorage.removeItem(SESSION_KEY); } catch(e){}
+  clearSession();
   stopAutoRefresh();
-  document.getElementById('main-screen').style.display  = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('login-id').value = '';
-  document.getElementById('login-pw').value = '';
+  showGuide();
+}
+
+/** 保存しているトークンと利用者情報を消す */
+function clearSession() {
+  try { sessionStorage.removeItem(SESSION_KEY); } catch(e){}
+  try { sessionStorage.removeItem(TOKEN_KEY); } catch(e){}
 }
 
 // ポータルへ戻る既定URL（ポータルからの起動時はportal_urlパラメータが優先される）
 const DEFAULT_PORTAL_URL = 'https://script.google.com/macros/s/AKfycbzAB87ZCwdp3mgVTMe8kS-bAgQAEleWotqJGS72GJCx3UkNKoLu-i2r2WBgibzpN9sU/exec';
+
+// ★F10：既存GASホストと、指定された静的ポータルの完全一致URLだけを許可。
+//   javascript:/別ホスト/不正・二重デコードは既定URLへ。ホスト部分一致(includes)は使わない。
+function safePortalUrl_(raw) {
+  if (raw === 'https://spkkanri043-glitch.github.io/shipping-system/portal_index.html') return raw;
+  try {
+    const u = new URL(String(raw || DEFAULT_PORTAL_URL));
+    if (u.protocol !== 'https:' || u.hostname !== 'script.google.com' ||
+        u.port || u.username || u.password) return DEFAULT_PORTAL_URL;
+    return u.href;
+  } catch(e) { return DEFAULT_PORTAL_URL; }
+}
 
 function closeTab() {
   notifyOfflineShipping();
@@ -909,39 +1015,135 @@ function closeTab() {
   // window.close()が効かない場合（タブがスクリプト経由で開かれていない等）のフォールバック
   setTimeout(function() {
     const portalUrl = new URLSearchParams(window.location.search).get('portal_url');
-    window.location.href = portalUrl ? decodeURIComponent(portalUrl) : DEFAULT_PORTAL_URL;
+    window.location.href = safePortalUrl_(portalUrl);   // ★F10：検証済みURLのみ
   }, 300);
 }
 
-// SSO
-(function() {
-  function parseSSOToken(token) {
-    try {
-      const decoded = atob(token.split('').reverse().join(''));
-      const data    = JSON.parse(decoded);
-      if (Date.now() - data.ts > 5 * 60 * 1000) return null;
-      return data;
-    } catch(e) { return null; }
+// ============================================================
+// GASの呼び出し（Step 7）
+//
+// ★決まりごと
+//  ・すべてPOSTで送る（GETは使わない）
+//  ・Content-Type は text/plain
+//    application/json にすると、ブラウザがCORSプリフライト(OPTIONS)を送るが、
+//    GASのウェブアプリはOPTIONSに応答できないため通信が失敗する
+//  ・トークンはPOST本文に入れる。URLに載せない（履歴やログに残るため）
+//  ・応答が unauthorized なら、保存したトークンを消して案内画面に戻す
+//
+// ★接続先は GAS_URL（ファイル冒頭の定数）に固定。
+//   URLパラメータや localStorage から差し替えられる作りにはしないこと。
+// ============================================================
+function getStoredToken() {
+  try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch(e) { return ''; }
+}
+
+async function gasCall(action, payload) {
+  const token = getStoredToken();
+  if (!token) { clearSession(); showGuide('ポータルからやり直してください'); throw new Error('unauthorized'); }
+
+  const body = Object.assign({}, payload || {}, { action: action, token: token });
+  const res  = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },   // ★application/json にしない
+    body: JSON.stringify(body),
+    redirect: 'follow'
+  });
+  const text = await res.text();
+
+  let data;
+  try { data = JSON.parse(text); }
+  catch (e) { throw new Error('サーバーの応答を読めませんでした'); }
+
+  if (data && data.ok === false && data.error === 'unauthorized') {
+    clearSession();
+    showGuide('セッションの有効期限が切れました。ポータルからやり直してください');
+    throw new Error('unauthorized');
   }
-  const params = new URLSearchParams(window.location.search);
-  const token  = params.get('sso');
-  if (token) {
-    const data = parseSSOToken(token);
-    if (data) {
-      window.history.replaceState({}, '', window.location.pathname);
-      let name = data.name || '';
-      try { name = decodeURIComponent(escape(name)); } catch(e) {}
-      const user = { id: data.id, name: name, admin: data.role === 'admin' || data.role === 'master' };
-      try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch(e) {}
-      showMainScreen(user);
-      return;
+  return data;
+}
+
+/**
+ * 応答がJSONではなくCSV本文そのものである操作（getCSV）用。
+ * 認証の扱いは gasCall と同じ。
+ */
+async function gasCallText(action, payload) {
+  const token = getStoredToken();
+  if (!token) { clearSession(); showGuide('ポータルからやり直してください'); throw new Error('unauthorized'); }
+
+  const body = Object.assign({}, payload || {}, { action: action, token: token });
+  const res  = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(body),
+    redirect: 'follow'
+  });
+  const text = await res.text();
+
+  // 失敗したときだけJSONが返る
+  if (text.trim().charAt(0) === '{') {
+    let d = null;
+    try { d = JSON.parse(text); } catch (e) {}
+    if (d && d.ok === false && d.error === 'unauthorized') {
+      clearSession();
+      showGuide('セッションの有効期限が切れました。ポータルからやり直してください');
+      throw new Error('unauthorized');
     }
+    if (d && d.ok === false) throw new Error(d.message || '取得に失敗しました');
   }
-  try {
-    const sess = sessionStorage.getItem(SESSION_KEY);
-    if (sess) { const user = JSON.parse(sess); showMainScreen(user); return; }
-  } catch(e) {}
-  document.getElementById('login-screen').style.display = 'flex';
+  return text;
+}
+
+// ============================================================
+// 起動処理（fail-closed）
+//
+// ★トークンの中身はブラウザ側で検証しない（署名を確かめられないため）。
+//   GASの whoami に送り、サーバー側で「トークン・期限・対象アプリ・利用者・権限」が
+//   すべて通った場合だけ本物として扱う。
+// ★サーバー認証が確定するまで、メイン画面も業務データも一切表示しない。
+//   認証エラー・タイムアウト・非JSON応答・接続先違いは、すべて案内画面に倒す。
+// ============================================================
+
+/**
+ * サーバーに whoami を送り、有効な出荷照合セッションかを確認する。
+ * 成功時のみ {ok:true,id,name,role} を解決する。
+ * 失敗（未認証／偽造／期限切れ／別アプリ用トークン／認証設定不一致／
+ * エラー／タイムアウト／非JSON）は、すべて reject する。
+ */
+function verifySession() {
+  const token = getStoredToken();
+  if (!token) return Promise.reject(new Error('no-token'));
+  const controller = new AbortController();
+  const timer = setTimeout(function() { controller.abort(); }, 15000);  // 応答なし＝拒否側へ
+  return fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action: 'whoami', token: token }),
+    redirect: 'follow',
+    signal: controller.signal
+  }).then(function(res) { return res.text(); })
+    .then(function(text) {
+      clearTimeout(timer);
+      let data;
+      try { data = JSON.parse(text); } catch (e) { throw new Error('bad-response'); }
+      if (!data || data.ok !== true || !data.id) throw new Error('unauthorized');
+      return data;
+    }, function(err) { clearTimeout(timer); throw err; });
+}
+
+(function() {
+  // <head> の先頭スクリプトが、フラグメントからトークンを回収して保存済み。
+  // トークンが無ければ、この時点で案内画面（メインは非表示のまま）。
+  if (!getStoredToken()) { showGuide(); return; }
+
+  // ★ここではメイン画面を出さない。サーバー確認が通ってから showMainScreen する。
+  verifySession().then(function(res) {
+    const u = { id: res.id, name: res.name || '', admin: (res.role === 'admin' || res.role === 'master') };
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(u)); } catch (e) {}
+    showMainScreen(u);   // ← 認証確定後に初めてメイン表示＋restoreData（名前も確定値で表示）
+  }).catch(function() {
+    clearSession();
+    showGuide('認証を確認できませんでした。ポータルから開き直してください');
+  });
 })();
 
 // ============================================================
@@ -967,10 +1169,8 @@ async function loadDriveFileList() {
   if (!GAS_DEPLOY_URL || GAS_DEPLOY_URL === 'YOUR_DEPLOY_URL') { showUrlFb('GAS_DEPLOY_URLが未設定です', 'err'); return; }
   showUrlFb('ファイル一覧を取得中...', 'info');
   try {
-    const res  = await fetch(GAS_DEPLOY_URL + '?action=getFileList');
-    const text = await res.text();
-    let data;
-    try { data = JSON.parse(text); } catch(e) { showUrlFb('GASの応答がJSONではありません\n' + text.slice(0, 100), 'err'); return; }
+    const data = await gasCall('getFileList', {});
+    renderPendingPreparations_(data && data.pendingRequests || []);
     if (!data.ok) throw new Error(data.message || '取得失敗');
     if (!data.files || data.files.length === 0) { showUrlFb('フォルダにCSVファイルがありません', 'warn'); return; }
     const listEl = document.getElementById('drive-file-list');
@@ -982,20 +1182,28 @@ async function loadDriveFileList() {
     });
     const pendingFiles = data.files.filter(function(f) { return f.folder === 'pending'; });
     const sourceFiles  = data.files.filter(function(f) { return f.folder !== 'pending'; });
-    var html2 = '<div style="padding:8px 12px;border-bottom:2px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;background:#f9f9f7"><span style="font-size:11px;color:#888">' + data.files.length + '件（複数選択可）</span><button onclick="loadSelectedFiles()" style="padding:6px 16px;background:#1e8a55;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">選択して読込</button></div>';
+    var html2 = '<div style="padding:8px 12px;border-bottom:2px solid #e5e5e0;display:flex;justify-content:space-between;align-items:center;background:#f9f9f7"><span style="font-size:11px;color:#888">' + data.files.length + "件（複数選択可）</span><button data-csp-click=\"h23\" data-csp-source-click=\"loadSelectedFiles()\" style=\"padding:6px 16px;background:#1e8a55;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer\">選択して読込</button></div>";
     if (pendingFiles.length > 0) {
       html2 += '<div style="padding:6px 12px;background:#fff8ec;font-size:11px;font-weight:700;color:#b56e00;border-bottom:1px solid #f0e8cc">🔄 作業中（未完了フォルダ）</div>';
       pendingFiles.forEach(function(f) {
-        var safeName = f.name.replace(/'/g, "\'");
+        // ★旧: f.name.replace(/'/g, "\'") は置換になっていなかった。
+        //   二重引用符の中の "\'" は ' と同じ文字なので、' を ' に置き換えるだけ。
+        //   さらに、値を入れる先の属性は " で囲まれているため、
+        //   本当に無害化すべき文字は " のほうだった。esc() で両方まとめて処理する。
+        var safeName = esc(f.name);
         var labelColor = f.label && f.label.includes('前倒し') ? '#1a5fb4' : f.label && f.label.includes('後ろ倒し') ? '#c0392b' : '#b56e00';
-        html2 += '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;display:flex;align-items:center;gap:10px;cursor:pointer;background:#fffdf5"><input type="checkbox" value="' + f.id + '" data-name="' + safeName + '" style="width:18px;height:18px;flex-shrink:0;accent-color:#e8a000"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;word-break:break-all">' + f.name + '</div><div style="font-size:11px;margin-top:3px;display:flex;gap:6px;align-items:center"><span style="color:' + labelColor + ';font-weight:600">' + (f.label||'') + '</span><span style="color:#888">' + f.updated + '</span></div></div></label>';
+        html2 += '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;display:flex;align-items:center;gap:10px;cursor:pointer;background:#fffdf5"><input type="checkbox" value="' + esc(f.id) + '" data-name="' + safeName + '" style="width:18px;height:18px;flex-shrink:0;accent-color:#e8a000"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;word-break:break-all">' + esc(f.name) + '</div><div style="font-size:11px;margin-top:3px;display:flex;gap:6px;align-items:center"><span style="color:' + labelColor + ';font-weight:600">' + esc(f.label) + '</span><span style="color:#888">' + esc(f.updated) + '</span></div></div></label>';
       });
     }
     if (sourceFiles.length > 0) {
       html2 += '<div style="padding:6px 12px;background:#f0f5ff;font-size:11px;font-weight:700;color:#3a7bdc;border-bottom:1px solid #dce8ff">🆕 新規（読込元フォルダ）</div>';
       sourceFiles.forEach(function(f) {
-        var safeName = f.name.replace(/'/g, "\'");
-        html2 += '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;display:flex;align-items:center;gap:10px;cursor:pointer"><input type="checkbox" value="' + f.id + '" data-name="' + safeName + '" style="width:18px;height:18px;flex-shrink:0;accent-color:#3a7bdc"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;word-break:break-all">' + f.name + '</div><div style="font-size:11px;color:#888;margin-top:3px">' + f.updated + '</div></div></label>';
+        // ★旧: f.name.replace(/'/g, "\'") は置換になっていなかった。
+        //   二重引用符の中の "\'" は ' と同じ文字なので、' を ' に置き換えるだけ。
+        //   さらに、値を入れる先の属性は " で囲まれているため、
+        //   本当に無害化すべき文字は " のほうだった。esc() で両方まとめて処理する。
+        var safeName = esc(f.name);
+        html2 += '<label style="padding:10px 12px;border-bottom:1px solid #f0f0ea;display:flex;align-items:center;gap:10px;cursor:pointer"><input type="checkbox" value="' + esc(f.id) + '" data-name="' + safeName + '" style="width:18px;height:18px;flex-shrink:0;accent-color:#3a7bdc"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;word-break:break-all">' + esc(f.name) + '</div><div style="font-size:11px;color:#888;margin-top:3px">' + esc(f.updated) + '</div></div></label>';
       });
     }
     listEl.innerHTML = html2;
@@ -1003,51 +1211,60 @@ async function loadDriveFileList() {
   } catch(err) { showUrlFb('エラー: ' + err.message, 'err'); }
 }
 
-async function loadSelectedFiles() {
-  const checkboxes = document.querySelectorAll('#drive-file-list input[type=checkbox]:checked');
-  if (checkboxes.length === 0) { showUrlFb('ファイルを1つ以上選択してください', 'warn'); return; }
-  document.getElementById('drive-file-list').style.display = 'none';
-  let totalAdded = 0, totalSkipped = 0;
-  const movedFileIds = [];
-  for (let i = 0; i < checkboxes.length; i++) {
-    const cb = checkboxes[i]; const fileId = cb.value; const fileName = cb.dataset.name;
-    showUrlFb('(' + (i+1) + '/' + checkboxes.length + ') ' + fileName + ' 読込中...', 'info');
-    try {
-      const res = await fetch(GAS_DEPLOY_URL + '?action=getCSV&fileId=' + fileId);
-      let text = await res.text();
-      if (text.trim().startsWith('{')) { const d = JSON.parse(text); if (!d.ok) throw new Error(d.message); }
-      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-      const lines = text.trim().split('\n');
-      if (lines.length < 2) continue;
-      const headers = lines[0].split(',').map(function(h) { return h.replace(/^"|"$/g,'').trim(); });
-      const newRecs = lines.slice(1).map(function(line) {
-        const cols = splitCSV(line); const obj = {};
-        headers.forEach(function(h,i) { let v=(cols[i]||'').trim().replace(/^"|"$/g,'').replace(/^=?"?([^"]*)"?$/,'$1').replace(/^=/,''); obj[h]=v; });
-        if(obj['品番']) obj['品番']=obj['品番'].replace(/-/g,'');
-        if(!obj['消込済'])   obj['消込済']='未';
-        if(!obj['消込日時']) obj['消込日時']='';
-        if(!obj['納品調整']) obj['納品調整']='';
-        return obj;
-      }).filter(function(r) { return r['品番'] && r['バーコード番号']; });
-      const existingBCs = new Set(records.map(function(r) { return r['バーコード番号']; }));
-      newRecs.forEach(function(r) {
-        if(existingBCs.has(r['バーコード番号'])) { totalSkipped++; } else { records.push(r); existingBCs.add(r['バーコード番号']); totalAdded++; }
-      });
-      if(!loadedFiles.includes(fileName)) loadedFiles.push(fileName);
-      movedFileIds.push(fileId);
-      if(!sourceFileName) sourceFileName = getBaseFileName(fileName);
-    } catch(err) { showUrlFb('❌ ' + fileName + ': ' + err.message, 'err'); }
+async function loadSelectedFiles() { return loadSelectedCanonicalBatch_(); }
+
+function parseShippingCsvRows_(text) {
+  text = String(text).replace(/^\uFEFF/, '');
+  const rows = []; let row = [], cell = '', quoted = false, closed = false;
+  const endCell = () => { row.push(cell); cell = ''; closed = false; };
+  const endRow = () => { endCell(); rows.push(row); row = []; };
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { cell += '"'; i++; }
+        else { quoted = false; closed = true; }
+      } else cell += c;
+    } else if (c === ',' || c === '\r' || c === '\n') {
+      if (c === ',') endCell();
+      else { endRow(); if (c === '\r' && text[i+1] === '\n') i++; }
+    } else if (closed) {
+      throw new Error('CSVの引用符が不正です');
+    } else if (c === '"' && cell === '') {
+      quoted = true;
+    } else if (c === '=') {
+      // Legacy supplier barcode syntax; only exact numeric formulas are accepted.
+      const match = cell === '' && text.slice(i).match(/^="([0-9]+)"(?=,|\r|\n|$)/);
+      if (match) { cell = '="' + match[1] + '"'; i += match[0].length - 1; closed = true; }
+      else cell += c;
+    } else if (c === '"') {
+      throw new Error('CSVの引用符が不正です');
+    } else cell += c;
   }
-  updateStats(); renderList(); renderHinbanFilter(); updateChips(); autoSave();
-  showUrlFb('✅ 読込完了！追加 ' + totalAdded + '件 / 重複スキップ ' + totalSkipped + '件', 'ok');
-  if (GAS_DEPLOY_URL && GAS_DEPLOY_URL !== 'YOUR_DEPLOY_URL') {
-    for (var mi = 0; mi < movedFileIds.length; mi++) {
-      try {
-        await fetch(GAS_DEPLOY_URL, { method: 'POST', body: JSON.stringify({ action: 'recordLoadedFileId', fileId: movedFileIds[mi] }) });
-      } catch(e) { console.warn('記録失敗:', e); }
-    }
-  }
-  setTimeout(function() { closeUrlModal(); }, 2500);
+  if (quoted) throw new Error('CSVの引用符が閉じていません');
+  if (cell || closed || row.length) endRow();
+  while (rows.length && rows[rows.length - 1].every(v => v === '')) rows.pop();
+  return rows;
+}
+function csvOutputCell_(value, barcode) {
+  let v = String(value == null ? '' : value);
+  if (barcode) {
+    v = v.replace(/^="([0-9]+)"$/, '$1');
+    if (!/^[0-9]{18}$/.test(v)) throw new Error('バーコードが不正です');
+    v = '="' + v + '"';
+  } else if (/^\s*[=+@-]/.test(v)) throw new Error('CSVの数式値は保存できません');
+  return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+function parseBusinessCsv_(text) {
+  const rows = parseShippingCsvRows_(text), headers = rows.shift() || [];
+  if (!headers.length || new Set(headers).size !== headers.length) throw new Error('CSV見出しが不正です');
+  return rows.map(row => {
+    if (row.length !== headers.length) throw new Error('CSV列数が不正です');
+    const obj = Object.create(null);
+    headers.forEach((h, i) => { obj[h] = row[i]; });
+    if (Object.prototype.hasOwnProperty.call(obj, 'バーコード番号')) obj['バーコード番号'] = obj['バーコード番号'].replace(/^="([0-9]+)"$/, '$1');
+    return obj;
+  });
 }
 
 function showUrlFb(msg, type) {
@@ -1058,6 +1275,66 @@ function showUrlFb(msg, type) {
   fb.style.background   = type==='ok' ? '#ecf9f2' : type==='err' ? '#fdecea' : '#fff8ec';
   fb.style.color        = type==='ok' ? '#1e8a55' : type==='err' ? '#c0392b' : '#b56e00';
   fb.textContent = msg;
+}
+
+let pendingPrepare_ = null;
+async function prepareLocalCsv_(file) {
+  if(pendingPrepare_) {showFB('err','未完了の取込要求を先に再試行してください');return;}
+  const csvText=await file.text();
+  pendingPrepare_={requestId:crypto.randomUUID(),csvText};
+  await retryPreparation_();
+}
+async function retryPreparation_() {
+  if(!pendingPrepare_)return;
+  try {
+    const result=await gasCall('prepareBatch',pendingPrepare_);
+    if(!result || !result.ok){
+      const receipt=await gasCall('getBatch',{requestId:pendingPrepare_.requestId});
+      if(receipt && !receipt.ok && receipt.message==='REQUEST_NOT_OWNED')pendingPrepare_=null;
+      throw new Error(result && result.message || '取込未完了');
+    }
+    const batch=await gasCall('getBatch',{batchId:result.batchId});
+    if(!batch || !batch.ok)throw new Error(batch && batch.message || '作成したバッチを確認できません');
+    pendingPrepare_=null;
+    records=batch.records;sourceFileName=batch.batchId;loadedFiles=[batch.batchId+'.csv'];logEntries=[];
+    updateStats();renderList();renderHinbanFilter();updateChips();
+    showFB('ok','正本CSV・manifest作成済み: '+batch.batchId);
+  }catch(e){
+    showFB('err',e.message+(pendingPrepare_?' / 要求ID: '+pendingPrepare_.requestId:''));
+  }
+  renderPendingPreparations_(pendingPrepare_?[{requestId:pendingPrepare_.requestId,kind:'prepare'}]:[]);
+}
+function renderPendingPreparations_(items) {
+  const list=document.getElementById('drive-file-list');
+  if(!list)return;
+  let box=document.getElementById('pending-preparations');
+  if(!box){box=document.createElement('div');box.id='pending-preparations';list.parentNode.insertBefore(box,list);}
+  box.replaceChildren();
+  items.filter(x=>x.kind==='prepare').forEach(item=>{
+    const button=document.createElement('button');button.type='button';button.textContent='取込を再開: '+item.requestId;
+    button.style.cssText='max-width:100%;overflow-wrap:anywhere;margin:6px;padding:8px';
+    button.onclick=async()=>{
+      try{
+        const receipt=await gasCall('getBatch',{requestId:item.requestId});
+        if(!receipt || !receipt.ok)throw new Error(receipt && receipt.message || '要求を確認できません');
+        pendingPrepare_=receipt.operation.payload;
+        await retryPreparation_();
+      }catch(e){showFB('err',e.message);}
+    };
+    box.appendChild(button);
+  });
+}
+
+async function loadSelectedCanonicalBatch_() {
+  const selected=document.querySelectorAll('#drive-file-list input[type=checkbox]:checked');
+  if(selected.length!==1||records.length){showUrlFb('空の画面で1バッチを選択してください','err');return;}
+  try {
+    const data=await gasCall('getBatch',{batchId:selected[0].dataset.name.replace(/\.csv$/i,'')});
+    if(!data||!data.ok)throw new Error(data&&data.message||'読込失敗');
+    records=data.records;sourceFileName=data.batchId;loadedFiles=[data.batchId+'.csv'];logEntries=[];
+    updateStats();renderList();renderHinbanFilter();updateChips();
+    showUrlFb('読込完了: '+records.length+'件','ok');
+  }catch(e){showUrlFb(e.message,'err');}
 }
 </script>
 </body>
