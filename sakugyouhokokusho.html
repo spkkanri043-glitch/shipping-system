@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-Bui7sEH2mZgBNTOWxJqjmotPaLf2ot1QW/hHgyeC6Kc=' 'sha256-xivlwxE38xr1OMkZ6/xwsDLgJjxum+viaRos2YuDMNw=' https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-Bui7sEH2mZgBNTOWxJqjmotPaLf2ot1QW/hHgyeC6Kc=' 'sha256-W+WAD4ImjtDAcD1D8UREMv1ccw6KaElJgCxBGwMjLU4=' https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
 <script>/* MOGU_CSP_RUNTIME_V1 */
 const __moguCsp = (() => {
   const handlers = {"h0": function(event, _p) { goPortal()
@@ -815,8 +815,8 @@ clearBrowserBusinessData_();
 // ▼▼▼ デプロイ後に各GASのURLをここに入力してください（固定。URLパラメータ差し替えは廃止）▼▼▼
 //   セキュリティ改修：?gas_url= 等での接続先差し替え・localStorage保持を撤去。
 //   任意サーバへトークンを送られる経路を塞ぐため、接続先は必ずこの定数のみを使う。
-const REPORT_GAS_URL  = 'https://script.google.com/macros/s/AKfycby-AS3uRATUSAmLb5kqyfxuTy-Y1jDTg4SnbXbqAKpSjEYwlId1n86dHw0sQqmbu3sDEw/exec';   // 作業報告書GAS（saveReport・getReports）
-const PRODUCT_GAS_URL = 'https://script.google.com/macros/s/AKfycbww1lPYGVf7FLmIbjwxODbFMKSn8Q6yxFL9OpPnYmh9AnkAWVf9BgrRgk0Wc8GvK2XN/exec';  // 製品マスタGAS（getProducts・searchProduct／現状は匿名読取）
+const REPORT_GAS_URL  = 'https://script.google.com/macros/s/AKfycbyykHdr2GCV9IIDQ5bdCD5tPKV2S5VRF_ZYtcQWAUdyFz4QGgVRFCFl1OHsS_17Nc9M/exec';   // 作業報告書GAS（saveReport・getReports）
+const PRODUCT_GAS_URL = 'https://script.google.com/macros/s/AKfycbyXt-XOooLKLAK3xEyMgUbbH7uN0mx4jNQSIfNM4S6FRJZjsnBtYAJhAjnCWY64MuJIQQ/exec';  // 製品マスタGAS（getProducts・searchProduct／現状は匿名読取）
 
 // ============================================================
 // SSOトークン（ポータルが #sso= で受け渡す署名トークン）
@@ -1025,7 +1025,7 @@ function doLogout() {
 }
 function safePortalUrl_(raw) {
   if (typeof raw !== 'string' || !raw) return '';
-  if (raw === 'https://spkkanri043-glitch.github.io/shipping-system/portal_index.html') return raw;
+  if (raw === 'https://spkkanri043-glitch.github.io/shipping-system-dummytest/portal_index.html') return raw;
   let url; try { url = new URL(raw); } catch (e) { return ''; }
   if (url.protocol !== 'https:' || url.hostname !== 'script.google.com' || url.username || url.password || url.port) return '';
   return url.href;
@@ -1354,7 +1354,8 @@ function showScanTag(val) {
 function onHinbanInput() {
   const val = document.getElementById('f-hinban').value.trim();
   document.getElementById('scan-result-tag').style.display = 'none';
-  searchProduct(val);
+  // ★2026-10-20 手入力は4文字以上で探す（切替前の本番と同じ）。1文字目で別の品番が入ってしまうのを防ぐ
+  if (val.length >= 4) searchProduct(val);
 }
 
 let productLookupVersion = 0;
