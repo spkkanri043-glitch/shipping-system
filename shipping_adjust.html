@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-71RJ5WlPy+NHsFW/waIWsP4wZG9Hq7Xrku5oICv4FCM=' 'sha256-VkVjAO6BeTJsuRRO3g44E0jJcRNz5vfzp7ko2cE/waI='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-71RJ5WlPy+NHsFW/waIWsP4wZG9Hq7Xrku5oICv4FCM=' 'sha256-8v5nfJNrd1yiEwkXIlHKAaLfpLR8cdsGrIbYKQMcS/g='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
 <script>/* MOGU_CSP_RUNTIME_V1 */
 const __moguCsp = (() => {
   const handlers = {"h0": function(event, _p) { goPortal()
@@ -393,7 +393,7 @@ select.fi{cursor:pointer}
 // 設定
 // ============================================================
 // セキュリティ改修：接続先は固定（?adjust_gas_url= / ?gas_url= 差し替えを撤去）。
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxvxOoOGVKi_L9U9BG6aZI8fL9hP-O1EExPQsshppITG7BkpHsFNUbDwv9gs5nbI4wJ-w/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxZoEhqcpYbLyj-1EXvKtisWL3Wreb8_OwWVeyy4vUhB5t6PKC9HtCJWm1ESS8pabSSZg/exec';
 const SESSION_KEY = 'shipping_session_v1';
 
 // ══ SSO署名トークン（ポータルが #sso= で受け渡す） ══
@@ -483,8 +483,8 @@ function enterApp() {
 
 function goPortal() {
   const raw=new URLSearchParams(window.location.search).get('portal_url');
-  if(raw==='https://spkkanri043-glitch.github.io/shipping-system/portal_index.html'){window.location.href=raw;return;}
-  const fallback='https://script.google.com/macros/s/AKfycbzAB87ZCwdp3mgVTMe8kS-bAgQAEleWotqJGS72GJCx3UkNKoLu-i2r2WBgibzpN9sU/exec';
+  if(raw==='https://spkkanri043-glitch.github.io/shipping-system-dummytest/portal_index.html'){window.location.href=raw;return;}
+  const fallback='https://script.google.com/macros/s/AKfycbyFCgghA3bTbdj8NdWT1dwTilJEVYMpC8airu6VUt0pK16Ml_NCwd4xlGExy8vMoACH/exec';
   try {
     const url=new URL(raw||fallback);
     window.location.href=url.protocol==='https:'&&url.hostname==='script.google.com'&&!url.port&&!url.username&&!url.password?url.href:fallback;
@@ -587,7 +587,7 @@ async function loadLocalCSV(input) {
   const files=Array.from(input.files);
   if(files.length!==1){showStatus('err','1つのCSVを選択してください');return;}
   try {
-    pendingAdjustment_={action:'prepareBatch',payload:{requestId:crypto.randomUUID(),csvText:await files[0].text()}};
+    pendingAdjustment_={action:'prepareBatch',payload:{requestId:crypto.randomUUID(),csvText:await files[0].text(),fileName:files[0].name}};
     await runAdjustmentOperation_();
   }catch(e){showStatus('err',e.message);}
   input.value='';
@@ -918,9 +918,10 @@ async function execExport() {
   });
   if(!changes.length){showStatus('err','調整対象がありません');return;}
   if(!confirm('この調整を確定しますか？'))return;
+  // ★v3.3 全件の写し（records）は送らない。サーバーが revision で同じ写しかを確かめる（400行超の出荷でも送れるように）
   pendingAdjustment_={action:'saveAdjustment',payload:{
     requestId:crypto.randomUUID(),batchId:batchSnapshot_.batchId,sourceFileId:batchSnapshot_.sourceFileId,
-    version:batchSnapshot_.version,revision:batchSnapshot_.revision,records:batchSnapshot_.records,changes
+    version:batchSnapshot_.version,revision:batchSnapshot_.revision,changes
   }};
   return runAdjustmentOperation_();
 }
@@ -956,8 +957,12 @@ async function runAdjustmentOperation_() {
   try {
     const result=await gasCall_(operation.action,operation.payload);
     if(!result||!result.ok){
-      const receipt=await gasCall_('getBatch',{requestId:operation.payload.requestId});
-      if(receipt&&!receipt.ok&&receipt.message==='REQUEST_NOT_OWNED')pendingAdjustment_=null;
+      // ★v3.3 同じ要求で続けられる失敗（途中で止まった・混み合い）のときだけ要求を残す
+      if(result&&!result.retrySameRequest&&result.code!=='BUSY'&&['busy','unavailable'].indexOf(result.error)<0)pendingAdjustment_=null;
+      else {
+        const receipt=await gasCall_('getBatch',{requestId:operation.payload.requestId});
+        if(receipt&&!receipt.ok&&receipt.message==='REQUEST_NOT_OWNED')pendingAdjustment_=null;
+      }
       throw new Error(result&&result.message||'保存未完了');
     }
     pendingAdjustment_=null;
