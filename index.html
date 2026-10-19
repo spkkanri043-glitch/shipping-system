@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-LEBn/9POn2IH0kDT0VAkPRKzXIzyhTzHdVeDHUmftdI=' 'sha256-sptq+ApuuSLYnYNokgr7G3hWPeJbc/XL2Dgh+p/5TEQ=' 'sha256-UUD8OJUzXRoR+AAABTB/7Uhlqimy3Q6mYIkqgea3WZU='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-LEBn/9POn2IH0kDT0VAkPRKzXIzyhTzHdVeDHUmftdI=' 'sha256-sptq+ApuuSLYnYNokgr7G3hWPeJbc/XL2Dgh+p/5TEQ=' 'sha256-qYgj8J1e8E0MHgRtbhSJuUIXJTyRN/umvZpDj+pSFUE='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
 <script>/* MOGU_CSP_RUNTIME_V1 */
 const __moguCsp = (() => {
   const handlers = {"h0": function(event, _p) { goPortal()
@@ -360,7 +360,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
     <div style="overflow-y:auto;flex:1;padding:14px">
       <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
         <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">☁️ ドライブから選ぶ</div>
-        <div style="font-size:11px;color:#888;margin-bottom:10px">読込元フォルダの新しいCSV（リーダー以上が取り込めます）と、取り込み済みの出荷</div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">読込元フォルダの新しいCSV（管理者・マスターが取り込めます）と、取り込み済みの出荷</div>
         <button style="width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px" data-csp-click="h20" data-csp-source-click="loadDriveFileList()">📋 ファイル一覧を取得</button>
         <div id="drive-file-list" style="display:none;border:1px solid #e5e5e0;border-radius:8px"></div>
       </div>
@@ -381,7 +381,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
 // ============================================================
 // GAS設定
 // ============================================================
-const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbxZoEhqcpYbLyj-1EXvKtisWL3Wreb8_OwWVeyy4vUhB5t6PKC9HtCJWm1ESS8pabSSZg/exec';
+const GAS_DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbxvxOoOGVKi_L9U9BG6aZI8fL9hP-O1EExPQsshppITG7BkpHsFNUbDwv9gs5nbI4wJ-w/exec';
 const GAS_URL = GAS_DEPLOY_URL;
 
 // ============================================================
@@ -837,6 +837,7 @@ async function exportCSVByStatus() {
   const today = todayStr();
   if (GAS_DEPLOY_URL && GAS_DEPLOY_URL !== 'YOUR_DEPLOY_URL') {
     showFB('ok', '📤 CSV書き出し中...');
+    let savedOk = false;
     try {
       const baseName = sourceFileName || ('出荷指示_' + today);
       // ★担当者名は送らない。サーバーがトークンの中の名前を使う
@@ -844,6 +845,7 @@ async function exportCSVByStatus() {
       clearTimeout(cloudSaveTimer);
       const saved = await gasCall('saveShippingData', {records, batchId: sourceFileName});
       if (!saved.ok) throw new Error(saved.message || '保存失敗');
+      savedOk = true;
       const resData = await gasCall('saveCSVByStatus', { records: records, today: today, baseName: baseName, batchId: sourceFileName });
       const resText = JSON.stringify(resData);
       let data;
@@ -858,6 +860,12 @@ async function exportCSVByStatus() {
       const notificationFailed = (data.notifications || []).some(n => !n.ok);
       showFB(notificationFailed ? 'warn' : 'ok', '☁️ Googleドライブに保存しました\n' + msgs.join('\n') + (notificationFailed ? '\n通知は未完了です。送信結果を確認してください。' : ''));
     } catch(err) { showFB('err', '書き出し失敗: ' + err.message); }
+    // ★v3.3 書き出しの前の保存で、サーバーの状態は「保存済み（要再判定）」に戻る。
+    //   全件済みなら完了判定をやり直す（しないと客先CSVの自動作成〈processCompletedBatches_〉の対象にならない）。
+    if (savedOk && sourceFileName && records.length && records.every(function(r){ return isDone(r); })) {
+      try { await gasCall('evaluateCompletion', { batchId: sourceFileName }); }
+      catch(e) { console.warn('evaluateCompletion失敗:', e); }
+    }
   } else {
     const pending   = records.filter(function(r) { return isPending(r); });
     const done      = records.filter(function(r) { return isDone(r); });
@@ -995,12 +1003,12 @@ function clearSession() {
 }
 
 // ポータルへ戻る既定URL（ポータルからの起動時はportal_urlパラメータが優先される）
-const DEFAULT_PORTAL_URL = 'https://script.google.com/macros/s/AKfycbyFCgghA3bTbdj8NdWT1dwTilJEVYMpC8airu6VUt0pK16Ml_NCwd4xlGExy8vMoACH/exec';
+const DEFAULT_PORTAL_URL = 'https://script.google.com/macros/s/AKfycbzAB87ZCwdp3mgVTMe8kS-bAgQAEleWotqJGS72GJCx3UkNKoLu-i2r2WBgibzpN9sU/exec';
 
 // ★F10：既存GASホストと、指定された静的ポータルの完全一致URLだけを許可。
 //   javascript:/別ホスト/不正・二重デコードは既定URLへ。ホスト部分一致(includes)は使わない。
 function safePortalUrl_(raw) {
-  if (raw === 'https://spkkanri043-glitch.github.io/shipping-system-dummytest/portal_index.html') return raw;
+  if (raw === 'https://spkkanri043-glitch.github.io/shipping-system/portal_index.html') return raw;
   try {
     const u = new URL(String(raw || DEFAULT_PORTAL_URL));
     if (u.protocol !== 'https:' || u.hostname !== 'script.google.com' ||
@@ -1172,7 +1180,7 @@ async function loadDriveFileList() {
     const data = await gasCall('getFileList', {});
     renderPendingPreparations_(data && data.pendingRequests || []);
     if (!data.ok) throw new Error(data.message || '取得失敗');
-    // ★v3.3 inbox＝読込元フォルダの新しい CSV（選ぶとサーバーがドライブから読んで取り込む。leader 以上にだけ届く）
+    // ★v3.3 inbox＝読込元フォルダの新しい CSV（選ぶとサーバーがドライブから読んで取り込む。admin・master にだけ届く）
     //        files＝取り込み済みの出荷（照合できるもの。全員）
     const inboxFiles  = (data.inbox || []).slice().sort(function(a, b) { return String(a.name).localeCompare(String(b.name), 'ja'); });
     const sourceFiles = (data.files || []).slice().sort(function(a, b) { return new Date(a.updated) - new Date(b.updated); });
@@ -1213,9 +1221,13 @@ async function importInboxCsv_(fileId, name) {
   if (inboxImportBusy_) return;
   inboxImportBusy_ = true;
   showUrlFb('取り込み中: ' + name + '（行数が多いと少し時間がかかります）', 'info');
+  let retryable = true;   // 通信の途切れ・途中停止・混み合いだけ「選び直すと続きから」と案内する
   try {
     const result = await gasCall('prepareBatch', { sourceFileId: fileId });
-    if (!result || !result.ok) throw new Error(result && result.message || '取込未完了');
+    if (!result || !result.ok) {
+      retryable = !result || !!result.retrySameRequest || result.code === 'BUSY' || ['busy','unavailable'].indexOf(result.error) >= 0;
+      throw new Error(result && result.message || '取込未完了');
+    }
     const batch = await gasCall('getBatch', { batchId: result.batchId });
     if (!batch || !batch.ok) throw new Error(batch && batch.message || '取り込んだ出荷を確認できません');
     records=batch.records;sourceFileName=batch.batchId;loadedFiles=[batch.batchId+'.csv'];logEntries=[];
@@ -1223,7 +1235,7 @@ async function importInboxCsv_(fileId, name) {
     showUrlFb('取り込み完了: ' + records.length + '件（' + name + '）', 'ok');
     showFB('ok','正本CSV・manifest作成済み: '+batch.batchId);
   } catch (e) {
-    showUrlFb('取り込めませんでした: ' + friendlyError_(e.message) + '\n同じファイルをもう一度選ぶと、続きから再開します。', 'err');
+    showUrlFb('取り込めませんでした: ' + friendlyError_(e.message) + (retryable ? '\n同じファイルをもう一度選ぶと、続きから再開します。' : ''), 'err');
   } finally { inboxImportBusy_ = false; }
 }
 
@@ -1231,14 +1243,14 @@ async function importInboxCsv_(fileId, name) {
 function friendlyError_(msg) {
   const m = String(msg || '');
   const map = {
-    ADMIN_REQUIRED: '「ファイルから選ぶ」は管理者・マスターだけが使えます。リーダーは「ファイル一覧を取得」から選んでください',
-    IMPORT_ROLE_REQUIRED: '取り込みはリーダー以上が行います',
+    ADMIN_REQUIRED: 'CSVの取り込みは管理者・マスターだけが行えます。取り込み済みの出荷は「ファイル一覧を取得」から開けます',
+    IMPORT_ROLE_REQUIRED: 'CSVの取り込みは管理者・マスターだけが行えます。取り込み済みの出荷は「ファイル一覧を取得」から開けます',
     SOURCE_ALREADY_REGISTERED: '同じ出荷（バーコード）が既に取り込まれています',
     SOURCE_FILE_CHANGED: '取り込みのあとでファイルの中身が変わっています。管理者に確認してください',
     SOURCE_FILE_NOT_ALLOWED: '読込元フォルダのCSVではないため取り込めません',
     SOURCE_FILE_NOT_FOUND: 'ファイルが見つかりません。一覧を取り直してください',
-    INVALID_CSV_SIZE: 'CSVが空か、大きすぎます（1回 1,000行まで）',
-    CSV_SCHEMA_MISMATCH: 'CSVの見出しが違うか、行数が多すぎます（1回 1,000行まで）'
+    INVALID_CSV_SIZE: 'CSVが空か、大きすぎます（1回 1,500行・300KBまで）',
+    CSV_SCHEMA_MISMATCH: 'CSVの見出しが違うか、行数が多すぎます（1回 1,500行まで）'
   };
   for (const k of Object.keys(map)) if (m.indexOf(k) >= 0) return map[k] + '（' + k + '）';
   return m;
