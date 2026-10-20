@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-M8l/vYr2FJXNmBQI+42Dxfzo9zRN7GpHJCnEwbQE/Ls=' 'sha256-VBmhvNlBfG9W+2NDSMjKIloVtzDJB0AgCXvD1Psbkis='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com https://translate.googleapis.com; frame-src 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-M8l/vYr2FJXNmBQI+42Dxfzo9zRN7GpHJCnEwbQE/Ls=' 'sha256-bNQW6kzahoohcp/CIwlSF2mE/4d0PWnJ0YnJWPORcss='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com https://translate.googleapis.com; frame-src 'none'; form-action 'none'">
 <script>/* MOGU_CSP_RUNTIME_V1 */
 const __moguCsp = (() => {
   const handlers = {"h0": function(event, _p) { onLangChange()
@@ -3130,7 +3130,9 @@ async function fetchProductMasterAll() {
           (typeof item['品番'] !== 'string' && !(typeof item['品番'] === 'number' && Number.isFinite(item['品番']))))) throw new Error('invalid public product list');
     PRODUCT_CACHE = d.data.map(item => ({
       '品番':String(item['品番']), '製品名':String(item['製品名'] || ''),
-      '基本取引先':String(item['基本取引先'] || ''), '箱入数':item['箱入数']
+      '基本取引先':String(item['基本取引先'] || ''), '箱入数':item['箱入数'],
+      // ★2026-10-20 整番（製品マスタの公開の列に追加）。数値で届くこともあるので文字に直す。無い版の製品マスタでは空
+      '整番':item['整番'] == null ? '' : String(item['整番'])
     }));
     return PRODUCT_CACHE;
   } catch(e) {
