@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-M8l/vYr2FJXNmBQI+42Dxfzo9zRN7GpHJCnEwbQE/Ls=' 'sha256-5jISaGNNiC5HWFAP8iMjTiv3q7BiPFYbw8coqH32xK4='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com https://translate.googleapis.com; frame-src 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-M8l/vYr2FJXNmBQI+42Dxfzo9zRN7GpHJCnEwbQE/Ls=' 'sha256-VBmhvNlBfG9W+2NDSMjKIloVtzDJB0AgCXvD1Psbkis='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com https://translate.googleapis.com; frame-src 'none'; form-action 'none'">
 <script>/* MOGU_CSP_RUNTIME_V1 */
 const __moguCsp = (() => {
   const handlers = {"h0": function(event, _p) { onLangChange()
@@ -3123,11 +3123,13 @@ async function fetchProductMasterAll() {
     const r = await fetch(PRODUCT_GAS_URL + '?action=getProducts', {credentials:'omit'});
     if (!r.ok) throw new Error('HTTP error');
     const d = await r.json();
+    // ★2026-10-20 数字だけの品番は製品マスタのシートで数値になり、数値で届く（本番 723件中5件）。
+    //   1件でも数値があると一覧ごと捨てて「製品マスタに接続できません」になっていた → 数値も受け付けて文字に直す。
     if (!d || d.ok !== true || !Array.isArray(d.data) || d.data.length > 20000 ||
         d.data.some(item => !item || typeof item !== 'object' || Array.isArray(item) ||
-          typeof item['品番'] !== 'string')) throw new Error('invalid public product list');
+          (typeof item['品番'] !== 'string' && !(typeof item['品番'] === 'number' && Number.isFinite(item['品番']))))) throw new Error('invalid public product list');
     PRODUCT_CACHE = d.data.map(item => ({
-      '品番':item['品番'], '製品名':String(item['製品名'] || ''),
+      '品番':String(item['品番']), '製品名':String(item['製品名'] || ''),
       '基本取引先':String(item['基本取引先'] || ''), '箱入数':item['箱入数']
     }));
     return PRODUCT_CACHE;
