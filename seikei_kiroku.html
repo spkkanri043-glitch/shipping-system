@@ -509,14 +509,15 @@ select.on.ng{background:#fadbd8;color:#c0392b;font-weight:bold;}
 
 /* ── 品番サジェスト ── */
 .pn-suggest-wrap{ position:relative; }
-.pn-suggest{ position:absolute; left:0; right:0; top:100%; z-index:50; background:#fff; border:1px solid var(--blue2); border-top:none; border-radius:0 0 5px 5px; max-height:220px; overflow-y:auto; box-shadow:0 6px 16px rgba(0,0,0,.18); display:none; }
+.pn-suggest{ position:absolute; left:0; right:0; top:100%; z-index:50; min-width:min(300px, 90vw); background:#fff; border:1px solid var(--blue2); border-top:none; border-radius:0 0 5px 5px; max-height:220px; overflow-y:auto; box-shadow:0 6px 16px rgba(0,0,0,.18); display:none; }
 .pn-suggest.show{ display:block; }
 .pn-sg-item{ padding:7px 10px; font-size:12px; cursor:pointer; border-bottom:1px solid var(--sec); }
 .pn-sg-item:last-child{ border-bottom:none; }
 .pn-sg-item:hover, .pn-sg-item.active{ background:var(--sec); }
-.pn-sg-no{ font-weight:bold; color:var(--blue); }
-.pn-sg-name{ font-size:10px; color:var(--tx2); margin-top:1px; }
-.pn-sg-sb{ font-size:9.5px; font-weight:bold; color:#fff; background:var(--blue2); border-radius:3px; padding:1px 6px; margin-left:6px; vertical-align:1px; }
+/* 2026-10-20 整番の札が途中で折り返さないよう、品番と札を並べ、入りきらないときは札ごと次の行へ */
+.pn-sg-no{ font-weight:bold; color:var(--blue); display:flex; flex-wrap:wrap; align-items:center; gap:3px 6px; word-break:break-all; }
+.pn-sg-name{ font-size:10.5px; color:var(--tx2); margin-top:2px; }
+.pn-sg-sb{ font-size:10.5px; font-weight:bold; line-height:1.5; color:#fff; background:var(--blue2); border-radius:3px; padding:1px 7px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis; }
 .pn-sg-empty{ padding:9px 10px; font-size:11px; color:var(--tx3); }
 
 /* ═══ 印刷スタイル ═══ */
