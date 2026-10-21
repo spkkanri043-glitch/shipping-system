@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-LEBn/9POn2IH0kDT0VAkPRKzXIzyhTzHdVeDHUmftdI=' 'sha256-sptq+ApuuSLYnYNokgr7G3hWPeJbc/XL2Dgh+p/5TEQ=' 'sha256-qYgj8J1e8E0MHgRtbhSJuUIXJTyRN/umvZpDj+pSFUE='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-LEBn/9POn2IH0kDT0VAkPRKzXIzyhTzHdVeDHUmftdI=' 'sha256-sptq+ApuuSLYnYNokgr7G3hWPeJbc/XL2Dgh+p/5TEQ=' 'sha256-wdEcw4RZcSGk+C3B0fiWtuEtJwzn6ZfN178NKFYLIM4='; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
 <script>/* MOGU_CSP_RUNTIME_V1 */
 const __moguCsp = (() => {
   const handlers = {"h0": function(event, _p) { goPortal()
@@ -360,7 +360,7 @@ select,input[type=date]{width:100%;padding:10px;border:1px solid #ccc;border-rad
     <div style="overflow-y:auto;flex:1;padding:14px">
       <div class="modal-field" style="border:1px solid #e5e5e0;border-radius:10px;padding:14px;margin-bottom:12px">
         <div class="modal-label" style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:8px">☁️ ドライブから選ぶ</div>
-        <div style="font-size:11px;color:#888;margin-bottom:10px">読込元フォルダの新しいCSV（管理者・マスターが取り込めます）と、取り込み済みの出荷</div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">読込元フォルダの新しいCSV（リーダー以上が取り込めます）と、取り込み済みの出荷</div>
         <button style="width:100%;padding:10px;background:#3a7bdc;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px" data-csp-click="h20" data-csp-source-click="loadDriveFileList()">📋 ファイル一覧を取得</button>
         <div id="drive-file-list" style="display:none;border:1px solid #e5e5e0;border-radius:8px"></div>
       </div>
@@ -1180,7 +1180,7 @@ async function loadDriveFileList() {
     const data = await gasCall('getFileList', {});
     renderPendingPreparations_(data && data.pendingRequests || []);
     if (!data.ok) throw new Error(data.message || '取得失敗');
-    // ★v3.3 inbox＝読込元フォルダの新しい CSV（選ぶとサーバーがドライブから読んで取り込む。admin・master にだけ届く）
+    // ★v3.3 inbox＝読込元フォルダの新しい CSV（選ぶとサーバーがドライブから読んで取り込む。leader・admin・master にだけ届く）
     //        files＝取り込み済みの出荷（照合できるもの。全員）
     const inboxFiles  = (data.inbox || []).slice().sort(function(a, b) { return String(a.name).localeCompare(String(b.name), 'ja'); });
     const sourceFiles = (data.files || []).slice().sort(function(a, b) { return new Date(a.updated) - new Date(b.updated); });
@@ -1243,8 +1243,8 @@ async function importInboxCsv_(fileId, name) {
 function friendlyError_(msg) {
   const m = String(msg || '');
   const map = {
-    ADMIN_REQUIRED: 'CSVの取り込みは管理者・マスターだけが行えます。取り込み済みの出荷は「ファイル一覧を取得」から開けます',
-    IMPORT_ROLE_REQUIRED: 'CSVの取り込みは管理者・マスターだけが行えます。取り込み済みの出荷は「ファイル一覧を取得」から開けます',
+    ADMIN_REQUIRED: '「ファイルから選ぶ」は管理者・マスターだけが使えます。リーダーは「ファイル一覧を取得」から選んでください',
+    IMPORT_ROLE_REQUIRED: 'CSVの取り込みはリーダー以上が行えます。取り込み済みの出荷は「ファイル一覧を取得」から開けます',
     SOURCE_ALREADY_REGISTERED: '同じ出荷（バーコード）が既に取り込まれています',
     SOURCE_FILE_CHANGED: '取り込みのあとでファイルの中身が変わっています。管理者に確認してください',
     SOURCE_FILE_NOT_ALLOWED: '読込元フォルダのCSVではないため取り込めません',
