@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-Bui7sEH2mZgBNTOWxJqjmotPaLf2ot1QW/hHgyeC6Kc=' 'sha256-zN4p8L5ahw4/rH/f1dOVrs/aIif7s851M5J8+75p678=' https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'sha256-Bui7sEH2mZgBNTOWxJqjmotPaLf2ot1QW/hHgyeC6Kc=' 'sha256-fyVdDExqkHficO3lryxVgBzJI4N0GIxRth6+5Ujal3k=' https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; frame-src 'none'; form-action 'none'">
 <script>/* MOGU_CSP_RUNTIME_V1 */
 const __moguCsp = (() => {
   const handlers = {"h0": function(event, _p) { goPortal()
@@ -335,6 +335,12 @@ textarea.fi2 { resize: none; line-height: 1.6; }
   font-weight: 600; margin-top: 5px;
 }
 
+.shikicho-msg {
+  margin-top: 5px; padding: 7px 10px; border-radius: var(--rads);
+  background: var(--abg); color: var(--a); border: 1px solid rgba(176,112,0,.3);
+  font-size: 12px; font-weight: 600;
+}
+
 /* ===== COUNT ===== */
 .count-wrap { border: 1px solid var(--bd2); border-radius: var(--rads); overflow: hidden; background: #f8fafc; display: flex; }
 .count-btn {
@@ -591,6 +597,7 @@ textarea.fi2 { resize: none; line-height: 1.6; }
       <button class="btn-resume" id="btn-resume" data-csp-click="h3" data-csp-source-click="doResume()" disabled>▶ 再開</button>
       <button class="btn-end"    id="btn-end"    data-csp-click="h4" data-csp-source-click="doEnd()">🏁 作業終了して保存</button>
     </div>
+    <div id="submit-msg" class="shikicho-msg" role="status" style="display:none;margin-top:8px"></div>
 
     <!-- 基本情報 -->
     <div class="section-card">
@@ -634,6 +641,12 @@ textarea.fi2 { resize: none; line-height: 1.6; }
         <div id="scan-result-tag" style="display:none">
           <span class="scan-result-tag">✅ <span id="scan-result-text"></span></span>
         </div>
+      </div>
+      <div class="frow">
+        <label class="fl2">色調</label>
+        <input class="fi2" type="text" id="f-shikicho" readonly tabindex="-1"
+          placeholder="現品票を読むと自動で入ります" style="pointer-events:none;font-weight:700">
+        <div id="shikicho-msg" class="shikicho-msg" style="display:none"></div>
       </div>
       <div class="frow">
         <label class="fl2">基本取引先</label>
@@ -978,7 +991,13 @@ async function gasPost(action, data) {
   if (!res.ok) throw new Error('通信エラー ' + res.status);
   const json = await res.json();
   if (json && json.error === 'unauthorized') { handleUnauthorized_(); throw new Error('認証が無効です。ポータルから入り直してください。'); }
-  if (!json || typeof json !== 'object' || json.ok === false || json.error) throw new Error('処理に失敗しました');
+  if (!json || typeof json !== 'object' || json.ok === false || json.error) {
+    // ★2026-11-18 決まった記号（error）を例外に付ける（保存の未完了・識別値の扱いの判定に使う。文は今までどおり）
+    const err = new Error('処理に失敗しました');
+    err.code = json && typeof json.error === 'string' ? json.error : '';
+    err.data = json && typeof json === 'object' && !Array.isArray(json) ? json : null;
+    throw err;
+  }
   return json;
 }
 
@@ -1005,6 +1024,7 @@ function doLogout() {
     clearBrowserBusinessData_();
     stopTimer(); stopCamera(true); hideBreakOverlay();
     clearAutoSave(); // ログアウト → バックアップ破棄
+    resetSubmission_();
     sessionStorage.removeItem('kpk_report_user');
     try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch(e) {}
     AUTH_TOKEN = '';
@@ -1087,7 +1107,8 @@ async function loadProducts() {
     if (AUTH_TOKEN !== token) return false;   // 途中で利用者が変わった応答は使わない
     if (res.ok !== true || !Array.isArray(res.data) || res.data.some(p => !p || typeof p !== 'object' || Array.isArray(p))) throw new Error('不正な製品一覧');
     products = res.data.map(p => ({
-      '品番': p['品番'], '製品名': p['製品名'], '基本取引先': p['基本取引先'], '箱入数': p['箱入数']
+      '品番': p['品番'], '製品名': p['製品名'], '基本取引先': p['基本取引先'], '箱入数': p['箱入数'],
+      '整番': p['整番']   // ★色調（構想）：GAS の getProductsLite に 整番 を足す
     }));
     return true;
   } catch(e) {
@@ -1193,6 +1214,8 @@ function countChange(d) {
   autoSave();
 }
 function calcTotal() {
+  // ★F01/F02：箱入数が今の品番・色調で確定していないときは、合計を確定値として出さない（端数があっても）
+  if (!productConfirmed_()) { document.getElementById('total-disp').textContent = '—'; return; }
   const h = parseInt(document.getElementById('f-hakoiri').value) || 0;
   const hasuu = parseInt(document.getElementById('f-hasuu').value) || 0;
   document.getElementById('total-disp').textContent = count * h + hasuu;
@@ -1322,14 +1345,31 @@ function startScanLoop(video) {
   scanRAF = requestAnimationFrame(tick);
 }
 
+// ★色調（構想）：社内現品票は「品番|品名|||入数||色調」。区切りは | と }（JIS 配列のスキャナは | を } で出す）。
+//   7つに分かれたときだけ 7番目を色調として読む（色調の無い現品票は最後の値が入数なので「最後の値」では読まない）
+function parseGenpin_(raw) {
+  const parts = String(raw || '').normalize('NFKC').trim().split(/[|}]/);
+  let shikicho = '';
+  if (parts.length === 7) {
+    const c = parts[6].trim().toUpperCase();
+    if (/^[A-Z0-9-]{2,12}$/.test(c)) shikicho = c;
+  }
+  return { hinban: parts[0], shikicho };
+}
+function setShikicho_(v) {
+  const el = document.getElementById('f-shikicho');
+  if (el) el.value = v || '';
+}
 function onScanned(raw, type) {
   stopCamera(true); // スキャン完了 → カメラを完全停止（電池消費を抑える）
-  const data = raw.split('|')[0].replace(/[\s\-]/g, '');
+  const g = parseGenpin_(raw);
+  const data = g.hinban.replace(/[\s\-]/g, '');
+  setShikicho_(g.shikicho);   // ★色調は現品票から読んだときだけ入る（人は入力しない）
   document.getElementById('f-hinban').value = data;
   document.getElementById('f-hinban').classList.add('filled');
   showScanTag(data);
   searchProduct(data);
-  showToast(type + 'スキャン: ' + data, 'success');
+  showToast(type + 'スキャン: ' + data + (g.shikicho ? '（色調 ' + g.shikicho + '）' : ''), 'success');
   autoSave();
 }
 
@@ -1356,29 +1396,101 @@ function showScanTag(val) {
 function onHinbanInput() {
   const val = document.getElementById('f-hinban').value.trim();
   document.getElementById('scan-result-tag').style.display = 'none';
+  setShikicho_('');   // ★品番を手で直したら色調は空に戻す（色調は現品票からだけ）
   // ★2026-10-20 手入力は4文字以上で探す（切替前の本番と同じ）。1文字目で別の品番が入ってしまうのを防ぐ
+  // ★F02：探さないとき（空・1〜3文字）も、前の製品（取引先・箱入数・合計）は使わない。直した時点で無効にする
   if (val.length >= 4) searchProduct(val);
+  else invalidateProduct_(val ? 'short' : 'empty');
 }
 
+// ★色調（構想）：同じ品番が色違いで2行以上あるときだけ、色調で行を選ぶ（人は選ばない）
+//   色違い＝整番から読んだ色（色調の記号 例 NH900L、または最後の 黒・グレ など）が2種類以上ある品番
+//   ・整番に読んだ色調そのものが書いてある行が1つ → その行（例 84151-3BV：NH882L は箱入数15、NH900L は92）
+//   ・決まらない → 候補の行で値が同じ項目だけ入れ、違う項目は空にして知らせる
+//   ・違いが色ではない品番（成形素材と完成品など）→ 今と同じく最初の行
+const SEIBAN_COLOR_WORDS_ = ['ブラック', 'ホワイト', 'シルバー', 'ベージュ', 'ブラウン', 'グレー', 'グレ', '黒', '白'];
+function seibanMark_(seiban) {
+  const s = String(seiban || '').normalize('NFKC').trim().toUpperCase();
+  if (!s) return '';
+  const codes = s.split(/[\s_\-\/()（）,]+/).filter(x => /^[A-Z]{2}[0-9]{3}[A-Z]?$/.test(x));
+  if (codes.length === 1) return 'code:' + codes[0];
+  const compact = s.replace(/[\s_\-]+/g, '');
+  const w = SEIBAN_COLOR_WORDS_.find(x => compact.endsWith(x));
+  return w ? 'word:' + w : '';
+}
+function pickProduct_(key, shikicho, normalize) {
+  const cands = products.filter(p => normalize(p['品番']) === key);
+  if (cands.length <= 1) return cands[0] || null;
+  const marks = cands.map(p => seibanMark_(p['整番']));
+  if (new Set(marks.filter(Boolean)).size < 2) return cands[0];   // 違いが色ではない → 今と同じ
+  const hit = shikicho ? cands.filter((p, i) => marks[i] === 'code:' + shikicho) : [];
+  if (hit.length === 1) return hit[0];
+  const val = (p, k) => String(p[k] == null ? '' : p[k]);
+  const differs = ['基本取引先', '箱入数'].filter(k => new Set(cands.map(p => val(p, k))).size > 1);
+  const same = k => (differs.includes(k) ? '' : cands[0][k]);
+  return { '品番': cands[0]['品番'], '製品名': new Set(cands.map(p => val(p, '製品名'))).size === 1 ? cands[0]['製品名'] : '',
+    '基本取引先': same('基本取引先'), '箱入数': same('箱入数'), __differs: differs };
+}
+
+// ★F01/F02（2026-11-14）：今の品番・色調で、製品マスタの行（取引先・箱入数）が確定しているか。
+//   確定するのは、今の品番・色調で選んだ行の箱入数が1つに決まったときだけ。手で品番を直した・下書きを戻した・探し始めた時点で無効にする。
+//   確定していない間は合計を確定値として出さず、最終保存（validate・doEnd・submitReport）を止める。端末の下書き（autoSave）は止めない。
 let productLookupVersion = 0;
-async function searchProduct(code) {
-  const lookupVersion = ++productLookupVersion;
+let productState_ = { ok: false, reason: 'empty', key: '', shikicho: '', box: '', text: '' };
+const PRODUCT_STATE_TEXT_ = {
+  short:    '品番が途中のため、製品が確定していません。品番を最後まで入力するか、現品票を読み取ってください。',
+  loading:  '製品一覧を確認しています。少し待ってください（確認できるまで保存できません）。',
+  failed:   '製品一覧を取得できませんでした。通信を確かめて、現品票をもう一度読み取ってください。',
+  notfound: '品番を製品一覧で確認できませんでした。現品票を読み取るか、管理者へ確認してください。'
+};
+function normalizeProductKey_(s) { return String(s || '').normalize('NFKC').replace(/[^a-zA-Z0-9]/g, '').toUpperCase(); }
+function setProductState_(s) {
+  productState_ = Object.assign({ ok: false, reason: '', key: '', shikicho: '', box: '', text: '' }, s);
+  const msg = document.getElementById('shikicho-msg');
+  if (msg) {
+    const text = productState_.ok ? '' : (productState_.text || PRODUCT_STATE_TEXT_[productState_.reason] || '');
+    msg.textContent = text;
+    msg.style.display = text ? 'block' : 'none';
+  }
+  calcTotal();
+}
+function invalidateProduct_(reason) {
+  const version = ++productLookupVersion;   // 前に始めた検索の結果は、あとから返っても使わない
   document.getElementById('f-torihiki').value = '';
   document.getElementById('f-hakoiri').value = '';
-  if (!code) return;
-  const normalize = s => String(s || '').normalize('NFKC').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-  const key = normalize(code);
-  if (!key) return;
-  let found = products.find(p => normalize(p['品番']) === key);
-  if (found) { applyProduct(found); return; }
+  setProductState_({ reason: reason || 'empty' });
+  return version;
+}
+function productConfirmed_() {
+  const s = productState_;
+  return !!s.ok && String(s.box) !== '' &&
+    s.key === normalizeProductKey_(document.getElementById('f-hinban').value) &&
+    s.shikicho === ((document.getElementById('f-shikicho') || {}).value || '') &&
+    String(document.getElementById('f-hakoiri').value) === String(s.box);
+}
+// 最終保存できない理由（空なら保存してよい）。箱入数がマスタに無い品番は、今までどおり「箱入数を入力してください」に任せる
+function productBlockReason_() {
+  if (productConfirmed_() || productState_.reason === 'nobox') return '';
+  return productState_.text || PRODUCT_STATE_TEXT_[productState_.reason] || '品番・色調に合う箱入数が確定していません。現品票を読み取ってください。';
+}
+async function searchProduct(code) {
+  const lookupVersion = invalidateProduct_('loading');   // ★探し始めた時点で前の製品は無効
+  const key = normalizeProductKey_(code);
+  if (!key) { invalidateProduct_('empty'); return; }
+  const shikicho = (document.getElementById('f-shikicho') || {}).value || '';
+  let found = pickProduct_(key, shikicho, normalizeProductKey_);
+  if (found) { applyProduct(found, shikicho); return; }
   // Reload the same limited public projection once, never a private search RPC.
-  if (!await loadProducts() || lookupVersion !== productLookupVersion) return;
-  found = products.find(p => normalize(p['品番']) === key);
-  if (found) { applyProduct(found); return; }
+  const loaded = await loadProducts();
+  if (lookupVersion !== productLookupVersion) return;   // ★取得中に品番が変わった：古い結果は戻さない
+  if (!loaded) { setProductState_({ reason: 'failed' }); return; }
+  found = pickProduct_(key, shikicho, normalizeProductKey_);
+  if (found) { applyProduct(found, shikicho); return; }
+  setProductState_({ reason: 'notfound' });
   showToast('取得した公開一覧（最大20,000件）では品番を確認できませんでした。管理者へ確認してください。', 'warn');
 }
 
-function applyProduct(p) {
+function applyProduct(p, shikicho) {
   // 基本取引先・箱入数を転記
   document.getElementById('f-torihiki').value = p['基本取引先'] || p['取引先'] || '';
   document.getElementById('f-hakoiri').value  = p['箱入数']     || '';
@@ -1388,8 +1500,16 @@ function applyProduct(p) {
     document.getElementById('f-hinban').classList.add('filled');
     showScanTag(p['品番']);
   }
-  calcTotal();
-  showToast('製品情報を自動入力しました ✓', 'success');
+  // ★色調（構想）：色違いで値が違う項目を空にしたときは知らせる
+  const differs = Array.isArray(p.__differs) ? p.__differs : [];
+  // ★F01/F02：今の品番・色調で箱入数が1つに決まったときだけ「確定」にする（色で違えば未確定＝最終保存しない）
+  const box = String(document.getElementById('f-hakoiri').value);
+  if (differs.length) setProductState_({ reason: 'color', text: '色調で' + differs.join('・') + 'が違う品番です。現品票を読み取ってください。' });
+  else if (box === '') setProductState_({ reason: 'nobox' });
+  else setProductState_({ ok: true, reason: 'ok', key: normalizeProductKey_(p['品番']), box: box,
+    shikicho: typeof shikicho === 'string' ? shikicho : ((document.getElementById('f-shikicho') || {}).value || '') });
+  if (differs.length) showToast('色調で' + differs.join('・') + 'が違う品番です。現品票を読み取ってください', 'warn');
+  else showToast('製品情報を自動入力しました ✓', 'success');
 }
 
 // ============================================================
@@ -1545,14 +1665,19 @@ function renderDefects() {
 // 作業終了
 // ============================================================
 function doEnd() {
-  if (!validate()) return;
+  // ★2026-11-18 送った内容があるとき（未完了・結果不明のあと）は、画面の今の値ではなく、その内容で確かめる（判定は GAS）
+  const pend = pendingReport_;
+  if (!pend && !validate()) return;
   openConfirm(
-    '作業を終了して報告書を保存しますか？\n\n' +
-    '品番: ' + (document.getElementById('f-hinban').value||'未入力') + '\n' +
-    'カウント: ' + count + ' 箱\n' +
-    '合計: ' + document.getElementById('total-disp').textContent + ' 個',
+    (pend ? '前に送った内容で、保存を確かめます（二重にはなりません）。\n\n' : '作業を終了して報告書を保存しますか？\n\n') +
+    '品番: ' + ((pend ? pend['品番'] : document.getElementById('f-hinban').value)||'未入力') + '\n' +
+    '色調: ' + ((pend ? pend['色調'] : document.getElementById('f-shikicho').value)||'なし') + '\n' +
+    'カウント: ' + (pend ? pend['カウント'] : count) + ' 箱\n' +
+    '合計: ' + (pend ? pend['合計'] : document.getElementById('total-disp').textContent) + ' 個',
     '作業終了・保存',
     async () => {
+      // ★F01/F02：確認を出している間に品番などが変わっていないか、保存の直前にもう一度確かめる（送った内容で確かめるときを除く）
+      if (!pendingReport_ && !productConfirmed_()) { showToast(productBlockReason_() || '箱入数が確定していません。現品票を読み取ってください。', 'error'); return; }
       if (workState.status === 'paused') doResume();
       workState.status = 'ended';
       ['btn-pause','btn-resume','btn-end'].forEach(id => {
@@ -1588,6 +1713,15 @@ function validate(strict = true) {
     document.getElementById('f-hinban').classList.add('err');
     showToast('品番を入力してください', 'error');
     return false;
+  }
+  // ★F01/F02：今の品番・色調で製品と箱入数が確定していなければ最終保存しない（一時保存＝端末の下書きは止めない）
+  if (strict) {
+    const why = productBlockReason_();
+    if (why) {
+      document.getElementById('f-hakoiri').classList.add('err');
+      showToast(why, 'error');
+      return false;
+    }
   }
   if (strict && !hakoiri) {
     document.getElementById('f-hakoiri').classList.add('err');
@@ -1628,8 +1762,51 @@ function notificationSummary_(notification) {
   return { text: 'LINE WORKS API受理' + sent + '件・スキップ' + skipped + '件（既読未確認）。', type: skipped > 0 ? 'warn' : 'success' };
 }
 
+// ★2026-11-18 送信の識別値（田中さんの指示書 11/17「P1 の3件」1117-02・1117-03）
+//   作業ごとに1つ（新しい作業を始めたときだけ新しく作る）。保存の要求に付け、再送・下書きの復元でも同じ値を送る。
+//   送った内容（写真を除く）は pendingReport_ に持ち、下書きにも残す。保存が始まったかもしれない間（未完了・結果不明）は、
+//   再送でこの内容をそのまま送る。GAS は同じ識別値・同じ内容のときだけ続きを処理し、足りない分だけ足す（二重にならない）。
+//   保存の前に断られた（数量の不一致など）ときだけ pendingReport_ を捨て、直した内容で同じ識別値のまま送れる（GAS は何も残していない）。
+let submissionId_ = '';
+let pendingReport_ = null;
+const PRE_SAVE_REJECT_CODES_ = ['invalid_report', 'product_not_found', 'invalid_shikicho', 'invalid_quantity', 'products_unavailable',
+  'product_undetermined', 'box_unavailable', 'box_mismatch', 'total_mismatch'];
+const SUBMISSION_ID_RE_ = /^[A-Za-z][A-Za-z0-9_-]{15,63}$/;
+function newSubmissionId_() {
+  const a = new Uint8Array(16);
+  crypto.getRandomValues(a);
+  return 'S' + Array.from(a, b => ('0' + b.toString(16)).slice(-2)).join('');
+}
+function showSubmitMsg_(text) {
+  const el = document.getElementById('submit-msg');
+  if (!el) return;
+  el.textContent = text || '';
+  el.style.display = text ? 'block' : 'none';
+}
+function resetSubmission_() { submissionId_ = ''; pendingReport_ = null; showSubmitMsg_(''); }
+function submitFailureText_(e) {
+  const code = e && e.code || '';
+  const data = e && e.data || {};
+  const id = typeof data.id === 'string' && /^[A-Za-z0-9_-]{1,80}$/.test(data.id) ? data.id : '';
+  if (code === 'partial_saved') {
+    if (data.needPhotos === true) return '保存が途中です（記録番号 ' + id + '）。写真をもう一度付けてから「作業終了して保存」を押してください。足りない分だけ保存します。';
+    return '保存が途中です（記録番号 ' + id + '）。不具合の記録などがまだそろっていません。もう一度「作業終了して保存」を押すと、足りない分だけ保存します（二重にはなりません）。';
+  }
+  if (code === 'submission_mismatch') return 'この作業は前に送った内容で保存が始まっています。内容を変えて保存することはできません。管理者に確認してください。';
+  if (code === 'submission_conflict' || code === 'submission_unavailable' || code === 'invalid_submission') return '保存の状態を確かめられませんでした。管理者に確認してください（' + code + '）。';
+  return '保存の結果を確かめられませんでした。記録はできているかもしれません。もう一度「作業終了して保存」を押すと、二重にならずに確かめます。';
+}
+
 async function submitReport(isFinal) {
   let notification, saved;
+  // ★F01/F02：最終保存の処理でも確かめる（画面のボタンや確認だけに頼らない）。未確定なら保存要求を出さない
+  //   ★2026-11-18 送った内容で確かめるとき（pendingReport_）は除く（その内容は前に送ったもの。判定は GAS）
+  if (!pendingReport_ && !productConfirmed_()) {
+    showToast(productBlockReason_() || '箱入数が確定していません。現品票を読み取ってください。', 'error');
+    ['btn-pause','btn-end'].forEach(id => { document.getElementById(id).disabled = false; });
+    if (workState.status === 'ended') { workState.status = 'working'; startTimer(); }
+    return;
+  }
   showLoading('Googleスプレッドシートに保存中...');
 
   const endTime    = new Date();
@@ -1639,13 +1816,15 @@ const hasuu      = parseInt(document.getElementById('f-hasuu')?.value) || 0;
 const totalCount = count * hakoiri + hasuu;
   const fuguaiCount = defects.reduce((s, d) => s + (parseInt(d.count) || 0), 0);
 
-  const report = {
+  // ★2026-11-18 送った内容があれば、それをそのまま送る（写真は画面にあれば付ける）
+  const report = pendingReport_ ? Object.assign({}, pendingReport_, { photos: photos }) : {
     担当者:     currentUser.name,
     担当者ID:   currentUser.id,
     作成日時:   document.getElementById('f-date').value,
     終了日時:   fmtDT(endTime),
     作業項目:   document.getElementById('f-sakugyo').value,
     品番:       document.getElementById('f-hinban').value,
+    色調:       (document.getElementById('f-shikicho') || {}).value || '',   // ★色調（構想）：シートのいちばん後ろの列
     基本取引先: document.getElementById('f-torihiki').value,
     箱入数:     hakoiri,
     カウント:   count,
@@ -1660,24 +1839,44 @@ const totalCount = count * hakoiri + hasuu;
     photos:     photos  // Base64写真データ（GAS側でドライブに保存）
   };
 
+  // ★2026-11-18 送る前に、識別値と送る内容を下書きへ残す（応答が届かなくても、開き直して同じ識別値・同じ内容で送り直せる）
+  if (!submissionId_) submissionId_ = newSubmissionId_();
+  if (!pendingReport_) { pendingReport_ = Object.assign({}, report); delete pendingReport_.photos; }
+  autoSave(true);
+
   try {
-    const res = await gasPost('saveReport', { report });
+    const res = await gasPost('saveReport', { report, submissionId: submissionId_ });
     if (!res || res.ok !== true) throw new Error((res && res.message) || '保存失敗');
     saved = res;
     notification = res.notification;
   } catch(e) {
     hideLoading();
-    showToast('保存エラー: ' + e.message, 'error');
+    const code = e && e.code || '';
+    if (PRE_SAVE_REJECT_CODES_.indexOf(code) >= 0) {
+      pendingReport_ = null;   // 保存の前に断られた＝何も保存していない。直した内容で送れる（識別値はそのまま）
+      showSubmitMsg_('');
+      showToast('保存エラー: ' + e.message, 'error');
+    } else if (!code && /認証が無効/.test(String(e && e.message))) {
+      showToast('保存エラー: ' + e.message, 'error');   // 入り直したあと、同じ識別値・同じ内容で送り直せる（下書きに残っている）
+    } else {
+      const text = submitFailureText_(e);   // 未完了・結果不明など：同じ識別値・同じ内容で送り直す（二重にならない）
+      showSubmitMsg_(text);
+      showToast(text, 'error');
+    }
     ['btn-pause','btn-end'].forEach(id => {
       document.getElementById(id).disabled = false;
     });
     workState.status = 'working';
     startTimer();
+    autoSave(true);
     return;
   }
 
   hideLoading();
-  clearAutoSave(); // 正常保存完了 → バックアップ破棄
+  pendingReport_ = null;
+  showSubmitMsg_('');
+  clearAutoSave(); // 正常保存完了 → バックアップ破棄（全部の保存先がそろったときだけ）
+  if (saved && saved.resumed === true) showToast('前に保存した内容を確かめました（二重には保存していません）', 'success');
   if (isFinal) showComplete(report, notification, saved);
 }
 
@@ -1692,6 +1891,7 @@ function showComplete(r, notification, saved) {
     ['担当者',   r.担当者],
     ['作業項目', r.作業項目],
     ['品番',     r.品番 || '-'],
+    ['色調',     r.色調 || '-'],
     ['カウント', r.カウント + ' 箱'],
     ['合計',     r.合計 + ' 個'],
     ['作業時間', r.作業時間分 + ' 分'],
@@ -1717,6 +1917,7 @@ function startNew() {
   document.getElementById('s-main').classList.add('on');
   hideBreakOverlay();
   clearAutoSave(); // 新しい作業を開始 → 前のバックアップ破棄
+  resetSubmission_();   // ★2026-11-18 新しい作業は新しい識別値（送るときに作る）
   resetForm();
   count   = 0;
   defects = [];
@@ -1734,11 +1935,12 @@ function startNew() {
 }
 
 function resetForm() {
-  ['f-sakugyo','f-hinban','f-torihiki','f-hakoiri','f-fuguai','f-hasuu'].forEach(id => {
+  ['f-sakugyo','f-hinban','f-shikicho','f-torihiki','f-hakoiri','f-fuguai','f-hasuu'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.value = ''; el.classList.remove('filled','err'); }
   });
   document.getElementById('scan-result-tag').style.display = 'none';
+  invalidateProduct_('empty');   // ★F01/F02：新しい作業では前の製品を使わない（知らせも消える）
   resetPhotos();
 }
 
@@ -1812,8 +2014,9 @@ const draftStorage = (() => {
 })();
 
 // 作業中データを保存（端末に置けないときは画面の中のメモリ）
-function autoSave() {
-  if (!currentUser || workState.status === 'ended') return;
+function autoSave(force) {
+  // ★2026-11-18 force＝true：送る直前・送ったあと（作業が終了でも、識別値と送った内容を残す）
+  if (!currentUser || (workState.status === 'ended' && force !== true)) return;
   try {
     const data = {
       savedAt: new Date().toISOString(),
@@ -1827,6 +2030,7 @@ function autoSave() {
       form: {
         sakugyo:  document.getElementById('f-sakugyo')?.value  || '',
         hinban:   document.getElementById('f-hinban')?.value   || '',
+        shikicho: document.getElementById('f-shikicho')?.value || '',
         torihiki: document.getElementById('f-torihiki')?.value || '',
         hakoiri:  document.getElementById('f-hakoiri')?.value  || '',
         hasuu:    document.getElementById('f-hasuu')?.value    || '0',
@@ -1835,6 +2039,8 @@ function autoSave() {
       },
       count:   count,
       defects: defects,
+      // ★2026-11-18 送信の識別値と送った内容（写真は入れない）
+      submission: submissionId_ ? { id: submissionId_, report: pendingReport_ } : null,
     };
     draftStorage.setItem(BACKUP_KEY, JSON.stringify(data));
   } catch(e) {}
@@ -1852,10 +2058,16 @@ function checkAndRestoreBackup() {
     if (!raw) return;
     const data = JSON.parse(raw);
     if (!data.user || !currentUser || data.user.id !== currentUser.id) { clearAutoSave(); return; }
+    // ★2026-11-18 保存の結果を確かめていない作業（送った内容がある）は7日まで残す。過ぎたら黙って捨てずに知らせる
+    const pending = !!(data.submission && data.submission.report);
     // 24時間以上古いバックアップは無視
-    if (Date.now() - new Date(data.savedAt).getTime() > 24 * 60 * 60 * 1000) { clearAutoSave(); return; }
+    if (Date.now() - new Date(data.savedAt).getTime() > (pending ? 7 : 1) * 24 * 60 * 60 * 1000) {
+      clearAutoSave();
+      if (pending) showToast('7日より前に、保存の結果を確かめていない作業がありました。日報確認で記録を確かめてください。', 'warn');
+      return;
+    }
     // 中身が空（何も入力していない状態）なら復元不要
-    if (!data.form.hinban && !data.count && (!data.defects || !data.defects.length)) { clearAutoSave(); return; }
+    if (!pending && !data.form.hinban && !data.count && (!data.defects || !data.defects.length)) { clearAutoSave(); return; }
 
     const savedAt = new Date(data.savedAt);
     const timeStr = pad(savedAt.getHours()) + ':' + pad(savedAt.getMinutes());
@@ -1868,10 +2080,13 @@ function checkAndRestoreBackup() {
       `カウント: ${data.count} 箱
 
 ` +
+      (pending ? `※前回、保存の結果を確かめられませんでした。続きから再開して「作業終了して保存」を押すと、二重にならずに確かめます（キャンセルすると確かめられなくなります）。
+
+` : '') +
       `続きから再開しますか？`,
       '💾 作業データの復元',
       () => restoreBackup(data),
-      () => clearAutoSave()   // 「キャンセル」＝破棄して新規作業
+      () => { clearAutoSave(); resetSubmission_(); }   // 「キャンセル」＝破棄して新規作業
     );
   } catch(e) { clearAutoSave(); }
 }
@@ -1890,8 +2105,10 @@ function restoreBackup(data) {
   if (f.date)     document.getElementById('f-date').value     = f.date;
   if (f.sakugyo)  document.getElementById('f-sakugyo').value  = f.sakugyo;
   if (f.hinban)   { document.getElementById('f-hinban').value = f.hinban; document.getElementById('f-hinban').classList.add('filled'); showScanTag(f.hinban); }
-  if (f.torihiki) document.getElementById('f-torihiki').value = f.torihiki;
-  if (f.hakoiri)  document.getElementById('f-hakoiri').value  = f.hakoiri;
+  // ★F01：取引先・箱入数は下書きから戻さない（古い値を信用しない）。下で今の品番・色調から選び直す
+  invalidateProduct_('loading');
+  // ★F01：色調は下書きにあるときだけ（形を確かめる）。無ければ空にして、画面に残っていた色調も引き継がない
+  setShikicho_(typeof f.shikicho === 'string' && /^[A-Z0-9-]{2,12}$/.test(f.shikicho) ? f.shikicho : '');
   if (f.hasuu)    document.getElementById('f-hasuu').value    = f.hasuu;
   if (f.fuguai)   document.getElementById('f-fuguai').value   = f.fuguai;
 
@@ -1905,6 +2122,15 @@ function restoreBackup(data) {
   updateStatusBar();
   startTimer();
   showToast('作業データを復元しました', 'success');
+  // ★2026-11-18 送信の識別値と送った内容を戻す（同じ作業の再送で二重にしない）
+  const sub = data.submission;
+  if (sub && typeof sub.id === 'string' && SUBMISSION_ID_RE_.test(sub.id)) {
+    submissionId_ = sub.id;
+    pendingReport_ = sub.report && typeof sub.report === 'object' && !Array.isArray(sub.report) ? sub.report : null;
+    showSubmitMsg_(pendingReport_ ? '前回、保存の結果を確かめられませんでした。「作業終了して保存」を押すと、前に送った内容で、二重にならずに確かめます。' : '');
+  } else resetSubmission_();
+  // ★F01：復元した品番・色調で製品を確かめ直す。確定するまで（取得中・失敗・色で決まらない）は最終保存しない
+  if (f.hinban) searchProduct(f.hinban); else invalidateProduct_('empty');
 }
 
 const PRIVATE_PHOTO_API_URL = REPORT_GAS_URL;
